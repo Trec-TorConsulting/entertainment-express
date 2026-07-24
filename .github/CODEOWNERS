@@ -1,0 +1,6 @@
+# CODEOWNERS
+# Every change to this repository requires review from the code owner.
+# As the sole maintainer, @Trec-TorConsulting is automatically requested on
+# every pull request. See CONTRIBUTING.md for the review/merge policy.
+
+*       @Trec-TorConsulting

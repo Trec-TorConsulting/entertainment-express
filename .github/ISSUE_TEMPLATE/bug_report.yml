@@ -1,0 +1,100 @@
+name: 🐞 Bug report
+description: Report a defect in the platform, an API, or a client app.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees:
+  - Trec-TorConsulting
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a report. Please fill in as much
+        detail as possible so the issue can be reproduced quickly.
+
+        > ⚠️ **Do not report security vulnerabilities here.** Use a
+        > [private security advisory](https://github.com/Trec-TorConsulting/entertainment-express/security/advisories/new)
+        > instead (see `SECURITY.md`).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug and its impact.
+      placeholder: When I do X, Y happens instead of Z…
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps (and the tenant/site, if relevant) to reproduce.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      description: Which part of the platform does this affect?
+      options:
+        - Control plane / provisioning
+        - Booking
+        - Scheduling & dispatch
+        - Workforce
+        - Billing & payments (Stripe)
+        - Service catalog
+        - Public API
+        - Crew app (mobile)
+        - Customer portal
+        - Dispatch portal
+        - Deployment / infrastructure
+        - Other / not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Where did you observe this?
+      options:
+        - Production (K3s)
+        - Local bench (development)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / image tag
+      description: App version, image tag (e.g. `bench:0.0.1`), or commit SHA.
+      placeholder: "0.0.1 / commit abc1234"
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / screenshots
+      description: Paste logs, tracebacks, or attach screenshots. Redact any secrets.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This is **not** a security vulnerability (those go to a private advisory).
+          required: true
+        - label: I confirmed no tenant secrets or PII are included in this report.
+          required: true

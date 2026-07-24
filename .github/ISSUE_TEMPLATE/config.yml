@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔐 Report a security vulnerability (private)
+    url: https://github.com/Trec-TorConsulting/entertainment-express/security/advisories/new
+    about: >-
+      Please report security issues privately through GitHub Security Advisories.
+      Do NOT open a public issue for anything security-related. See SECURITY.md.
+  - name: 💼 Licensing & commercial inquiries
+    url: mailto:tobey@trec-tor.com
+    about: >-
+      Entertainment Express is proprietary. For licensing, commercial use, or
+      partnership questions, email the maintainer directly.

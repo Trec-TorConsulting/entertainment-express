@@ -1,0 +1,79 @@
+name: ✨ Feature request
+description: Propose a capability or enhancement (spec-driven via OpenSpec).
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees:
+  - Trec-TorConsulting
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Entertainment Express is developed **spec-first** with
+        [OpenSpec](https://github.com/Fission-AI/OpenSpec). Non-trivial features
+        begin as a change proposal under `openspec/changes/` before
+        implementation. This form captures the intent that becomes that proposal.
+
+        Please keep solutions **generic and config-driven** — the platform serves
+        many entertainment verticals through one configurable engine, not
+        hard-coded per vertical.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / user story
+      description: What problem are we solving, and for whom (tenant, crew, customer, operator)?
+      placeholder: As a <role>, I need <capability> so that <outcome>.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior. Note any new doctypes, APIs, or UI.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Control plane / provisioning
+        - Booking
+        - Scheduling & dispatch
+        - Workforce
+        - Billing & payments (Stripe)
+        - Service catalog
+        - Public API
+        - Crew app (mobile)
+        - Customer portal
+        - Dispatch portal
+        - Deployment / infrastructure
+        - Cross-cutting / platform
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How do we know it's done? Include multi-tenant isolation expectations.
+      value: |
+        - [ ]
+        - [ ] Multi-tenant isolation preserved (no cross-site access)
+        - [ ] Happy-path and failure-path tests added
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you weighed and why they were set aside.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmations
+      options:
+        - label: I searched existing issues and change proposals for duplicates.
+          required: true
+        - label: This aligns with the config-driven, multi-tenant design in `openspec/project.md`.
+          required: true
