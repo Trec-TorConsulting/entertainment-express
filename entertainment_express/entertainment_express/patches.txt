@@ -1,8 +1,11 @@
 # Patches are run by `bench migrate`. Add one line per patch in the format:
 # entertainment_express.patches.<subfolder>.<patch_file>
 # (Frappe appends `.execute` automatically — do NOT add it.)
+# Both section headers must be present even if a section is empty.
 # Example:
 # entertainment_express.patches.v0_0.rename_doctype
+
+[pre_model_sync]
 
 [post_model_sync]
 entertainment_express.patches.v0_0_1.hide_unused_erpnext_workspaces

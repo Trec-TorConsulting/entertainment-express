@@ -67,7 +67,9 @@ data:
       "server_script_enabled": 1,
       "ignore_csrf": 0,
       "allow_cors": [],
-      "ee_base_domain": "entertainmentexpress.app"
+      "ee_base_domain": "entx.app",
+      "ee_tenant_domain": "entx.app",
+      "ee_focus_desk": 1
     }
 
 ---
@@ -1340,13 +1342,13 @@ spec:
             port:
               number: 8000
 ---
-# Route ee.trector.com to the control-plane site: Frappe multi-tenant resolves the
-# site from the X-Frappe-Site-Name header, so Traefik injects it (standard pattern in
-# this cluster — mirrors the frappe/frappe-site-header middleware).
+# Route the public prod domain (entx.app + www) to the control-plane site. Frappe
+# multi-tenant resolves the site from the X-Frappe-Site-Name header, so Traefik injects
+# it (standard pattern in this cluster — mirrors the frappe/frappe-site-header middleware).
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: ee-site-header
+  name: entx-site-header
   namespace: entertainment-express
   labels:
     app.kubernetes.io/name: entertainment-express
@@ -1358,14 +1360,15 @@ spec:
     customRequestHeaders:
       X-Frappe-Site-Name: admin.entertainmentexpress.app
 ---
-# Public URL — ee.trector.com — TLS via cert-manager + Let's Encrypt (cluster standard).
-# cert-manager watches the `cert-manager.io/cluster-issuer` annotation and issues/renews
-# the certificate into the `ee-trector-com-tls` Secret via an HTTP-01 challenge through
-# Traefik. Prereq: ee.trector.com must resolve publicly to this cluster's ingress IP.
+# Public prod URL — entx.app (+ www) — control plane. TLS is terminated at Cloudflare's
+# edge (Universal SSL covers the apex + first-level *.entx.app); Traefik serves the origin
+# with its default cert over Cloudflare "Full". A proper origin Let's Encrypt cert for this
+# zone needs DNS-01 (HTTP-01 can't validate the apex behind Cloudflare's Always-Use-HTTPS)
+# with an entx.app-scoped Cloudflare API token — see the note in secrets.example.yaml.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: entertainment-express-public
+  name: entertainment-express-entx
   namespace: entertainment-express
   labels:
     app.kubernetes.io/name: entertainment-express
@@ -1373,16 +1376,68 @@ metadata:
     app.kubernetes.io/managed-by: kubectl
     app.kubernetes.io/component: ingress
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    traefik.ingress.kubernetes.io/router.middlewares: entertainment-express-ee-site-header@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    traefik.ingress.kubernetes.io/router.middlewares: entertainment-express-entx-site-header@kubernetescrd
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - ee.trector.com
-    secretName: ee-trector-com-tls
   rules:
-  - host: ee.trector.com
+  - host: entx.app
+    http:
+      paths:
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-socketio
+            port:
+              number: 9000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-python
+            port:
+              number: 8000
+  - host: www.entx.app
+    http:
+      paths:
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-socketio
+            port:
+              number: 9000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-python
+            port:
+              number: 8000
+---
+# Tenant sites — <slug>.entx.app (multi-tenant; Frappe resolves each site from the Host,
+# so no site-header middleware here — each tenant subdomain IS its own site directory).
+# Public TLS for first-level *.entx.app is provided by Cloudflare's edge (Universal SSL);
+# the origin is reached over Cloudflare "Full", so a per-tenant origin cert is not needed.
+# (Let's Encrypt HTTP-01 cannot issue wildcard certs; switch to a DNS-01 issuer if the
+# edge ever terminates directly on this cluster.)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: entertainment-express-tenants
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    app.kubernetes.io/component: ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: "*.entx.app"
     http:
       paths:
       - path: /socket.io

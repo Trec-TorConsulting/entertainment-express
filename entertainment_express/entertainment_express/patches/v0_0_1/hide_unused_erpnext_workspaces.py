@@ -18,6 +18,10 @@ HIDDEN_WORKSPACES = [
 
 
 def execute():
+    # Deployment-specific and opt-in: only hide workspaces when the site sets
+    # ee_focus_desk. Keeps the app neutral for anyone who installs it elsewhere.
+    if not frappe.conf.get("ee_focus_desk"):
+        return
     for name in HIDDEN_WORKSPACES:
         if frappe.db.exists("Workspace", name):
             # update_modified bumps the record's timestamp past the ERPNext source file

@@ -80,7 +80,11 @@ def _provision_create(job) -> None:
     """Create a new tenant site, install apps, bootstrap, mark active."""
     tenant = frappe.get_doc("Tenant", job.tenant)
     base_domain = frappe.conf.get("ee_base_domain", "entertainmentexpress.app")
-    site_name = f"{tenant.tenant_slug}.app.{base_domain}"
+    # Tenant sites are <slug>.<ee_tenant_domain>. Defaults to app.<base_domain> to
+    # preserve the historical scheme; deployments can set ee_tenant_domain to serve
+    # tenants directly under the base domain (e.g. <slug>.entx.app).
+    tenant_domain = frappe.conf.get("ee_tenant_domain") or f"app.{base_domain}"
+    site_name = f"{tenant.tenant_slug}.{tenant_domain}"
 
     _log(job, f"Provisioning site: {site_name}")
 
