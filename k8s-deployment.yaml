@@ -15,6 +15,13 @@
 # NOTE: the site-init and admin-site-init Jobs are one-shot bootstrappers. They
 # wait for MariaDB and are idempotent. To re-run them (e.g. after an image bump),
 # delete first:  kubectl -n entertainment-express delete job entertainment-express-site-init entertainment-express-admin-site-init
+#
+# NOTE (existing clusters migrated from Helm): the live MariaDB StatefulSet was
+# originally created by Helm, so its immutable volumeClaimTemplates still carry
+# app.kubernetes.io/managed-by=Helm. A full re-apply will report the MariaDB
+# StatefulSet as rejected ("updates to statefulset spec ... are forbidden"). This
+# is harmless — MariaDB is already running and matches this manifest. On a fresh
+# cluster the manifest applies cleanly.
 # ─────────────────────────────────────────────────────────────────────────────
 ---
 # Source: entertainment-express/templates/namespace.yaml
