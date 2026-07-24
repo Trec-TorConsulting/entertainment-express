@@ -1,4 +1,8 @@
 # Patches are run by `bench migrate`. Add one line per patch in the format:
-# entertainment_express.patches.<patch_file>.<function_name>
+# entertainment_express.patches.<subfolder>.<patch_file>
+# (Frappe appends `.execute` automatically — do NOT add it.)
 # Example:
-# entertainment_express.patches.v0_0.rename_doctype.execute
+# entertainment_express.patches.v0_0.rename_doctype
+
+[post_model_sync]
+entertainment_express.patches.v0_0_1.hide_unused_erpnext_workspaces
