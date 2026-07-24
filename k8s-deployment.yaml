@@ -306,6 +306,12 @@ spec:
           set -e
           mkdir -p /home/frappe/logs
           cd /home/frappe/frappe-bench
+          export SITES_PATH=/home/frappe/frappe-bench/sites
+          # No nginx in this deployment, so gunicorn must serve the static /assets and
+          # /files itself: frappe.app:application_with_statics() is a factory that wraps
+          # the WSGI app with SharedDataMiddleware. Plain frappe.app:application 404s all
+          # assets. After bumping the frappe/erpnext base image, flush redis-cache and
+          # roll this deployment so the cached asset manifest matches the new bundles.
           exec /home/frappe/frappe-bench/env/bin/gunicorn \
             --chdir /home/frappe/frappe-bench/sites \
             --bind 0.0.0.0:8000 \
@@ -316,7 +322,7 @@ spec:
             --timeout 120 \
             --max-requests 5000 \
             --max-requests-jitter 500 \
-            frappe.app:application
+            'frappe.app:application_with_statics()'
         ports:
         - containerPort: 8000
           name: http
