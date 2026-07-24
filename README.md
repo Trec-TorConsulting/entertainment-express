@@ -90,20 +90,29 @@ smoke_test.py              # Post-deploy smoke checks
 
 ## Deployment
 
-The application is packaged as a multi-arch container image (official `frappe/erpnext` base +
-this app) and deployed to a K3s cluster via a Helm chart. Bootstrapping of the base and
-control-plane sites runs automatically as idempotent Helm post-install/upgrade hooks; per-tenant
-sites are then created on demand by the control plane.
+Everything needed to run in production lives in this repo: the multi-arch
+[`Dockerfile`](Dockerfile), the full Kubernetes manifest
+[`k8s-deployment.yaml`](k8s-deployment.yaml) (namespace `entertainment-express`),
+and a [`secrets.example.yaml`](secrets.example.yaml) template. Bootstrapping of the
+base and control-plane sites runs via the idempotent `site-init` / `admin-site-init`
+Jobs; per-tenant sites are then created on demand by the control plane.
 
 ```bash
-# Build & push the multi-arch bench image
+# 1) Build & push the multi-arch bench image (from the repo root)
 docker buildx build --platform linux/amd64,linux/arm64 \
   -t <registry>/entertainment-express/bench:<tag> --push -f Dockerfile .
+
+# 2) Namespace + secrets (edit secrets.example.yaml first — never commit real values)
+kubectl create namespace entertainment-express --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n entertainment-express apply -f secrets.example.yaml
+
+# 3) Deploy
+kubectl apply -f k8s-deployment.yaml
 ```
 
-> The production Helm chart and cluster configuration are maintained in the private
-> infrastructure repository. Secrets are **never** committed — they are supplied at deploy time
-> via Kubernetes Secrets.
+> Secrets are **never** committed — supply them at deploy time via Kubernetes Secrets
+> (see [`secrets.example.yaml`](secrets.example.yaml)). The `base-domain` secret value must
+> match the ingress hosts in `k8s-deployment.yaml`.
 
 ---
 

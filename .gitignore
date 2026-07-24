@@ -38,6 +38,7 @@ web-build/
 *secret*.yaml
 secret.yaml
 stripe-secret.yaml
+!secrets.example.yaml
 *.pem
 *.key
 *.p12

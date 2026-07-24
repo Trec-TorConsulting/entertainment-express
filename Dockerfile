@@ -1,53 +1,44 @@
-FROM python:3.11-slim
+# Entertainment Express — production bench image
+#
+# Multi-arch (linux/amd64 + linux/arm64) image built on the official
+# frappe/erpnext base with the entertainment_express app baked in. This is the
+# single, self-contained image used to deploy the platform to production
+# (see k8s-deployment.yaml).
+#
+# Build & push (from the repo root):
+#   docker buildx build \
+#     --platform linux/amd64,linux/arm64 \
+#     -t <registry>/entertainment-express/bench:<tag> \
+#     --push -f Dockerfile .
+#
+# Pinned base for reproducible builds — bump when upgrading Frappe/ERPNext.
+FROM frappe/erpnext:v15.65.2
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    BENCH_ENVIRONMENT=production
+# ── Install the entertainment_express app ───────────────────────────────────
+# COPY paths are relative to the build context (this repo's root).
+COPY entertainment_express/entertainment_express \
+     /home/frappe/frappe-bench/apps/entertainment_express/entertainment_express
+COPY entertainment_express/pyproject.toml \
+     /home/frappe/frappe-bench/apps/entertainment_express/pyproject.toml
+COPY entertainment_express/license.txt \
+     /home/frappe/frappe-bench/apps/entertainment_express/license.txt
+COPY entertainment_express/README.md \
+     /home/frappe/frappe-bench/apps/entertainment_express/README.md
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    wget \
-    build-essential \
-    mariadb-client \
-    postgresql-client \
-    libmariadb-dev \
-    python3-dev \
-    npm \
-    gettext-base \
-    && rm -rf /var/lib/apt/lists/*
+# Install the app into the bench virtualenv (editable so Frappe resolves it).
+RUN /home/frappe/frappe-bench/env/bin/pip install --no-cache-dir \
+    -e /home/frappe/frappe-bench/apps/entertainment_express
 
-# Create frappe user
-RUN useradd -m -u 1000 frappe && mkdir -p /home/frappe && chown -R frappe:frappe /home/frappe
+# Register the app. The base image's apps.txt has no trailing newline, so
+# normalize with awk (guarantees a newline per entry) and only append if missing
+# — a naive `echo >>` would concatenate onto the last entry.
+RUN awk 'NF' /home/frappe/frappe-bench/sites/apps.txt > /tmp/apps.txt && \
+    grep -qxF 'entertainment_express' /tmp/apps.txt || echo 'entertainment_express' >> /tmp/apps.txt && \
+    mv /tmp/apps.txt /home/frappe/frappe-bench/sites/apps.txt && \
+    echo "── apps.txt ──" && cat /home/frappe/frappe-bench/sites/apps.txt
 
-WORKDIR /home/frappe
-
-USER frappe
-
-# Add user bin to PATH
-ENV PATH="/home/frappe/.local/bin:$PATH"
-
-# Install bench
-RUN pip install frappe-bench
-
-# Create bench environment
-RUN /home/frappe/.local/bin/bench init --frappe-branch=version-15 --no-procfile frappe-bench
-
-WORKDIR /home/frappe/frappe-bench
-
-# Install ERPNext
-RUN bench get-app erpnext --branch=version-15
-
-# Copy Entertainment Express app
-COPY --chown=frappe:frappe entertainment_express/ ./apps/entertainment_express/
-
-# Install Entertainment Express (treat as local path app)
-RUN bench install-app entertainment_express 2>&1 || echo "App install deferred to site initialization"
-
-# Expose ports
-EXPOSE 8000 8001 9000
-
-# Default: web server
-CMD ["bench", "start", "--port", "8000"]
+# ── Image labels ────────────────────────────────────────────────────────────
+LABEL org.opencontainers.image.title="Entertainment Express Bench"
+LABEL org.opencontainers.image.description="Frappe/ERPNext bench with the Entertainment Express app"
+LABEL org.opencontainers.image.vendor="Trec-Tor Consulting"
+LABEL org.opencontainers.image.source="https://github.com/Trec-TorConsulting/entertainment-express"

@@ -1,336 +1,1616 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Entertainment Express — Production Kubernetes manifests
+#
+# Self-contained, kubectl-appliable deployment for the entertainment-express
+# namespace. Built from this repo's Dockerfile image
+# (192.168.4.10:30500/entertainment-express/bench:0.0.1).
+#
+# PREREQUISITES — create the two secrets first (never commit real secrets):
+#   see secrets.example.yaml, then:
+#   kubectl -n entertainment-express apply -f secrets.example.yaml   # after editing
+#
+# DEPLOY:
+#   kubectl apply -f k8s-deployment.yaml
+#
+# NOTE: the site-init and admin-site-init Jobs are one-shot bootstrappers. They
+# wait for MariaDB and are idempotent. To re-run them (e.g. after an image bump),
+# delete first:  kubectl -n entertainment-express delete job entertainment-express-site-init entertainment-express-admin-site-init
+# ─────────────────────────────────────────────────────────────────────────────
 ---
+# Source: entertainment-express/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    # Isolated environment — no shared resources across dev/prod or with other apps.
+
+---
+# Source: entertainment-express/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: frappe-site-config
+  name: entertainment-express-common-config
   namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: config
 data:
-  site_config.json: |
+  common_site_config.json: |
     {
-      "db_host": "mariadb.entertainment-express.svc.cluster.local",
-      "db_port": 3306,
-      "background_workers": 1,
-      "gunicorn_workers": 2,
-      "app_cache_size": 100,
-      "session_expiry_in_seconds": 3600000,
-      "allow_cors": "*"
+      "db_host": "mariadb",
+      "redis_cache": "redis://redis-cache:6379",
+      "redis_queue": "redis://redis-queue:6379",
+      "redis_socketio": "redis://redis-socketio:6379",
+      "socketio_host": "frappe-socketio",
+      "socketio_port": 9000,
+      "maintenance_mode": 0,
+      "serve_default_site": 0,
+      "auto_migrate": 1,
+      "dns_multitenant": 1,
+      "cookie_secure": 1,
+      "cookie_samesite": "None",
+      "server_script_enabled": 1,
+      "ignore_csrf": 0,
+      "allow_cors": [],
+      "ee_base_domain": "entertainmentexpress.app"
     }
+
 ---
+# Source: entertainment-express/templates/pvc-sites.yaml
 apiVersion: v1
-kind: Secret
+kind: PersistentVolumeClaim
 metadata:
-  name: db-credentials
+  name: entertainment-express-sites
   namespace: entertainment-express
-type: Opaque
-stringData:
-  db_user: frappe
-  db_password: frappe
-  root_password: root
+  annotations:
+    numberOfReplicas: "2"
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: sites
+spec:
+  accessModes:
+  - ReadWriteMany   # python + workers + scheduler + socketio all mount this
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 50Gi
+
 ---
+# Source: entertainment-express/templates/frappe-python.yaml
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: stripe-credentials
+  name: frappe-python
   namespace: entertainment-express
-type: Opaque
-stringData:
-  stripe_public_key: "pk_test_PLACEHOLDER"
-  stripe_secret_key: "sk_test_PLACEHOLDER"
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: python
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  selector:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: python
 ---
+# Source: entertainment-express/templates/frappe-socketio.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frappe-socketio
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: socketio
+spec:
+  ports:
+  - port: 9000
+    targetPort: 9000
+    name: socketio
+  selector:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: socketio
+---
+# Source: entertainment-express/templates/mariadb-statefulset.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: mariadb
+spec:
+  clusterIP: None   # Headless — StatefulSet DNS uses pod hostname
+  ports:
+  - name: mysql
+    port: 3306
+    targetPort: 3306
+  selector:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: mariadb
+---
+# Source: entertainment-express/templates/redis.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cache
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: redis-cache
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: redis-cache
+---
+# Source: entertainment-express/templates/redis.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-queue
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: redis-queue
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: redis-queue
+---
+# Source: entertainment-express/templates/redis.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-socketio
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: redis-socketio
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: redis-socketio
+---
+# Source: entertainment-express/templates/frappe-python.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-python
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: python
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: python
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: python
+    spec:
+      enableServiceLinks: false
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: python
+              topologyKey: kubernetes.io/hostname
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: frappe-python
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command:
+        - bash
+        - -c
+        - |
+          set -e
+          mkdir -p /home/frappe/logs
+          cd /home/frappe/frappe-bench
+          exec /home/frappe/frappe-bench/env/bin/gunicorn \
+            --chdir /home/frappe/frappe-bench/sites \
+            --bind 0.0.0.0:8000 \
+            --workers 4 \
+            --worker-class gthread \
+            --threads 4 \
+            --worker-tmp-dir /dev/shm \
+            --timeout 120 \
+            --max-requests 5000 \
+            --max-requests-jitter 500 \
+            frappe.app:application
+        ports:
+        - containerPort: 8000
+          name: http
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /api/method/ping
+            port: 8000
+            httpHeaders:
+            - name: Host
+              value: base.app.entertainmentexpress.app
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/method/ping
+            port: 8000
+            httpHeaders:
+            - name: Host
+              value: base.app.entertainmentexpress.app
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+
+---
+# Source: entertainment-express/templates/frappe-scheduler.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-scheduler
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: scheduler
+spec:
+  replicas: 1   # Exactly one scheduler — never scale beyond 1.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: scheduler
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: scheduler
+    spec:
+      enableServiceLinks: false
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: scheduler
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["bash", "-c", "mkdir -p /home/frappe/logs && cd /home/frappe/frappe-bench && bench schedule"]
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+
+---
+# Source: entertainment-express/templates/frappe-socketio.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-socketio
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: socketio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: socketio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: socketio
+    spec:
+      enableServiceLinks: false
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: socketio
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["bash", "-c", "cd /home/frappe/frappe-bench && node apps/frappe/socketio.js"]
+        env:
+        - name: SOCKETIO_PORT
+          value: "9000"
+        - name: SOCKETIO_ADDRESS
+          value: "0.0.0.0"
+        ports:
+        - containerPort: 9000
+          name: socketio
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+
+---
+# Source: entertainment-express/templates/frappe-workers.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-worker-default
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: worker-default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: worker-default
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: worker-default
+    spec:
+      enableServiceLinks: false
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: worker
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["bash", "-c", "mkdir -p /home/frappe/logs && cd /home/frappe/frappe-bench && bench worker --queue default"]
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+---
+# Source: entertainment-express/templates/frappe-workers.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-worker-short
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: worker-short
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: worker-short
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: worker-short
+    spec:
+      enableServiceLinks: false
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: worker
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["bash", "-c", "mkdir -p /home/frappe/logs && cd /home/frappe/frappe-bench && bench worker --queue short"]
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+---
+# Source: entertainment-express/templates/frappe-workers.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-worker-long
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: worker-long
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: worker-long
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: worker-long
+    spec:
+      enableServiceLinks: false
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: worker
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["bash", "-c", "mkdir -p /home/frappe/logs && cd /home/frappe/frappe-bench && bench worker --queue long"]
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+---
+# Source: entertainment-express/templates/redis.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cache
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: redis-cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: redis-cache
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: redis-cache
+    spec:
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: redis-cache
+        image: redis:7.2
+        args:
+          - "--save"
+          - ""
+          - "--appendonly"
+          - "no"
+          - "--maxmemory"
+          - "512mb"
+          - "--maxmemory-policy"
+          - "allkeys-lru"
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+# Source: entertainment-express/templates/redis.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-queue
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: redis-queue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: redis-queue
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: redis-queue
+    spec:
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: redis-queue
+        image: redis:7.2
+        args:
+          - "--save"
+          - ""
+          - "--appendonly"
+          - "no"
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+# Source: entertainment-express/templates/redis.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-socketio
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: redis-socketio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: redis-socketio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: redis-socketio
+    spec:
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: redis-socketio
+        image: redis:7.2
+        args:
+          - "--save"
+          - ""
+          - "--appendonly"
+          - "no"
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+# Source: entertainment-express/templates/mariadb-statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mariadb
   namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: mariadb
 spec:
   serviceName: mariadb
   replicas: 1
   selector:
     matchLabels:
-      app: mariadb
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: mariadb
   template:
     metadata:
       labels:
-        app: mariadb
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: mariadb
     spec:
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
       containers:
       - name: mariadb
-        image: mariadb:10.6
-        ports:
-        - containerPort: 3306
+        image: mariadb:10.11
+        imagePullPolicy: IfNotPresent
+        args:
+          - --character-set-server=utf8mb4
+          - --collation-server=utf8mb4_unicode_ci
+          - --skip-character-set-client-handshake
+          - --max-connections=500
+          - --innodb-buffer-pool-size=512M
         env:
-        - name: MYSQL_ROOT_PASSWORD
+        - name: MARIADB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: db-credentials
-              key: root_password
-        - name: MYSQL_DATABASE
-          value: frappe
-        - name: MYSQL_USER
+              name: ee-secrets
+              key: mariadb-root-password
+        - name: MARIADB_USER
           valueFrom:
             secretKeyRef:
-              name: db-credentials
-              key: db_user
-        - name: MYSQL_PASSWORD
+              name: ee-secrets
+              key: mariadb-user
+        - name: MARIADB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: db-credentials
-              key: db_password
+              name: ee-secrets
+              key: mariadb-password
+        ports:
+        - name: mysql
+          containerPort: 3306
         volumeMounts:
         - name: data
           mountPath: /var/lib/mysql
-      volumes:
-      - name: data
-        emptyDir: {}
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - 'mysqladmin ping -h 127.0.0.1 -u root -p"$MARIADB_ROOT_PASSWORD"'
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          failureThreshold: 5
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - 'mysqladmin ping -h 127.0.0.1 -u root -p"$MARIADB_ROOT_PASSWORD"'
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          failureThreshold: 3
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      annotations:
+        numberOfReplicas: "2"
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: mariadb
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 30Gi
+
 ---
-apiVersion: v1
-kind: Service
+# Source: entertainment-express/templates/backup-cronjob.yaml
+apiVersion: batch/v1
+kind: CronJob
 metadata:
-  name: mariadb
+  name: entertainment-express-backup
   namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: backup
 spec:
-  clusterIP: None
-  selector:
-    app: mariadb
-  ports:
-  - port: 3306
-    targetPort: 3306
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: entertainment-express
+            app.kubernetes.io/instance: ee-prod
+            app.kubernetes.io/managed-by: kubectl
+            helm.sh/chart: entertainment-express-0.1.0
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          affinity:
+            
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                    - node05
+          initContainers:
+          - name: fix-sites-perms
+            image: busybox:1.36
+            command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+            securityContext:
+              runAsUser: 0
+            volumeMounts:
+            - name: sites
+              mountPath: /mnt/sites
+          - name: seed-sites
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+            imagePullPolicy: Always
+            command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+            volumeMounts:
+            - name: sites
+              mountPath: /mnt/sites
+          - name: write-common-config
+            image: busybox:1.36
+            securityContext:
+              runAsUser: 1000
+            command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+            volumeMounts:
+            - name: common-config
+              mountPath: /config
+            - name: sites
+              mountPath: /mnt/sites
+          containers:
+          - name: bench-backup
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+            imagePullPolicy: Always
+            command:
+            - bash
+            - -c
+            - |
+              set -e
+              cd /home/frappe/frappe-bench
+              echo "=== EE Backup starting at $(date) ==="
+              bench --site all backup --with-files --backup-path /tmp/ee-backups
+              echo "=== Backup files written ==="; ls -lh /tmp/ee-backups/
+            volumeMounts:
+            - name: sites
+              mountPath: /home/frappe/frappe-bench/sites
+            - name: backup-staging
+              mountPath: /tmp/ee-backups
+            resources:
+              requests: { cpu: 200m, memory: 512Mi }
+              limits:   { cpu: "1", memory: 1Gi }
+          - name: upload-to-minio
+            image: minio/mc:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              DATE=$(date +%Y-%m-%d)
+              mc alias set backup "http://192.168.4.9:9000" \
+                "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}"
+              mc mb --ignore-existing backup/ee-backups
+              echo "Uploading backup for ${DATE}..."
+              mc cp --recursive /tmp/ee-backups/ "backup/ee-backups/${DATE}/"
+              echo "Pruning backups older than 30 days..."
+              mc find backup/ee-backups --older-than 30d --exec "mc rm {}" || true
+              echo "=== Backup complete at $(date) ==="
+            env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ee-secrets
+                  key: minio-access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ee-secrets
+                  key: minio-secret-key
+            volumeMounts:
+            - name: backup-staging
+              mountPath: /tmp/ee-backups
+              readOnly: true
+            resources:
+              requests: { cpu: 100m, memory: 128Mi }
+              limits:   { cpu: 500m, memory: 256Mi }
+          volumes:
+          - name: sites
+            persistentVolumeClaim:
+              claimName: entertainment-express-sites
+          - name: common-config
+            configMap:
+              name: entertainment-express-common-config
+              items:
+              - key: common_site_config.json
+                path: common_site_config.json
+          - name: backup-staging
+            emptyDir: {}
+
 ---
+# Source: entertainment-express/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: entertainment-express-ingress
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-https@kubernetescrd,traefik-gzip-compress@kubernetescrd,traefik-security-headers@kubernetescrd"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - "*.app.entertainmentexpress.app"
+    - "admin.entertainmentexpress.app"
+    # secretName omitted — the cert resolver manages the TLS secret automatically.
+  rules:
+  - host: "*.app.entertainmentexpress.app"
+    http:
+      paths:
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-socketio
+            port:
+              number: 9000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-python
+            port:
+              number: 8000
+  - host: "admin.entertainmentexpress.app"
+    http:
+      paths:
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-socketio
+            port:
+              number: 9000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-python
+            port:
+              number: 8000
+---
+# Source: entertainment-express/templates/admin-site-init-job.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: admin-site-init
+  name: entertainment-express-admin-site-init
   namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: admin-site-init
 spec:
-  backoffLimit: 3
-  template:
-    spec:
-      serviceAccountName: bench-sa
-      containers:
-      - name: init
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
-        env:
-        - name: DB_HOST
-          value: mariadb.entertainment-express.svc.cluster.local
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: db_user
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: db_password
-        - name: ADMIN_SITE_NAME
-          value: admin.entertainment-express.local
-        - name: ADMIN_PASSWORD
-          value: admin
-        - name: STRIPE_PUBLIC_KEY
-          valueFrom:
-            secretKeyRef:
-              name: stripe-credentials
-              key: stripe_public_key
-        - name: STRIPE_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: stripe-credentials
-              key: stripe_secret_key
-        command:
-        - /bin/bash
-        - -c
-        - |
-          set -e
-          cd /home/frappe/frappe-bench
-          
-          # Wait for MariaDB to be ready
-          for i in {1..30}; do
-            if mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD -e "SELECT 1" 2>/dev/null; then
-              echo "Database is ready"
-              break
-            fi
-            echo "Waiting for database... ($i/30)"
-            sleep 2
-          done
-          
-          # Create admin site
-          bench new-site $ADMIN_SITE_NAME \
-            --db-host $DB_HOST \
-            --db-user $DB_USER \
-            --db-password $DB_PASSWORD \
-            --admin-password $ADMIN_PASSWORD
-          
-          # Install apps
-          bench --site $ADMIN_SITE_NAME install-app erpnext entertainment_express
-          
-          # Bootstrap: create roles, sample catalog
-          bench --site $ADMIN_SITE_NAME execute entertainment_express.setup.install.after_install
-          
-          echo "✓ Admin site initialized at $ADMIN_SITE_NAME"
-      restartPolicy: Never
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bench-sa
-  namespace: entertainment-express
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: bench-admin
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: bench-sa
-  namespace: entertainment-express
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: frappe-web
-  namespace: entertainment-express
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: frappe-web
+  backoffLimit: 1
   template:
     metadata:
       labels:
-        app: frappe-web
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: admin-site-init
     spec:
+      restartPolicy: Never
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
       containers:
-      - name: web
+      - name: admin-site-init
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
-        ports:
-        - containerPort: 8000
+        imagePullPolicy: Always
+        command:
+        - bash
+        - -c
+        - |
+          set -e
+          ADMIN_SITE="admin.${BASE_DOMAIN}"
+          cd /home/frappe/frappe-bench
+
+          echo "Waiting for MariaDB..."
+          for i in $(seq 1 60); do
+            if mysqladmin ping -h mariadb -uroot -p"${DB_ROOT_PASSWORD}" --silent 2>/dev/null; then
+              echo "MariaDB is ready."; break
+            fi
+            echo "  ...still waiting ($i/60)"; sleep 3
+          done
+
+          if [ -f "sites/${ADMIN_SITE}/site_config.json" ]; then
+            echo "Admin site ${ADMIN_SITE} already provisioned — skipping creation."
+          else
+            echo "Creating control-plane site ${ADMIN_SITE}..."
+            rm -rf "sites/${ADMIN_SITE}"
+            bench new-site "${ADMIN_SITE}" \
+              --force \
+              --db-host mariadb \
+              --db-root-username root \
+              --mariadb-root-password "${DB_ROOT_PASSWORD}" \
+              --admin-password "${ADMIN_PASSWORD}" \
+              --no-mariadb-socket
+          fi
+
+          bench --site "${ADMIN_SITE}" install-app erpnext || true
+          bench --site "${ADMIN_SITE}" install-app entertainment_express || true
+          bench --site "${ADMIN_SITE}" migrate
+          bench --site "${ADMIN_SITE}" set-config host_name "https://${ADMIN_SITE}"
+          bench --site "${ADMIN_SITE}" execute \
+            entertainment_express.setup.seed_plans.run || true
+          echo "Admin site init complete."
         env:
-        - name: DB_HOST
-          value: mariadb.entertainment-express.svc.cluster.local
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_USER
+        - name: BASE_DOMAIN
           valueFrom:
             secretKeyRef:
-              name: db-credentials
-              key: db_user
-        - name: DB_PASSWORD
+              name: ee-secrets
+              key: base-domain
+        - name: DB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: db-credentials
-              key: db_password
-        - name: STRIPE_PUBLIC_KEY
+              name: ee-secrets
+              key: mariadb-root-password
+        - name: ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: stripe-credentials
-              key: stripe_public_key
-        - name: STRIPE_SECRET_KEY
+              name: ee-secrets
+              key: administrator-password
+        - name: EE_STRIPE_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: stripe-credentials
-              key: stripe_secret_key
-        livenessProbe:
-          httpGet:
-            path: /api/method/frappe.client.get_count
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /api/method/frappe.client.get_count
-            port: 8000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-      - name: worker-short
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
-        env:
-        - name: DB_HOST
-          value: mariadb.entertainment-express.svc.cluster.local
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_USER
+              name: ee-stripe-secrets
+              key: stripe-secret-key
+        - name: EE_STRIPE_WEBHOOK_SECRET
           valueFrom:
             secretKeyRef:
-              name: db-credentials
-              key: db_user
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: db_password
-        command: ["bench", "worker", "--site", "admin.entertainment-express.local", "--queue", "short"]
-      - name: worker-long
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
-        env:
-        - name: DB_HOST
-          value: mariadb.entertainment-express.svc.cluster.local
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: db_user
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: db_password
-        command: ["bench", "worker", "--site", "admin.entertainment-express.local", "--queue", "long"]
-      - name: scheduler
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
-        env:
-        - name: DB_HOST
-          value: mariadb.entertainment-express.svc.cluster.local
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: db_user
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: db_password
-        command: ["bench", "schedule"]
+              name: ee-stripe-secrets
+              key: stripe-webhook-secret
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          requests: { cpu: 500m, memory: 1Gi }
+          limits:   { cpu: "2", memory: 2Gi }
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+
 ---
-apiVersion: v1
-kind: Service
+# Source: entertainment-express/templates/site-init-job.yaml
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: frappe-web
+  name: entertainment-express-site-init
   namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    helm.sh/chart: entertainment-express-0.1.0
+    app.kubernetes.io/component: site-init
 spec:
-  selector:
-    app: frappe-web
-  ports:
-  - port: 80
-    targetPort: 8000
-  type: LoadBalancer
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: frappe-network-policy
-  namespace: entertainment-express
-spec:
-  podSelector:
-    matchLabels:
-      app: frappe-web
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: entertainment-express
-    ports:
-    - protocol: TCP
-      port: 8000
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: entertainment-express
+        app.kubernetes.io/instance: ee-prod
+        app.kubernetes.io/managed-by: kubectl
+        helm.sh/chart: entertainment-express-0.1.0
+        app.kubernetes.io/component: site-init
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: fix-sites-perms
+        image: busybox:1.36
+        command: ["/bin/sh", "-c", "chown -R 1000:1000 /mnt/sites 2>/dev/null || true; chmod -R u+rwX,g+rwX /mnt/sites 2>/dev/null || true"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: seed-sites
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
+      - name: write-common-config
+        image: busybox:1.36
+        securityContext:
+          runAsUser: 1000
+        command: ["/bin/sh", "-c", "cp -f /config/common_site_config.json /mnt/sites/common_site_config.json"]
+        volumeMounts:
+        - name: common-config
+          mountPath: /config
+        - name: sites
+          mountPath: /mnt/sites
+      affinity:
+        
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - node05
+      containers:
+      - name: site-init
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        imagePullPolicy: Always
+        command:
+        - bash
+        - -c
+        - |
+          set -e
+          SITE="base.app.${BASE_DOMAIN}"
+          cd /home/frappe/frappe-bench
+
+          echo "Waiting for MariaDB..."
+          for i in $(seq 1 60); do
+            if mysqladmin ping -h mariadb -uroot -p"${DB_ROOT_PASSWORD}" --silent 2>/dev/null; then
+              echo "MariaDB is ready."; break
+            fi
+            echo "  ...still waiting ($i/60)"; sleep 3
+          done
+
+          if [ -f "sites/${SITE}/site_config.json" ]; then
+            echo "Site ${SITE} already provisioned — skipping creation."
+          else
+            echo "Creating site ${SITE}..."
+            rm -rf "sites/${SITE}"
+            bench new-site "${SITE}" \
+              --force \
+              --db-host mariadb \
+              --db-root-username root \
+              --mariadb-root-password "${DB_ROOT_PASSWORD}" \
+              --admin-password "${ADMIN_PASSWORD}" \
+              --no-mariadb-socket
+          fi
+
+          echo "Installing erpnext..."
+          bench --site "${SITE}" install-app erpnext || true
+          echo "Installing entertainment_express..."
+          bench --site "${SITE}" install-app entertainment_express
+          echo "Running migrate..."
+          bench --site "${SITE}" migrate
+          echo "Setting host name..."
+          bench --site "${SITE}" set-config host_name "https://${SITE}"
+          echo "Site init complete."
+        env:
+        - name: BASE_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: ee-secrets
+              key: base-domain
+        - name: DB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ee-secrets
+              key: mariadb-root-password
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ee-secrets
+              key: administrator-password
+        volumeMounts:
+        - name: sites
+          mountPath: /home/frappe/frappe-bench/sites
+        resources:
+          requests: { cpu: 500m, memory: 1Gi }
+          limits:   { cpu: "2", memory: 2Gi }
+      volumes:
+      - name: sites
+        persistentVolumeClaim:
+          claimName: entertainment-express-sites
+      - name: common-config
+        configMap:
+          name: entertainment-express-common-config
+          items:
+          - key: common_site_config.json
+            path: common_site_config.json
+
