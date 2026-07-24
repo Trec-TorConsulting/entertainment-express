@@ -1,0 +1,362 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"eeHdrShortcut\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"eeScBooking\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Event Booking\",\"col\":3}},{\"id\":\"eeScCrew\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Crew Assignment\",\"col\":3}},{\"id\":\"eeScRunSheet\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Run Sheet\",\"col\":3}},{\"id\":\"eeScSignup\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Signup Application\",\"col\":3}},{\"id\":\"eeScTenant\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tenant\",\"col\":3}},{\"id\":\"eeScPackage\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Package\",\"col\":3}},{\"id\":\"eeSpacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"eeHdrExplore\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Explore</b></span>\",\"col\":12}},{\"id\":\"eeCardBooking\",\"type\":\"card\",\"data\":{\"card_name\":\"Booking\",\"col\":4}},{\"id\":\"eeCardCatalog\",\"type\":\"card\",\"data\":{\"card_name\":\"Service Catalog\",\"col\":4}},{\"id\":\"eeCardDispatch\",\"type\":\"card\",\"data\":{\"card_name\":\"Scheduling & Dispatch\",\"col\":4}},{\"id\":\"eeCardContracts\",\"type\":\"card\",\"data\":{\"card_name\":\"Contracts\",\"col\":4}},{\"id\":\"eeCardHr\",\"type\":\"card\",\"data\":{\"card_name\":\"HR & Workforce\",\"col\":4}},{\"id\":\"eeCardBilling\",\"type\":\"card\",\"data\":{\"card_name\":\"Billing & Payments\",\"col\":4}},{\"id\":\"eeCardControl\",\"type\":\"card\",\"data\":{\"card_name\":\"Control Plane\",\"col\":4}},{\"id\":\"eeCardSetup\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4}}]",
+ "creation": "2026-07-24 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "calendar",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Entertainment Express",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Booking",
+   "link_count": 2,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Event Booking",
+   "link_count": 0,
+   "link_to": "Event Booking",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Event Booking Hold",
+   "link_count": 0,
+   "link_to": "Event Booking Hold",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Service Catalog",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Service Package",
+   "link_count": 0,
+   "link_to": "Service Package",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Service Asset",
+   "link_count": 0,
+   "link_to": "Service Asset",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Service Area",
+   "link_count": 0,
+   "link_to": "Service Area",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Scheduling & Dispatch",
+   "link_count": 2,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Crew Assignment",
+   "link_count": 0,
+   "link_to": "Crew Assignment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Run Sheet",
+   "link_count": 0,
+   "link_to": "Run Sheet",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Contracts",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "EE Contract",
+   "link_count": 0,
+   "link_to": "EE Contract",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "EE Contract Template",
+   "link_count": 0,
+   "link_to": "EE Contract Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "EE Crew Role",
+   "link_count": 0,
+   "link_to": "EE Crew Role",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "HR & Workforce",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pay Run",
+   "link_count": 0,
+   "link_to": "Pay Run",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Worker Availability",
+   "link_count": 0,
+   "link_to": "Worker Availability",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Compliance Document",
+   "link_count": 0,
+   "link_to": "Compliance Document",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Billing & Payments",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stripe Processed Event",
+   "link_count": 0,
+   "link_to": "Stripe Processed Event",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Invoice",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Entry",
+   "link_count": 0,
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Control Plane",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenant",
+   "link_count": 0,
+   "link_to": "Tenant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Plan",
+   "link_count": 0,
+   "link_to": "Plan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Signup Application",
+   "link_count": 0,
+   "link_to": "Signup Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Provisioning Job",
+   "link_count": 0,
+   "link_to": "Provisioning Job",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Setup",
+   "link_count": 1,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Notification Template",
+   "link_count": 0,
+   "link_to": "Notification Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-07-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "Entertainment Express",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [],
+ "sequence_id": 0.5,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "label": "Event Booking",
+   "link_to": "Event Booking",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "label": "Crew Assignment",
+   "link_to": "Crew Assignment",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "label": "Run Sheet",
+   "link_to": "Run Sheet",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "label": "Signup Application",
+   "link_to": "Signup Application",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "label": "Tenant",
+   "link_to": "Tenant",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "label": "Service Package",
+   "link_to": "Service Package",
+   "type": "DocType"
+  }
+ ],
+ "title": "Entertainment Express"
+}
