@@ -1,0 +1,66 @@
+[
+  {
+    "doctype": "Role",
+    "name": "EE Tenant Admin",
+    "role_name": "EE Tenant Admin",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Sales",
+    "role_name": "EE Sales",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Dispatcher",
+    "role_name": "EE Dispatcher",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Accounting",
+    "role_name": "EE Accounting",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Marketing",
+    "role_name": "EE Marketing",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Crew",
+    "role_name": "EE Crew",
+    "desk_access": 0,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Customer",
+    "role_name": "EE Customer",
+    "desk_access": 0,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "SaaS Operator",
+    "role_name": "SaaS Operator",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  }
+]

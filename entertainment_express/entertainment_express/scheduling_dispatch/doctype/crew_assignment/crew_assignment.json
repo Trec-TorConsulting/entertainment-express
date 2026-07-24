@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "booking", "status",
+  "col1", "crew_member", "role", "col2",
+  "call_time", "check_in", "check_out",
+  "col3", "pay_basis", "pay_rate", "col4",
+  "shift_token", "notes"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-CA-.YYYY.-.####"},
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Event Booking", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status",
+   "options": "offered\naccepted\ndeclined\nchecked_in\ncompleted\nno_show",
+   "default": "offered", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "crew_member", "fieldtype": "Link", "label": "Crew Member", "options": "Employee", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "role", "fieldtype": "Link", "label": "Role", "options": "EE Crew Role", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "call_time", "fieldtype": "Datetime", "label": "Call Time", "description": "When crew should arrive (setup)"},
+  {"fieldname": "check_in", "fieldtype": "Datetime", "label": "Checked In At", "read_only": 1},
+  {"fieldname": "check_out", "fieldtype": "Datetime", "label": "Checked Out At", "read_only": 1},
+  {"fieldname": "col3", "fieldtype": "Column Break"},
+  {"fieldname": "pay_basis", "fieldtype": "Select", "label": "Pay Basis", "options": "\nper_event\nhourly"},
+  {"fieldname": "pay_rate", "fieldtype": "Currency", "label": "Pay Rate"},
+  {"fieldname": "col4", "fieldtype": "Column Break"},
+  {"fieldname": "shift_token", "fieldtype": "Data", "label": "Shift Token", "read_only": 1, "description": "HMAC token for accept/decline links"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Scheduling Dispatch",
+ "name": "Crew Assignment",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0, "export": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Crew", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

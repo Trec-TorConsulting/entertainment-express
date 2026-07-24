@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:tenant_slug",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tenant_slug", "company_name", "status", "site_name", "plan",
+  "col1", "primary_contact", "primary_email", "col2",
+  "activated_on", "suspended_on", "notes"
+ ],
+ "fields": [
+  {"fieldname": "tenant_slug", "fieldtype": "Data", "label": "Tenant Slug", "reqd": 1, "unique": 1, "in_list_view": 1, "description": "DNS-safe slug, e.g. acme-dj — becomes acme-dj.app.{base_domain}"},
+  {"fieldname": "company_name", "fieldtype": "Data", "label": "Company Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status",
+   "options": "pending\nprovisioning\nactive\nsuspended\ndeprovisioning\ndeleted",
+   "default": "pending", "in_list_view": 1, "reqd": 1},
+  {"fieldname": "site_name", "fieldtype": "Data", "label": "Frappe Site Name", "description": "e.g. acme-dj.app.entertainmentexpress.app", "read_only": 1},
+  {"fieldname": "plan", "fieldtype": "Link", "label": "Plan", "options": "Plan", "reqd": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "primary_contact", "fieldtype": "Data", "label": "Primary Contact Name"},
+  {"fieldname": "primary_email", "fieldtype": "Data", "label": "Primary Email"},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "activated_on", "fieldtype": "Datetime", "label": "Activated On", "read_only": 1},
+  {"fieldname": "suspended_on", "fieldtype": "Datetime", "label": "Suspended On", "read_only": 1},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Control Plane",
+ "name": "Tenant",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "SaaS Operator", "read": 1, "write": 1, "create": 1, "delete": 0, "export": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "title_field": "company_name"
+}

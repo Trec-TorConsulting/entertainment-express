@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "area_name", "active",
+  "col1", "travel_fee", "min_order", "col2",
+  "match_type", "out_of_area_policy",
+  "section_zip", "zips",
+  "section_radius", "center_geo", "radius_km",
+  "notes"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-AREA-.####"},
+  {"fieldname": "area_name", "fieldtype": "Data", "label": "Area Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1", "in_list_view": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "travel_fee", "fieldtype": "Currency", "label": "Travel Fee", "in_list_view": 1},
+  {"fieldname": "min_order", "fieldtype": "Currency", "label": "Minimum Order"},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "match_type", "fieldtype": "Select", "label": "Match Type",
+   "options": "zip_list\nradius", "default": "zip_list", "reqd": 1},
+  {"fieldname": "out_of_area_policy", "fieldtype": "Select", "label": "Out-of-Area Policy",
+   "options": "block\nflag_for_review", "default": "flag_for_review"},
+  {"fieldname": "section_zip", "fieldtype": "Section Break", "label": "ZIP Code List (match_type = zip_list)"},
+  {"fieldname": "zips", "fieldtype": "Small Text", "label": "ZIP Codes",
+   "description": "Comma-separated ZIP codes, e.g. 07001,07002,07003"},
+  {"fieldname": "section_radius", "fieldtype": "Section Break", "label": "Radius (match_type = radius)"},
+  {"fieldname": "center_geo", "fieldtype": "Data", "label": "Center Coordinates",
+   "description": "lat,lon e.g. 40.7128,-74.0060"},
+  {"fieldname": "radius_km", "fieldtype": "Float", "label": "Radius (km)"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Service Catalog",
+ "name": "Service Area",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Sales", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "area_name",
+ "sort_order": "ASC",
+ "title_field": "area_name",
+ "track_changes": 1
+}

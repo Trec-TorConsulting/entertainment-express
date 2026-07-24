@@ -1,0 +1,336 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frappe-site-config
+  namespace: entertainment-express
+data:
+  site_config.json: |
+    {
+      "db_host": "mariadb.entertainment-express.svc.cluster.local",
+      "db_port": 3306,
+      "background_workers": 1,
+      "gunicorn_workers": 2,
+      "app_cache_size": 100,
+      "session_expiry_in_seconds": 3600000,
+      "allow_cors": "*"
+    }
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+  namespace: entertainment-express
+type: Opaque
+stringData:
+  db_user: frappe
+  db_password: frappe
+  root_password: root
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: stripe-credentials
+  namespace: entertainment-express
+type: Opaque
+stringData:
+  stripe_public_key: "pk_test_PLACEHOLDER"
+  stripe_secret_key: "sk_test_PLACEHOLDER"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  namespace: entertainment-express
+spec:
+  serviceName: mariadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:10.6
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: root_password
+        - name: MYSQL_DATABASE
+          value: frappe
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_password
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: entertainment-express
+spec:
+  clusterIP: None
+  selector:
+    app: mariadb
+  ports:
+  - port: 3306
+    targetPort: 3306
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: admin-site-init
+  namespace: entertainment-express
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: bench-sa
+      containers:
+      - name: init
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        env:
+        - name: DB_HOST
+          value: mariadb.entertainment-express.svc.cluster.local
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_password
+        - name: ADMIN_SITE_NAME
+          value: admin.entertainment-express.local
+        - name: ADMIN_PASSWORD
+          value: admin
+        - name: STRIPE_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-credentials
+              key: stripe_public_key
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-credentials
+              key: stripe_secret_key
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          cd /home/frappe/frappe-bench
+          
+          # Wait for MariaDB to be ready
+          for i in {1..30}; do
+            if mysql -h $DB_HOST -u $DB_USER -p$DB_PASSWORD -e "SELECT 1" 2>/dev/null; then
+              echo "Database is ready"
+              break
+            fi
+            echo "Waiting for database... ($i/30)"
+            sleep 2
+          done
+          
+          # Create admin site
+          bench new-site $ADMIN_SITE_NAME \
+            --db-host $DB_HOST \
+            --db-user $DB_USER \
+            --db-password $DB_PASSWORD \
+            --admin-password $ADMIN_PASSWORD
+          
+          # Install apps
+          bench --site $ADMIN_SITE_NAME install-app erpnext entertainment_express
+          
+          # Bootstrap: create roles, sample catalog
+          bench --site $ADMIN_SITE_NAME execute entertainment_express.setup.install.after_install
+          
+          echo "✓ Admin site initialized at $ADMIN_SITE_NAME"
+      restartPolicy: Never
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bench-sa
+  namespace: entertainment-express
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bench-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: bench-sa
+  namespace: entertainment-express
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-web
+  namespace: entertainment-express
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frappe-web
+  template:
+    metadata:
+      labels:
+        app: frappe-web
+    spec:
+      containers:
+      - name: web
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_HOST
+          value: mariadb.entertainment-express.svc.cluster.local
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_password
+        - name: STRIPE_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-credentials
+              key: stripe_public_key
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-credentials
+              key: stripe_secret_key
+        livenessProbe:
+          httpGet:
+            path: /api/method/frappe.client.get_count
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/method/frappe.client.get_count
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      - name: worker-short
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        env:
+        - name: DB_HOST
+          value: mariadb.entertainment-express.svc.cluster.local
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_password
+        command: ["bench", "worker", "--site", "admin.entertainment-express.local", "--queue", "short"]
+      - name: worker-long
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        env:
+        - name: DB_HOST
+          value: mariadb.entertainment-express.svc.cluster.local
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_password
+        command: ["bench", "worker", "--site", "admin.entertainment-express.local", "--queue", "long"]
+      - name: scheduler
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.1
+        env:
+        - name: DB_HOST
+          value: mariadb.entertainment-express.svc.cluster.local
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: db_password
+        command: ["bench", "schedule"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frappe-web
+  namespace: entertainment-express
+spec:
+  selector:
+    app: frappe-web
+  ports:
+  - port: 80
+    targetPort: 8000
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frappe-network-policy
+  namespace: entertainment-express
+spec:
+  podSelector:
+    matchLabels:
+      app: frappe-web
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: entertainment-express
+    ports:
+    - protocol: TCP
+      port: 8000

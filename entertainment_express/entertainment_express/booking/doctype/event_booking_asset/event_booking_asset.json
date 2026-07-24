@@ -1,0 +1,22 @@
+{
+ "actions": [],
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["asset", "asset_name", "asset_type", "quantity_reserved"],
+ "fields": [
+  {"fieldname": "asset", "fieldtype": "Link", "label": "Asset", "options": "Service Asset", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "asset_name", "fieldtype": "Data", "label": "Asset Name", "fetch_from": "asset.asset_name", "read_only": 1, "in_list_view": 1},
+  {"fieldname": "asset_type", "fieldtype": "Data", "label": "Asset Type", "fetch_from": "asset.asset_type", "read_only": 1},
+  {"fieldname": "quantity_reserved", "fieldtype": "Int", "label": "Qty Reserved", "default": "1"}
+ ],
+ "istable": 1,
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Booking",
+ "name": "Event Booking Asset",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

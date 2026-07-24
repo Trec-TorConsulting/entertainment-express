@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "asset_name", "asset_type", "identifier",
+  "col1", "status", "quantity", "home_location", "col2",
+  "section_items", "linked_items",
+  "section_images", "images",
+  "section_meta", "vertical_tag", "notes"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-ASSET-.####"},
+  {"fieldname": "asset_name", "fieldtype": "Data", "label": "Asset Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "asset_type", "fieldtype": "Select", "label": "Asset Type",
+   "options": "inflatable\nbooth\ntruck\ndj_rig\ncasino_table\nkaraoke_rig\nprop\nother",
+   "reqd": 1, "in_list_view": 1},
+  {"fieldname": "identifier", "fieldtype": "Data", "label": "Serial / Identifier"},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status",
+   "options": "available\nmaintenance\nretired", "default": "available", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "quantity", "fieldtype": "Int", "label": "Pool Quantity", "default": "1",
+   "description": "1 = unique asset; > 1 = fungible pool. Booking blocks against this count."},
+  {"fieldname": "home_location", "fieldtype": "Data", "label": "Home Location / Warehouse"},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "section_items", "fieldtype": "Section Break", "label": "Linked Service Items"},
+  {"fieldname": "linked_items", "fieldtype": "Table", "label": "Linked Items", "options": "Service Asset Linked Item"},
+  {"fieldname": "section_images", "fieldtype": "Section Break", "label": "Images"},
+  {"fieldname": "images", "fieldtype": "Attach Image", "label": "Primary Image"},
+  {"fieldname": "section_meta", "fieldtype": "Section Break", "label": "Meta"},
+  {"fieldname": "vertical_tag", "fieldtype": "Data", "label": "Vertical Tag"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Service Catalog",
+ "name": "Service Asset",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "asset_name",
+ "sort_order": "ASC",
+ "title_field": "asset_name",
+ "track_changes": 1
+}

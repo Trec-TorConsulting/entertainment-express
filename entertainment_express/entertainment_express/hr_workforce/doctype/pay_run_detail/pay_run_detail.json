@@ -1,0 +1,29 @@
+{
+ "actions": [],
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "worker", "event_fees", "hourly_pay", "tips", "gross_amount",
+  "col1", "payout_method", "txn_id"
+ ],
+ "fields": [
+  {"fieldname": "worker", "fieldtype": "Link", "label": "Worker", "options": "Employee", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "event_fees", "fieldtype": "Currency", "label": "Event Fees", "default": "0", "in_list_view": 1},
+  {"fieldname": "hourly_pay", "fieldtype": "Currency", "label": "Hourly Pay", "default": "0", "in_list_view": 1},
+  {"fieldname": "tips", "fieldtype": "Currency", "label": "Tips", "default": "0", "in_list_view": 1},
+  {"fieldname": "gross_amount", "fieldtype": "Currency", "label": "Gross Amount", "read_only": 1, "in_list_view": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "payout_method", "fieldtype": "Data", "label": "Payout Method", "description": "stripe_account_id or bank details"},
+  {"fieldname": "txn_id", "fieldtype": "Data", "label": "Transaction ID", "read_only": 1}
+ ],
+ "istable": 1,
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "HR Workforce",
+ "name": "Pay Run Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

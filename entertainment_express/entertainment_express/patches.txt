@@ -1,0 +1,4 @@
+# Patches are run by `bench migrate`. Add one line per patch in the format:
+# entertainment_express.patches.<patch_file>.<function_name>
+# Example:
+# entertainment_express.patches.v0_0.rename_doctype.execute

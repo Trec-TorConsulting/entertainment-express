@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "autoname": "field:booking",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "booking", "published", "generated_at",
+  "col1", "venue_address", "venue_geo", "col2",
+  "client_name", "client_phone", "emergency_contact",
+  "section_access", "access_notes",
+  "section_equipment", "equipment_items",
+  "section_checklist", "checklist_items",
+  "section_notes", "notes"
+ ],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Event Booking", "options": "Event Booking", "reqd": 1, "unique": 1, "in_list_view": 1},
+  {"fieldname": "published", "fieldtype": "Check", "label": "Published to Crew", "default": "0", "in_list_view": 1},
+  {"fieldname": "generated_at", "fieldtype": "Datetime", "label": "Generated At", "read_only": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "venue_address", "fieldtype": "Small Text", "label": "Venue Address"},
+  {"fieldname": "venue_geo", "fieldtype": "Data", "label": "Venue Geo (lat,lon)"},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "client_name", "fieldtype": "Data", "label": "Client Name"},
+  {"fieldname": "client_phone", "fieldtype": "Data", "label": "Client Phone"},
+  {"fieldname": "emergency_contact", "fieldtype": "Data", "label": "Emergency Contact"},
+  {"fieldname": "section_access", "fieldtype": "Section Break", "label": "Venue Access"},
+  {"fieldname": "access_notes", "fieldtype": "Text Editor", "label": "Access / Load-in Notes"},
+  {"fieldname": "section_equipment", "fieldtype": "Section Break", "label": "Equipment List"},
+  {"fieldname": "equipment_items", "fieldtype": "Table", "label": "Equipment", "options": "Run Sheet Equipment Item"},
+  {"fieldname": "section_checklist", "fieldtype": "Section Break", "label": "Setup Checklist"},
+  {"fieldname": "checklist_items", "fieldtype": "Table", "label": "Checklist", "options": "Run Sheet Checklist Item"},
+  {"fieldname": "section_notes", "fieldtype": "Section Break", "label": "Notes"},
+  {"fieldname": "notes", "fieldtype": "Text Editor", "label": "Additional Notes"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Scheduling Dispatch",
+ "name": "Run Sheet",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0, "export": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Crew", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "booking",
+ "track_changes": 1
+}

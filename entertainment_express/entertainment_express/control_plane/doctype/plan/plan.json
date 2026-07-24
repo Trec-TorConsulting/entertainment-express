@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:plan_code",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "plan_name", "plan_code", "price_monthly", "currency", "trial_days",
+  "status", "section_entitlements", "entitlements"
+ ],
+ "fields": [
+  {"fieldname": "plan_name", "fieldtype": "Data", "label": "Plan Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "plan_code", "fieldtype": "Data", "label": "Plan Code", "reqd": 1, "unique": 1, "description": "Slug used in entitlement checks, e.g. starter, pro, enterprise"},
+  {"fieldname": "price_monthly", "fieldtype": "Currency", "label": "Monthly Price", "reqd": 1},
+  {"fieldname": "currency", "fieldtype": "Link", "label": "Currency", "options": "Currency", "default": "USD"},
+  {"fieldname": "trial_days", "fieldtype": "Int", "label": "Trial Days", "default": "0"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Active\nArchived", "default": "Active", "in_list_view": 1},
+  {"fieldname": "section_entitlements", "fieldtype": "Section Break", "label": "Entitlements"},
+  {"fieldname": "entitlements", "fieldtype": "Table", "label": "Entitlements", "options": "Plan Entitlement"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Control Plane",
+ "name": "Plan",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "SaaS Operator", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

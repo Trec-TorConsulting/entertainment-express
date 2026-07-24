@@ -1,0 +1,90 @@
+---
+base_template: "templates/web.html"
+no_cache: 1
+---
+
+{% block title %}Request a Quote{% endblock %}
+
+{% block page_content %}
+<div class="container mt-4 mb-5" style="max-width:620px">
+  <h2>Request a Quote</h2>
+  <p class="text-muted">Tell us about your event and we'll get back to you shortly.</p>
+
+  <div id="rq-success" class="alert alert-success d-none">
+    Thanks! We received your request and will be in touch soon.
+  </div>
+  <div id="rq-error" class="alert alert-danger d-none"></div>
+
+  <form id="rq-form">
+    <div class="mb-3">
+      <label class="form-label">Contact Name *</label>
+      <input type="text" class="form-control" name="contact_name" required maxlength="140">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Company / Organization</label>
+      <input type="text" class="form-control" name="company_name" maxlength="140">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Email *</label>
+      <input type="email" class="form-control" name="email" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Phone</label>
+      <input type="tel" class="form-control" name="phone" maxlength="20">
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Event Type</label>
+        <select class="form-control" name="event_type">
+          <option value="">-- Select --</option>
+          <option>Wedding</option>
+          <option>Corporate</option>
+          <option>Birthday</option>
+          <option>School / Prom</option>
+          <option>Mitzvah</option>
+          <option>Quinceañera</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Event Date</label>
+        <input type="date" class="form-control" name="event_date">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Venue Address</label>
+      <input type="text" class="form-control" name="venue_address">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Service Interest</label>
+      <input type="text" class="form-control" name="service_interest" placeholder="e.g. DJ, Photo Booth, Inflatable">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Message</label>
+      <textarea class="form-control" name="message" rows="3" maxlength="2000"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+  </form>
+</div>
+
+<script>
+document.getElementById('rq-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  try {
+    const res = await frappe.call({
+      method: 'entertainment_express.api.public.submit_lead',
+      args: data,
+    });
+    if (res.message && res.message.status === 'received') {
+      document.getElementById('rq-success').classList.remove('d-none');
+      e.target.style.display = 'none';
+    }
+  } catch (err) {
+    const el = document.getElementById('rq-error');
+    el.textContent = err.message || 'An error occurred. Please try again.';
+    el.classList.remove('d-none');
+  }
+});
+</script>
+{% endblock %}

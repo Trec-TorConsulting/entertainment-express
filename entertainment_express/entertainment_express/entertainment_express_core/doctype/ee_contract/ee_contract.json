@@ -1,0 +1,53 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "template", "status", "expires_at",
+  "col1", "quotation", "booking", "col2",
+  "section_signer", "signer_name", "signer_email",
+  "col3", "signed_at", "signed_ip", "col4",
+  "content_hash", "signature_typed", "signature_image",
+  "section_body", "rendered_html"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-CON-.YYYY.-.####"},
+  {"fieldname": "template", "fieldtype": "Link", "label": "Contract Template", "options": "EE Contract Template"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status",
+   "options": "draft\nsent\nviewed\nsigned\ndeclined\nexpired",
+   "default": "draft", "in_list_view": 1, "reqd": 1},
+  {"fieldname": "expires_at", "fieldtype": "Datetime", "label": "Expires At"},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "quotation", "fieldtype": "Link", "label": "Quotation", "options": "Quotation", "in_list_view": 1},
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Event Booking", "options": "Event Booking"},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "section_signer", "fieldtype": "Section Break", "label": "Signer"},
+  {"fieldname": "signer_name", "fieldtype": "Data", "label": "Signer Name"},
+  {"fieldname": "signer_email", "fieldtype": "Data", "label": "Signer Email", "options": "Email"},
+  {"fieldname": "col3", "fieldtype": "Column Break"},
+  {"fieldname": "signed_at", "fieldtype": "Datetime", "label": "Signed At", "read_only": 1},
+  {"fieldname": "signed_ip", "fieldtype": "Data", "label": "Signer IP", "read_only": 1},
+  {"fieldname": "col4", "fieldtype": "Column Break"},
+  {"fieldname": "content_hash", "fieldtype": "Data", "label": "Content Hash (SHA-256)", "read_only": 1, "description": "SHA-256 of rendered_html + signer + timestamp"},
+  {"fieldname": "signature_typed", "fieldtype": "Data", "label": "Typed Signature"},
+  {"fieldname": "signature_image", "fieldtype": "Attach Image", "label": "Drawn Signature"},
+  {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Rendered Contract"},
+  {"fieldname": "rendered_html", "fieldtype": "Text Editor", "label": "Rendered HTML", "read_only": 1}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Contract",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Accounting", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

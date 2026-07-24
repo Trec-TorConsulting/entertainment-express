@@ -1,0 +1,22 @@
+{
+ "actions": [],
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["asset", "asset_name", "quantity", "packed"],
+ "fields": [
+  {"fieldname": "asset", "fieldtype": "Link", "label": "Asset", "options": "Service Asset", "in_list_view": 1},
+  {"fieldname": "asset_name", "fieldtype": "Data", "label": "Asset / Item Name", "in_list_view": 1},
+  {"fieldname": "quantity", "fieldtype": "Int", "label": "Qty", "default": "1", "in_list_view": 1},
+  {"fieldname": "packed", "fieldtype": "Check", "label": "Packed ✓", "default": "0", "in_list_view": 1}
+ ],
+ "istable": 1,
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Scheduling Dispatch",
+ "name": "Run Sheet Equipment Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

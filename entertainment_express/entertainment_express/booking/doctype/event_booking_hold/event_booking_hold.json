@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "token", "converted",
+  "col1", "event_start", "event_end", "expires_at", "col2",
+  "section_resources", "resources",
+  "customer_name", "customer_email"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-HOLD-.####"},
+  {"fieldname": "token", "fieldtype": "Data", "label": "Token", "unique": 1, "read_only": 1, "description": "Secure random token for checkout link"},
+  {"fieldname": "converted", "fieldtype": "Check", "label": "Converted to Booking", "default": "0", "read_only": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "event_start", "fieldtype": "Datetime", "label": "Event Start", "reqd": 1},
+  {"fieldname": "event_end", "fieldtype": "Datetime", "label": "Event End", "reqd": 1},
+  {"fieldname": "expires_at", "fieldtype": "Datetime", "label": "Hold Expires At", "reqd": 1},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "section_resources", "fieldtype": "Section Break", "label": "Reserved Resources"},
+  {"fieldname": "resources", "fieldtype": "Table", "label": "Resources", "options": "Event Booking Hold Resource"},
+  {"fieldname": "customer_name", "fieldtype": "Data", "label": "Customer Name"},
+  {"fieldname": "customer_email", "fieldtype": "Data", "label": "Customer Email", "options": "Email"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Booking",
+ "name": "Event Booking Hold",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "expires_at",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

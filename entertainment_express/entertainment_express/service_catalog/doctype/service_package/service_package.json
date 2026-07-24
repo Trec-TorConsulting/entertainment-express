@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "package_name", "active",
+  "col1", "package_price", "currency", "col2",
+  "section_items", "items",
+  "section_meta", "description", "vertical_tag", "event_types"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-PKG-.####"},
+  {"fieldname": "package_name", "fieldtype": "Data", "label": "Package Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1", "in_list_view": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "package_price", "fieldtype": "Currency", "label": "Package Price", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "currency", "fieldtype": "Link", "label": "Currency", "options": "Currency", "default": "USD"},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "section_items", "fieldtype": "Section Break", "label": "Included Items"},
+  {"fieldname": "items", "fieldtype": "Table", "label": "Items", "options": "Service Package Item", "reqd": 1},
+  {"fieldname": "section_meta", "fieldtype": "Section Break", "label": "Classification"},
+  {"fieldname": "description", "fieldtype": "Small Text", "label": "Description"},
+  {"fieldname": "vertical_tag", "fieldtype": "Data", "label": "Vertical Tag", "description": "e.g. dj, inflatable, booth, game_truck"},
+  {"fieldname": "event_types", "fieldtype": "Small Text", "label": "Event Types", "description": "Comma-separated event types this package targets, e.g. wedding,corporate"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Service Catalog",
+ "name": "Service Package",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Customer", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "package_name",
+ "sort_order": "ASC",
+ "title_field": "package_name",
+ "track_changes": 1
+}

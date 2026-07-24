@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+.Python
+build/
+dist/
+develop-eggs/
+.installed.cfg
+wheels/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Frappe / bench runtime
+sites/
+*.log
+.build/
+
+# Node / frontend
+node_modules/
+.expo/
+web-build/
+*.tsbuildinfo
+.pnp.*
+.yarn/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*secret*.yaml
+secret.yaml
+stripe-secret.yaml
+*.pem
+*.key
+*.p12
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/

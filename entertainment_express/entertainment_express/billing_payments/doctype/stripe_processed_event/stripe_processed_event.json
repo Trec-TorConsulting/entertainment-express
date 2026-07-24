@@ -1,0 +1,24 @@
+{
+ "actions": [],
+ "autoname": "field:name",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["event_type", "processed_at"],
+ "fields": [
+  {"fieldname": "event_type", "fieldtype": "Data", "label": "Stripe Event Type", "in_list_view": 1},
+  {"fieldname": "processed_at", "fieldtype": "Datetime", "label": "Processed At", "in_list_view": 1}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing Payments",
+ "name": "Stripe Processed Event",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "processed_at",
+ "sort_order": "DESC",
+ "description": "Tracks processed Stripe event IDs for webhook idempotency. Name = Stripe event id."
+}

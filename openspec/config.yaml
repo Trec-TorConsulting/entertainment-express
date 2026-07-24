@@ -1,0 +1,38 @@
+schema: spec-driven
+
+# Project context (shown to AI when creating artifacts).
+# The authoritative, detailed context lives in openspec/project.md — READ IT FIRST.
+context: |
+  Product: Entertainment Express — enterprise multi-tenant SaaS ERP/CRM/ops platform for
+  mobile entertainment companies (DJs, inflatables/rentals, photo/360 booths, game trucks/VR,
+  casino/karaoke/trivia, performers). One generic configurable engine, no vertical hard-coded.
+  Stack: custom Frappe app `entertainment_express` on top of ERPNext (Python 3.11, MariaDB, Redis).
+  Multi-tenancy: SITE-PER-TENANT (Frappe multi-site bench); tenant URL {tenant}.app.{base_domain};
+  control plane at admin.{base_domain}. Deploy: K3S (HomeLab-Redo repo), namespace
+  entertainment-express, Traefik+LetsEncrypt wildcard TLS, Longhorn storage, registry
+  192.168.4.10:30500, node05 is GPU-only (exclude via affinity).
+  Payments: Stripe(primary)+Square+PayPal+ACH. Comms: email+Twilio SMS/WhatsApp+FCM push. AI: Ollama.
+  AUDIENCE: a lower-capability model will implement these specs. Every change proposal must be explicit,
+  unambiguous, and include concrete file paths + acceptance criteria. Never guess on money, contracts,
+  or tenant isolation. Read openspec/project.md and the relevant openspec/specs/<capability>/spec.md
+  before implementing any phase in openspec/changes/.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

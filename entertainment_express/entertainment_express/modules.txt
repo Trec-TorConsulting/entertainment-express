@@ -1,0 +1,7 @@
+Entertainment Express Core
+Service Catalog
+Booking
+Scheduling Dispatch
+HR Workforce
+Billing Payments
+Control Plane

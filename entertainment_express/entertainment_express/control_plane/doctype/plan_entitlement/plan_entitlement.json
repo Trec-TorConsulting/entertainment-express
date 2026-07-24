@@ -1,0 +1,21 @@
+{
+ "actions": [],
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["feature_key", "limit_value", "description"],
+ "fields": [
+  {"fieldname": "feature_key", "fieldtype": "Data", "label": "Feature Key", "reqd": 1, "in_list_view": 1, "description": "e.g. max_tenants, enable_marketing, max_bookings_per_month"},
+  {"fieldname": "limit_value", "fieldtype": "Data", "label": "Limit / Value", "in_list_view": 1, "description": "Numeric limit or boolean (1/0) or 'unlimited'"},
+  {"fieldname": "description", "fieldtype": "Small Text", "label": "Description"}
+ ],
+ "istable": 1,
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Control Plane",
+ "name": "Plan Entitlement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

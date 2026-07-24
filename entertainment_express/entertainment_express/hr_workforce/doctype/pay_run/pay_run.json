@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2024-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "period_from", "period_to", "status",
+  "col1", "payout_processor", "total_amount", "col2",
+  "workers",
+  "col_notes", "notes"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-PR-.YYYY.-.####"},
+  {"fieldname": "period_from", "fieldtype": "Date", "label": "Period From", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "period_to", "fieldtype": "Date", "label": "Period To", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status",
+   "options": "draft\nfinalized\nsubmitted\npending_payout\npaid\nfailed",
+   "default": "draft", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "col1", "fieldtype": "Column Break"},
+  {"fieldname": "payout_processor", "fieldtype": "Select", "label": "Payout Processor",
+   "options": "\nstripe_connect\nmanual\npayroll", "description": "How to process payouts"},
+  {"fieldname": "total_amount", "fieldtype": "Currency", "label": "Total Amount", "read_only": 1},
+  {"fieldname": "col2", "fieldtype": "Column Break"},
+  {"fieldname": "workers", "fieldtype": "Table", "label": "Workers", "options": "Pay Run Detail"},
+  {"fieldname": "col_notes", "fieldtype": "Section Break", "label": "Notes"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2024-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "HR Workforce",
+ "name": "Pay Run",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0, "export": 1},
+  {"role": "EE Finance", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "doctype": "Notification Template",
+    "name": "lead_assigned",
+    "template_key": "lead_assigned",
+    "subject": "New lead: {{ lead_name }} from {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi,</p><p>A new quote request was submitted.</p><ul><li><b>Name:</b> {{ lead_name }}</li><li><b>Company:</b> {{ company_name }}</li><li><b>Email:</b> {{ email }}</li></ul><p>View in your dashboard to follow up.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "quote_sent",
+    "template_key": "quote_sent",
+    "subject": "Your quote from {{ company_name }} is ready",
+    "active": 1,
+    "body_html": "<p>Hi {{ customer_name }},</p><p>Your quote <b>#{{ quote_number }}</b> for your event on <b>{{ event_date }}</b> is ready.</p><p>Total: <b>${{ grand_total }}</b></p><p><a href='{{ accept_link }}' style='background:#1A73E8;color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none'>Review &amp; Accept Quote</a></p><p>This link is valid for 30 days.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "contract_sent",
+    "template_key": "contract_sent",
+    "subject": "Please sign your contract — {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ signer_name }},</p><p>Your contract with <b>{{ company_name }}</b> is ready for your signature.</p><p><a href='{{ sign_link }}' style='background:#1A73E8;color:#fff;padding:12px 24px;border-radius:4px;text-decoration:none'>Review &amp; Sign Contract</a></p><p>This link expires {{ expires_at }}.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "contract_signed",
+    "template_key": "contract_signed",
+    "subject": "✅ Contract signed — {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ signer_name }},</p><p>Your contract has been signed successfully on {{ signed_at }}.</p><p>We're looking forward to your event! Your booking confirmation and deposit payment link will follow shortly.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "contract_signed_internal",
+    "template_key": "contract_signed_internal",
+    "subject": "Contract signed by {{ signer_name }} — {{ contract_name }}",
+    "active": 1,
+    "body_html": "<p>Contract <b>{{ contract_name }}</b> was signed by <b>{{ signer_name }}</b> at {{ signed_at }}.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "booking_confirmed",
+    "template_key": "booking_confirmed",
+    "subject": "🎉 Booking confirmed — {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ customer_name }},</p><p>Great news! Your booking <b>{{ booking_name }}</b> is confirmed. We've received your deposit payment of <b>${{ amount }}</b>.</p><p>We'll be in touch with more details as your event approaches.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "deposit_receipt",
+    "template_key": "deposit_receipt",
+    "subject": "Payment receipt — Deposit for booking {{ booking_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ customer_name }},</p><p>This is your receipt for a deposit payment of <b>${{ amount }}</b> for booking <b>{{ booking_name }}</b>.</p><p>Invoice: {{ invoice_name }}</p><p>Thank you!</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "contract_expired",
+    "template_key": "contract_expired",
+    "subject": "Contract expired — {{ contract_name }}",
+    "active": 1,
+    "body_html": "<p>Contract <b>{{ contract_name }}</b> for <b>{{ signer_email }}</b> has expired without being signed.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "welcome_tenant",
+    "template_key": "welcome_tenant",
+    "subject": "🎉 Your Entertainment Express account is ready",
+    "active": 1,
+    "body_html": "<p>Hi,</p><p>Your <b>{{ company_name }}</b> account on Entertainment Express is ready!</p><p>Log in at: <a href='{{ site_url }}'>{{ site_url }}</a></p><p>Subdomain: <b>{{ tenant_slug }}</b></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "shift_offered",
+    "template_key": "shift_offered",
+    "subject": "Shift offer for {{ event_date }} — {{ role }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ employee_name }},</p><p>You've been offered a shift:</p><ul><li><b>Date:</b> {{ event_date }}</li><li><b>Role:</b> {{ role }}</li><li><b>Call Time:</b> {{ call_time }}</li><li><b>Venue:</b> {{ venue_address }}</li></ul><p><a href='{{ accept_link }}' style='background:#4CAF50;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;margin-right:10px'>Accept</a><a href='{{ decline_link }}' style='background:#F44336;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none'>Decline</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "shift_accepted",
+    "template_key": "shift_accepted",
+    "subject": "✅ Shift accepted — {{ employee_name }} for {{ booking }}",
+    "active": 1,
+    "body_html": "<p><b>{{ employee_name }}</b> has accepted their shift for booking <b>{{ booking }}</b> (role: {{ role }}).</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "shift_declined",
+    "template_key": "shift_declined",
+    "subject": "❌ Shift declined — {{ employee_name }} for {{ booking }}",
+    "active": 1,
+    "body_html": "<p><b>{{ employee_name }}</b> has declined their shift for booking <b>{{ booking }}</b> (role: {{ role }}). Please reassign.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "run_sheet_published",
+    "template_key": "run_sheet_published",
+    "subject": "📋 Run sheet published — {{ event_date }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ employee_name }},</p><p>Your run sheet for the <b>{{ event_date }}</b> event (role: <b>{{ role }}</b>) at <b>{{ venue_address }}</b> has been published.</p><p>Log in to your portal to view full details, checklist, and directions.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "timesheet_approved",
+    "template_key": "timesheet_approved",
+    "subject": "✅ Timesheet approved for {{ period }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ employee_name }},</p><p>Your timesheet for <b>{{ period }}</b> has been approved.</p><p>Total hours: <b>{{ total_hours }}</b></p><p>Timesheet: {{ timesheet }}</p><p>You will receive your payout by the next payment run.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "payout_processed",
+    "template_key": "payout_processed",
+    "subject": "💰 Payout processed — {{ period }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ employee_name }},</p><p>Your payout for <b>{{ period }}</b> has been processed.</p><p>Amount: <b>${{ amount }}</b></p><p>Transaction ID: {{ txn_id }}</p><p>Funds should appear in your account within 1-2 business days.</p>"
+  }
+]
