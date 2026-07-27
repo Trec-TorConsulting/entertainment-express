@@ -877,7 +877,7 @@ spec:
                 - node05
       containers:
       - name: redis-cache
-        image: redis:7.2
+        image: redis:8-alpine
         args:
           - "--save"
           - ""
@@ -947,7 +947,7 @@ spec:
                 - node05
       containers:
       - name: redis-queue
-        image: redis:7.2
+        image: redis:8-alpine
         args:
           - "--save"
           - ""
@@ -1013,7 +1013,7 @@ spec:
                 - node05
       containers:
       - name: redis-socketio
-        image: redis:7.2
+        image: redis:8-alpine
         args:
           - "--save"
           - ""
@@ -1080,7 +1080,7 @@ spec:
                 - node05
       containers:
       - name: mariadb
-        image: mariadb:10.11
+        image: mariadb:10.11.18
         imagePullPolicy: IfNotPresent
         args:
           - --character-set-server=utf8mb4
