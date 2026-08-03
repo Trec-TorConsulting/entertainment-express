@@ -9,10 +9,10 @@
 > 4. Each `phase-N-*/` folder contains `proposal.md` (why + scope + which spec requirements),
 >    `design.md` (concrete how: DocTypes, fields, APIs, manifests, file paths), and `tasks.md`
 >    (ordered, checkable steps with acceptance criteria). Do one task at a time and check it off.
-> 5. Fully-detailed proposals exist for **phase-0** and **phase-1**. Phases 2–18 are scoped here as
->    summaries; before starting one, generate its `proposal.md`/`design.md`/`tasks.md` following the
->    same pattern as phase-0/phase-1, using the matching baseline spec as the source of truth. You can
->    also run `/opsx:propose` to scaffold them.
+> 5. Fully-detailed proposals exist for **phase-0**, **phase-1**, and **phase-19**. Phases 2–18 are
+>    scoped here as summaries; before starting one, generate its `proposal.md`/`design.md`/`tasks.md`
+>    following the same pattern as phase-0/phase-1/phase-19, using the matching baseline spec as the
+>    source of truth. You can also run `/opsx:propose` to scaffold them.
 
 > **Commands & workflow (spec-first model — important):**
 > - The **source of truth is the baseline specs** in [`openspec/specs/`](../specs). Changes
@@ -139,6 +139,18 @@ Guided CSV/Excel import with mapping/validation, competitor-export mapping prese
 import jobs, data export, and a new-tenant onboarding checklist. Reduces tenant switching cost.
 **Spec:** `data-migration`. **Depends on:** phase-1 (core entities exist); can run in parallel with later
 phases as those entities become importable.
+
+## Phase 19 — SaaS Marketing Website & Lead Capture ✅
+**Goal:** The public product front door at `www.{base_domain}` (served by the control-plane site) that sells
+EE to prospective tenants: CMS-editable marketing pages + blog, a pricing page synced to control-plane
+`Plan` records, public demo/contact/newsletter lead capture with spam protection, a "start free trial" CTA
+that creates a control-plane Signup Application (with UTM attribution) and hands off to provisioning, plus
+SEO (sitemap/robots/meta/JSON-LD), analytics + cookie consent, and one new `Marketing Settings` DocType.
+Frappe-native (no new frontend stack); strictly isolated from tenant sites.
+**Spec:** `marketing-website`. **Depends on:** phase-1 (control-plane site, `Plan`, `Signup Application`,
+provisioning, email notifications). Enhanced later by phase-8 (marketing-engagement) and phase-12 (full
+control plane).
+**Folder:** [`phase-19-marketing-website/`](phase-19-marketing-website/)
 
 ---
 

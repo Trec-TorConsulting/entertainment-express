@@ -1,0 +1,257 @@
+:root {
+  --ee-bg: #f4f4ef;
+  --ee-card: #fffdf7;
+  --ee-text: #1f231a;
+  --ee-muted: #5f654f;
+  --ee-accent: #db5a2a;
+  --ee-accent-2: #20756c;
+  --ee-border: #d9d5c6;
+  --ee-shadow: 0 16px 32px rgba(31, 35, 26, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ee-text);
+  background:
+    radial-gradient(circle at 20% -10%, #f9d3b8 0, rgba(249, 211, 184, 0.2) 32%, transparent 55%),
+    radial-gradient(circle at 90% 0%, #b8e5df 0, rgba(184, 229, 223, 0.25) 28%, transparent 50%),
+    var(--ee-bg);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #20756c;
+  outline-offset: 2px;
+}
+
+.ee-shell {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.ee-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(10px);
+  background: rgba(244, 244, 239, 0.9);
+  border-bottom: 1px solid var(--ee-border);
+}
+
+.ee-header-inner,
+.ee-footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 64px;
+  gap: 1rem;
+}
+
+.ee-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  color: var(--ee-text);
+  text-decoration: none;
+}
+
+.ee-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--ee-accent), #e18a43);
+}
+
+.ee-nav {
+  position: relative;
+}
+
+.ee-nav-toggle {
+  display: none;
+  border: 1px solid var(--ee-border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+}
+
+.ee-nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1rem;
+}
+
+.ee-nav-menu a,
+.ee-footer a {
+  color: var(--ee-text);
+  text-decoration: none;
+}
+
+.ee-nav-menu a:hover,
+.ee-footer a:hover {
+  text-decoration: underline;
+}
+
+.ee-main {
+  padding: 2rem 0 3rem;
+}
+
+.ee-newsletter-form {
+  min-width: min(340px, 100%);
+}
+
+.ee-btn {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ee-btn-primary {
+  color: #fff;
+  background: var(--ee-accent);
+}
+
+.ee-btn-secondary {
+  color: var(--ee-accent-2);
+  border-color: var(--ee-accent-2);
+  background: transparent;
+}
+
+.ee-cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.ee-panel {
+  background: var(--ee-card);
+  border: 1px solid var(--ee-border);
+  border-radius: 16px;
+  box-shadow: var(--ee-shadow);
+  padding: 1.4rem;
+}
+
+.ee-form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.ee-form input,
+.ee-form textarea,
+.ee-form select {
+  width: 100%;
+  border: 1px solid var(--ee-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  background: #fff;
+}
+
+.ee-honeypot {
+  position: absolute;
+  left: -10000px;
+}
+
+.ee-consent {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  max-width: 740px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--ee-border);
+  border-radius: 12px;
+  box-shadow: var(--ee-shadow);
+  padding: 1rem;
+}
+
+.ee-consent-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.ee-skip-link {
+  position: absolute;
+  left: -999px;
+}
+
+.ee-skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--ee-border);
+  padding: 0.4rem 0.6rem;
+}
+
+.ee-footer {
+  border-top: 1px solid var(--ee-border);
+  margin-top: 3rem;
+}
+
+.ee-footer-links {
+  display: flex;
+  gap: 0.8rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 820px) {
+  .ee-nav-toggle {
+    display: inline-block;
+  }
+
+  .ee-nav-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    background: #fff;
+    border: 1px solid var(--ee-border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    min-width: 200px;
+    flex-direction: column;
+    box-shadow: var(--ee-shadow);
+  }
+
+  .ee-nav-menu.is-open {
+    display: flex;
+  }
+
+  .ee-header-inner,
+  .ee-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -114,7 +114,9 @@ A single tenant will typically offer **several** of these at once. The domain mo
 - **Control-plane site:** a dedicated site `admin.<BASE_DOMAIN>` runs the **SaaS control plane**
   (tenant provisioning, plans, metering, subscription billing). It is a tenant-like site but restricted to
   the SaaS Operator.
-- **Marketing site:** `www.<BASE_DOMAIN>` (static/marketing; out of scope for app logic).
+- **Marketing site:** `www.<BASE_DOMAIN>` + apex `<BASE_DOMAIN>` — the public product marketing site that
+  sells EE to prospective tenants. Served by the control-plane site, Guest-facing. Spec'd in
+  `openspec/specs/marketing-website/` and delivered by `openspec/changes/phase-19-marketing-website/`.
 - **Provisioning flow (automated):** signup on control plane → create site (`bench new-site`) → install
   `erpnext` + `entertainment_express` → run tenant bootstrap (roles, defaults, sample service catalog) →
   map hostname/ingress → send welcome. This must be a repeatable, idempotent job, not manual.

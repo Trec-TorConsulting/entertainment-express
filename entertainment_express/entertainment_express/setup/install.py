@@ -8,6 +8,11 @@ import frappe
 def after_install():
     """Create custom fields on ERPNext DocTypes."""
     create_all()
+    from entertainment_express.setup.seed_marketing_settings import run as seed_marketing_settings
+    from entertainment_express.setup.seed_marketing_pages import run as seed_marketing_pages
+
+    seed_marketing_settings()
+    seed_marketing_pages()
 
 
 def create_all():

@@ -1,0 +1,39 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<section class="ee-shell ee-panel">
+  <h1>Pricing</h1>
+  <p>Choose a plan and start a free trial. Prices sync from control-plane plan records.</p>
+  {% if pricing_error %}
+  <p>{{ pricing_error }}</p>
+  {% endif %}
+  <div class="ee-cta-group" style="margin-bottom:1rem">
+    <button type="button" class="ee-btn ee-btn-secondary" data-billing-toggle="monthly">Monthly</button>
+    <button type="button" class="ee-btn ee-btn-secondary" data-billing-toggle="annual">Annual</button>
+  </div>
+
+  <div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+    {% for plan in plans %}
+    <article class="ee-panel" style="box-shadow:none;">
+      <h2>{{ plan.name }}</h2>
+      <p>
+        <strong data-price-monthly="${{ '%.2f'|format(plan.price_monthly) }}/mo" data-price-annual="${{ '%.2f'|format(plan.price_annual) }}/yr">
+          ${{ '%.2f'|format(plan.price_monthly) }}/mo
+        </strong>
+      </p>
+      {% if plan.trial_days %}
+      <p>{{ plan.trial_days }} day free trial</p>
+      {% endif %}
+      <ul>
+        {% for feature in plan.features %}
+        <li>{{ feature.feature_key }}: {{ feature.limit_value or 'included' }}</li>
+        {% endfor %}
+      </ul>
+      <a class="ee-btn ee-btn-primary" href="{{ plan.cta_target }}">Start free trial</a>
+    </article>
+    {% else %}
+    <p>No active plans are currently published.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

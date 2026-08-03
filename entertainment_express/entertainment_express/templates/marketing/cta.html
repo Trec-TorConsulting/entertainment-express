@@ -1,0 +1,8 @@
+{% set primary_label = primary_cta_label or "Start free trial" %}
+{% set primary_target = primary_cta_target or "/start-trial" %}
+{% set secondary_label = secondary_cta_label or "Request a demo" %}
+{% set secondary_target = secondary_cta_target or "/demo" %}
+<div class="ee-cta-group">
+  <a class="ee-btn ee-btn-primary" href="{{ primary_target }}">{{ primary_label }}</a>
+  <a class="ee-btn ee-btn-secondary" href="{{ secondary_target }}">{{ secondary_label }}</a>
+</div>

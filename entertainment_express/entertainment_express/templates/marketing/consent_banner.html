@@ -1,0 +1,9 @@
+{% if consent_banner_enabled %}
+<div class="ee-consent" id="ee-consent" hidden>
+  <p>{{ consent_banner_text or "We use cookies to improve your experience. You can accept or reject non-essential cookies." }}</p>
+  <div class="ee-consent-actions">
+    <button type="button" class="ee-btn ee-btn-primary" id="ee-consent-accept">Accept</button>
+    <button type="button" class="ee-btn ee-btn-secondary" id="ee-consent-reject">Reject</button>
+  </div>
+</div>
+{% endif %}

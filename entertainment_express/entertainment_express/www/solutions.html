@@ -1,0 +1,21 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<section class="ee-shell ee-panel">
+  <h1>{{ solution.name }}</h1>
+  <p>{{ solution.summary }}</p>
+  <p>Entertainment Express adapts workflows, assets, and staffing rules for your service mix.</p>
+  {% include "entertainment_express/templates/marketing/cta.html" %}
+</section>
+
+<section class="ee-shell" style="margin-top:1.2rem">
+  <div class="ee-panel">
+    <h2>Explore other verticals</h2>
+    <ul>
+      {% for key in solution_keys %}
+      <li><a href="/solutions/{{ key }}">{{ key.replace('-', ' ').title() }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock %}

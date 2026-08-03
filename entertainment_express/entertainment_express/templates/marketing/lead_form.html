@@ -1,0 +1,37 @@
+<form class="ee-form" id="{{ form_id }}" data-lead-type="{{ lead_type }}" novalidate>
+  <label for="{{ form_id }}-name">Full Name</label>
+  <input id="{{ form_id }}-name" name="full_name" type="text" maxlength="140" required>
+
+  <label for="{{ form_id }}-email">Email</label>
+  <input id="{{ form_id }}-email" name="email" type="email" maxlength="140" required>
+
+  <label for="{{ form_id }}-company">Company</label>
+  <input id="{{ form_id }}-company" name="company" type="text" maxlength="140">
+
+  <label for="{{ form_id }}-phone">Phone</label>
+  <input id="{{ form_id }}-phone" name="phone" type="text" maxlength="30">
+
+  <label for="{{ form_id }}-vertical">Vertical</label>
+  <input id="{{ form_id }}-vertical" name="vertical" type="text" maxlength="140" placeholder="DJ, Rentals, Photo Booth, Game Truck...">
+
+  <label for="{{ form_id }}-message">Message</label>
+  <textarea id="{{ form_id }}-message" name="message" rows="4" maxlength="2000"></textarea>
+
+  <input type="hidden" name="lead_type" value="{{ lead_type }}">
+  <input type="hidden" name="source_page" value="{{ source_page }}">
+  <input type="hidden" name="utm_source" value="">
+  <input type="hidden" name="utm_medium" value="">
+  <input type="hidden" name="utm_campaign" value="">
+  <input type="hidden" name="utm_term" value="">
+  <input type="hidden" name="utm_content" value="">
+  <input type="hidden" name="referrer" value="">
+  <input type="text" name="website" value="" class="ee-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+  <label class="ee-consent-check">
+    <input type="checkbox" name="consent_marketing" value="1">
+    I agree to receive product updates and marketing emails.
+  </label>
+
+  <button type="submit" class="ee-btn ee-btn-primary">{{ submit_label or "Submit" }}</button>
+  <p class="ee-form-status" aria-live="polite"></p>
+</form>

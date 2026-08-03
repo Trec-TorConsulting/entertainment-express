@@ -1,0 +1,70 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<section class="ee-shell ee-panel">
+  <h1>Start Your Free Trial</h1>
+  <p>Choose your plan and create your signup application.</p>
+
+  <div id="trial-status" class="ee-form-status" aria-live="polite"></div>
+
+  <form class="ee-form" id="ee-trial-form">
+    <label for="trial-company">Company Name</label>
+    <input id="trial-company" name="company_name" type="text" maxlength="200" required>
+
+    <label for="trial-email">Email</label>
+    <input id="trial-email" name="contact_email" type="email" maxlength="140" required>
+
+    <label for="trial-slug">Desired Subdomain</label>
+    <input id="trial-slug" name="requested_slug" type="text" pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]" required>
+
+    <label for="trial-plan">Plan</label>
+    <input id="trial-plan" name="plan_code" type="text" value="{{ plan }}" readonly>
+
+    <input type="hidden" name="source_page" value="/start-trial">
+    <input type="hidden" name="utm_source" value="">
+    <input type="hidden" name="utm_medium" value="">
+    <input type="hidden" name="utm_campaign" value="">
+    <input type="hidden" name="utm_term" value="">
+    <input type="hidden" name="utm_content" value="">
+    <input type="hidden" name="referrer" value="">
+    <input type="text" name="website" value="" class="ee-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+    <label class="ee-consent-check">
+      <input type="checkbox" name="consent_marketing" value="1">
+      I agree to receive product updates.
+    </label>
+
+    <button type="submit" class="ee-btn ee-btn-primary">Create application</button>
+  </form>
+</section>
+
+<script>
+(function () {
+  var form = document.getElementById("ee-trial-form");
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    var status = document.getElementById("trial-status");
+    status.textContent = "Submitting...";
+
+    var data = Object.fromEntries(new FormData(form).entries());
+    try {
+      await frappe.call({
+        method: "entertainment_express.api.marketing.start_trial",
+        args: { payload: data }
+      });
+      status.textContent = "Your application was submitted. We will contact you soon.";
+      if (typeof window.eeTrackConversion === "function") {
+        window.eeTrackConversion("trial_started");
+      }
+      form.reset();
+    } catch (err) {
+      status.textContent = "Unable to submit application. Please try again.";
+    }
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<section class="ee-shell ee-panel">
+  <h1>Resources</h1>
+  <p>Playbooks, guides, and product updates for entertainment operators.</p>
+  <p><a class="ee-btn ee-btn-secondary" href="{{ rss_url }}">RSS Feed</a></p>
+</section>
+
+<section class="ee-shell" style="margin-top:1.2rem;display:grid;gap:1rem;grid-template-columns:2fr 1fr;">
+  <div class="ee-panel">
+    <h2>Latest Articles</h2>
+    {% if posts %}
+    <ul>
+      {% for post in posts %}
+      <li>
+        <a href="/{{ post.route or post.name }}">{{ post.title }}</a>
+        {% if post.blog_intro %}<p>{{ post.blog_intro }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No published articles yet.</p>
+    {% endif %}
+  </div>
+  <aside class="ee-panel">
+    <h2>Categories</h2>
+    {% if categories %}
+    <ul>
+      {% for category in categories %}
+      <li><a href="/{{ category.route or '' }}">{{ category.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Categories will appear here once created.</p>
+    {% endif %}
+  </aside>
+</section>
+{% endblock %}

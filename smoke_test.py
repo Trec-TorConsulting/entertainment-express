@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Smoke Test Runner for Entertainment Express Phase 1, 2, 3.
+Smoke Test Runner for Entertainment Express.
 
 Validates:
 - All Python modules compile and import without errors
@@ -9,12 +9,40 @@ Validates:
 - Basic availability logic works
 - Stripe webhook idempotency works
 - Worker availability check works
+- Phase-19 static marketing tests (if pytest is available)
+- Optional live marketing smoke checks when MARKETING_BASE_URL is set
 """
 
 import sys
 import json
+import os
+import subprocess
+import time
 from pathlib import Path
-from datetime import datetime, timedelta
+from urllib import parse, request
+from urllib.error import HTTPError
+
+
+def _http_get(url: str, timeout: int = 12):
+    req = request.Request(url, method="GET")
+    req.add_header("User-Agent", "Mozilla/5.0 (compatible; EE-Smoke/1.0)")
+    try:
+        with request.urlopen(req, timeout=timeout) as resp:
+            return resp.status, resp.read().decode("utf-8", errors="ignore")
+    except HTTPError as err:
+        return err.code, err.read().decode("utf-8", errors="ignore")
+
+
+def _http_post_form(url: str, payload: dict, timeout: int = 12):
+    data = parse.urlencode(payload).encode("utf-8")
+    req = request.Request(url, data=data, method="POST")
+    req.add_header("Content-Type", "application/x-www-form-urlencoded")
+    req.add_header("User-Agent", "Mozilla/5.0 (compatible; EE-Smoke/1.0)")
+    try:
+        with request.urlopen(req, timeout=timeout) as resp:
+            return resp.status, resp.read().decode("utf-8", errors="ignore")
+    except HTTPError as err:
+        return err.code, err.read().decode("utf-8", errors="ignore")
 
 def test_python_syntax():
     """Test all Python files compile."""
@@ -163,7 +191,6 @@ def test_specs():
     """Test OpenSpec specs are passing."""
     print("✓ Testing OpenSpec validation...")
     
-    import subprocess
     result = subprocess.run(
         ["openspec", "validate", "--specs"],
         capture_output=True,
@@ -183,6 +210,107 @@ def test_specs():
     return True
 
 
+def test_phase19_static_suite():
+    """Run phase-19 static checks when pytest is available in the current python."""
+    print("✓ Testing phase-19 static marketing suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_phase19_marketing_static.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ phase-19 static suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+def test_live_marketing_smoke():
+    """
+    Optional live smoke for task 13.3.
+    Requires MARKETING_BASE_URL, e.g. https://www.entx.app
+    """
+    print("✓ Testing live marketing smoke (optional)...")
+    base = (os.environ.get("MARKETING_BASE_URL") or "").strip().rstrip("/")
+    if not base:
+        print("  ⊘ Skipped (set MARKETING_BASE_URL to run live smoke)")
+        return True
+
+    try:
+        nonce = str(int(time.time()))
+        trial_email = f"smoke-trial-{nonce}@example.com"
+        trial_slug = f"smoketest{nonce[-6:]}"
+        newsletter_email = f"smoke-newsletter-{nonce}@example.com"
+
+        # 1) Public pages reachable
+        for path in ["/", "/pricing", "/demo", "/robots.txt"]:
+            status, _ = _http_get(base + path)
+            if status != 200:
+                print(f"  ✗ GET {path} returned {status}")
+                return False
+
+        # 2) Start trial endpoint reachable via API method path (payload is non-destructive)
+        trial_url = base + "/api/method/entertainment_express.api.marketing.start_trial"
+        status, body = _http_post_form(
+            trial_url,
+            {
+                "payload": json.dumps(
+                    {
+                        "company_name": "Smoke Test Co",
+                        "contact_email": trial_email,
+                        "requested_slug": trial_slug,
+                        "plan_code": "starter",
+                        "source_page": "/pricing",
+                    }
+                )
+            },
+        )
+        if status != 200:
+            print(f"  ✗ Trial API returned {status}")
+            return False
+        if "ok" not in body.lower():
+            print("  ✗ Trial API response missing ok marker")
+            return False
+
+        # 3) Newsletter submit endpoint reachable
+        newsletter_url = base + "/api/method/entertainment_express.api.marketing.subscribe_newsletter"
+        status, body = _http_post_form(
+            newsletter_url,
+            {
+                "payload": json.dumps(
+                    {
+                        "email": newsletter_email,
+                        "source_page": "/resources",
+                    }
+                )
+            },
+        )
+        if status != 200 or "ok" not in body.lower():
+            print("  ✗ Newsletter API smoke failed")
+            return False
+
+        print(f"  ✓ Live smoke passed for {base}")
+        return True
+    except Exception as exc:
+        print(f"  ✗ Live smoke failed: {exc}")
+        return False
+
+
 def main():
     print("\n" + "="*60)
     print("Entertainment Express — Multi-Phase Smoke Test")
@@ -196,6 +324,8 @@ def main():
         test_custom_fields,
         test_hooks,
         test_specs,
+        test_phase19_static_suite,
+        test_live_marketing_smoke,
     ]
     
     results = []

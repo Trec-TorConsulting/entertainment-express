@@ -1,0 +1,205 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-03 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "base_domain",
+  "section_home",
+  "hero_headline",
+  "hero_subhead",
+  "section_cta",
+  "primary_cta_label",
+  "primary_cta_target",
+  "secondary_cta_label",
+  "secondary_cta_target",
+  "section_ops",
+  "sales_notify_email",
+  "social_links",
+  "section_toggles",
+  "section_feature_grid",
+  "section_pricing_teaser",
+  "section_testimonials",
+  "section_analytics",
+  "analytics_provider",
+  "analytics_site_id",
+  "consent_banner_enabled",
+  "consent_banner_text",
+  "section_captcha",
+  "captcha_provider",
+  "captcha_site_key"
+ ],
+ "fields": [
+  {
+   "default": "entertainmentexpress.app",
+   "fieldname": "base_domain",
+   "fieldtype": "Data",
+   "label": "Base Domain",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_home",
+   "fieldtype": "Section Break",
+   "label": "Homepage"
+  },
+  {
+   "default": "Run your entertainment company on one platform.",
+   "fieldname": "hero_headline",
+   "fieldtype": "Data",
+   "label": "Hero Headline"
+  },
+  {
+   "fieldname": "hero_subhead",
+   "fieldtype": "Small Text",
+   "label": "Hero Subhead"
+  },
+  {
+   "fieldname": "section_cta",
+   "fieldtype": "Section Break",
+   "label": "Calls To Action"
+  },
+  {
+   "default": "Start free trial",
+   "fieldname": "primary_cta_label",
+   "fieldtype": "Data",
+   "label": "Primary CTA Label"
+  },
+  {
+   "default": "/pricing",
+   "fieldname": "primary_cta_target",
+   "fieldtype": "Data",
+   "label": "Primary CTA Target"
+  },
+  {
+   "default": "Request a demo",
+   "fieldname": "secondary_cta_label",
+   "fieldtype": "Data",
+   "label": "Secondary CTA Label"
+  },
+  {
+   "default": "/demo",
+   "fieldname": "secondary_cta_target",
+   "fieldtype": "Data",
+   "label": "Secondary CTA Target"
+  },
+  {
+   "fieldname": "section_ops",
+   "fieldtype": "Section Break",
+   "label": "Operations"
+  },
+  {
+   "fieldname": "sales_notify_email",
+   "fieldtype": "Data",
+   "label": "Sales Notification Email",
+   "options": "Email"
+  },
+  {
+   "description": "JSON object, e.g. {\"linkedin\": \"https://...\"}",
+   "fieldname": "social_links",
+   "fieldtype": "Small Text",
+   "label": "Social Links"
+  },
+  {
+   "fieldname": "section_toggles",
+   "fieldtype": "Section Break",
+   "label": "Section Toggles"
+  },
+  {
+   "default": "1",
+   "fieldname": "section_feature_grid",
+   "fieldtype": "Check",
+   "label": "Show Feature Grid"
+  },
+  {
+   "default": "1",
+   "fieldname": "section_pricing_teaser",
+   "fieldtype": "Check",
+   "label": "Show Pricing Teaser"
+  },
+  {
+   "default": "1",
+   "fieldname": "section_testimonials",
+   "fieldtype": "Check",
+   "label": "Show Testimonials"
+  },
+  {
+   "fieldname": "section_analytics",
+   "fieldtype": "Section Break",
+   "label": "Analytics & Consent"
+  },
+  {
+   "default": "none",
+   "fieldname": "analytics_provider",
+   "fieldtype": "Select",
+   "label": "Analytics Provider",
+   "options": "none\nplausible\numami\nga4"
+  },
+  {
+   "fieldname": "analytics_site_id",
+   "fieldtype": "Data",
+   "label": "Analytics Site ID"
+  },
+  {
+   "default": "1",
+   "fieldname": "consent_banner_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Consent Banner"
+  },
+  {
+   "default": "We use cookies to improve your experience. You can accept or reject non-essential cookies.",
+   "fieldname": "consent_banner_text",
+   "fieldtype": "Small Text",
+   "label": "Consent Banner Text"
+  },
+  {
+   "fieldname": "section_captcha",
+   "fieldtype": "Section Break",
+   "label": "Captcha"
+  },
+  {
+   "default": "none",
+   "fieldname": "captcha_provider",
+   "fieldtype": "Select",
+   "label": "Captcha Provider",
+   "options": "none\nhcaptcha\nturnstile"
+  },
+  {
+   "fieldname": "captcha_site_key",
+   "fieldtype": "Data",
+   "label": "Captcha Site Key"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-03 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Control Plane",
+ "name": "Marketing Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "SaaS Operator",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Marketing",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

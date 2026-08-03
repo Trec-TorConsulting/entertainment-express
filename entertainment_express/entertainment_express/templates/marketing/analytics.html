@@ -1,0 +1,12 @@
+{% if analytics_provider and analytics_provider != "none" and analytics_site_id %}
+<script>
+  window.eeAnalyticsConfig = {
+    provider: "{{ analytics_provider }}",
+    siteId: "{{ analytics_site_id }}"
+  };
+</script>
+{% else %}
+<script>
+  window.eeAnalyticsConfig = null;
+</script>
+{% endif %}

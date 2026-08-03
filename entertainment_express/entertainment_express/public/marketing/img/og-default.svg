@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Entertainment Express">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f4f4ef"/>
+      <stop offset="100%" stop-color="#f9d3b8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="230" cy="150" r="100" fill="#20756c" opacity="0.16"/>
+  <circle cx="980" cy="520" r="120" fill="#db5a2a" opacity="0.2"/>
+  <text x="80" y="300" font-family="Georgia, serif" font-size="72" fill="#1f231a">Entertainment Express</text>
+  <text x="80" y="380" font-family="Georgia, serif" font-size="34" fill="#5f654f">Operate bookings, crews, billing, and growth in one platform.</text>
+</svg>

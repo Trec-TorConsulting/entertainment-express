@@ -1,0 +1,26 @@
+<footer class="ee-footer" role="contentinfo">
+  <div class="ee-shell ee-footer-inner">
+    <div>
+      <p>&copy; {{ frappe.utils.now_datetime().year }} Entertainment Express</p>
+      <ul class="ee-footer-links">
+        <li><a href="/legal/terms">Terms</a></li>
+        <li><a href="/legal/privacy">Privacy</a></li>
+        <li><a href="/legal/cookies">Cookies</a></li>
+      </ul>
+    </div>
+    <form class="ee-form ee-newsletter-form" id="ee-newsletter-form" novalidate>
+      <label for="ee-newsletter-email">Newsletter</label>
+      <input id="ee-newsletter-email" name="email" type="email" placeholder="you@company.com" required>
+      <input type="hidden" name="source_page" value="{{ canonical or request.path }}">
+      <input type="hidden" name="utm_source" value="">
+      <input type="hidden" name="utm_medium" value="">
+      <input type="hidden" name="utm_campaign" value="">
+      <input type="hidden" name="utm_term" value="">
+      <input type="hidden" name="utm_content" value="">
+      <input type="hidden" name="referrer" value="">
+      <input type="text" name="website" value="" class="ee-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" class="ee-btn ee-btn-secondary">Subscribe</button>
+      <p class="ee-form-status" aria-live="polite"></p>
+    </form>
+  </div>
+</footer>

@@ -1,0 +1,14 @@
+[
+  {
+    "doctype": "Email Group",
+    "name": "EE Newsletter",
+    "title": "EE Newsletter",
+    "add_query_parameters": 1,
+    "confirmation_email_template": "",
+    "welcome_email_template": "",
+    "default_sender": "",
+    "enable_double_opt_in": 1,
+    "total_subscribers": 0,
+    "unsubscribed": 0
+  }
+]

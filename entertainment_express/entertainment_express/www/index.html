@@ -1,0 +1,46 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<section class="ee-shell ee-panel">
+  <p class="eyebrow">Built for mobile entertainment companies</p>
+  <h1>{{ hero_headline }}</h1>
+  <p>{{ hero_subhead }}</p>
+  {% include "entertainment_express/templates/marketing/cta.html" %}
+</section>
+
+{% if section_feature_grid %}
+<section class="ee-shell" style="margin-top:1.2rem">
+  <div class="ee-panel">
+    <h2>One workflow from lead to payday</h2>
+    <div class="ee-grid" style="display:grid;gap:0.8rem;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));">
+      <article><h3>Booking + availability</h3><p>Real-time slot checks with deposits and contracts.</p></article>
+      <article><h3>Dispatch + run sheets</h3><p>Assign crew, assets, and checklists without whiteboards.</p></article>
+      <article><h3>Billing + payments</h3><p>Send invoices, collect deposits, and keep accounting aligned.</p></article>
+      <article><h3>Portal + mobile app</h3><p>Customers self-serve while field crews run jobs from phones.</p></article>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if section_pricing_teaser %}
+<section class="ee-shell" style="margin-top:1.2rem">
+  <div class="ee-panel">
+    <h2>Pricing that scales with your company</h2>
+    <p>Start lean, then unlock automation and advanced dispatch as your event volume grows.</p>
+    <a class="ee-btn ee-btn-primary" href="/pricing">View pricing</a>
+  </div>
+</section>
+{% endif %}
+
+{% if section_testimonials %}
+<section class="ee-shell" style="margin-top:1.2rem">
+  <div class="ee-panel">
+    <h2>Trusted by operators who run live events every weekend</h2>
+    <blockquote>
+      "We replaced four disconnected tools. Sales closes faster and crew coordination is finally predictable."
+    </blockquote>
+    <p>- Operations Director, multi-city DJ + booth company</p>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

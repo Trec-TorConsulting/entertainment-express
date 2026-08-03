@@ -1,0 +1,24 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ seo_title or title or "Entertainment Express" }}{% endblock %}
+
+{% block head_include %}
+{{ super() }}
+{% include "entertainment_express/templates/marketing/seo_head.html" %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4f4ef">
+<link rel="preload" href="/assets/entertainment_express/marketing/marketing.css" as="style">
+<link rel="stylesheet" href="/assets/entertainment_express/marketing/marketing.css">
+{% endblock %}
+
+{% block page_content %}
+<a class="ee-skip-link" href="#ee-main">Skip to content</a>
+{% include "entertainment_express/templates/marketing/header.html" %}
+<main class="ee-main" id="ee-main" role="main">
+  {% block marketing_content %}{% endblock %}
+</main>
+{% include "entertainment_express/templates/marketing/footer.html" %}
+{% include "entertainment_express/templates/marketing/consent_banner.html" %}
+{% include "entertainment_express/templates/marketing/analytics.html" %}
+<script defer src="/assets/entertainment_express/marketing/marketing.js"></script>
+{% endblock %}

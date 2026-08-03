@@ -1,0 +1,157 @@
+[
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_lead_type",
+    "dt": "Lead",
+    "fieldname": "ee_lead_type",
+    "fieldtype": "Select",
+    "insert_after": "source",
+    "label": "EE Lead Type",
+    "options": "\ndemo\ncontact\nnewsletter\ntrial"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_vertical_interest",
+    "dt": "Lead",
+    "fieldname": "ee_vertical_interest",
+    "fieldtype": "Small Text",
+    "insert_after": "ee_lead_type",
+    "label": "Vertical Interest"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_source_page",
+    "dt": "Lead",
+    "fieldname": "ee_source_page",
+    "fieldtype": "Data",
+    "insert_after": "ee_vertical_interest",
+    "label": "Source Page"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_utm_source",
+    "dt": "Lead",
+    "fieldname": "ee_utm_source",
+    "fieldtype": "Data",
+    "insert_after": "ee_source_page",
+    "label": "UTM Source"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_utm_medium",
+    "dt": "Lead",
+    "fieldname": "ee_utm_medium",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_source",
+    "label": "UTM Medium"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_utm_campaign",
+    "dt": "Lead",
+    "fieldname": "ee_utm_campaign",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_medium",
+    "label": "UTM Campaign"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_utm_term",
+    "dt": "Lead",
+    "fieldname": "ee_utm_term",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_campaign",
+    "label": "UTM Term"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_utm_content",
+    "dt": "Lead",
+    "fieldname": "ee_utm_content",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_term",
+    "label": "UTM Content"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_referrer",
+    "dt": "Lead",
+    "fieldname": "ee_referrer",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_content",
+    "label": "Referrer"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_consent_marketing",
+    "dt": "Lead",
+    "fieldname": "ee_consent_marketing",
+    "fieldtype": "Check",
+    "insert_after": "ee_referrer",
+    "label": "Marketing Consent"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_consent_at",
+    "dt": "Lead",
+    "fieldname": "ee_consent_at",
+    "fieldtype": "Datetime",
+    "insert_after": "ee_consent_marketing",
+    "label": "Consent At"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Lead-ee_spam_score",
+    "dt": "Lead",
+    "fieldname": "ee_spam_score",
+    "fieldtype": "Float",
+    "insert_after": "ee_consent_at",
+    "label": "Spam Score"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Signup Application-ee_utm_source",
+    "dt": "Signup Application",
+    "fieldname": "ee_utm_source",
+    "fieldtype": "Data",
+    "insert_after": "plan",
+    "label": "UTM Source"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Signup Application-ee_utm_medium",
+    "dt": "Signup Application",
+    "fieldname": "ee_utm_medium",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_source",
+    "label": "UTM Medium"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Signup Application-ee_utm_campaign",
+    "dt": "Signup Application",
+    "fieldname": "ee_utm_campaign",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_medium",
+    "label": "UTM Campaign"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Signup Application-ee_source_page",
+    "dt": "Signup Application",
+    "fieldname": "ee_source_page",
+    "fieldtype": "Data",
+    "insert_after": "ee_utm_campaign",
+    "label": "Source Page"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Signup Application-ee_origin_lead",
+    "dt": "Signup Application",
+    "fieldname": "ee_origin_lead",
+    "fieldtype": "Link",
+    "insert_after": "ee_source_page",
+    "label": "Origin Lead",
+    "options": "Lead"
+  }
+]
