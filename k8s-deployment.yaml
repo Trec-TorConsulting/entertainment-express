@@ -277,6 +277,20 @@ spec:
           mountPath: /config
         - name: sites
           mountPath: /mnt/sites
+      - name: link-custom-assets
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.6
+        imagePullPolicy: Always
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          mkdir -p /mnt/sites/assets
+          rm -rf /mnt/sites/assets/entertainment_express
+          ln -sfn /home/frappe/frappe-bench/apps/entertainment_express/entertainment_express/public /mnt/sites/assets/entertainment_express
+        volumeMounts:
+        - name: sites
+          mountPath: /mnt/sites
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
