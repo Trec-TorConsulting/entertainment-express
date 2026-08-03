@@ -7,14 +7,14 @@
   {% if pricing_error %}
   <p>{{ pricing_error }}</p>
   {% endif %}
-  <div class="ee-cta-group" style="margin-bottom:1rem">
+  <div class="ee-cta-group ee-pricing-toggle">
     <button type="button" class="ee-btn ee-btn-secondary" data-billing-toggle="monthly">Monthly</button>
     <button type="button" class="ee-btn ee-btn-secondary" data-billing-toggle="annual">Annual</button>
   </div>
 
-  <div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+  <div class="ee-pricing-grid">
     {% for plan in plans %}
-    <article class="ee-panel" style="box-shadow:none;">
+    <article class="ee-panel ee-plan-panel">
       <h2>{{ plan.name }}</h2>
       <p>
         <strong data-price-monthly="${{ '%.2f'|format(plan.price_monthly) }}/mo" data-price-annual="${{ '%.2f'|format(plan.price_annual) }}/yr">
