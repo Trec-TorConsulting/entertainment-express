@@ -274,6 +274,102 @@ select:focus-visible {
   margin-bottom: 0;
 }
 
+.ee-proof-band {
+  display: grid;
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.ee-proof-title {
+  margin: 0;
+  color: #40455f;
+  font-size: 0.92rem;
+  font-weight: 620;
+}
+
+.ee-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.66rem;
+}
+
+.ee-proof-item {
+  border: 1px solid var(--ee-border);
+  background: #fff;
+  border-radius: 0.7rem;
+  min-height: 2.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.3rem 0.65rem;
+  color: #444a67;
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.ee-kpi-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.ee-kpi {
+  border: 1px solid var(--ee-border);
+  border-radius: 0.8rem;
+  background: #fff;
+  padding: 0.9rem;
+}
+
+.ee-kpi strong {
+  display: block;
+  color: var(--ee-primary-strong);
+  margin-bottom: 0.25rem;
+  font-size: 1.02rem;
+}
+
+.ee-kpi p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ee-workflow-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.ee-workflow-card {
+  border: 1px solid var(--ee-border);
+  border-radius: 0.8rem;
+  background: #fff;
+  padding: 0.95rem;
+}
+
+.ee-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ee-primary-strong);
+  background: var(--ee-primary-soft);
+  margin-bottom: 0.45rem;
+}
+
+.ee-checklist {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #4d536f;
+}
+
+.ee-checklist li + li {
+  margin-top: 0.35rem;
+}
+
 blockquote {
   margin: 0.7rem 0;
   padding: 0.82rem 1rem;
