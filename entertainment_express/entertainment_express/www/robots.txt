@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /app
+Disallow: /desk
 Disallow: /api
 Disallow: /private
+Disallow: /client
 Sitemap: https://www.entertainmentexpress.app/sitemap.xml

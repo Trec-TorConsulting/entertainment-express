@@ -1,0 +1,43 @@
+---
+base_template: "templates/web.html"
+no_cache: 1
+---
+
+{% block title %}Client Portal{% endblock %}
+
+{% block page_content %}
+<div class="container mt-4 mb-5" style="max-width:900px">
+  <h2>Client Portal</h2>
+  <p class="text-muted">Use this portal for customer workflows like signing contracts, sharing music details, and handling payments.</p>
+
+  <div class="row g-3 mt-2">
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Sign Contract</h5>
+          <p class="card-text text-muted">Open your secure contract link and complete your e-signature.</p>
+          <a class="btn btn-primary" href="/client/sign">Open Contract Signing</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Music Planning</h5>
+          <p class="card-text text-muted">Share must-play and do-not-play preferences for your event.</p>
+          <a class="btn btn-outline-primary" href="/client/music">Open Music Planner</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Payments</h5>
+          <p class="card-text text-muted">Use the payment link from your invoice email to complete deposits and balances.</p>
+          <a class="btn btn-outline-primary" href="/client/pay">Payment Help</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

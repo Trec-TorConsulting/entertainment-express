@@ -9,6 +9,9 @@ ROBOTS_FILE = ROOT / "www" / "robots.txt"
 HOOKS_FILE = ROOT / "hooks.py"
 START_TRIAL_FILE = ROOT / "www" / "start_trial.py"
 RUNTIME_TEST_FILE = ROOT / "tests" / "test_phase19_marketing.py"
+CLIENT_INDEX_FILE = ROOT / "www" / "client" / "index.html"
+CLIENT_SIGN_FILE = ROOT / "www" / "client" / "sign.html"
+REQUEST_GUARDS_FILE = ROOT / "security" / "request_guards.py"
 
 
 def _read(path: Path) -> str:
@@ -66,8 +69,10 @@ def test_robots_has_sitemap_and_disallow_rules():
     robots = _read(ROBOTS_FILE)
     assert "Sitemap:" in robots
     assert "Disallow: /app" in robots
+    assert "Disallow: /desk" in robots
     assert "Disallow: /api" in robots
     assert "Disallow: /private" in robots
+    assert "Disallow: /client" in robots
 
 
 def test_redirect_rules_present_for_legacy_marketing_routes():
@@ -76,6 +81,8 @@ def test_redirect_rules_present_for_legacy_marketing_routes():
     assert '"target": "/resources"' in hooks
     assert '"source": "/request-demo"' in hooks
     assert '"target": "/demo"' in hooks
+    assert '"source": "/sign"' in hooks
+    assert '"target": "/client/sign"' in hooks
 
 
 def test_start_trial_excluded_from_sitemap():
@@ -134,3 +141,26 @@ def test_task_12_6_guest_desk_guard_test_exists():
     source = _read(RUNTIME_TEST_FILE)
     assert "def test_guest_role_cannot_access_desk_only_features" in source
     assert "frappe.only_for(\"System Manager\")" in source
+
+
+def test_backend_boundary_hook_registered():
+    hooks = _read(HOOKS_FILE)
+    assert "before_request" in hooks
+    assert "enforce_backend_boundary" in hooks
+    assert "sanitize_backend_urls" in hooks
+
+
+def test_client_portal_pages_exist_and_reference_contract_flow():
+    index_page = _read(CLIENT_INDEX_FILE)
+    sign_page = _read(CLIENT_SIGN_FILE)
+    assert "Client Portal" in index_page
+    assert "/client/sign" in index_page
+    assert "entertainment_express.api.contract.view_contract" in sign_page
+    assert "entertainment_express.api.contract.sign_contract" in sign_page
+
+
+def test_backend_url_sanitizer_uses_clean_ee_route():
+    guards = _read(REQUEST_GUARDS_FILE)
+    assert "EE_BACKEND_HOME = \"/app/workspace/entertainment-express\"" in guards
+    assert "BRANDED_BACKEND_PATH_PARTS" in guards
+    assert "sanitize_backend_urls" in guards

@@ -8,6 +8,12 @@ app_version = "0.0.1"
 
 required_apps = ["erpnext"]
 
+# Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
+before_request = [
+    "entertainment_express.security.request_guards.sanitize_backend_urls",
+    "entertainment_express.security.request_guards.enforce_backend_boundary",
+]
+
 # Fixtures — export/import EE roles via bench migrate
 fixtures = [
     {"dt": "Role", "filters": [["name", "like", "EE %"]]},
@@ -77,7 +83,6 @@ scheduler_events = {
 
 # Website route rules (added in phase-1 www pages)
 website_route_rules = [
-    {"from_route": "/sign", "to_route": "sign"},
     {"from_route": "/book", "to_route": "book"},
     {"from_route": "/request-quote", "to_route": "request-quote"},
     {"from_route": "/signup", "to_route": "signup"},
@@ -95,5 +100,6 @@ website_route_rules = [
 website_redirects = [
     {"source": "/learn", "target": "/resources"},
     {"source": "/request-demo", "target": "/demo"},
+    {"source": "/sign", "target": "/client/sign"},
 ]
 

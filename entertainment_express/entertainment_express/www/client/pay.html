@@ -1,0 +1,28 @@
+---
+base_template: "templates/web.html"
+no_cache: 1
+---
+
+{% block title %}Client Payments{% endblock %}
+
+{% block page_content %}
+<div class="container mt-4 mb-5" style="max-width:720px">
+  <h2>Payments</h2>
+  <p class="text-muted">All client payments are completed through your secure invoice or checkout link.</p>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <h5 class="card-title">How to Pay</h5>
+      <ol class="mb-0">
+        <li>Open the invoice or payment email from Entertainment Express.</li>
+        <li>Click the secure checkout link in that message.</li>
+        <li>Complete your deposit or balance payment.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="alert alert-info mt-3 mb-0">
+    Need a new payment link? Contact your coordinator and we will resend it.
+  </div>
+</div>
+{% endblock %}

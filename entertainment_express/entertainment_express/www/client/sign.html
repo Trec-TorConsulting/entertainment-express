@@ -1,0 +1,114 @@
+---
+base_template: "templates/web.html"
+no_cache: 1
+---
+
+{% block title %}Client Contract Signing{% endblock %}
+
+{% block page_content %}
+<div class="container mt-4 mb-5" style="max-width:800px">
+
+  <div id="sign-loading" class="text-center py-5">
+    <div class="spinner-border" role="status"></div>
+    <p class="mt-2">Loading contract...</p>
+  </div>
+
+  <div id="sign-content" class="d-none">
+    <h2>Contract Review and Signature</h2>
+    <p class="text-muted" id="sign-meta"></p>
+
+    <div class="card mb-4">
+      <div class="card-body" id="contract-html" style="font-size:0.95rem;line-height:1.7">
+      </div>
+    </div>
+
+    <div id="sign-form-wrapper">
+      <h5>Sign Below</h5>
+      <div class="mb-3">
+        <label class="form-label">Your Full Legal Name *</label>
+        <input type="text" id="signer-name" class="form-control" required>
+      </div>
+      <p class="text-muted small">
+        By clicking "I Agree and Sign", you confirm you have read the contract above and agree to its terms.
+        Your typed name constitutes a legally binding electronic signature.
+      </p>
+      <button id="btn-sign" class="btn btn-success btn-lg">I Agree and Sign</button>
+    </div>
+
+    <div id="sign-success" class="alert alert-success d-none mt-4">
+      Contract signed successfully. A copy will be emailed to you.
+    </div>
+    <div id="sign-error" class="alert alert-danger d-none mt-4"></div>
+  </div>
+
+  <div id="sign-expired" class="alert alert-warning d-none mt-4">
+    This contract link has expired or is no longer valid.
+  </div>
+</div>
+
+<script>
+(async function() {
+  const params = new URLSearchParams(window.location.search);
+  const contract = params.get('contract');
+  const token = params.get('token');
+
+  if (!contract || !token) {
+    document.getElementById('sign-loading').classList.add('d-none');
+    document.getElementById('sign-expired').classList.remove('d-none');
+    return;
+  }
+
+  try {
+    const res = await frappe.call({
+      method: 'entertainment_express.api.contract.view_contract',
+      args: { contract_name: contract, token: token },
+    });
+    const d = res.message;
+    document.getElementById('sign-loading').classList.add('d-none');
+
+    if (d.status === 'signed') {
+      document.getElementById('sign-content').classList.remove('d-none');
+      document.getElementById('contract-html').innerHTML = d.rendered_html;
+      document.getElementById('sign-meta').textContent = 'This contract is already signed.';
+      document.getElementById('sign-form-wrapper').remove();
+      return;
+    }
+    if (d.status === 'expired' || d.status === 'declined') {
+      document.getElementById('sign-expired').classList.remove('d-none');
+      return;
+    }
+
+    document.getElementById('sign-content').classList.remove('d-none');
+    document.getElementById('contract-html').innerHTML = d.rendered_html;
+    document.getElementById('sign-meta').textContent = `Prepared for: ${d.signer_name}`;
+  } catch (e) {
+    document.getElementById('sign-loading').classList.add('d-none');
+    document.getElementById('sign-expired').classList.remove('d-none');
+  }
+
+  document.getElementById('btn-sign').addEventListener('click', async function() {
+    const signerName = document.getElementById('signer-name').value.trim();
+    if (!signerName) { alert('Please enter your full legal name.'); return; }
+
+    this.disabled = true;
+    this.textContent = 'Signing...';
+    try {
+      const res = await frappe.call({
+        method: 'entertainment_express.api.contract.sign_contract',
+        args: { contract_name: contract, token: token, signature_typed: signerName, signer_name: signerName },
+      });
+      if (res.message && res.message.status === 'signed') {
+        document.getElementById('sign-form-wrapper').style.display = 'none';
+        document.getElementById('sign-success').classList.remove('d-none');
+      }
+    } catch (err) {
+      const el = document.getElementById('sign-error');
+      el.textContent = err.message || 'Signing failed. Please try again.';
+      el.classList.remove('d-none');
+      this.disabled = false;
+      this.textContent = 'I Agree and Sign';
+    }
+  });
+})();
+</script>
+{% endblock %}
