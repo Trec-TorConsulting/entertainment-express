@@ -321,6 +321,9 @@ spec:
           mkdir -p /home/frappe/logs
           cd /home/frappe/frappe-bench
           export SITES_PATH=/home/frappe/frappe-bench/sites
+          mkdir -p /home/frappe/frappe-bench/sites/assets
+          rm -rf /home/frappe/frappe-bench/sites/assets/entertainment_express
+          ln -sfn /home/frappe/frappe-bench/apps/entertainment_express/entertainment_express/public /home/frappe/frappe-bench/sites/assets/entertainment_express
           # No nginx in this deployment, so gunicorn must serve the static /assets and
           # /files itself: frappe.app:application_with_statics() is a factory that wraps
           # the WSGI app with SharedDataMiddleware. Plain frappe.app:application 404s all
