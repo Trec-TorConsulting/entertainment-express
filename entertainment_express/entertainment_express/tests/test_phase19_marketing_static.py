@@ -16,6 +16,7 @@ PORTAL_BASE_FILE = ROOT / "templates" / "portal" / "base.html"
 REQUEST_GUARDS_FILE = ROOT / "security" / "request_guards.py"
 BOOTSTRAP_FILE = ROOT / "control_plane" / "bootstrap.py"
 PROVISIONER_FILE = ROOT / "control_plane" / "provisioner.py"
+SIGNUP_JS_FILE = ROOT / "control_plane" / "doctype" / "signup_application" / "signup_application.js"
 ONBOARDING_FILE = ROOT / "setup" / "onboarding.py"
 ROLE_FIXTURE_FILE = ROOT / "fixtures" / "role.json"
 WORKSPACE_HIDE_PATCH_FILE = ROOT / "patches" / "v0_0_1" / "hide_unused_erpnext_workspaces.py"
@@ -222,6 +223,15 @@ def test_third_party_onboarding_is_hidden():
     assert "def hide_third_party_onboarding()" in onboarding
     assert "Module Onboarding" in onboarding
     assert "is_complete" in onboarding
+
+
+def test_signup_application_has_approve_button():
+    """The Signup Application form must expose a one-click approve that calls the
+    control-plane approve_signup, shown only while the application is new."""
+    js = _read(SIGNUP_JS_FILE)
+    assert "add_custom_button" in js
+    assert "entertainment_express.api.public.approve_signup" in js
+    assert 'frm.doc.status !== "new"' in js
 
 
 def test_public_home_and_portal_landing_split():
