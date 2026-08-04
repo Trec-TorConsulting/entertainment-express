@@ -401,7 +401,9 @@ def _ensure_tenant_admin(tenant_doc) -> None:
         role_names = [r.role for r in user.roles]
         if "EE Tenant Admin" not in role_names:
             user.append("roles", {"role": "EE Tenant Admin"})
-            user.save(ignore_permissions=True)
+        if not user.default_workspace:
+            user.default_workspace = "Entertainment Express"
+        user.save(ignore_permissions=True)
         return
 
     user = frappe.get_doc({
@@ -410,6 +412,8 @@ def _ensure_tenant_admin(tenant_doc) -> None:
         "first_name": tenant_doc.primary_contact or email.split("@")[0],
         "enabled": 1,
         "send_welcome_email": 0,
+        # Land staff straight on the EE workspace (not the ERPNext "Home" desk).
+        "default_workspace": "Entertainment Express",
         "roles": [{"role": "EE Tenant Admin"}],
     })
     user.insert(ignore_permissions=True)

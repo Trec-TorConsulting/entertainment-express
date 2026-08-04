@@ -3,7 +3,7 @@
 #
 # Self-contained, kubectl-appliable deployment for the entertainment-express
 # namespace. Built from this repo's Dockerfile image
-# (192.168.4.10:30500/entertainment-express/bench:0.0.22-ee).
+# (192.168.4.10:30500/entertainment-express/bench:0.0.23-ee).
 #
 # PREREQUISITES — create the two secrets first (never commit real secrets):
 #   see secrets.example.yaml, then:
@@ -261,7 +261,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -278,7 +278,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: link-custom-assets
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command:
         - /bin/sh
@@ -311,7 +311,7 @@ spec:
                 - node05
       containers:
       - name: frappe-python
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -434,7 +434,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -462,7 +462,7 @@ spec:
                 - node05
       containers:
       - name: scheduler
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -536,7 +536,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -564,7 +564,7 @@ spec:
                 - node05
       containers:
       - name: socketio
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["bash", "-c", "cd /home/frappe/frappe-bench && node apps/frappe/socketio.js"]
         env:
@@ -645,7 +645,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -673,7 +673,7 @@ spec:
                 - node05
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -746,7 +746,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -774,7 +774,7 @@ spec:
                 - node05
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -847,7 +847,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -875,7 +875,7 @@ spec:
                 - node05
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -1276,7 +1276,7 @@ spec:
             - name: sites
               mountPath: /mnt/sites
           - name: seed-sites
-            image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
             imagePullPolicy: Always
             command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
             volumeMounts:
@@ -1294,7 +1294,7 @@ spec:
               mountPath: /mnt/sites
           containers:
           - name: bench-backup
-            image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
             imagePullPolicy: Always
             command:
             - bash
@@ -1567,7 +1567,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -1595,7 +1595,7 @@ spec:
                 - node05
       containers:
       - name: admin-site-init
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command:
         - bash
@@ -1712,7 +1712,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -1740,7 +1740,7 @@ spec:
                 - node05
       containers:
       - name: site-init
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.22-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.23-ee
         imagePullPolicy: Always
         command:
         - bash

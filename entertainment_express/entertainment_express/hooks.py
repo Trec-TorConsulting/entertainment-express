@@ -8,20 +8,11 @@ app_version = "0.0.1"
 
 required_apps = ["erpnext"]
 
-# First-login defaults for mobile entertainment operations.
-role_home_page = {
-    "EE Tenant Admin": "/app/workspace/entertainment-express",
-    "EE Sales": "/app/workspace/entertainment-express",
-    "EE Dispatcher": "/app/workspace/entertainment-express",
-    "EE Accounting": "/app/workspace/entertainment-express",
-    "EE Office": "/app/workspace/entertainment-express",
-    "EE Entertainer": "/app/workspace/entertainment-express",
-    "SaaS Operator": "/app/workspace/entertainment-express",
-}
-
 # Post-login landing: customers -> /client portal; staff -> desk workspace.
-# A function hook (not the static website_user_home_page) so guests are NOT sent
-# to the portal and the public marketing home stays at / for anonymous visitors.
+# Staff are System Users, so Frappe sends them to /app on login regardless; a
+# role_home_page mapping only hijacks the PUBLIC site root (/) for logged-in
+# staff and 404s "View Website". A function hook keeps guests on the public
+# marketing home and routes only logged-in customers to the portal.
 get_website_user_home_page = "entertainment_express.security.request_guards.get_website_user_home_page"
 
 # Guests land on the public marketing/signup site, never the login-gated portal.
@@ -71,6 +62,10 @@ fixtures = [
 
 # After install: create custom fields on ERPNext DocTypes
 after_install = "entertainment_express.setup.install.after_install"
+
+# After every migrate: hide ERPNext/Frappe desk onboarding so tenants never see
+# the "journey with ERPNext" guide (white-label).
+after_migrate = "entertainment_express.setup.onboarding.hide_third_party_onboarding"
 
 # Scheduled tasks
 scheduler_events = {

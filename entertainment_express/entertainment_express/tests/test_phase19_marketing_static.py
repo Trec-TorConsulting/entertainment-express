@@ -16,6 +16,7 @@ PORTAL_BASE_FILE = ROOT / "templates" / "portal" / "base.html"
 REQUEST_GUARDS_FILE = ROOT / "security" / "request_guards.py"
 BOOTSTRAP_FILE = ROOT / "control_plane" / "bootstrap.py"
 PROVISIONER_FILE = ROOT / "control_plane" / "provisioner.py"
+ONBOARDING_FILE = ROOT / "setup" / "onboarding.py"
 ROLE_FIXTURE_FILE = ROOT / "fixtures" / "role.json"
 WORKSPACE_HIDE_PATCH_FILE = ROOT / "patches" / "v0_0_1" / "hide_unused_erpnext_workspaces.py"
 
@@ -203,15 +204,24 @@ def test_login_route_resolves_to_client_portal_page():
     assert "website_path_resolver" not in hooks
 
 
-def test_role_home_page_targets_ops_workspace():
+def test_role_home_page_not_hijacking_public_root():
+    """role_home_page mapped logged-in staff to a /app route, which hijacks the
+    public site root (/) and 404s "View Website". Staff are System Users and are
+    sent to /app by Frappe login regardless, so the hook must be absent."""
     hooks = _read(HOOKS_FILE)
-    assert "role_home_page" in hooks
-    assert '"EE Tenant Admin": "/app/workspace/entertainment-express"' in hooks
-    assert '"EE Sales": "/app/workspace/entertainment-express"' in hooks
-    assert '"EE Dispatcher": "/app/workspace/entertainment-express"' in hooks
-    assert '"EE Accounting": "/app/workspace/entertainment-express"' in hooks
-    assert '"EE Office": "/app/workspace/entertainment-express"' in hooks
-    assert '"EE Entertainer": "/app/workspace/entertainment-express"' in hooks
+    assert "role_home_page = {" not in hooks
+
+
+def test_third_party_onboarding_is_hidden():
+    """ERPNext desk onboarding ("journey with ERPNext") must be hidden on tenant
+    desks via an after_migrate hook."""
+    hooks = _read(HOOKS_FILE)
+    onboarding = _read(ONBOARDING_FILE)
+    assert "after_migrate" in hooks
+    assert "hide_third_party_onboarding" in hooks
+    assert "def hide_third_party_onboarding()" in onboarding
+    assert "Module Onboarding" in onboarding
+    assert "is_complete" in onboarding
 
 
 def test_public_home_and_portal_landing_split():
