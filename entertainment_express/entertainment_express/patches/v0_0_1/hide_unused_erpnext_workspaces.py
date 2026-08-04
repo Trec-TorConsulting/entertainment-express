@@ -1,10 +1,10 @@
 import frappe
 
 # Tenant desk should stay white-labeled and EE-focused. Under ee_focus_desk,
-# hide all standard non-EE workspaces except a tiny allowlist.
+# hide all standard non-EE workspaces except a tiny allowlist. The generic ERPNext
+# "Home" workspace is intentionally excluded so only Entertainment Express shows.
 ALLOWED_STANDARD_WORKSPACES = {
     "Entertainment Express",
-    "Home",
 }
 
 ALLOWED_MODULES = {
