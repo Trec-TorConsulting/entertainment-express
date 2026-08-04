@@ -20,6 +20,11 @@ before_request = [
     "entertainment_express.security.request_guards.enforce_backend_boundary",
 ]
 
+# Whitelisted method overrides
+override_whitelisted_methods = {
+    "frappe.desk.desktop.get_workspace_sidebar_items": "entertainment_express.security.workspace_ui.get_workspace_sidebar_items",
+}
+
 # Fixtures — export/import EE roles via bench migrate
 fixtures = [
     {"dt": "Role", "filters": [["name", "like", "EE %"]]},
