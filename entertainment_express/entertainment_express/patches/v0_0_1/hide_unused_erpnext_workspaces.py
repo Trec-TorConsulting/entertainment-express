@@ -51,4 +51,16 @@ def execute(force: bool = False):
         # update_modified bumps timestamp past source import version to avoid re-import toggling.
         frappe.db.set_value("Workspace", ws.get("name"), "is_hidden", 1, update_modified=True)
 
+    # Existing staff users may still carry ERPNext's default "Home" workspace.
+    # Normalize them to EE so "Home" is never the default landing workspace.
+    frappe.db.sql(
+        """
+        update `tabUser`
+        set default_workspace = %s
+        where user_type = 'System User'
+          and ifnull(default_workspace, '') in ('', 'Home')
+        """,
+        ("Entertainment Express",),
+    )
+
     frappe.clear_cache()
