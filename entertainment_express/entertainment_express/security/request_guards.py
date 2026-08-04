@@ -59,6 +59,17 @@ def sanitize_backend_urls() -> None:
     path = (getattr(req, "path", "") or "").strip() or "/"
     user = frappe.session.user or "Guest"
 
+    # Frappe/ERPNext "Home" desk route resolves through Page doctype and can
+    # leak framework UX/permissions. Keep all home entries on the EE workspace.
+    if path == "/app/home" or path.startswith("/app/home/"):
+        if user == "Guest":
+            req.environ["PATH_INFO"] = EE_CLIENT_PORTAL
+            frappe.local.path = EE_CLIENT_PORTAL.strip("/")
+            return
+        req.environ["PATH_INFO"] = EE_BACKEND_HOME
+        frappe.local.path = EE_BACKEND_HOME.strip("/")
+        return
+
     if path in {"/app", "/app/", "/desk", "/desk/"}:
         if user == "Guest":
             # before_request runs under frappe.app.application; raising Redirect here
