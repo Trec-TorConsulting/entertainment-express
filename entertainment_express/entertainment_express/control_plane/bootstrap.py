@@ -66,6 +66,7 @@ def run_bootstrap(company_name: str, primary_email: str = "", primary_contact: s
 def _run_steps(ctx) -> None:
     """Run every idempotent bootstrap step against the current (tenant) site."""
     _ensure_erpnext_baseline()
+    _ensure_setup_complete()
     _ensure_company(ctx)
     _ensure_roles_permissions()
     _ensure_focus_desk_mode()
@@ -93,6 +94,14 @@ def _ensure_erpnext_baseline() -> None:
     from erpnext.setup.setup_wizard.operations.install_fixtures import install as install_erpnext_fixtures
 
     install_erpnext_fixtures(country="United States")
+
+
+def _ensure_setup_complete() -> None:
+    """Mark the setup wizard complete. Provisioning configures the site
+    programmatically, so without this System Users are redirected to
+    /app/setup-wizard on login and non-admins hit "Not permitted"."""
+    if not frappe.db.get_single_value("System Settings", "setup_complete"):
+        frappe.db.set_single_value("System Settings", "setup_complete", 1)
 
 
 # ── Bootstrap steps ──────────────────────────────────────────────────────────

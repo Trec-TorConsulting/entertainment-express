@@ -331,6 +331,14 @@ def test_bootstrap_seeds_erpnext_baseline_before_company():
     assert src.index("_ensure_erpnext_baseline()") < src.index("_ensure_company(ctx)")
 
 
+def test_bootstrap_marks_setup_complete():
+    """Provisioning skips the setup wizard, so bootstrap must mark it complete or
+    System Users are redirected to /app/setup-wizard and non-admins get denied."""
+    src = _read(BOOTSTRAP_FILE)
+    assert "_ensure_setup_complete()" in src
+    assert '"System Settings", "setup_complete"' in src
+
+
 def test_workspace_hiding_uses_allowlist_model():
     source = _read(WORKSPACE_HIDE_PATCH_FILE)
     assert "ALLOWED_STANDARD_WORKSPACES" in source
