@@ -19,7 +19,13 @@ role_home_page = {
     "SaaS Operator": "/app/workspace/entertainment-express",
 }
 
-website_user_home_page = "/client"
+# Post-login landing: customers -> /client portal; staff -> desk workspace.
+# A function hook (not the static website_user_home_page) so guests are NOT sent
+# to the portal and the public marketing home stays at / for anonymous visitors.
+get_website_user_home_page = "entertainment_express.security.request_guards.get_website_user_home_page"
+
+# Guests land on the public marketing/signup site, never the login-gated portal.
+home_page = "index"
 
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [

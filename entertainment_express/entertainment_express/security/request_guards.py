@@ -1,5 +1,7 @@
 """Request boundary guards for backend and client portal access."""
 
+from urllib.parse import quote
+
 import frappe
 from frappe import _
 
@@ -32,6 +34,7 @@ BRANDED_BACKEND_PATH_PARTS = (
 )
 EE_BACKEND_HOME = "/app/workspace/entertainment-express"
 EE_CLIENT_PORTAL = "/client"
+EE_LOGIN = "/login"
 
 
 def _is_backend_path(path: str) -> bool:
@@ -98,3 +101,32 @@ def enforce_backend_boundary() -> None:
         _("Backend access is restricted to Entertainment Express owners and employees. Use the /client portal."),
         frappe.PermissionError,
     )
+
+
+def require_client_login() -> None:
+    """Gate the /client customer portal behind authentication.
+
+    The portal is not public marketing; anonymous visitors are sent to login and
+    returned to the page they requested after signing in. Called from each
+    www/client/*.py get_context.
+    """
+    if (frappe.session.user or "Guest") != "Guest":
+        return
+    req = getattr(frappe.local, "request", None)
+    dest = (getattr(req, "path", None) or EE_CLIENT_PORTAL) if req else EE_CLIENT_PORTAL
+    _redirect(f"{EE_LOGIN}?redirect-to={quote(dest, safe='/')}")
+
+
+def get_website_user_home_page(user: str | None) -> str | None:
+    """Post-login landing route (Frappe get_website_user_home_page hook).
+
+    Customers land on the /client portal; staff and guests return None so they
+    fall through to role_home_page (desk) / the public marketing home. This keeps
+    the site root public for anonymous visitors.
+    """
+    if not user or user == "Guest":
+        return None
+    roles = set(frappe.get_roles(user) or [])
+    if roles.intersection(INTERNAL_BACKEND_ROLES):
+        return None
+    return EE_CLIENT_PORTAL

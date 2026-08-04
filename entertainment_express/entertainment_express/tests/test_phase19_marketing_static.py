@@ -11,6 +11,7 @@ START_TRIAL_FILE = ROOT / "www" / "start_trial.py"
 RUNTIME_TEST_FILE = ROOT / "tests" / "test_phase19_marketing.py"
 CLIENT_INDEX_FILE = ROOT / "www" / "client" / "index.html"
 CLIENT_SIGN_FILE = ROOT / "www" / "client" / "sign.html"
+CLIENT_DIR = ROOT / "www" / "client"
 PORTAL_BASE_FILE = ROOT / "templates" / "portal" / "base.html"
 REQUEST_GUARDS_FILE = ROOT / "security" / "request_guards.py"
 BOOTSTRAP_FILE = ROOT / "control_plane" / "bootstrap.py"
@@ -173,6 +174,19 @@ def test_backend_url_sanitizer_uses_clean_ee_route():
     guards = _read(REQUEST_GUARDS_FILE)
     assert "EE_BACKEND_HOME = \"/app/workspace/entertainment-express\"" in guards
     assert "EE_CLIENT_PORTAL = \"/client\"" in guards
+
+
+def test_client_portal_is_gated_behind_login():
+    """The /client customer portal must not be public: every page has a
+    controller that redirects guests to login via require_client_login()."""
+    guards = _read(REQUEST_GUARDS_FILE)
+    assert "def require_client_login()" in guards
+    assert "EE_LOGIN = \"/login\"" in guards
+    assert "redirect-to=" in guards
+    for html in CLIENT_DIR.glob("*.html"):
+        controller = html.with_suffix(".py")
+        assert controller.exists(), f"missing login gate controller for {html.name}"
+        assert "require_client_login()" in _read(controller)
     assert "BRANDED_BACKEND_PATH_PARTS" in guards
     assert "sanitize_backend_urls" in guards
 
@@ -198,6 +212,18 @@ def test_role_home_page_targets_ops_workspace():
     assert '"EE Accounting": "/app/workspace/entertainment-express"' in hooks
     assert '"EE Office": "/app/workspace/entertainment-express"' in hooks
     assert '"EE Entertainer": "/app/workspace/entertainment-express"' in hooks
+
+
+def test_public_home_and_portal_landing_split():
+    """Guests must land on the public marketing home; only logged-in customers
+    are routed to the login-gated /client portal."""
+    hooks = _read(HOOKS_FILE)
+    guards = _read(REQUEST_GUARDS_FILE)
+    # The static hook that forced every visitor (incl. guests) to /client is gone.
+    assert 'website_user_home_page = "/client"' not in hooks
+    assert "get_website_user_home_page" in hooks
+    assert 'home_page = "index"' in hooks
+    assert "def get_website_user_home_page(" in guards
 
 
 def test_client_portal_flow_order_sign_pay_plan():
