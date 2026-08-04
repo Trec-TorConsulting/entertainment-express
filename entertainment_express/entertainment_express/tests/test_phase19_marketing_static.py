@@ -18,6 +18,8 @@ BOOTSTRAP_FILE = ROOT / "control_plane" / "bootstrap.py"
 PROVISIONER_FILE = ROOT / "control_plane" / "provisioner.py"
 SIGNUP_JS_FILE = ROOT / "control_plane" / "doctype" / "signup_application" / "signup_application.js"
 ONBOARDING_FILE = ROOT / "setup" / "onboarding.py"
+TENANT_HOME_FILE = ROOT / "www" / "tenant_home.html"
+TENANT_HOME_PY_FILE = ROOT / "www" / "tenant_home.py"
 ROLE_FIXTURE_FILE = ROOT / "fixtures" / "role.json"
 WORKSPACE_HIDE_PATCH_FILE = ROOT / "patches" / "v0_0_1" / "hide_unused_erpnext_workspaces.py"
 
@@ -235,15 +237,31 @@ def test_signup_application_has_approve_button():
 
 
 def test_public_home_and_portal_landing_split():
-    """Guests must land on the public marketing home; only logged-in customers
-    are routed to the login-gated /client portal."""
+    """Home is per-site: EE marketing on the control plane, the tenant's own
+    branded landing on tenant sites; only logged-in customers go to /client."""
     hooks = _read(HOOKS_FILE)
     guards = _read(REQUEST_GUARDS_FILE)
     # The static hook that forced every visitor (incl. guests) to /client is gone.
     assert 'website_user_home_page = "/client"' not in hooks
     assert "get_website_user_home_page" in hooks
-    assert 'home_page = "index"' in hooks
     assert "def get_website_user_home_page(" in guards
+    # Site-aware home resolution (no single global home_page hook).
+    assert 'home_page = "index"' not in hooks
+    assert "_is_control_plane" in guards
+    assert "ee_control_plane" in guards
+    assert "TENANT_HOME" in guards
+
+
+def test_tenant_home_is_branded_landing():
+    """Tenant sites serve a branded landing (company name + quote + client login),
+    not EE's SaaS marketing."""
+    html = _read(TENANT_HOME_FILE)
+    py = _read(TENANT_HOME_PY_FILE)
+    assert "{{ company_name }}" in html
+    assert "/request-quote" in html
+    assert "/login?redirect-to=/client" in html
+    assert "company_name" in py
+    assert "Built for mobile entertainment companies" not in html
 
 
 def test_client_portal_flow_order_sign_pay_plan():

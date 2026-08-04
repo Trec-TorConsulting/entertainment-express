@@ -35,6 +35,10 @@ BRANDED_BACKEND_PATH_PARTS = (
 EE_BACKEND_HOME = "/app/workspace/entertainment-express"
 EE_CLIENT_PORTAL = "/client"
 EE_LOGIN = "/login"
+# Public site roots: EE SaaS marketing on the control plane, the tenant's own
+# branded landing on a tenant site.
+EE_MARKETING_HOME = "index"
+TENANT_HOME = "tenant_home"
 
 
 def _is_backend_path(path: str) -> bool:
@@ -117,16 +121,23 @@ def require_client_login() -> None:
     _redirect(f"{EE_LOGIN}?redirect-to={quote(dest, safe='/')}")
 
 
-def get_website_user_home_page(user: str | None) -> str | None:
-    """Post-login landing route (Frappe get_website_user_home_page hook).
+def _is_control_plane() -> bool:
+    """The SaaS/control-plane site (admin.{base_domain}) sets ee_control_plane in
+    site_config; every other site is a tenant."""
+    return bool(frappe.conf.get("ee_control_plane"))
 
-    Customers land on the /client portal; staff and guests return None so they
-    fall through to role_home_page (desk) / the public marketing home. This keeps
-    the site root public for anonymous visitors.
+
+def get_website_user_home_page(user: str | None) -> str | None:
+    """Resolve the website home (Frappe get_website_user_home_page hook).
+
+    - Logged-in customers -> the /client portal.
+    - Everyone else (guests, staff) -> the public home: EE SaaS marketing on the
+      control plane, or the tenant's own branded landing on a tenant site.
+    Staff still reach the desk via /app on login (Frappe handles that), so this
+    only governs the public site root and "View Website".
     """
-    if not user or user == "Guest":
-        return None
-    roles = set(frappe.get_roles(user) or [])
-    if roles.intersection(INTERNAL_BACKEND_ROLES):
-        return None
-    return EE_CLIENT_PORTAL
+    if user and user != "Guest":
+        roles = set(frappe.get_roles(user) or [])
+        if not roles.intersection(INTERNAL_BACKEND_ROLES):
+            return EE_CLIENT_PORTAL
+    return EE_MARKETING_HOME if _is_control_plane() else TENANT_HOME

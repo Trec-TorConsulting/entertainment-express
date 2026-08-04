@@ -8,15 +8,11 @@ app_version = "0.0.1"
 
 required_apps = ["erpnext"]
 
-# Post-login landing: customers -> /client portal; staff -> desk workspace.
-# Staff are System Users, so Frappe sends them to /app on login regardless; a
-# role_home_page mapping only hijacks the PUBLIC site root (/) for logged-in
-# staff and 404s "View Website". A function hook keeps guests on the public
-# marketing home and routes only logged-in customers to the portal.
+# Public site root + post-login landing. The function resolves per-site: EE SaaS
+# marketing on the control plane, the tenant's own branded landing on tenant
+# sites, and the /client portal for logged-in customers. Staff still go to /app
+# on login (Frappe handles that), so this only governs the public root.
 get_website_user_home_page = "entertainment_express.security.request_guards.get_website_user_home_page"
-
-# Guests land on the public marketing/signup site, never the login-gated portal.
-home_page = "index"
 
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [
