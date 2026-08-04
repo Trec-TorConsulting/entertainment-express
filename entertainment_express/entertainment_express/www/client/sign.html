@@ -1,46 +1,47 @@
----
-base_template: "templates/web.html"
-no_cache: 1
----
-<div class="container mt-4 mb-5" style="max-width:800px">
+{% extends "entertainment_express/templates/portal/base.html" %}
 
-  <div id="sign-loading" class="text-center py-5">
-    <div class="spinner-border" role="status"></div>
-    <p class="mt-2">Loading contract...</p>
-  </div>
-
-  <div id="sign-content" class="d-none">
+{% block portal_content %}
+<section class="ee-shell ee-section-spaced">
+  <div class="ee-panel" style="max-width:800px;margin:0 auto;">
+    <p class="eyebrow">Client Portal</p>
     <h2>Contract Review and Signature</h2>
-    <p class="text-muted" id="sign-meta"></p>
 
-    <div class="card mb-4">
-      <div class="card-body" id="contract-html" style="font-size:0.95rem;line-height:1.7">
+    <div id="sign-loading" class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+      <p class="mt-2">Loading contract...</p>
+    </div>
+
+    <div id="sign-content" class="d-none">
+      <p class="text-muted" id="sign-meta"></p>
+
+      <div class="ee-panel ee-section-spaced">
+        <div id="contract-html" style="font-size:0.95rem;line-height:1.7"></div>
       </div>
-    </div>
 
-    <div id="sign-form-wrapper">
-      <h5>Sign Below</h5>
-      <div class="mb-3">
-        <label class="form-label">Your Full Legal Name *</label>
-        <input type="text" id="signer-name" class="form-control" required>
+      <div id="sign-form-wrapper" class="ee-section-spaced">
+        <h5>Sign Below</h5>
+        <div class="mb-3">
+          <label class="form-label">Your Full Legal Name *</label>
+          <input type="text" id="signer-name" class="form-control" required>
+        </div>
+        <p class="text-muted small">
+          By clicking "I Agree and Sign", you confirm you have read the contract above and agree to its terms.
+          Your typed name constitutes a legally binding electronic signature.
+        </p>
+        <button id="btn-sign" class="ee-btn ee-btn-primary">I Agree and Sign</button>
       </div>
-      <p class="text-muted small">
-        By clicking "I Agree and Sign", you confirm you have read the contract above and agree to its terms.
-        Your typed name constitutes a legally binding electronic signature.
-      </p>
-      <button id="btn-sign" class="btn btn-success btn-lg">I Agree and Sign</button>
+
+      <div id="sign-success" class="alert alert-success d-none mt-4">
+        Contract signed successfully. A copy will be emailed to you.
+      </div>
+      <div id="sign-error" class="alert alert-danger d-none mt-4"></div>
     </div>
 
-    <div id="sign-success" class="alert alert-success d-none mt-4">
-      Contract signed successfully. A copy will be emailed to you.
+    <div id="sign-expired" class="alert alert-warning d-none mt-4">
+      This contract link has expired or is no longer valid.
     </div>
-    <div id="sign-error" class="alert alert-danger d-none mt-4"></div>
   </div>
-
-  <div id="sign-expired" class="alert alert-warning d-none mt-4">
-    This contract link has expired or is no longer valid.
-  </div>
-</div>
+</section>
 
 <script>
 (async function() {
@@ -107,3 +108,4 @@ no_cache: 1
   });
 })();
 </script>
+{% endblock %}

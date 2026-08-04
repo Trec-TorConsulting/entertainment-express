@@ -11,7 +11,9 @@ INTERNAL_BACKEND_ROLES = {
     "EE Sales",
     "EE Dispatcher",
     "EE HR",
-    "EE Finance",
+    "EE Accounting",
+    "EE Office",
+    "EE Entertainer",
     "EE Crew",
 }
 
@@ -29,6 +31,7 @@ BRANDED_BACKEND_PATH_PARTS = (
     "/frappe",
 )
 EE_BACKEND_HOME = "/app/workspace/entertainment-express"
+EE_CLIENT_PORTAL = "/client"
 
 
 def _is_backend_path(path: str) -> bool:
@@ -36,10 +39,8 @@ def _is_backend_path(path: str) -> bool:
 
 
 def _redirect(location: str) -> None:
-    frappe.local.response["type"] = "redirect"
-    frappe.local.response["location"] = location
-    frappe.local.response["http_status_code"] = 302
-    raise frappe.Redirect
+    frappe.flags.redirect_location = location
+    raise frappe.Redirect(302)
 
 
 def sanitize_backend_urls() -> None:
@@ -49,16 +50,27 @@ def sanitize_backend_urls() -> None:
         return
 
     path = (getattr(req, "path", "") or "").strip() or "/"
+    user = frappe.session.user or "Guest"
 
-    if path in {"/desk", "/desk/"}:
-        _redirect(EE_BACKEND_HOME)
+    if path in {"/app", "/app/", "/desk", "/desk/"}:
+        if user == "Guest":
+            # before_request runs under frappe.app.application; raising Redirect here
+            # becomes a 500. Rewrite the resolved path instead.
+            req.environ["PATH_INFO"] = EE_CLIENT_PORTAL
+            frappe.local.path = EE_CLIENT_PORTAL.strip("/")
+            return
+        if path in {"/desk", "/desk/"}:
+            req.environ["PATH_INFO"] = EE_BACKEND_HOME
+            frappe.local.path = EE_BACKEND_HOME.strip("/")
+            return
 
     if not path.startswith("/app") and not path.startswith("/desk"):
         return
 
     lowered = path.lower()
     if any(token in lowered for token in BRANDED_BACKEND_PATH_PARTS):
-        _redirect(EE_BACKEND_HOME)
+        req.environ["PATH_INFO"] = EE_BACKEND_HOME
+        frappe.local.path = EE_BACKEND_HOME.strip("/")
 
 
 def enforce_backend_boundary() -> None:

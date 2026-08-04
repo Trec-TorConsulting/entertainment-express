@@ -11,7 +11,12 @@ START_TRIAL_FILE = ROOT / "www" / "start_trial.py"
 RUNTIME_TEST_FILE = ROOT / "tests" / "test_phase19_marketing.py"
 CLIENT_INDEX_FILE = ROOT / "www" / "client" / "index.html"
 CLIENT_SIGN_FILE = ROOT / "www" / "client" / "sign.html"
+PORTAL_BASE_FILE = ROOT / "templates" / "portal" / "base.html"
 REQUEST_GUARDS_FILE = ROOT / "security" / "request_guards.py"
+BOOTSTRAP_FILE = ROOT / "control_plane" / "bootstrap.py"
+PROVISIONER_FILE = ROOT / "control_plane" / "provisioner.py"
+ROLE_FIXTURE_FILE = ROOT / "fixtures" / "role.json"
+WORKSPACE_HIDE_PATCH_FILE = ROOT / "patches" / "v0_0_1" / "hide_unused_erpnext_workspaces.py"
 
 
 def _read(path: Path) -> str:
@@ -153,14 +158,119 @@ def test_backend_boundary_hook_registered():
 def test_client_portal_pages_exist_and_reference_contract_flow():
     index_page = _read(CLIENT_INDEX_FILE)
     sign_page = _read(CLIENT_SIGN_FILE)
+    portal_base = _read(PORTAL_BASE_FILE)
     assert "Client Portal" in index_page
     assert "/client/sign" in index_page
     assert "entertainment_express.api.contract.view_contract" in sign_page
     assert "entertainment_express.api.contract.sign_contract" in sign_page
+    assert "entertainment_express/templates/portal/base.html" in index_page
+    assert "entertainment_express/templates/portal/base.html" in sign_page
+    assert "Client Portal" in portal_base
+    assert "templates/web.html" not in portal_base
 
 
 def test_backend_url_sanitizer_uses_clean_ee_route():
     guards = _read(REQUEST_GUARDS_FILE)
     assert "EE_BACKEND_HOME = \"/app/workspace/entertainment-express\"" in guards
+    assert "EE_CLIENT_PORTAL = \"/client\"" in guards
     assert "BRANDED_BACKEND_PATH_PARTS" in guards
     assert "sanitize_backend_urls" in guards
+
+
+def test_app_route_redirect_targets_client_portal():
+    hooks = _read(HOOKS_FILE)
+    assert "sanitize_backend_urls" in hooks
+    assert "enforce_backend_boundary" in hooks
+
+
+def test_login_route_resolves_to_client_portal_page():
+    hooks = _read(HOOKS_FILE)
+    assert '{"from_route": "/login", "to_route": "client"}' not in hooks
+    assert "website_path_resolver" not in hooks
+
+
+def test_role_home_page_targets_ops_workspace():
+    hooks = _read(HOOKS_FILE)
+    assert "role_home_page" in hooks
+    assert '"EE Tenant Admin": "/app/workspace/entertainment-express"' in hooks
+    assert '"EE Sales": "/app/workspace/entertainment-express"' in hooks
+    assert '"EE Dispatcher": "/app/workspace/entertainment-express"' in hooks
+    assert '"EE Accounting": "/app/workspace/entertainment-express"' in hooks
+    assert '"EE Office": "/app/workspace/entertainment-express"' in hooks
+    assert '"EE Entertainer": "/app/workspace/entertainment-express"' in hooks
+
+
+def test_client_portal_flow_order_sign_pay_plan():
+    page = _read(CLIENT_INDEX_FILE)
+    sign_idx = page.find('/client/sign')
+    pay_idx = page.find('/client/pay')
+    music_idx = page.find('/client/music')
+    assert sign_idx != -1 and pay_idx != -1 and music_idx != -1
+    assert sign_idx < pay_idx < music_idx
+
+
+def test_portal_nav_order_sign_pay_plan():
+    portal_base = _read(PORTAL_BASE_FILE)
+    sign_idx = portal_base.find('/client/sign')
+    pay_idx = portal_base.find('/client/pay')
+    music_idx = portal_base.find('/client/music')
+    assert sign_idx != -1 and pay_idx != -1 and music_idx != -1
+    assert sign_idx < pay_idx < music_idx
+
+
+def test_backend_boundary_roles_match_ee_employee_roles():
+    guards = _read(REQUEST_GUARDS_FILE)
+    assert '"EE Accounting"' in guards
+    assert '"EE Office"' in guards
+    assert '"EE Entertainer"' in guards
+    assert '"EE Finance"' not in guards
+
+
+def test_role_fixtures_include_office_and_entertainer():
+    roles = _read(ROLE_FIXTURE_FILE)
+    assert '"name": "EE Office"' in roles
+    assert '"name": "EE Entertainer"' in roles
+    assert '"desk_access": 1' in roles
+
+
+def test_tenant_bootstrap_enforces_focus_desk_mode():
+    source = _read(BOOTSTRAP_FILE)
+    assert "_ensure_focus_desk_mode()" in source
+    assert "frappe.defaults.set_global_default(\"ee_focus_desk\", 1)" in source
+    assert "hide_unused_erpnext_workspaces" in source
+    assert "execute(force=True)" in source
+
+
+def test_provisioner_runs_bootstrap_as_subprocess_not_in_process():
+    """Regression: in-process bootstrap.run() called frappe.destroy() and unbound
+    the provisioning job, leaving it stuck in 'running'. Bootstrap must run via a
+    `bench execute` subprocess against the tenant site instead."""
+    provisioner = _read(PROVISIONER_FILE)
+    bootstrap = _read(BOOTSTRAP_FILE)
+    assert "bootstrap.run(site_name" not in provisioner
+    assert "bootstrap.run_bootstrap" in provisioner
+    assert "\"execute\"" in provisioner
+    assert "def run_bootstrap(" in bootstrap
+
+
+def test_bootstrap_seeds_erpnext_baseline_before_company():
+    """Regression: automated provisioning skips the ERPNext setup wizard, so a
+    fresh tenant has no Item Groups/UOMs/Warehouse Types and Company creation fails
+    (Warehouse Type 'Transit'). Bootstrap must seed the ERPNext baseline first and
+    give starter Items a stock_uom."""
+    src = _read(BOOTSTRAP_FILE)
+    assert "_ensure_erpnext_baseline()" in src
+    assert "install_fixtures" in src
+    assert "Warehouse Type" in src
+    assert "stock_uom" in src
+    # baseline must run before the company step
+    assert src.index("_ensure_erpnext_baseline()") < src.index("_ensure_company(ctx)")
+
+
+def test_workspace_hiding_uses_allowlist_model():
+    source = _read(WORKSPACE_HIDE_PATCH_FILE)
+    assert "ALLOWED_STANDARD_WORKSPACES" in source
+    assert "ALLOWED_MODULES" in source
+    assert "has_field(\"is_standard\")" in source
+    assert '"public"' in source
+    assert "frappe.db.set_value(\"Workspace\"" in source

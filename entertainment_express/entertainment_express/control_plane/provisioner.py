@@ -8,6 +8,7 @@ ISOLATION RULE: This is the ONLY control-plane code that touches tenant sites.
 Idempotency: Every step is safe to re-run. Already-completed steps are skipped.
 """
 
+import json
 import os
 import re
 import subprocess
@@ -21,7 +22,7 @@ RESERVED_SLUGS = frozenset([
 ])
 
 
-def validate_slug(slug: str) -> None:
+def validate_slug(slug: str, exclude_tenant_name: str | None = None) -> None:
     """
     Validate a tenant slug is DNS-safe, not reserved, and not already taken.
     Raises frappe.ValidationError on failure.
@@ -34,7 +35,8 @@ def validate_slug(slug: str) -> None:
         )
     if slug in RESERVED_SLUGS:
         frappe.throw(f"'{slug}' is a reserved slug.", frappe.ValidationError)
-    if frappe.db.exists("Tenant", slug):
+    existing = frappe.db.get_value("Tenant", {"tenant_slug": slug}, "name")
+    if existing and existing != exclude_tenant_name:
         frappe.throw(f"Slug '{slug}' is already taken.", frappe.ValidationError)
 
 
@@ -89,7 +91,7 @@ def _provision_create(job) -> None:
     _log(job, f"Provisioning site: {site_name}")
 
     # 1. Validate slug (belt-and-suspenders; was validated at Signup approve time too)
-    validate_slug(tenant.tenant_slug)
+    validate_slug(tenant.tenant_slug, exclude_tenant_name=tenant.name)
 
     # 2. Create site (idempotent)
     bench_root = _bench_root()
@@ -120,10 +122,21 @@ def _provision_create(job) -> None:
     _log(job, "Running migrate...")
     _bench_exec(job, ["bench", "--site", site_name, "migrate"])
 
-    # 5. Bootstrap tenant data
+    # 5. Bootstrap tenant data — run INSIDE the tenant site as a subprocess so the
+    #    control-plane job's own frappe context stays bound. Never call
+    #    bootstrap.run() in-process here: it does frappe.destroy() and would unbind
+    #    this job, leaving the Provisioning Job stuck in "running".
     _log(job, "Bootstrapping tenant...")
-    from entertainment_express.control_plane import bootstrap
-    bootstrap.run(site_name, tenant)
+    bootstrap_kwargs = json.dumps({
+        "company_name": tenant.company_name,
+        "primary_email": tenant.get("primary_email") or "",
+        "primary_contact": tenant.get("primary_contact") or "",
+    })
+    _bench_exec(job, [
+        "bench", "--site", site_name, "execute",
+        "entertainment_express.control_plane.bootstrap.run_bootstrap",
+        "--kwargs", bootstrap_kwargs,
+    ])
 
     # 6. Set host_name
     _bench_exec(job, [

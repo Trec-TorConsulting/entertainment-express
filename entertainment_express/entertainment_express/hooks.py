@@ -8,6 +8,19 @@ app_version = "0.0.1"
 
 required_apps = ["erpnext"]
 
+# First-login defaults for mobile entertainment operations.
+role_home_page = {
+    "EE Tenant Admin": "/app/workspace/entertainment-express",
+    "EE Sales": "/app/workspace/entertainment-express",
+    "EE Dispatcher": "/app/workspace/entertainment-express",
+    "EE Accounting": "/app/workspace/entertainment-express",
+    "EE Office": "/app/workspace/entertainment-express",
+    "EE Entertainer": "/app/workspace/entertainment-express",
+    "SaaS Operator": "/app/workspace/entertainment-express",
+}
+
+website_user_home_page = "/client"
+
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [
     "entertainment_express.security.request_guards.sanitize_backend_urls",

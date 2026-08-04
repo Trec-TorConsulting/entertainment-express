@@ -41,6 +41,22 @@
   },
   {
     "doctype": "Role",
+    "name": "EE Office",
+    "role_name": "EE Office",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Entertainer",
+    "role_name": "EE Entertainer",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
     "name": "EE Crew",
     "role_name": "EE Crew",
     "desk_access": 0,

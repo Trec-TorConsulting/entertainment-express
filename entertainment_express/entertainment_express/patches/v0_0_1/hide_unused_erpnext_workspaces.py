@@ -1,30 +1,54 @@
 import frappe
 
-# ERPNext ships a broad set of public Desk workspaces (supply-chain, manufacturing,
-# CRM, etc.). A mobile-entertainment SaaS does not use these, so we hide them from the
-# Desk sidebar to keep it focused on Entertainment Express. Hidden workspaces are still
-# reachable directly by URL — this only removes the sidebar clutter.
-HIDDEN_WORKSPACES = [
-    "Buying",
-    "Selling",
-    "Stock",
-    "Manufacturing",
-    "Assets",
-    "Quality",
-    "Projects",
-    "Support",
-    "CRM",
-]
+# Tenant desk should stay white-labeled and EE-focused. Under ee_focus_desk,
+# hide all standard non-EE workspaces except a tiny allowlist.
+ALLOWED_STANDARD_WORKSPACES = {
+    "Entertainment Express",
+    "Home",
+}
+
+ALLOWED_MODULES = {
+    "Entertainment Express Core",
+    "Control Plane",
+}
 
 
-def execute():
+def execute(force: bool = False):
     # Deployment-specific and opt-in: only hide workspaces when the site sets
     # ee_focus_desk. Keeps the app neutral for anyone who installs it elsewhere.
-    if not frappe.conf.get("ee_focus_desk"):
+    focus_enabled = frappe.conf.get("ee_focus_desk")
+    if focus_enabled is None:
+        focus_enabled = frappe.db.get_default("ee_focus_desk")
+    if not force and str(focus_enabled).lower() not in {"1", "true", "yes", "on"}:
         return
-    for name in HIDDEN_WORKSPACES:
-        if frappe.db.exists("Workspace", name):
-            # update_modified bumps the record's timestamp past the ERPNext source file
-            # so later migrates skip re-importing (which would otherwise un-hide it).
-            frappe.db.set_value("Workspace", name, "is_hidden", 1, update_modified=True)
+
+    has_is_standard = frappe.get_meta("Workspace").has_field("is_standard")
+    fields = ["name", "module", "public", "is_hidden"]
+    if has_is_standard:
+        fields.append("is_standard")
+
+    workspaces = frappe.get_all(
+        "Workspace",
+        fields=fields,
+        limit_page_length=2000,
+    )
+
+    for ws in workspaces:
+        if has_is_standard:
+            if not ws.get("is_standard"):
+                # Keep custom tenant workspaces visible unless the tenant chooses otherwise.
+                continue
+        elif not ws.get("public"):
+            # Older schemas may not expose is_standard; keep non-public workspaces visible.
+            continue
+
+        if ws.get("name") in ALLOWED_STANDARD_WORKSPACES:
+            continue
+
+        if ws.get("module") in ALLOWED_MODULES:
+            continue
+
+        # update_modified bumps timestamp past source import version to avoid re-import toggling.
+        frappe.db.set_value("Workspace", ws.get("name"), "is_hidden", 1, update_modified=True)
+
     frappe.clear_cache()

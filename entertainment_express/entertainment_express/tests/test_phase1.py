@@ -222,6 +222,35 @@ class TestContractAndProvisioning:
         with pytest.raises((frappe.ValidationError, Exception)):
             validate_slug("my_company")  # underscore
 
+    def test_slug_validation_allows_current_tenant_record(self, monkeypatch):
+        """Provisioning should not fail when the only matching slug is the same tenant."""
+        from entertainment_express.control_plane.provisioner import validate_slug
+
+        monkeypatch.setattr(
+            frappe.db,
+            "get_value",
+            lambda doctype, filters, fieldname: "tenant-acme"
+            if doctype == "Tenant" and isinstance(filters, dict) and filters.get("tenant_slug") == "acme-slug"
+            else None,
+        )
+
+        validate_slug("acme-slug", exclude_tenant_name="tenant-acme")
+
+    def test_slug_validation_rejects_other_tenant_duplicate(self, monkeypatch):
+        """Provisioning must still reject a slug that belongs to another tenant."""
+        from entertainment_express.control_plane.provisioner import validate_slug
+
+        monkeypatch.setattr(
+            frappe.db,
+            "get_value",
+            lambda doctype, filters, fieldname: "tenant-other"
+            if doctype == "Tenant" and isinstance(filters, dict) and filters.get("tenant_slug") == "acme-slug"
+            else None,
+        )
+
+        with pytest.raises((frappe.ValidationError, Exception)):
+            validate_slug("acme-slug", exclude_tenant_name="tenant-acme")
+
     def test_provisioning_job_state_transitions(self):
         """
         WHEN a Provisioning Job is queued, running, then succeeded,

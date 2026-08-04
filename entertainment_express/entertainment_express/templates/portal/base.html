@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2f1d4f">
+  <title>{{ seo_title or title or "Entertainment Express" }}</title>
+  <meta name="description" content="{{ meta_description or 'Client portal for contracts, music planning, and payments.' }}">
+  <link rel="canonical" href="{{ canonical or request.url }}">
+  <link rel="preload" href="/assets/entertainment_express/marketing/marketing.css?v=0.0.10" as="style">
+  <link rel="stylesheet" href="/assets/entertainment_express/marketing/marketing.css?v=0.0.10">
+</head>
+<body>
+  <a class="ee-skip-link" href="#ee-main">Skip to content</a>
+  <header class="ee-header" role="banner">
+    <div class="ee-shell ee-header-inner">
+      <a class="ee-brand" href="/client" aria-label="Entertainment Express client portal">
+        <span class="ee-brand-mark">EE</span>
+        <span class="ee-brand-text">Client Portal</span>
+      </a>
+      <nav class="ee-nav" aria-label="Client navigation">
+        <ul class="ee-nav-menu">
+          <li><a href="/client/sign">Contract</a></li>
+          <li><a href="/client/pay">Payments</a></li>
+          <li><a href="/client/music">Music</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="ee-main" id="ee-main" role="main">
+    <section class="ee-shell ee-panel">
+      <p class="eyebrow">Client Portal</p>
+      <h1>Secure customer workspace</h1>
+      <p>Access contracts, payment milestones, and planning details in one clean branded portal.</p>
+    </section>
+
+    {% block portal_content %}{% endblock %}
+  </main>
+
+  <footer class="ee-footer" role="contentinfo">
+    <div class="ee-shell ee-footer-inner">
+      <div>
+        <p>&copy; {{ frappe.utils.now_datetime().year }} Entertainment Express</p>
+        <ul class="ee-footer-links">
+          <li><a href="/legal/terms">Terms</a></li>
+          <li><a href="/legal/privacy">Privacy</a></li>
+          <li><a href="/legal/cookies">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script type="text/javascript" src="/assets/frappe/dist/js/frappe-web.bundle.CKCA67WU.js"></script>
+</body>
+</html>

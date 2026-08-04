@@ -1,23 +1,24 @@
----
-base_template: "templates/web.html"
-no_cache: 1
----
-<div class="container mt-4 mb-5" style="max-width:720px">
-  <h2>Music Planning</h2>
-  <p class="text-muted">Use your event planning link from your account manager to submit playlist details.</p>
+{% extends "entertainment_express/templates/portal/base.html" %}
 
-  <div class="card mt-3">
-    <div class="card-body">
-      <h5 class="card-title">What to Prepare</h5>
-      <ul class="mb-0">
+{% block portal_content %}
+<section class="ee-shell ee-section-spaced">
+  <div class="ee-panel" style="max-width:720px;margin:0 auto;">
+    <p class="eyebrow">Client Portal</p>
+    <h2>Music Planning</h2>
+    <p>Use your event planning link from your account manager to submit playlist details.</p>
+
+    <div class="ee-panel ee-section-spaced">
+      <h3>What to Prepare</h3>
+      <ul class="ee-checklist">
         <li>Must-play songs</li>
         <li>Do-not-play songs</li>
         <li>Special moments and timing notes</li>
       </ul>
     </div>
-  </div>
 
-  <div class="alert alert-info mt-3 mb-0">
-    If you do not have your planning link yet, contact your coordinator and ask for your event portal access.
+    <div class="ee-panel ee-section-spaced">
+      <p class="ee-proof-title">If you do not have your planning link yet, contact your coordinator and ask for your event portal access.</p>
+    </div>
   </div>
-</div>
+</section>
+{% endblock %}
