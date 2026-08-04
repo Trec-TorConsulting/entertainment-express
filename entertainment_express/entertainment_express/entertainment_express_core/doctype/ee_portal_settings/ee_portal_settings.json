@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-08-04 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "portal_mode",
+  "section_branding",
+  "brand_name",
+  "brand_logo",
+  "brand_color",
+  "section_flags",
+  "feature_flags"
+ ],
+ "fields": [
+  {
+    "default": "enforce",
+   "fieldname": "portal_mode",
+   "fieldtype": "Select",
+   "label": "Portal Mode",
+   "options": "off\nwarn\nenforce",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_branding",
+   "fieldtype": "Section Break",
+   "label": "Branding"
+  },
+  {
+   "fieldname": "brand_name",
+   "fieldtype": "Data",
+   "label": "Brand Name"
+  },
+  {
+   "fieldname": "brand_logo",
+   "fieldtype": "Attach Image",
+   "label": "Brand Logo"
+  },
+  {
+   "fieldname": "brand_color",
+   "fieldtype": "Data",
+   "label": "Brand Color"
+  },
+  {
+   "fieldname": "section_flags",
+   "fieldtype": "Section Break",
+   "label": "Feature Flags"
+  },
+  {
+   "description": "JSON object of portal feature flags.",
+   "fieldname": "feature_flags",
+   "fieldtype": "Small Text",
+   "label": "Feature Flags"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-04 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Portal Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Office",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -152,6 +152,21 @@ provisioning, email notifications). Enhanced later by phase-8 (marketing-engagem
 control plane).
 **Folder:** [`phase-19-marketing-website/`](phase-19-marketing-website/)
 
+## Phase 20 — Role-Based Portals ✅
+**Goal:** Modernize the experience layer by giving each audience its own purpose-built portal over the **one**
+existing backend, and reserve the operator Desk for the platform operator: `/app` → `System Manager`/
+`SaaS Operator` only; `/owner` → `EE Tenant Admin` business cockpit; `/employee` → role-adaptive staff/field
+operations workspace; `/client` → customers (unchanged). Two new React+Vite+TS SPAs (matching the existing
+customer/dispatch portals) served by role-guarded Frappe `www` host pages, a shared portal UI kit, a small set
+of read-optimized aggregate APIs, one optional `EE Portal Settings` Single, and a **staged, reversible**
+enforcement flag (`off → warn → enforce`) so no owner/employee is locked out before parity. No new backend,
+DB, service, or namespace.
+**Specs:** `owner-portal`, `employee-portal`, `identity-access` (tiered boundary + role-based landing),
+`customer-portal` (alignment only). **Depends on:** phase-1 (identity/roles, provisioning, `/client`); reuses
+phase-2 dispatch and the phase-4/9 mobile API. Enhanced later by phase-10 (BI feeds the cockpit) and phase-12
+(full control plane).
+**Folder:** [`phase-20-role-based-portals/`](phase-20-role-based-portals/)
+
 ---
 
 ## Traceability

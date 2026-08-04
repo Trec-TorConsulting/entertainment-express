@@ -25,9 +25,11 @@ COPY entertainment_express/license.txt \
 COPY entertainment_express/README.md \
      /home/frappe/frappe-bench/apps/entertainment_express/README.md
 
-# Install the app into the bench virtualenv (editable so Frappe resolves it).
+# Install the app into the bench virtualenv (editable so Frappe resolves it)
+# and include pytest so bench run-tests works in newly rolled pods.
 RUN /home/frappe/frappe-bench/env/bin/pip install --no-cache-dir \
-    -e /home/frappe/frappe-bench/apps/entertainment_express
+     -e /home/frappe/frappe-bench/apps/entertainment_express \
+     pytest
 
 # Register the app. The base image's apps.txt has no trailing newline, so
 # normalize with awk (guarantees a newline per entry) and only append if missing

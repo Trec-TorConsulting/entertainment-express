@@ -9,6 +9,8 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { create } from 'zustand';
 import axios from 'axios';
+import { AppShell, DataTable, EmptyState } from '../../portal-kit/src';
+import '../../portal-kit/src/tokens.css';
 
 // ── API Client ────────────────────────────────────────────────────────────
 
@@ -63,12 +65,12 @@ export const Dashboard: React.FC = () => {
     { staleTime: 60000 }
   );
 
-  if (isLoading) return <div className="p-8 text-center">Loading bookings...</div>;
-  if (error) return <div className="p-8 text-red-600">Error loading bookings</div>;
+  if (isLoading) return <AppShell title="Client Portal"><EmptyState title="Loading" message="Loading bookings..." /></AppShell>;
+  if (error) return <AppShell title="Client Portal"><EmptyState title="Error" message="Error loading bookings" /></AppShell>;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+    <AppShell title="Client Portal">
+      <div className="max-w-6xl mx-auto px-4" style={{ display: 'grid', gap: '1rem' }}>
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900">
@@ -101,14 +103,22 @@ export const Dashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* Bookings List */}
-        <div className="space-y-4">
-          {bookings?.data?.map((booking: any) => (
-            <BookingCard key={booking.name} booking={booking} />
-          ))}
-        </div>
+        {bookings?.data?.length ? (
+          <DataTable
+            id="client-bookings"
+            columns={[
+              { key: 'name', label: 'Booking' },
+              { key: 'status', label: 'Status' },
+              { key: 'event_date', label: 'Date' },
+              { key: 'venue_address', label: 'Venue' },
+            ]}
+            rows={bookings.data}
+          />
+        ) : (
+          <EmptyState title="No Bookings Yet" message="Your upcoming events will appear here." />
+        )}
       </div>
-    </div>
+    </AppShell>
   );
 };
 

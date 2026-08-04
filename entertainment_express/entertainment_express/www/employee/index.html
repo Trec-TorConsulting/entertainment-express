@@ -1,0 +1,16 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Employee Portal{% endblock %}
+
+{% block page_content %}
+<section class="container" style="padding: 2rem 1rem;">
+  <div id="root" data-portal="employee"></div>
+  <script>
+    window.eePortalBootstrap = {{ portal_bootstrap | tojson }};
+  </script>
+  <script type="module" src="/assets/entertainment_express/employee/main.js"></script>
+  <noscript>
+    <p>Employee portal requires JavaScript.</p>
+  </noscript>
+</section>
+{% endblock %}

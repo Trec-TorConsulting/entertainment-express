@@ -8,6 +8,8 @@ desk. This runs after every migrate (idempotent).
 
 import frappe
 
+from entertainment_express.setup.fiscal_year import ensure_active_fiscal_year
+
 # Module Onboarding records owned by Entertainment Express (kept visible). Empty
 # for now — add EE onboarding names here when a branded guide is introduced.
 EE_ONBOARDINGS: frozenset[str] = frozenset()
@@ -27,5 +29,8 @@ def hide_third_party_onboarding() -> None:
         if name in EE_ONBOARDINGS:
             continue
         frappe.db.set_value("Module Onboarding", name, "is_complete", 1, update_modified=False)
+
+    company_name = frappe.db.get_single_value("Global Defaults", "default_company")
+    ensure_active_fiscal_year(company_name=company_name)
 
     frappe.db.commit()

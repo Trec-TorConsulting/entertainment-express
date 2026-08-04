@@ -15,6 +15,8 @@ the control-plane job's frappe context):
 import frappe
 from frappe.utils import now_datetime
 
+from entertainment_express.setup.fiscal_year import ensure_active_fiscal_year
+
 
 def run(site_name: str, tenant_doc) -> None:
     """
@@ -68,6 +70,7 @@ def _run_steps(ctx) -> None:
     _ensure_erpnext_baseline()
     _ensure_setup_complete()
     _ensure_company(ctx)
+    _ensure_current_fiscal_year(ctx)
     _ensure_roles_permissions()
     _ensure_focus_desk_mode()
     _ensure_default_service_area()
@@ -119,6 +122,10 @@ def _ensure_company(tenant_doc) -> None:
     })
     company.insert(ignore_permissions=True)
     frappe.db.set_single_value("Global Defaults", "default_company", company_name)
+
+
+def _ensure_current_fiscal_year(tenant_doc) -> None:
+    ensure_active_fiscal_year(company_name=tenant_doc.company_name)
 
 
 def _ensure_roles_permissions() -> None:

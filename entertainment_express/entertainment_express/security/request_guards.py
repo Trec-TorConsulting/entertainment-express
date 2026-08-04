@@ -6,10 +6,14 @@ import frappe
 from frappe import _
 
 
-INTERNAL_BACKEND_ROLES = {
+SUPER_ADMIN_ROLES = {
     "System Manager",
     "SaaS Operator",
+}
+OWNER_ROLES = {
     "EE Tenant Admin",
+}
+EMPLOYEE_ROLES = {
     "EE Sales",
     "EE Dispatcher",
     "EE HR",
@@ -18,12 +22,23 @@ INTERNAL_BACKEND_ROLES = {
     "EE Entertainer",
     "EE Crew",
 }
+CUSTOMER_ROLES = {
+    "EE Customer",
+}
+
+INTERNAL_BACKEND_ROLES = SUPER_ADMIN_ROLES | OWNER_ROLES | EMPLOYEE_ROLES
 
 BACKEND_PREFIXES = (
     "/app",
     "/desk",
     "/api/method/frappe.desk",
 )
+
+HEALTH_ENDPOINTS = {
+    "/api/method/ping",
+    "/api/method/frappe.utils.health.ping",
+    "/api/method/frappe.health.get_health_status",
+}
 
 # Any direct branded framework route in backend navigation should be rewritten
 # to the EE workspace entry route.
@@ -33,21 +48,76 @@ BRANDED_BACKEND_PATH_PARTS = (
     "/frappe",
 )
 EE_BACKEND_HOME = "/app/workspace/entertainment-express"
+EE_OPERATOR_HOME = EE_BACKEND_HOME
+EE_OWNER_PORTAL = "/owner"
+EE_EMPLOYEE_PORTAL = "/employee"
 EE_CLIENT_PORTAL = "/client"
 EE_LOGIN = "/login"
 # Public site roots: EE SaaS marketing on the control plane, the tenant's own
 # branded landing on a tenant site.
 EE_MARKETING_HOME = "index"
 TENANT_HOME = "tenant_home"
+PORTAL_MODE_OPTIONS = {"off", "warn", "enforce"}
+
+
+def _get_user_roles(user: str) -> set[str]:
+    if not user or user == "Guest":
+        return set()
+    return set(frappe.get_roles(user) or [])
+
+
+def _is_super_admin(roles: set[str]) -> bool:
+    return bool(roles.intersection(SUPER_ADMIN_ROLES))
+
+
+def _is_owner(roles: set[str]) -> bool:
+    return bool(roles.intersection(OWNER_ROLES))
+
+
+def _is_employee(roles: set[str]) -> bool:
+    return bool(roles.intersection(EMPLOYEE_ROLES))
+
+
+def get_portal_mode() -> str:
+    mode = (
+        frappe.db.get_single_value("EE Portal Settings", "portal_mode")
+        or frappe.conf.get("ee_portal_mode")
+        or "warn"
+    )
+    mode = str(mode).strip().lower()
+    return mode if mode in PORTAL_MODE_OPTIONS else "warn"
+
+
+def resolve_home_portal(user: str) -> str:
+    roles = _get_user_roles(user)
+    if _is_super_admin(roles):
+        return EE_OPERATOR_HOME
+    if _is_owner(roles):
+        return EE_OWNER_PORTAL
+    if _is_employee(roles):
+        return EE_EMPLOYEE_PORTAL
+    return EE_CLIENT_PORTAL
 
 
 def _is_backend_path(path: str) -> bool:
     return any(path == prefix or path.startswith(prefix + "/") for prefix in BACKEND_PREFIXES)
 
 
+def _is_health_path(path: str) -> bool:
+    return path in HEALTH_ENDPOINTS
+
+
 def _redirect(location: str) -> None:
     frappe.flags.redirect_location = location
     raise frappe.Redirect(302)
+
+
+def _rewrite_path(location: str) -> None:
+    req = getattr(frappe.local, "request", None)
+    if not req:
+        return
+    req.environ["PATH_INFO"] = location
+    frappe.local.path = location.strip("/")
 
 
 def sanitize_backend_urls() -> None:
@@ -57,65 +127,89 @@ def sanitize_backend_urls() -> None:
         return
 
     path = (getattr(req, "path", "") or "").strip() or "/"
+    if _is_health_path(path):
+        return
+
     user = frappe.session.user or "Guest"
+    roles = _get_user_roles(user)
+    mode = get_portal_mode()
+
+    def _resolve_enforced_target() -> str | None:
+        if user == "Guest":
+            return EE_CLIENT_PORTAL
+        if _is_super_admin(roles):
+            return None
+        if mode != "enforce":
+            return None
+        if _is_owner(roles):
+            return EE_OWNER_PORTAL
+        if _is_employee(roles):
+            return EE_EMPLOYEE_PORTAL
+        return EE_CLIENT_PORTAL
+
+    enforced_target = _resolve_enforced_target()
 
     # Frappe/ERPNext "Home" desk route resolves through Page doctype and can
     # leak framework UX/permissions. Keep all home entries on the EE workspace.
     if path == "/app/home" or path.startswith("/app/home/"):
-        if user == "Guest":
-            req.environ["PATH_INFO"] = EE_CLIENT_PORTAL
-            frappe.local.path = EE_CLIENT_PORTAL.strip("/")
+        if enforced_target:
+            _rewrite_path(enforced_target)
             return
-        req.environ["PATH_INFO"] = EE_BACKEND_HOME
-        frappe.local.path = EE_BACKEND_HOME.strip("/")
+        _rewrite_path(EE_BACKEND_HOME)
         return
 
     if path in {"/app", "/app/", "/desk", "/desk/"}:
-        if user == "Guest":
+        if enforced_target:
             # before_request runs under frappe.app.application; raising Redirect here
             # becomes a 500. Rewrite the resolved path instead.
-            req.environ["PATH_INFO"] = EE_CLIENT_PORTAL
-            frappe.local.path = EE_CLIENT_PORTAL.strip("/")
+            _rewrite_path(enforced_target)
             return
         if path in {"/desk", "/desk/"}:
-            req.environ["PATH_INFO"] = EE_BACKEND_HOME
-            frappe.local.path = EE_BACKEND_HOME.strip("/")
+            _rewrite_path(EE_BACKEND_HOME)
             return
 
     if not path.startswith("/app") and not path.startswith("/desk"):
         return
 
+    if enforced_target:
+        _rewrite_path(enforced_target)
+        return
+
     lowered = path.lower()
     if any(token in lowered for token in BRANDED_BACKEND_PATH_PARTS):
-        req.environ["PATH_INFO"] = EE_BACKEND_HOME
-        frappe.local.path = EE_BACKEND_HOME.strip("/")
+        _rewrite_path(EE_BACKEND_HOME)
 
 
 def enforce_backend_boundary() -> None:
     """
-    Restrict Desk/backend entry points to owner/employee accounts only.
-    Guests still follow normal login behavior; logged-in non-staff accounts are denied.
+    Restrict deep Desk/backend entry points to super-admin accounts in enforce mode.
+    Non-enforced modes keep legacy behavior while portals reach parity.
     """
     req = getattr(frappe.local, "request", None)
     if not req:
         return
 
     path = (getattr(req, "path", "") or "").strip() or "/"
+    if _is_health_path(path):
+        return
+
     if not _is_backend_path(path):
+        return
+
+    if get_portal_mode() != "enforce":
         return
 
     user = frappe.session.user or "Guest"
     if user in {"Guest", "Administrator"}:
         return
 
-    roles = set(frappe.get_roles(user) or [])
-    if roles.intersection(INTERNAL_BACKEND_ROLES):
+    roles = _get_user_roles(user)
+    if _is_super_admin(roles):
         return
 
-    frappe.throw(
-        _("Backend access is restricted to Entertainment Express owners and employees. Use the /client portal."),
-        frappe.PermissionError,
-    )
+    # Keep users inside their permitted portal boundary instead of surfacing
+    # a hard permission error when stale /app or desk API paths are hit.
+    _rewrite_path(resolve_home_portal(user))
 
 
 def require_client_login() -> None:
@@ -130,6 +224,28 @@ def require_client_login() -> None:
     req = getattr(frappe.local, "request", None)
     dest = (getattr(req, "path", None) or EE_CLIENT_PORTAL) if req else EE_CLIENT_PORTAL
     _redirect(f"{EE_LOGIN}?redirect-to={quote(dest, safe='/')}")
+
+
+def require_owner_login() -> None:
+    user = frappe.session.user or "Guest"
+    if user == "Guest":
+        req = getattr(frappe.local, "request", None)
+        dest = (getattr(req, "path", None) or EE_OWNER_PORTAL) if req else EE_OWNER_PORTAL
+        _redirect(f"{EE_LOGIN}?redirect-to={quote(dest, safe='/')}")
+
+    if resolve_home_portal(user) != EE_OWNER_PORTAL:
+        _redirect(resolve_home_portal(user))
+
+
+def require_employee_login() -> None:
+    user = frappe.session.user or "Guest"
+    if user == "Guest":
+        req = getattr(frappe.local, "request", None)
+        dest = (getattr(req, "path", None) or EE_EMPLOYEE_PORTAL) if req else EE_EMPLOYEE_PORTAL
+        _redirect(f"{EE_LOGIN}?redirect-to={quote(dest, safe='/')}")
+
+    if resolve_home_portal(user) != EE_EMPLOYEE_PORTAL:
+        _redirect(resolve_home_portal(user))
 
 
 def _is_control_plane() -> bool:
@@ -148,7 +264,5 @@ def get_website_user_home_page(user: str | None) -> str | None:
     only governs the public site root and "View Website".
     """
     if user and user != "Guest":
-        roles = set(frappe.get_roles(user) or [])
-        if not roles.intersection(INTERNAL_BACKEND_ROLES):
-            return EE_CLIENT_PORTAL
+        return resolve_home_portal(user)
     return EE_MARKETING_HOME if _is_control_plane() else TENANT_HOME

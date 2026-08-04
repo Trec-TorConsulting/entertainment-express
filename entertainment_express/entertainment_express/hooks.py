@@ -22,6 +22,7 @@ before_request = [
 
 # Whitelisted method overrides
 override_whitelisted_methods = {
+    "ping": "entertainment_express.api.health.ping",
     "frappe.desk.desktop.get_workspace_sidebar_items": "entertainment_express.security.workspace_ui.get_workspace_sidebar_items",
 }
 
@@ -59,6 +60,7 @@ fixtures = [
     },
     {"dt": "Email Group", "filters": [["name", "=", "EE Newsletter"]]},
     {"dt": "Marketing Settings", "filters": [["name", "=", "Marketing Settings"]]},
+    {"dt": "EE Portal Settings", "filters": [["name", "=", "EE Portal Settings"]]},
 ]
 
 # After install: create custom fields on ERPNext DocTypes
@@ -101,6 +103,8 @@ website_route_rules = [
     {"from_route": "/book", "to_route": "book"},
     {"from_route": "/request-quote", "to_route": "request-quote"},
     {"from_route": "/signup", "to_route": "signup"},
+    {"from_route": "/owner/<path:app_path>", "to_route": "owner"},
+    {"from_route": "/employee/<path:app_path>", "to_route": "employee"},
     {"from_route": "/solutions/djs", "to_route": "solutions?vertical=djs"},
     {"from_route": "/solutions/rentals", "to_route": "solutions?vertical=rentals"},
     {"from_route": "/solutions/photo-booths", "to_route": "solutions?vertical=photo-booths"},
