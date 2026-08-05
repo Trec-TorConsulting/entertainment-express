@@ -67,7 +67,7 @@
 ## 6. Testing & Validation
 - [x] 6.1 Unit tests for mobile API v2 endpoints.
       **Accept:** 20+ tests passing (CRUD, permissions, pagination).
-- [ ] 6.2 Integration tests for crew app flow (shift accept → check-in → check-out).
+- [x] 6.2 Integration tests for crew app flow (shift accept → check-in → check-out).
       **Accept:** Full flow works end-to-end; booking status transitions correctly.
 - [ ] 6.3 Smoke test: crew app + customer portal + dispatch portal together.
       **Accept:** All three apps working simultaneously; WebSocket updates cross-apps.
