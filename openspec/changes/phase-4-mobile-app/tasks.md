@@ -73,7 +73,7 @@
       **Accept:** All three apps working simultaneously; WebSocket updates cross-apps.
 - [x] 6.4 Load test (100 concurrent users on dispatch board).
       **Accept:** WebSocket handles 100+ concurrent; <500ms latency.
-- [ ] 6.5 Mobile app testing (iOS simulator, Android emulator, physical device).
+- [x] 6.5 Mobile app testing (iOS simulator, Android emulator, physical device).
       **Accept:** App functions on iOS 14+ and Android 10+; no crashes.
 
 ## 7. Deployment

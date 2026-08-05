@@ -15,9 +15,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTabletMode": true,
+      "supportsTablet": true,
       "bundleIdentifier": "com.entertainmentexpress.crew",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "MinimumOSVersion": "14.0",
+        "NSLocationWhenInUseUsageDescription": "Allow Entertainment Express to access your location for check-in purposes.",
+        "NSCameraUsageDescription": "Allow Entertainment Express to capture check-in photos.",
+        "NSPhotoLibraryUsageDescription": "Allow Entertainment Express to access your photos for event documentation."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,12 +31,33 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.entertainmentexpress.crew",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "14.0"
+          },
+          "android": {
+            "minSdkVersion": 29,
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34
+          }
+        }
+      ],
       [
         "expo-location",
         {

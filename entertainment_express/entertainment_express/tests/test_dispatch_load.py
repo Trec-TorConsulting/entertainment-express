@@ -172,12 +172,13 @@ class TestDispatchLoad:
 if __name__ == "__main__":
     # Standalone runner when frappe is initialized externally via bench
     print(f"Running dispatch load test (n={CONCURRENCY}, budget={LATENCY_BUDGET_MS}ms)...")
-    for row in run_all():
+    results = run_all()
+    for row in results:
         status = "PASS" if row.get("within_budget") else "FAIL"
         print(
             f"  [{status}] {row['label']}: "
             f"p50={row.get('p50_ms')}ms p95={row.get('p95_ms')}ms "
             f"max={row.get('max_ms')}ms errors={row.get('errors')}"
         )
-    if not all(r.get("within_budget") for r in run_all() if "within_budget" in r):
+    if not all(r.get("within_budget") for r in results if "within_budget" in r):
         raise SystemExit(1)

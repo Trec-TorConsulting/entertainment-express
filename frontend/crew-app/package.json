@@ -11,7 +11,8 @@
     "web": "expo start --web",
     "type-check": "tsc --noEmit",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "qa": "bash scripts/qa-mobile.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
@@ -22,6 +23,7 @@
     "@tanstack/react-query": "^5.0.0",
     "axios": "^1.6.2",
     "expo": "^50.0.0",
+    "expo-build-properties": "^0.11.1",
     "expo-constants": "~15.4.0",
     "expo-device": "~5.9.0",
     "expo-file-system": "~16.0.0",
