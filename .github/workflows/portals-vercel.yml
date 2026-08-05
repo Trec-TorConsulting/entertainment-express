@@ -1,0 +1,131 @@
+name: Portal Static Hosting (Vercel)
+
+# Builds + optionally deploys customer/dispatch SPAs.
+# Domains: customer.entertainment-express.app / dispatch.entertainment-express.app
+#
+# Secrets for live deploy:
+#   VERCEL_TOKEN, VERCEL_ORG_ID
+#   VERCEL_PROJECT_ID_CUSTOMER, VERCEL_PROJECT_ID_DISPATCH
+# Project env (Vercel dashboard): VITE_API_BASE_URL
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/customer-portal/**"
+      - "frontend/dispatch-portal/**"
+      - ".github/workflows/portals-vercel.yml"
+
+jobs:
+  build-customer:
+    name: Build customer portal
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/customer-portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/customer-portal/package-lock.json
+      - run: npm ci
+      - run: npm run build:standalone
+      - uses: actions/upload-artifact@v4
+        with:
+          name: customer-portal-dist
+          path: frontend/customer-portal/dist
+
+  build-dispatch:
+    name: Build dispatch portal
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/dispatch-portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/dispatch-portal/package-lock.json
+      - run: npm ci
+      - run: npm run build:standalone
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dispatch-portal-dist
+          path: frontend/dispatch-portal/dist
+
+  deploy-customer:
+    name: Deploy customer → Vercel
+    needs: build-customer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/customer-portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/customer-portal/package-lock.json
+      - run: npm ci
+      - name: Gate on Vercel secrets
+        id: gate
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CUSTOMER }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Vercel secrets missing — skipping deploy (build artifact retained)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy production
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CUSTOMER }}
+        run: npx vercel deploy --prod --yes --token="$VERCEL_TOKEN"
+
+  deploy-dispatch:
+    name: Deploy dispatch → Vercel
+    needs: build-dispatch
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/dispatch-portal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/dispatch-portal/package-lock.json
+      - run: npm ci
+      - name: Gate on Vercel secrets
+        id: gate
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DISPATCH }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Vercel secrets missing — skipping deploy (build artifact retained)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy production
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DISPATCH }}
+        run: npx vercel deploy --prod --yes --token="$VERCEL_TOKEN"

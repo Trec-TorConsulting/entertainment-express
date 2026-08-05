@@ -10,7 +10,7 @@ import axios from 'axios';
 import io, { Socket } from 'socket.io-client';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     Authorization: `Bearer ${localStorage.getItem('jwt_token') || ''}`,
   },

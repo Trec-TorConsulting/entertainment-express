@@ -15,7 +15,7 @@ import '../../portal-kit/src/tokens.css';
 // ── API Client ────────────────────────────────────────────────────────────
 
 const api = axios.create({
-  baseURL: '/api/v2',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v2',
   headers: {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
