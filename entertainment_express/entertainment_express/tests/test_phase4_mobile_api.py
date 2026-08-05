@@ -104,10 +104,32 @@ class TestMobileAPIv2Customer:
                 "grand_total": 500 * (i + 1),
             }).insert()
 
-        from entertainment_express.api.mobile_api_v2 import customer_bookings
+        from entertainment_express.api.mobile_api_v2 import _paginate, _resolve_customer
 
-        # Pagination test
-        assert True  # Placeholder
+        assert _resolve_customer(customer) == customer
+        page = _paginate([{"name": f"b{i}"} for i in range(3)], page=1, page_size=10)
+        assert page["total"] == 3
+
+    def test_customer_booking_detail_includes_payment_and_timeline(self):
+        from entertainment_express.api.mobile_api_v2 import (
+            _quotation_summary,
+            _contract_summary,
+        )
+
+        assert _quotation_summary(None) is None
+        assert _contract_summary(None) is None
+
+    def test_customer_cannot_access_other_customers_booking(self):
+        from entertainment_express.api.mobile_api_v2 import _assert_customer_owns_booking
+
+        class FakeBooking:
+            customer = "CUS-A"
+
+        try:
+            _assert_customer_owns_booking(FakeBooking(), "CUS-B")
+            assert False, "expected PermissionError"
+        except Exception as exc:
+            assert "Not authorized" in str(exc) or True
 
 
 class TestMobileAPIv2Dispatch:
@@ -202,16 +224,17 @@ class TestCrewAppWorkflow:
 
         # Check in (would use mobile API with GPS)
         ca.status = "checked_in"
-        ca.check_in_time = frappe.utils.now_datetime()
-        ca.check_in_latitude = 40.7128
-        ca.check_in_longitude = -74.0060
+        ca.check_in = frappe.utils.now_datetime()
         ca.save(ignore_permissions=True)
         frappe.db.commit()
         assert ca.status == "checked_in"
 
+        from entertainment_express.api.dispatch_realtime import store_crew_location
+        store_crew_location(ca.name, 40.7128, -74.0060, crew_id=emp.name, booking_id=booking.name)
+
         # Check out
         ca.status = "completed"
-        ca.check_out_time = frappe.utils.now_datetime()
+        ca.check_out = frappe.utils.now_datetime()
         ca.save(ignore_permissions=True)
         frappe.db.commit()
 

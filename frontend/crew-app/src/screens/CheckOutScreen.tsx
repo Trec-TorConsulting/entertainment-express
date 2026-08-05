@@ -25,7 +25,7 @@ interface CheckOutScreenProps {
   route: {
     params: {
       shiftId: string;
-      checkInTime: string;
+      checkInTime?: string;
     };
   };
   navigation: any;
@@ -83,15 +83,7 @@ export default function CheckOutScreen({ route, navigation }: CheckOutScreenProp
         console.warn('[CheckOut] API failed, storing offline:', apiError.message);
 
         // Store offline
-        const actionId = `checkout_${shiftId}_${Date.now()}`;
-        await storePendingAction({
-          id: actionId,
-          action_type: 'checkout',
-          entity_id: shiftId,
-          payload: JSON.stringify(checkOutData),
-          created_at: new Date().toISOString(),
-          synced: false,
-        });
+        await storePendingAction('checkout', shiftId, checkOutData);
 
         Alert.alert(
           '✓ Check-Out Saved',

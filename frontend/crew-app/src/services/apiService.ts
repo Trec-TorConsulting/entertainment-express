@@ -6,7 +6,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '../store/authStore';
-import { storePendingAction, getUnsyncedActions, markActionSynced } from './databaseService';
+import { storePendingAction, syncOfflineActions as replayOfflineQueue } from './databaseService';
 
 const API_BASE_URL = 'https://api.entertainmentexpress.com/api/v2';
 const MAX_RETRIES = 3;
@@ -179,31 +179,10 @@ const queueOfflineAction = async (
  */
 export const syncOfflineActions = async (): Promise<void> => {
   try {
-    const actions = await getUnsyncedActions();
-    
-    if (actions.length === 0) {
-      console.log('[API] No offline actions to sync');
-      return;
-    }
-
-    console.log(`[API] Syncing ${actions.length} offline actions...`);
-
-    for (const action of actions) {
-      try {
-        const config = {
-          method: action.action_type.toLowerCase(),
-          url: action.entity_id,
-          data: action.payload.data,
-        };
-
-        const response = await apiClient(config);
-        await markActionSynced(action.id);
-        console.log('[API] Synced action:', action.id);
-      } catch (error) {
-        console.error('[API] Failed to sync action:', action.id, error);
-        // Retry later
-      }
-    }
+    const result = await replayOfflineQueue(async (url, data) => {
+      return apiClient.post(url, data);
+    });
+    console.log(`[API] Offline sync complete: ${result.synced} synced, ${result.failed} failed`);
   } catch (error) {
     console.error('[API] Sync offline actions error:', error);
   }

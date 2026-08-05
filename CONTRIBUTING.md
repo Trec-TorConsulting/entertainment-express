@@ -49,9 +49,12 @@ Non-trivial work is **proposed as a spec before it is implemented**, using
 3. **Archive / sync** — once shipped, archive the change and sync deltas into the
    main specs.
 
-Prompt helpers for each step live in [`.github/prompts/`](.github/prompts). If a
-spec and `openspec/project.md` disagree, the project file wins unless a change
-proposal explicitly overrides it.
+Cursor Agent Skills for each step live in [`.cursor/skills/`](.cursor/skills/)
+(`openspec-propose`, `openspec-apply-change`, `openspec-explore`,
+`openspec-archive-change`, `openspec-sync-specs`). A persistent workflow rule is
+in [`.cursor/rules/openspec-workflow.mdc`](.cursor/rules/openspec-workflow.mdc).
+If a spec and `openspec/project.md` disagree, the project file wins unless a
+change proposal explicitly overrides it.
 
 ---
 

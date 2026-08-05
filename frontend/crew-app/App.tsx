@@ -11,12 +11,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { createNativeStackNavigator } from 'react-native-screens/native-stack';
 
 // Screens
 import ShiftListScreen from './src/screens/ShiftListScreen';
@@ -33,11 +32,13 @@ import SplashLoadingScreen from './src/screens/SplashLoadingScreen';
 // Services
 import { initializeNotifications, setupNotificationListeners } from './src/services/notificationService';
 import { initializeDatabase } from './src/services/databaseService';
+import { syncOfflineActions } from './src/services/apiService';
 import { useAuthStore } from './src/store/authStore';
+import { AppState, AppStateStatus } from 'react-native';
 
 // Configure notification handler
 Notifications.setNotificationHandler({
-  handleNotification: async (notification) => ({
+  handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
@@ -65,9 +66,9 @@ export type TimesheetsStackParamList = {
 };
 
 // Create navigators
-const Stack = createStackNavigator<RootStackParamList>();
-const ShiftsStack = createStackNavigator<ShiftsStackParamList>();
-const TimesheetsStack = createStackNavigator<TimesheetsStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const ShiftsStack = createNativeStackNavigator<ShiftsStackParamList>();
+const TimesheetsStack = createNativeStackNavigator<TimesheetsStackParamList>();
 const Tab = createBottomTabNavigator();
 
 /**
@@ -234,6 +235,23 @@ export default function App() {
     initializeApp();
   }, []);
 
+  // Replay offline queue when the app returns to foreground
+  useEffect(() => {
+    if (!isReady || !token) return;
+
+    const onChange = (state: AppStateStatus) => {
+      if (state === 'active') {
+        syncOfflineActions().catch((err) =>
+          console.warn('[App] Offline sync failed:', err)
+        );
+      }
+    };
+
+    const sub = AppState.addEventListener('change', onChange);
+    syncOfflineActions().catch(() => undefined);
+    return () => sub.remove();
+  }, [isReady, token]);
+
   // Setup notification listeners
   useEffect(() => {
     if (!isReady) return;
@@ -269,7 +287,7 @@ export default function App() {
   }
 
   // Linking configuration for deep links
-  const linking = {
+  const linking: any = {
     prefixes: ['entertainment-express://', 'https://entertainmentexpress.com'],
     config: {
       screens: {
@@ -296,7 +314,7 @@ export default function App() {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          cardStyle: { backgroundColor: '#fff' },
+          contentStyle: { backgroundColor: '#fff' },
         }}
       >
         {token ? (

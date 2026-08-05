@@ -72,10 +72,7 @@ export const setupNotificationListeners = () => {
   const receivedListener = Notifications.addNotificationReceivedListener(
     (notification) => {
       console.log('[Notifications] Received:', notification);
-      
-      // Play sound
-      Notifications.playNotificationSoundAsync();
-      
+
       // Show local notification
       showLocalNotification(
         notification.request.content.title || 'Entertainment Express',

@@ -126,19 +126,19 @@ export default function RunSheetScreen({ route, navigation }: RunSheetScreenProp
     ? [
         {
           title: '🎤 Audio Equipment',
-          data: runSheetData.equipment.filter((e) => e.category === 'audio'),
+          data: runSheetData.equipment.filter((e: any) => e.category === 'audio'),
         },
         {
           title: '💡 Lighting',
-          data: runSheetData.equipment.filter((e) => e.category === 'lighting'),
+          data: runSheetData.equipment.filter((e: any) => e.category === 'lighting'),
         },
         {
           title: '🎪 Staging',
-          data: runSheetData.equipment.filter((e) => e.category === 'staging'),
+          data: runSheetData.equipment.filter((e: any) => e.category === 'staging'),
         },
         {
           title: '📦 Miscellaneous',
-          data: runSheetData.equipment.filter((e) => e.category === 'misc'),
+          data: runSheetData.equipment.filter((e: any) => e.category === 'misc'),
         },
       ].filter((section) => section.data.length > 0)
     : [];

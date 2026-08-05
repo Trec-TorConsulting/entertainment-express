@@ -3,6 +3,7 @@
  * Handles crew location tracking, shift updates, at-risk alerts
  */
 
+import React from 'react';
 import io, { Socket } from 'socket.io-client';
 
 interface CrewLocation {

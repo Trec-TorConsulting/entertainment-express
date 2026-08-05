@@ -240,22 +240,39 @@ const CrewAssignmentPanel: React.FC<{ bookingId: string }> = ({ bookingId }) => 
  */
 const RunSheetPanel: React.FC<{ bookingId: string }> = ({ bookingId }) => {
   const generateMutation = useMutation(async () => {
-    await api.post(`/dispatch/generate-runsheet`, { booking_id: bookingId });
+    await api.post('/method/entertainment_express.api.dispatch.generate_run_sheet', null, {
+      params: { booking_name: bookingId },
+    });
   });
 
-  const { data: runsheet } = useQuery(
+  const publishMutation = useMutation(async () => {
+    await api.post('/method/entertainment_express.api.dispatch.publish_run_sheet', null, {
+      params: { booking_name: bookingId },
+    });
+  });
+
+  const { data: runsheet, refetch } = useQuery(
     ['runsheet', bookingId],
     async () => {
-      const res = await api.get(`/dispatch/runsheet/${bookingId}`);
-      return res.data.data;
+      const res = await api.get('/method/entertainment_express.api.dispatch.get_run_sheet', {
+        params: { booking_name: bookingId },
+      });
+      return res.data.message || res.data.data || res.data;
     }
   );
+
+  const checklist = runsheet?.checklist_items || runsheet?.checklist || [];
+  const doneCount = checklist.filter((i: any) => i.done || i.status === 'completed').length;
+  const completion = checklist.length ? Math.round((doneCount / checklist.length) * 100) : 0;
 
   return (
     <div className="space-y-4">
       {!runsheet ? (
         <button
-          onClick={() => generateMutation.mutate()}
+          onClick={async () => {
+            await generateMutation.mutateAsync();
+            await refetch();
+          }}
           disabled={generateMutation.isPending}
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:bg-gray-600"
         >
@@ -263,23 +280,41 @@ const RunSheetPanel: React.FC<{ bookingId: string }> = ({ bookingId }) => {
         </button>
       ) : (
         <div>
-          <h3 className="font-bold mb-3">Equipment Checklist</h3>
-          <div className="space-y-2">
-            {runsheet.checklist?.map((item: any) => (
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold">Equipment Checklist</h3>
+            <span className="text-sm text-gray-300">{completion}% complete</span>
+          </div>
+          <div className="w-full bg-gray-700 rounded h-2 mb-4">
+            <div className="bg-green-500 h-2 rounded" style={{ width: `${completion}%` }} />
+          </div>
+          <div className="space-y-2 mb-4">
+            {checklist.map((item: any, idx: number) => (
               <div
-                key={item.name}
+                key={item.name || idx}
                 className="flex items-center p-2 bg-gray-700 rounded"
               >
                 <input
                   type="checkbox"
-                  checked={item.status === 'completed'}
+                  checked={Boolean(item.done) || item.status === 'completed'}
                   readOnly
                   className="mr-3"
                 />
-                <span className="text-gray-300">{item.item}</span>
+                <span className="text-gray-300">{item.description || item.item || item.asset_name}</span>
               </div>
             ))}
           </div>
+          {!runsheet.published && (
+            <button
+              onClick={() => publishMutation.mutate()}
+              disabled={publishMutation.isPending}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-600"
+            >
+              {publishMutation.isPending ? 'Publishing...' : 'Publish to Crew'}
+            </button>
+          )}
+          {runsheet.published === 1 && (
+            <p className="text-green-400 text-sm">Published to assigned crew</p>
+          )}
         </div>
       )}
     </div>

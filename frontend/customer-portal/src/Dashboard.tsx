@@ -211,7 +211,7 @@ const CrewTrackingMap: React.FC<{ bookingId: string }> = ({ bookingId }) => {
         <div className="text-center">
           <div className="text-2xl mb-2">📍</div>
           <div className="text-gray-600">
-            {crewStatus?.filter((c) => c.latitude)?.length || 0} crew checked in
+            {crewStatus?.filter((c: { latitude?: number }) => c.latitude)?.length || 0} crew checked in
           </div>
         </div>
       </div>
@@ -273,7 +273,7 @@ const PaymentSection: React.FC<{ booking: any }> = ({ booking }) => {
 const MessagingSection: React.FC<{ bookingId: string }> = ({ bookingId }) => {
   const [message, setMessage] = useState('');
   const sendMutation = useMutation(async () => {
-    await api.post(`/booking/${bookingId}/message`, { message });
+    await api.post(`/customer/booking/${bookingId}/message`, { message });
     setMessage('');
   });
 

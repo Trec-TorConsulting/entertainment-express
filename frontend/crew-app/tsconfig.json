@@ -1,0 +1,14 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-native",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["jest"]
+  },
+  "include": ["App.tsx", "src/**/*"],
+  "exclude": ["node_modules", "src/screens/index.tsx", "src/screens/PlaceholderScreens.tsx"]
+}

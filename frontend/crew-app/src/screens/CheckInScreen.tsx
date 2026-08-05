@@ -203,7 +203,7 @@ export default function CheckInScreen({ route, navigation }: CheckInScreenProps)
               <DetailRow label="Longitude" value={location.coords.longitude.toFixed(6)} />
               <DetailRow
                 label="Accuracy"
-                value={`±${Math.round(location.coords.accuracy)}m`}
+                value={`±${Math.round(location.coords.accuracy ?? 0)}m`}
               />
               <DetailRow
                 label="Altitude"

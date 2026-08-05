@@ -12,14 +12,14 @@
 > 5. Fully-detailed proposals exist for **phase-0**, **phase-1**, and **phase-19**. Phases 2–18 are
 >    scoped here as summaries; before starting one, generate its `proposal.md`/`design.md`/`tasks.md`
 >    following the same pattern as phase-0/phase-1/phase-19, using the matching baseline spec as the
->    source of truth. You can also run `/opsx:propose` to scaffold them.
+>    source of truth. You can also ask Cursor to propose a change (openspec-propose skill) to scaffold them.
 
 > **Commands & workflow (spec-first model — important):**
 > - The **source of truth is the baseline specs** in [`openspec/specs/`](../specs). Changes
 >   (`phase-N-*/`) intentionally carry only `proposal.md` / `design.md` / `tasks.md` — they do **not**
 >   contain delta specs.
 > - **To start / continue building a phase:** `openspec status --change <phase-id> --json`, then work
->   its `tasks.md` (or run `/opsx:apply <phase-id>`). `applyRequires` is `["tasks"]`, which is satisfied.
+>   its `tasks.md` (or ask Cursor to apply the change via openspec-apply-change). `applyRequires` is `["tasks"]`, which is satisfied.
 > - **To validate:** use `openspec validate --specs` (validates all baseline specs). Do **not** expect
 >   `openspec validate <phase-id>` to pass — it reports "no deltas" by design, which is expected and is
 >   **not** an error to fix.

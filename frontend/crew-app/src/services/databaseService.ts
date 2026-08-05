@@ -1,14 +1,21 @@
 /**
- * Database Service - SQLite Offline Cache
- * Provides offline support with automatic sync when online
+ * Offline cache + sync queue for the crew app.
+ *
+ * Uses AsyncStorage (already required by Expo) so offline mode works on
+ * Expo SDK 50 without depending on expo-sqlite async APIs (SDK 51+).
  */
 
-import * as SQLite from 'expo-sqlite';
-import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const DB_NAME = 'entertainment_express.db';
+const KEYS = {
+  shifts: 'ee.offline.shifts',
+  runSheets: 'ee.offline.run_sheets',
+  checkIns: 'ee.offline.check_ins',
+  actions: 'ee.offline.pending_actions',
+  ready: 'ee.offline.ready',
+} as const;
 
-interface CachedShift {
+export interface CachedShift {
   id: string;
   name: string;
   booking_name: string;
@@ -17,17 +24,18 @@ interface CachedShift {
   role: string;
   venue: string;
   created_at: string;
+  updated_at?: string;
 }
 
-interface CachedRunSheet {
+export interface CachedRunSheet {
   id: string;
   booking_id: string;
-  content: string; // JSON stringified
+  content: string;
   created_at: string;
   synced: boolean;
 }
 
-interface CachedCheckIn {
+export interface CachedCheckIn {
   id: string;
   shift_id: string;
   latitude: number;
@@ -35,357 +43,194 @@ interface CachedCheckIn {
   timestamp: string;
   photo_uri?: string;
   synced: boolean;
+  created_at?: string;
 }
 
-let db: SQLite.SQLiteDatabase | null = null;
+export interface PendingAction {
+  id: string;
+  action_type: string;
+  entity_id: string;
+  payload: any;
+  created_at: string;
+  synced: boolean;
+}
 
-/**
- * Initialize database
- */
+async function readList<T>(key: string): Promise<T[]> {
+  const raw = await AsyncStorage.getItem(key);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeList<T>(key: string, items: T[]): Promise<void> {
+  await AsyncStorage.setItem(key, JSON.stringify(items));
+}
+
 export const initializeDatabase = async (): Promise<void> => {
-  try {
-    db = await SQLite.openDatabaseAsync(DB_NAME);
-
-    // Enable foreign keys
-    await db.runAsync('PRAGMA foreign_keys = ON');
-
-    // Create tables
-    await db.runAsync(`
-      CREATE TABLE IF NOT EXISTS shifts (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        booking_name TEXT NOT NULL,
-        status TEXT NOT NULL,
-        call_time TEXT,
-        role TEXT,
-        venue TEXT,
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-    `);
-
-    await db.runAsync(`
-      CREATE TABLE IF NOT EXISTS run_sheets (
-        id TEXT PRIMARY KEY,
-        booking_id TEXT NOT NULL,
-        content TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        synced INTEGER DEFAULT 0
-      );
-    `);
-
-    await db.runAsync(`
-      CREATE TABLE IF NOT EXISTS check_ins (
-        id TEXT PRIMARY KEY,
-        shift_id TEXT NOT NULL,
-        latitude REAL NOT NULL,
-        longitude REAL NOT NULL,
-        timestamp TEXT NOT NULL,
-        photo_uri TEXT,
-        synced INTEGER DEFAULT 0,
-        created_at TEXT NOT NULL
-      );
-    `);
-
-    await db.runAsync(`
-      CREATE TABLE IF NOT EXISTS pending_actions (
-        id TEXT PRIMARY KEY,
-        action_type TEXT NOT NULL,
-        entity_id TEXT NOT NULL,
-        payload TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        synced INTEGER DEFAULT 0
-      );
-    `);
-
-    // Create indexes for performance
-    await db.runAsync(`
-      CREATE INDEX IF NOT EXISTS idx_shifts_status ON shifts(status);
-      CREATE INDEX IF NOT EXISTS idx_check_ins_shift_id ON check_ins(shift_id);
-      CREATE INDEX IF NOT EXISTS idx_pending_actions_synced ON pending_actions(synced);
-    `);
-
-    console.log('[Database] Initialized successfully');
-  } catch (error) {
-    console.error('[Database] Initialization error:', error);
-    throw error;
-  }
-};
-
-/**
- * Cache a shift
- */
-export const cacheShift = async (shift: CachedShift): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const now = new Date().toISOString();
-    await db.runAsync(
-      `
-      INSERT OR REPLACE INTO shifts 
-      (id, name, booking_name, status, call_time, role, venue, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-      [
-        shift.id,
-        shift.name,
-        shift.booking_name,
-        shift.status,
-        shift.call_time,
-        shift.role,
-        shift.venue,
-        shift.created_at,
-        now,
-      ]
-    );
-  } catch (error) {
-    console.error('[Database] Cache shift error:', error);
-    throw error;
-  }
-};
-
-/**
- * Get cached shift
- */
-export const getCachedShift = async (shiftId: string): Promise<CachedShift | null> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const result = await db.getFirstAsync<CachedShift>(
-      'SELECT * FROM shifts WHERE id = ?',
-      [shiftId]
-    );
-    return result || null;
-  } catch (error) {
-    console.error('[Database] Get cached shift error:', error);
-    return null;
-  }
-};
-
-/**
- * Get all cached shifts
- */
-export const getAllCachedShifts = async (status?: string): Promise<CachedShift[]> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    let query = 'SELECT * FROM shifts ORDER BY call_time DESC';
-    const params: any[] = [];
-
-    if (status) {
-      query += ' WHERE status = ?';
-      params.push(status);
+  await AsyncStorage.setItem(KEYS.ready, new Date().toISOString());
+  // Ensure keys exist
+  for (const key of [KEYS.shifts, KEYS.runSheets, KEYS.checkIns, KEYS.actions]) {
+    const existing = await AsyncStorage.getItem(key);
+    if (existing == null) {
+      await AsyncStorage.setItem(key, '[]');
     }
-
-    const results = await db.allAsync<CachedShift>(query, params);
-    return results || [];
-  } catch (error) {
-    console.error('[Database] Get all cached shifts error:', error);
-    return [];
   }
+  console.log('[Database] Offline cache initialized (AsyncStorage)');
 };
 
-/**
- * Cache run sheet
- */
+export const cacheShift = async (shift: CachedShift): Promise<void> => {
+  const shifts = await readList<CachedShift>(KEYS.shifts);
+  const now = new Date().toISOString();
+  const next = shifts.filter((s) => s.id !== shift.id);
+  next.push({ ...shift, updated_at: now });
+  await writeList(KEYS.shifts, next);
+};
+
+export const getCachedShift = async (shiftId: string): Promise<CachedShift | null> => {
+  const shifts = await readList<CachedShift>(KEYS.shifts);
+  return shifts.find((s) => s.id === shiftId) || null;
+};
+
+export const getAllCachedShifts = async (status?: string): Promise<CachedShift[]> => {
+  const shifts = await readList<CachedShift>(KEYS.shifts);
+  const filtered = status ? shifts.filter((s) => s.status === status) : shifts;
+  return filtered.sort((a, b) => (b.call_time || '').localeCompare(a.call_time || ''));
+};
+
 export const cacheRunSheet = async (runSheet: CachedRunSheet): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const now = new Date().toISOString();
-    await db.runAsync(
-      `
-      INSERT OR REPLACE INTO run_sheets
-      (id, booking_id, content, created_at, synced)
-      VALUES (?, ?, ?, ?, ?)
-      `,
-      [runSheet.id, runSheet.booking_id, runSheet.content, now, 0]
-    );
-  } catch (error) {
-    console.error('[Database] Cache run sheet error:', error);
-    throw error;
-  }
+  const sheets = await readList<CachedRunSheet>(KEYS.runSheets);
+  const now = new Date().toISOString();
+  const next = sheets.filter((s) => s.booking_id !== runSheet.booking_id);
+  next.push({ ...runSheet, created_at: runSheet.created_at || now, synced: false });
+  await writeList(KEYS.runSheets, next);
 };
 
-/**
- * Get cached run sheet
- */
 export const getCachedRunSheet = async (bookingId: string): Promise<CachedRunSheet | null> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const result = await db.getFirstAsync<CachedRunSheet>(
-      'SELECT * FROM run_sheets WHERE booking_id = ?',
-      [bookingId]
-    );
-    return result || null;
-  } catch (error) {
-    console.error('[Database] Get cached run sheet error:', error);
-    return null;
-  }
+  const sheets = await readList<CachedRunSheet>(KEYS.runSheets);
+  return sheets.find((s) => s.booking_id === bookingId) || null;
 };
 
-/**
- * Store pending check-in (for offline support)
- */
 export const storePendingCheckIn = async (checkIn: CachedCheckIn): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const now = new Date().toISOString();
-    await db.runAsync(
-      `
-      INSERT INTO check_ins
-      (id, shift_id, latitude, longitude, timestamp, photo_uri, synced, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-      [
-        checkIn.id,
-        checkIn.shift_id,
-        checkIn.latitude,
-        checkIn.longitude,
-        checkIn.timestamp,
-        checkIn.photo_uri || null,
-        0,
-        now,
-      ]
-    );
-  } catch (error) {
-    console.error('[Database] Store pending check-in error:', error);
-    throw error;
-  }
+  const items = await readList<CachedCheckIn>(KEYS.checkIns);
+  const now = new Date().toISOString();
+  items.push({
+    ...checkIn,
+    synced: false,
+    created_at: checkIn.created_at || now,
+  });
+  await writeList(KEYS.checkIns, items);
 };
 
-/**
- * Get unsynced check-ins
- */
 export const getUnsyncedCheckIns = async (): Promise<CachedCheckIn[]> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const results = await db.allAsync<CachedCheckIn>(
-      'SELECT * FROM check_ins WHERE synced = 0 ORDER BY created_at ASC'
-    );
-    return results || [];
-  } catch (error) {
-    console.error('[Database] Get unsynced check-ins error:', error);
-    return [];
-  }
+  const items = await readList<CachedCheckIn>(KEYS.checkIns);
+  return items.filter((c) => !c.synced);
 };
 
-/**
- * Mark check-in as synced
- */
 export const markCheckInSynced = async (checkInId: string): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    await db.runAsync('UPDATE check_ins SET synced = 1 WHERE id = ?', [checkInId]);
-  } catch (error) {
-    console.error('[Database] Mark check-in synced error:', error);
-    throw error;
-  }
+  const items = await readList<CachedCheckIn>(KEYS.checkIns);
+  await writeList(
+    KEYS.checkIns,
+    items.map((c) => (c.id === checkInId ? { ...c, synced: true } : c))
+  );
 };
 
-/**
- * Store pending action (for retry logic)
- */
 export const storePendingAction = async (
   actionType: string,
   entityId: string,
   payload: any
 ): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const id = `${actionType}_${entityId}_${Date.now()}`;
-    const now = new Date().toISOString();
-    await db.runAsync(
-      `
-      INSERT INTO pending_actions
-      (id, action_type, entity_id, payload, created_at, synced)
-      VALUES (?, ?, ?, ?, ?, ?)
-      `,
-      [id, actionType, entityId, JSON.stringify(payload), now, 0]
-    );
-  } catch (error) {
-    console.error('[Database] Store pending action error:', error);
-    throw error;
-  }
+  const items = await readList<PendingAction>(KEYS.actions);
+  items.push({
+    id: `${actionType}_${entityId}_${Date.now()}`,
+    action_type: actionType,
+    entity_id: entityId,
+    payload,
+    created_at: new Date().toISOString(),
+    synced: false,
+  });
+  await writeList(KEYS.actions, items);
 };
 
-/**
- * Get unsynced actions
- */
-export const getUnsyncedActions = async (): Promise<any[]> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    const results = await db.allAsync(
-      'SELECT * FROM pending_actions WHERE synced = 0 ORDER BY created_at ASC'
-    );
-    return results?.map((r: any) => ({
-      ...r,
-      payload: JSON.parse(r.payload),
-    })) || [];
-  } catch (error) {
-    console.error('[Database] Get unsynced actions error:', error);
-    return [];
-  }
+export const getUnsyncedActions = async (): Promise<PendingAction[]> => {
+  const items = await readList<PendingAction>(KEYS.actions);
+  return items.filter((a) => !a.synced);
 };
 
-/**
- * Mark action as synced
- */
 export const markActionSynced = async (actionId: string): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
-
-  try {
-    await db.runAsync('UPDATE pending_actions SET synced = 1 WHERE id = ?', [actionId]);
-  } catch (error) {
-    console.error('[Database] Mark action synced error:', error);
-    throw error;
-  }
+  const items = await readList<PendingAction>(KEYS.actions);
+  await writeList(
+    KEYS.actions,
+    items.map((a) => (a.id === actionId ? { ...a, synced: true } : a))
+  );
 };
 
-/**
- * Clear old cached data
- */
 export const clearOldCache = async (daysOld: number = 7): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  const cutoff = Date.now() - daysOld * 24 * 60 * 60 * 1000;
+  const shifts = await readList<CachedShift>(KEYS.shifts);
+  await writeList(
+    KEYS.shifts,
+    shifts.filter((s) => new Date(s.created_at).getTime() >= cutoff)
+  );
 
-  try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-    const cutoffDateStr = cutoffDate.toISOString();
-
-    await db.runAsync(
-      'DELETE FROM shifts WHERE created_at < ?',
-      [cutoffDateStr]
-    );
-
-    await db.runAsync(
-      'DELETE FROM run_sheets WHERE created_at < ? AND synced = 1',
-      [cutoffDateStr]
-    );
-
-    console.log('[Database] Cleared old cache entries');
-  } catch (error) {
-    console.error('[Database] Clear old cache error:', error);
-  }
+  const sheets = await readList<CachedRunSheet>(KEYS.runSheets);
+  await writeList(
+    KEYS.runSheets,
+    sheets.filter((s) => !s.synced || new Date(s.created_at).getTime() >= cutoff)
+  );
 };
 
 /**
- * Close database connection
+ * Replay unsynced check-ins and pending actions against the live API.
+ * Safe to call on app resume / network restore.
  */
-export const closeDatabase = async (): Promise<void> => {
-  if (db) {
+export const syncOfflineActions = async (
+  postFn: (url: string, data: any) => Promise<any>
+): Promise<{ synced: number; failed: number }> => {
+  let synced = 0;
+  let failed = 0;
+
+  const checkIns = await getUnsyncedCheckIns();
+  for (const checkIn of checkIns) {
     try {
-      await db.closeAsync();
-      db = null;
-      console.log('[Database] Connection closed');
-    } catch (error) {
-      console.error('[Database] Close error:', error);
+      await postFn('/crew/check-in', {
+        assignment_id: checkIn.shift_id,
+        latitude: checkIn.latitude,
+        longitude: checkIn.longitude,
+        photo_url: checkIn.photo_uri,
+      });
+      await markCheckInSynced(checkIn.id);
+      synced += 1;
+    } catch {
+      failed += 1;
     }
   }
+
+  const actions = await getUnsyncedActions();
+  for (const action of actions) {
+    try {
+      if (action.action_type === 'checkout') {
+        await postFn('/crew/check-out', action.payload);
+      } else if (action.action_type === 'checkin') {
+        await postFn('/crew/check-in', action.payload);
+      } else if (action.action_type === 'accept') {
+        await postFn(`/crew/shift/${action.entity_id}/accept`, action.payload || {});
+      } else if (action.action_type === 'decline') {
+        await postFn(`/crew/shift/${action.entity_id}/decline`, action.payload || {});
+      }
+      await markActionSynced(action.id);
+      synced += 1;
+    } catch {
+      failed += 1;
+    }
+  }
+
+  return { synced, failed };
+};
+
+export const closeDatabase = async (): Promise<void> => {
+  // AsyncStorage has no connection to close.
 };

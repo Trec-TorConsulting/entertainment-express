@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* Touch-friendly targets on phones */
+@media (max-width: 640px) {
+  button,
+  [role="button"],
+  a.btn {
+    min-height: 44px;
+  }
+
+  .ee-pad {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Prefer readable two-column layouts on tablets */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .ee-grid-responsive {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
