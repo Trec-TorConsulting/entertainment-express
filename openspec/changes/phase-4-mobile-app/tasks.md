@@ -65,7 +65,7 @@
       **Accept:** >100 req/min throttled; returns 429 with retry-after header.
 
 ## 6. Testing & Validation
-- [ ] 6.1 Unit tests for mobile API v2 endpoints.
+- [x] 6.1 Unit tests for mobile API v2 endpoints.
       **Accept:** 20+ tests passing (CRUD, permissions, pagination).
 - [ ] 6.2 Integration tests for crew app flow (shift accept → check-in → check-out).
       **Accept:** Full flow works end-to-end; booking status transitions correctly.
