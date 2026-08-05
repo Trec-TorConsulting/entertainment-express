@@ -358,8 +358,36 @@ def main() -> int:
         token=crew_tok,
     )
     cout_ms = (time.perf_counter() - t0) * 1000
-    assert_success(st, body, "check-out")
+    msg = assert_success(st, body, "check-out")
     print(f"✓ crew checked out ({cout_ms:.0f}ms)")
+    timesheet_id = (msg.get("data") or {}).get("timesheet", {}).get("timesheet_id")
+    if not timesheet_id:
+        raise RuntimeError(f"check-out did not return timesheet: {msg}")
+    print(f"✓ timesheet auto-created {timesheet_id}")
+
+    st, body = c.method(
+        "entertainment_express.api.mobile_api_v2.crew_timesheets",
+        {"token": crew_tok, "page": 1},
+        http="GET",
+        token=crew_tok,
+    )
+    msg = assert_success(st, body, "crew timesheets")
+    items = (msg.get("data") or {}).get("items") or []
+    if not any(i.get("name") == timesheet_id for i in items):
+        raise RuntimeError(f"timesheet {timesheet_id} missing from crew list: {items[:3]}")
+    print("✓ crew timesheets list includes auto-created sheet")
+
+    st, body = c.method(
+        "entertainment_express.api.mobile_api_v2.crew_timesheet_detail",
+        {"timesheet_id": timesheet_id, "token": crew_tok},
+        http="GET",
+        token=crew_tok,
+    )
+    msg = assert_success(st, body, "crew timesheet detail")
+    detail = msg.get("data") or {}
+    if flt_or_zero(detail.get("total_hours")) <= 0:
+        raise RuntimeError(f"timesheet detail has no hours: {detail}")
+    print(f"✓ crew timesheet detail hours={detail.get('total_hours')}")
 
     st, body = c._req("GET", f"/api/resource/Event%20Booking/{parse.quote(booking)}")
     if st != 200:
@@ -375,6 +403,13 @@ def main() -> int:
     print(f"✓ latency samples ms: {[round(x) for x in latencies]} ({under_500}/{len(latencies)} <500ms)")
     print("\nDoD API path PASSED")
     return 0
+
+
+def flt_or_zero(value) -> float:
+    try:
+        return float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
 
 
 if __name__ == "__main__":

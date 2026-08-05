@@ -91,7 +91,7 @@
 - [x] Dispatcher sees both crew on dispatch board
 - [x] Crew checks out
 - [x] Booking marked complete
-- [ ] Timesheet auto-created; crew can view on app
+- [x] Timesheet auto-created; crew can view on app
 - [x] All 3 apps working simultaneously with <500ms latency
 - [x] 20+ unit tests, 5+ integration tests all passing
 - [ ] Apps deployed to staging + production URLs

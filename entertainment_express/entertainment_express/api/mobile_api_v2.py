@@ -359,6 +359,8 @@ def crew_check_out(assignment_id: str = None, notes: str = None, token: str = No
         
         logger.info(f"Check-out: {assignment_id}")
 
+        timesheet_info = _auto_create_timesheet_for_assignment(ca)
+
         from entertainment_express.api.dispatch_realtime import (
             publish_booking_status_change,
             publish_shift_status_update,
@@ -380,10 +382,82 @@ def crew_check_out(assignment_id: str = None, notes: str = None, token: str = No
             logger.info(f"Booking auto-completed: {ca.booking}")
             publish_booking_status_change(ca.booking, "completed")
         
-        return _response({"status": "checked_out", "timestamp": str(ca.check_out)})
+        payload = {"status": "checked_out", "timestamp": str(ca.check_out)}
+        if timesheet_info:
+            payload["timesheet"] = timesheet_info
+        return _response(payload)
     except Exception as e:
         logger.error(f"crew_check_out failed: {e}")
         return _response(status="error", data={"error": str(e)})
+
+
+def _auto_create_timesheet_for_assignment(ca) -> Dict | None:
+    """
+    Create / update the crew member's weekly Timesheet from check-in/out duration.
+
+    Soft-fails (logs + returns None) so check-out never rolls back on timesheet issues.
+    """
+    try:
+        if not ca.check_in or not ca.check_out:
+            return None
+        check_in = get_datetime(ca.check_in)
+        check_out = get_datetime(ca.check_out)
+        hours = max(0.0, (check_out - check_in).total_seconds() / 3600.0)
+        if hours <= 0:
+            return None
+
+        week_start = frappe.utils.getdate(check_in)
+        company = frappe.db.get_value("Employee", ca.crew_member, "company")
+        detail = {
+            "activity_type": None,
+            "from_time": check_in,
+            "to_time": check_out,
+            "hours": flt(hours),
+            "ee_booking": ca.booking,
+            "ee_crew_role": ca.role,
+            "ee_bill_rate": flt(getattr(ca, "pay_rate", 0) or 0),
+            "ee_approved": 0,
+        }
+
+        existing = frappe.db.get_value(
+            "Timesheet",
+            {"employee": ca.crew_member, "start_date": week_start, "docstatus": 0},
+            "name",
+        )
+        if existing:
+            ts = frappe.get_doc("Timesheet", existing)
+            already = any(
+                (getattr(row, "ee_booking", None) == ca.booking)
+                for row in (ts.get("time_logs") or [])
+            )
+            if not already:
+                ts.append("time_logs", detail)
+                ts.save(ignore_permissions=True)
+            created = False
+        else:
+            # time_logs is required on Timesheet — create with the first row inline
+            ts = frappe.get_doc({
+                "doctype": "Timesheet",
+                "naming_series": "TS-.YYYY.-",
+                "employee": ca.crew_member,
+                "company": company,
+                "start_date": week_start,
+                "end_date": week_start + timedelta(days=6),
+                "time_logs": [detail],
+            })
+            ts.insert(ignore_permissions=True)
+            created = True
+
+        frappe.db.commit()
+        return {
+            "timesheet_id": ts.name,
+            "created": created,
+            "hours": flt(hours),
+            "booking": ca.booking,
+        }
+    except Exception as exc:
+        logger.warning(f"timesheet auto-create skipped for {ca.name}: {exc}")
+        return None
 
 
 @frappe.whitelist(allow_guest=True, methods=["GET"])
@@ -477,19 +551,19 @@ def crew_timesheet_detail(timesheet_id: str = None, token: str = None) -> Dict:
         if ts.employee != crew_id:
             raise PermissionError("Not authorized")
         
-        details = [
-            {
+        details = []
+        child_rows = list(ts.get("time_logs") or []) or list(getattr(ts, "timesheets_detail", []) or [])
+        for d in child_rows:
+            details.append({
                 "booking": d.get("ee_booking"),
                 "role": d.get("ee_crew_role"),
-                "hours": flt(d.working_hours),
+                "hours": flt(d.get("hours") or d.get("working_hours") or 0),
                 "rate": flt(d.get("ee_bill_rate", 0)),
                 "approved": d.get("ee_approved", 0) == 1,
-            }
-            for d in ts.timesheets_detail
-        ]
-        
-        total_hours = sum(flt(d.working_hours) for d in ts.timesheets_detail)
-        
+            })
+
+        total_hours = sum(flt(x["hours"]) for x in details)
+
         return _response({
             "timesheet_id": ts.name,
             "period": f"{ts.start_date} to {ts.end_date}",
