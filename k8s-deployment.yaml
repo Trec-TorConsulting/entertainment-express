@@ -1817,3 +1817,104 @@ spec:
           - key: common_site_config.json
             path: common_site_config.json
 
+---
+# Phase-4 portal hosts — customer / dispatch SPAs via Frappe www shells.
+# /api, /assets, /socket.io hit Frappe (or Socket.IO) unchanged; other paths are
+# rewritten onto /customer or /dispatch so React deep-links work.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: customer-spa-rewrite
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: portal-ingress
+spec:
+  replacePathRegex:
+    regex: "^/(?!customer(?:/|$)|api(?:/|$)|assets(?:/|$)|files(?:/|$)|private(?:/|$)|socket\\.io(?:/|$)|app(?:/|$)|login(?:/|$)|assets)(.*)$"
+    replacement: "/customer/$1"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: dispatch-spa-rewrite
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: portal-ingress
+spec:
+  replacePathRegex:
+    regex: "^/(?!dispatch(?:/|$)|api(?:/|$)|assets(?:/|$)|files(?:/|$)|private(?:/|$)|socket\\.io(?:/|$)|app(?:/|$)|login(?:/|$))(.*)$"
+    replacement: "/dispatch/$1"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: entertainment-express-portal-customer
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: portal-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: "entertainment-express-customer-spa-rewrite@kubernetescrd"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - customer.entertainment-express.app
+  rules:
+  - host: customer.entertainment-express.app
+    http:
+      paths:
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-socketio
+            port:
+              number: 9000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-python
+            port:
+              number: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: entertainment-express-portal-dispatch
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: portal-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: "entertainment-express-dispatch-spa-rewrite@kubernetescrd"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - dispatch.entertainment-express.app
+  rules:
+  - host: dispatch.entertainment-express.app
+    http:
+      paths:
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-socketio
+            port:
+              number: 9000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-python
+            port:
+              number: 8000

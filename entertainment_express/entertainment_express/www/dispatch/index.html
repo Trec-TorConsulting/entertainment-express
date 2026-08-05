@@ -1,0 +1,23 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Dispatch Portal — Entertainment Express{% endblock %}
+
+{% block page_content %}
+<style>
+  .navbar, .web-footer, .page-header, .breadcrumb { display: none !important; }
+  body { margin: 0; }
+  #root { min-height: 100vh; }
+</style>
+<div id="root" data-portal="dispatch"></div>
+<script>
+  window.eePortalBootstrap = {
+    portal: "dispatch",
+    csrf_token: {{ csrf_token | tojson }},
+    apiBase: "/api"
+  };
+</script>
+<script type="module" src="/assets/entertainment_express/dispatch/main.js"></script>
+<noscript>
+  <p style="padding:2rem;font-family:sans-serif;">Dispatch portal requires JavaScript.</p>
+</noscript>
+{% endblock %}

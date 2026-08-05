@@ -81,7 +81,7 @@
       **Accept:** iOS & Android builds available for QA testers.
 - [x] 7.2 Deploy customer & dispatch portals to static hosting (S3/Vercel).
       **Accept:** Accessible at https://customer.entertainment-express.app and https://dispatch.entertainment-express.app
-- [ ] 7.3 Update K8s Frappe deployment to serve portals (reverse proxy).
+- [x] 7.3 Update K8s Frappe deployment to serve portals (reverse proxy).
       **Accept:** API routing works (/api/v2/* hits Frappe); SPA routing works (/* hits React).
 
 ## Definition of Done (phase gate)

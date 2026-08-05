@@ -1,0 +1,24 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Customer Portal — Entertainment Express{% endblock %}
+
+{% block page_content %}
+<style>
+  /* Full-bleed SPA shell — hide Frappe website chrome when present */
+  .navbar, .web-footer, .page-header, .breadcrumb { display: none !important; }
+  body { margin: 0; }
+  #ee-customer-root, #root { min-height: 100vh; }
+</style>
+<div id="root" data-portal="customer"></div>
+<script>
+  window.eePortalBootstrap = {
+    portal: "customer",
+    csrf_token: {{ csrf_token | tojson }},
+    apiBase: "/api/v2"
+  };
+</script>
+<script type="module" src="/assets/entertainment_express/client/main.js"></script>
+<noscript>
+  <p style="padding:2rem;font-family:sans-serif;">Customer portal requires JavaScript.</p>
+</noscript>
+{% endblock %}
