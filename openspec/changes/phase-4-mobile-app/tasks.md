@@ -71,7 +71,7 @@
       **Accept:** Full flow works end-to-end; booking status transitions correctly.
 - [x] 6.3 Smoke test: crew app + customer portal + dispatch portal together.
       **Accept:** All three apps working simultaneously; WebSocket updates cross-apps.
-- [ ] 6.4 Load test (100 concurrent users on dispatch board).
+- [x] 6.4 Load test (100 concurrent users on dispatch board).
       **Accept:** WebSocket handles 100+ concurrent; <500ms latency.
 - [ ] 6.5 Mobile app testing (iOS simulator, Android emulator, physical device).
       **Accept:** App functions on iOS 14+ and Android 10+; no crashes.
