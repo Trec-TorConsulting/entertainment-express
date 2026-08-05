@@ -69,7 +69,7 @@
       **Accept:** 20+ tests passing (CRUD, permissions, pagination).
 - [x] 6.2 Integration tests for crew app flow (shift accept → check-in → check-out).
       **Accept:** Full flow works end-to-end; booking status transitions correctly.
-- [ ] 6.3 Smoke test: crew app + customer portal + dispatch portal together.
+- [x] 6.3 Smoke test: crew app + customer portal + dispatch portal together.
       **Accept:** All three apps working simultaneously; WebSocket updates cross-apps.
 - [ ] 6.4 Load test (100 concurrent users on dispatch board).
       **Accept:** WebSocket handles 100+ concurrent; <500ms latency.

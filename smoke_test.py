@@ -311,6 +311,27 @@ def test_live_marketing_smoke():
         return False
 
 
+def test_portal_artifacts():
+    """Verify customer + dispatch portal bundles and crew app scaffold exist (phase-4 6.3)."""
+    print("✓ Testing portal & crew app artifacts...")
+    required = [
+        Path("entertainment_express/entertainment_express/public/client/main.js"),
+        Path("entertainment_express/entertainment_express/public/dispatch/main.js"),
+        Path("frontend/customer-portal/package.json"),
+        Path("frontend/dispatch-portal/package.json"),
+        Path("frontend/crew-app/package.json"),
+    ]
+    for path in required:
+        if not path.is_file():
+            print(f"  ✗ Missing {path}")
+            return False
+        if path.suffix == ".js" and path.stat().st_size < 1000:
+            print(f"  ✗ Bundle too small: {path}")
+            return False
+    print(f"  ✓ All {len(required)} portal/crew artifacts present")
+    return True
+
+
 def main():
     print("\n" + "="*60)
     print("Entertainment Express — Multi-Phase Smoke Test")
@@ -326,6 +347,7 @@ def main():
         test_specs,
         test_phase19_static_suite,
         test_live_marketing_smoke,
+        test_portal_artifacts,
     ]
     
     results = []
