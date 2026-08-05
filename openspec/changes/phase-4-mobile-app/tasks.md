@@ -85,15 +85,18 @@
       **Accept:** API routing works (/api/v2/* hits Frappe); SPA routing works (/* hits React).
 
 ## Definition of Done (phase gate)
-- [ ] Crew accepts shift via mobile app
-- [ ] Crew checks in (GPS + photo)
-- [ ] Customer sees crew location on portal map in real-time
-- [ ] Dispatcher sees both crew on dispatch board
-- [ ] Crew checks out
-- [ ] Booking marked complete
+- [x] Crew accepts shift via mobile app
+- [x] Crew checks in (GPS + photo)
+- [x] Customer sees crew location on portal map in real-time
+- [x] Dispatcher sees both crew on dispatch board
+- [x] Crew checks out
+- [x] Booking marked complete
 - [ ] Timesheet auto-created; crew can view on app
-- [ ] All 3 apps working simultaneously with <500ms latency
-- [ ] 20+ unit tests, 5+ integration tests all passing
+- [x] All 3 apps working simultaneously with <500ms latency
+- [x] 20+ unit tests, 5+ integration tests all passing
 - [ ] Apps deployed to staging + production URLs
 
 Then proceed to **phase-5-vendor-network**.
+
+> Live E2E driver: `scripts/e2e_phase4_dod.py` (tenant default `https://funytown.entx.app`).
+> Portal path shells verified at `/customer` + `/dispatch`; dedicated portal DNS still needs Cloudflare origin wiring.
