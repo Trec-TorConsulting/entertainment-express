@@ -1,0 +1,12 @@
+# Files that should not be uploaded to EAS builders
+node_modules/
+.expo/
+dist/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+google-service-account.json
+.env
+.env.*
+!.env.example

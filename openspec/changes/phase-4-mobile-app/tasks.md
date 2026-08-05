@@ -77,7 +77,7 @@
       **Accept:** App functions on iOS 14+ and Android 10+; no crashes.
 
 ## 7. Deployment
-- [ ] 7.1 Build & push mobile app to Expo EAS or App Store.
+- [x] 7.1 Build & push mobile app to Expo EAS or App Store.
       **Accept:** iOS & Android builds available for QA testers.
 - [ ] 7.2 Deploy customer & dispatch portals to static hosting (S3/Vercel).
       **Accept:** Accessible at https://customer.entertainment-express.app and https://dispatch.entertainment-express.app

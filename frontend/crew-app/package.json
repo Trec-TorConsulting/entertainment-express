@@ -12,7 +12,11 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "qa": "bash scripts/qa-mobile.sh"
+    "qa": "bash scripts/qa-mobile.sh",
+    "eas:preview": "bash scripts/eas-build-preview.sh all preview",
+    "eas:preview:ios": "bash scripts/eas-build-preview.sh ios preview",
+    "eas:preview:android": "bash scripts/eas-build-preview.sh android preview",
+    "eas:production": "bash scripts/eas-build-preview.sh all production"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
