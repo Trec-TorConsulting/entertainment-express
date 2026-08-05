@@ -305,6 +305,131 @@ def get_run_sheet(booking_name: str) -> dict:
 # ── Dispatch board ───────────────────────────────────────────────────────────
 
 @frappe.whitelist()
+def list_available_crew(event_date: str = None, role_name: str = None) -> list:
+    """
+    List Active employees available for assignment on a date.
+    Excludes employees with accepted/checked_in conflicts that day.
+    """
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    event_date = frappe.utils.getdate(event_date) if event_date else frappe.utils.getdate()
+
+    busy = set()
+    day_assignments = frappe.db.sql(
+        """
+        SELECT ca.crew_member
+        FROM `tabCrew Assignment` ca
+        JOIN `tabEvent Booking` eb ON eb.name = ca.booking
+        WHERE ca.status IN ('accepted', 'checked_in')
+          AND eb.event_date = %s
+        """,
+        (event_date,),
+        as_dict=True,
+    )
+    busy = {row.crew_member for row in day_assignments}
+
+    employees = frappe.get_all(
+        "Employee",
+        filters={"status": "Active"},
+        fields=["name", "employee_name", "user_id", "image", "ee_crew_roles", "ee_default_pay_rate", "ee_pay_basis"],
+        limit_page_length=200,
+    )
+
+    result = []
+    for emp in employees:
+        if emp["name"] in busy:
+            continue
+        roles = [r.strip() for r in (emp.get("ee_crew_roles") or "").split(",") if r.strip()]
+        if role_name and role_name not in roles:
+            continue
+        result.append({
+            "employee": emp["name"],
+            "employee_name": emp["employee_name"],
+            "roles": roles,
+            "avatar": emp.get("image"),
+            "pay_rate": flt(emp.get("ee_default_pay_rate")),
+            "pay_basis": emp.get("ee_pay_basis") or "per_event",
+            "available": True,
+        })
+    return result
+
+
+@frappe.whitelist()
+def get_dispatch_analytics(days: int = 30) -> dict:
+    """
+    Utilization and reliability snapshot for the dispatch portal.
+    utilization = assigned_shifts / (active_crew * days) (bounded).
+    """
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    from datetime import timedelta
+
+    days = max(1, min(90, int(days or 30)))
+    start = frappe.utils.add_days(frappe.utils.getdate(), -days)
+
+    active_crew = frappe.db.count("Employee", {"status": "Active"}) or 1
+    assignments = frappe.get_all(
+        "Crew Assignment",
+        filters={"creation": [">=", str(start)]},
+        fields=["name", "crew_member", "status", "booking"],
+    )
+
+    offered = len([a for a in assignments if a["status"] == "offered"])
+    accepted = len([a for a in assignments if a["status"] in ("accepted", "checked_in", "completed")])
+    declined = len([a for a in assignments if a["status"] == "declined"])
+    completed = len([a for a in assignments if a["status"] == "completed"])
+    no_show = len([a for a in assignments if a["status"] == "no_show"])
+
+    bookings = frappe.get_all(
+        "Event Booking",
+        filters={"event_date": [">=", str(start)]},
+        fields=["name", "customer", "status", "event_date", "grand_total"],
+    )
+    repeat_customers = {}
+    for b in bookings:
+        repeat_customers[b["customer"]] = repeat_customers.get(b["customer"], 0) + 1
+    repeat_booking_count = sum(1 for c, n in repeat_customers.items() if n > 1)
+
+    total_shifts = len(assignments) or 1
+    utilization = round(min(100.0, (accepted / max(active_crew * days, 1)) * 100), 1)
+    accept_rate = round((accepted / total_shifts) * 100, 1) if assignments else 0.0
+    reliability = round(((completed) / max(accepted, 1)) * 100, 1) if accepted else 0.0
+
+    by_crew = {}
+    for a in assignments:
+        key = a["crew_member"]
+        by_crew.setdefault(key, {"crew_member": key, "accepted": 0, "completed": 0, "declined": 0})
+        if a["status"] in ("accepted", "checked_in", "completed"):
+            by_crew[key]["accepted"] += 1
+        if a["status"] == "completed":
+            by_crew[key]["completed"] += 1
+        if a["status"] == "declined":
+            by_crew[key]["declined"] += 1
+
+    crew_rows = []
+    for emp_id, stats in by_crew.items():
+        stats["employee_name"] = frappe.db.get_value("Employee", emp_id, "employee_name") or emp_id
+        crew_rows.append(stats)
+    crew_rows.sort(key=lambda r: r["completed"], reverse=True)
+
+    return {
+        "window_days": days,
+        "active_crew": active_crew,
+        "bookings": len(bookings),
+        "repeat_booking_customers": repeat_booking_count,
+        "shifts": {
+            "offered": offered,
+            "accepted": accepted,
+            "declined": declined,
+            "completed": completed,
+            "no_show": no_show,
+        },
+        "utilization_pct": utilization,
+        "accept_rate_pct": accept_rate,
+        "reliability_pct": reliability,
+        "crew": crew_rows[:50],
+    }
+
+
+@frappe.whitelist()
 def get_dispatch_board(date: str) -> list:
     """
     Return all bookings for the given date with crew/asset assignment status.

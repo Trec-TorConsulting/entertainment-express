@@ -51,9 +51,9 @@
       **Accept:** Crew location map updates every 30s; at-risk alerts pop in real-time; latency <500ms.
 - [x] 4.4 Implement run sheet management (generate, publish, completion %).
       **Accept:** Generate creates equipment list + checklist; publish sends notification; track % complete.
-- [ ] 4.5 Implement drag-drop crew scheduler (assign shifts).
+- [x] 4.5 Implement drag-drop crew scheduler (assign shifts).
       **Accept:** Drag crew avatar to time slot; conflict check; create assignment + send offer.
-- [ ] 4.6 Implement analytics (utilization %, crew reliability, reports).
+- [x] 4.6 Implement analytics (utilization %, crew reliability, reports).
       **Accept:** Dashboard shows crew utilization; repeat booking counts; export CSV.
 
 ## 5. Authentication & Security
