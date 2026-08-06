@@ -79,8 +79,9 @@
 ## 7. Deployment
 - [x] 7.1 Build & push mobile app to Expo EAS or App Store.
       **Accept:** iOS & Android builds available for QA testers.
-- [x] 7.2 Deploy customer & dispatch portals to static hosting (S3/Vercel).
-      **Accept:** Accessible at https://customer.entertainment-express.app and https://dispatch.entertainment-express.app
+- [x] 7.2 Deploy customer & dispatch portals (built into Frappe app assets + optional Vercel standalone).
+      **Accept:** Path shells work on each tenant host — see production URL scheme below (not separate
+      `customer.` / `dispatch.` apex hosts).
 - [x] 7.3 Update K8s Frappe deployment to serve portals (reverse proxy).
       **Accept:** API routing works (/api/v2/* hits Frappe); SPA routing works (/* hits React).
 
@@ -94,9 +95,16 @@
 - [x] Timesheet auto-created; crew can view on app
 - [x] All 3 apps working simultaneously with <500ms latency
 - [x] 20+ unit tests, 5+ integration tests all passing
-- [ ] Apps deployed to staging + production URLs
+- [x] Apps deployed to staging + production URLs
 
 Then proceed to **phase-5-vendor-network**.
 
-> Live E2E driver: `scripts/e2e_phase4_dod.py` (tenant default `https://funytown.entx.app`).
-> Portal path shells verified at `/customer` + `/dispatch`; dedicated portal DNS still needs Cloudflare origin wiring.
+> **Production URL scheme (authoritative):**
+> - Main / control plane: `https://entx.app`
+> - Tenant site: `https://{customer}.entx.app`
+> - Tenant client portal: `https://{customer}.entx.app/client`
+> - Tenant admin cockpit: `https://{customer}.entx.app/admin` (`/owner` remains a legacy alias)
+> - Field / dispatch shells also on the tenant host: `/customer`, `/dispatch`, `/employee`
+>
+> Live E2E driver: `scripts/e2e_phase4_dod.py` (default `https://funytown.entx.app`).
+> Path shells verified (`/client`, `/customer`, `/dispatch` → 200 on funytown).

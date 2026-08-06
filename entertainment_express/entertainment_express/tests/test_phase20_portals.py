@@ -67,7 +67,8 @@ class _FakeFrappeApi:
 def test_resolve_home_portal_routes_by_role(monkeypatch):
     fake = _FakeFrappeRG(roles=["EE Tenant Admin"])
     monkeypatch.setattr(request_guards, "frappe", fake)
-    assert request_guards.resolve_home_portal("owner@test.local") == request_guards.EE_OWNER_PORTAL
+    assert request_guards.EE_OWNER_PORTAL == "/admin"
+    assert request_guards.resolve_home_portal("owner@test.local") == "/admin"
 
     fake = _FakeFrappeRG(roles=["EE Dispatcher"])
     monkeypatch.setattr(request_guards, "frappe", fake)
@@ -186,3 +187,11 @@ def test_portal_api_signatures_no_cross_site_param():
         params = set(inspect.signature(fn).parameters.keys())
         assert "site" not in params
         assert "tenant" not in params
+
+
+def test_admin_alias_routes_to_owner_shell():
+    from entertainment_express import hooks
+
+    rules = {(r.get("from_route"), r.get("to_route")) for r in hooks.website_route_rules}
+    assert ("/admin", "owner") in rules
+    assert ("/admin/<path:app_path>", "owner") in rules

@@ -181,6 +181,13 @@ export function OwnerApp() {
     <AppShell title="Owner Portal">
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/admin" element={<Dashboard />} />
+        <Route path="/admin/approvals" element={<ApprovalsWorkspace />} />
+        <Route path="/admin/finances" element={<FinancesWorkspace />} />
+        <Route path="/admin/team" element={<TeamWorkspace />} />
+        <Route path="/admin/catalog" element={<CatalogWorkspace />} />
+        <Route path="/admin/settings" element={<SettingsWorkspace />} />
+        {/* Legacy /owner paths stay supported as aliases */}
         <Route path="/owner" element={<Dashboard />} />
         <Route path="/owner/approvals" element={<ApprovalsWorkspace />} />
         <Route path="/owner/finances" element={<FinancesWorkspace />} />
