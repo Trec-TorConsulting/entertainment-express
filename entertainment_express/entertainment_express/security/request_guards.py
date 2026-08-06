@@ -114,10 +114,19 @@ def _redirect(location: str) -> None:
 
 
 def _rewrite_path(location: str) -> None:
+    """Rewrite the in-flight request path (before_request cannot safely raise Redirect).
+
+    Werkzeug caches ``request.path`` as a ``cached_property``. Reading it before a
+    rewrite (to decide where to send the user) pins the old value, so we must clear
+    those caches after updating PATH_INFO or ``get_response()`` still serves Desk.
+    """
     req = getattr(frappe.local, "request", None)
     if not req:
         return
     req.environ["PATH_INFO"] = location
+    # Bust Werkzeug cached URL bits derived from PATH_INFO.
+    for key in ("path", "full_path", "url", "base_url", "url_root", "host_url", "host"):
+        req.__dict__.pop(key, None)
     frappe.local.path = location.strip("/")
 
 

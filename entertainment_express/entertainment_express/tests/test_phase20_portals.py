@@ -81,11 +81,25 @@ def test_resolve_home_portal_routes_by_role(monkeypatch):
 
 def test_sanitize_backend_urls_enforce_redirects_owner(monkeypatch):
     fake = _FakeFrappeRG(roles=["EE Tenant Admin"], path="/app")
+    # Simulate Werkzeug cached_property already resolved to the original Desk path.
+    fake.local.request.__dict__["path"] = "/app"
     monkeypatch.setattr(request_guards, "frappe", fake)
 
     request_guards.sanitize_backend_urls()
 
     assert fake.local.request.environ["PATH_INFO"] == request_guards.EE_OWNER_PORTAL
+    assert "path" not in fake.local.request.__dict__
+
+
+def test_sanitize_app_home_rewrites_owner_to_admin(monkeypatch):
+    fake = _FakeFrappeRG(roles=["EE Tenant Admin"], path="/app/home")
+    fake.local.request.__dict__["path"] = "/app/home"
+    monkeypatch.setattr(request_guards, "frappe", fake)
+
+    request_guards.sanitize_backend_urls()
+
+    assert fake.local.request.environ["PATH_INFO"] == "/admin"
+    assert "path" not in fake.local.request.__dict__
 
 
 def test_sanitize_backend_urls_warn_keeps_owner_on_app(monkeypatch):
