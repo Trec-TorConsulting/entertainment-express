@@ -119,14 +119,24 @@ def _rewrite_path(location: str) -> None:
     Werkzeug caches ``request.path`` as a ``cached_property``. Reading it before a
     rewrite (to decide where to send the user) pins the old value, so we must clear
     those caches after updating PATH_INFO or ``get_response()`` still serves Desk.
+
+    After clearing, immediately recompute ``path`` so exception handlers never see a
+    Request with a missing ``path`` attribute (that previously caused HTTP 500).
     """
     req = getattr(frappe.local, "request", None)
     if not req:
         return
-    req.environ["PATH_INFO"] = location
-    # Bust Werkzeug cached URL bits derived from PATH_INFO.
-    for key in ("path", "full_path", "url", "base_url", "url_root", "host_url", "host"):
+    environ = getattr(req, "environ", None)
+    if environ is not None:
+        environ["PATH_INFO"] = location
+    # Only clear PATH_INFO-derived caches — never host (independent) and always
+    # rebuild path so handle_exception / downstream code can read it.
+    for key in ("path", "full_path", "url", "base_url", "url_root", "host_url"):
         req.__dict__.pop(key, None)
+    try:
+        _ = req.path  # recompute cached_property from environ
+    except Exception:
+        req.__dict__["path"] = location
     frappe.local.path = location.strip("/")
 
 

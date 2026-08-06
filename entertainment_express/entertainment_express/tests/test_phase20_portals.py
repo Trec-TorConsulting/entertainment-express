@@ -88,7 +88,7 @@ def test_sanitize_backend_urls_enforce_redirects_owner(monkeypatch):
     request_guards.sanitize_backend_urls()
 
     assert fake.local.request.environ["PATH_INFO"] == request_guards.EE_OWNER_PORTAL
-    assert "path" not in fake.local.request.__dict__
+    assert getattr(fake.local.request, "path") == request_guards.EE_OWNER_PORTAL
 
 
 def test_sanitize_app_home_rewrites_owner_to_admin(monkeypatch):
@@ -99,7 +99,34 @@ def test_sanitize_app_home_rewrites_owner_to_admin(monkeypatch):
     request_guards.sanitize_backend_urls()
 
     assert fake.local.request.environ["PATH_INFO"] == "/admin"
-    assert "path" not in fake.local.request.__dict__
+    assert getattr(fake.local.request, "path") == "/admin"
+
+
+def test_rewrite_path_rehydrates_path_attribute(monkeypatch):
+    """Popping Werkzeug caches must not leave Request without .path (HTTP 500)."""
+
+    class _Req:
+        def __init__(self):
+            self.environ = {"PATH_INFO": "/app/home"}
+            self.__dict__["path"] = "/app/home"
+
+        @property
+        def path(self):
+            return self.environ.get("PATH_INFO", "/")
+
+    req = _Req()
+
+    class _Local:
+        request = req
+        path = "app/home"
+
+    class _Fake:
+        local = _Local()
+
+    monkeypatch.setattr(request_guards, "frappe", _Fake())
+    request_guards._rewrite_path("/admin")
+    assert req.environ["PATH_INFO"] == "/admin"
+    assert req.path == "/admin"
 
 
 def test_sanitize_backend_urls_warn_keeps_owner_on_app(monkeypatch):
