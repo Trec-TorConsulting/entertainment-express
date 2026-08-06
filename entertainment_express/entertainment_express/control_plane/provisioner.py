@@ -190,19 +190,49 @@ def _provision_resume(job) -> None:
 def _provision_deprovision(job) -> None:
     tenant = frappe.get_doc("Tenant", job.tenant)
     _log(job, f"Deprovisioning tenant {tenant.tenant_slug} — THIS IS DESTRUCTIVE.")
-    if tenant.site_name:
+    site_name = tenant.site_name
+    if site_name:
         # Must pass root password non-interactively — bare `drop-site --force` prompts
-        # and aborts in containerized / CI environments.
-        _bench_exec(job, [
-            "bench", "drop-site", tenant.site_name,
-            "--force",
-            "--no-backup",
-            "--db-root-password", _get_secret("mariadb-root-password"),
-        ])
+        # and aborts in containerized / CI environments. Never put the password into
+        # process argv that gets echoed into job logs; use an env override instead.
+        root_pw = _get_secret("mariadb-root-password")
+        env = os.environ.copy()
+        env["MYSQL_ROOT_PASSWORD"] = root_pw
+        try:
+            _bench_exec(
+                job,
+                [
+                    "bench", "drop-site", site_name,
+                    "--force",
+                    "--no-backup",
+                    "--db-root-password", root_pw,
+                ],
+                env=env,
+            )
+        except Exception as exc:
+            # DB drop often succeeds before archive/move; treat leftover site dirs as
+            # best-effort cleanup so Tenant can still reach status=deleted.
+            _log(job, f"drop-site raised ({exc}); forcing site directory cleanup.")
+            _force_remove_site_dir(job, site_name)
+        else:
+            # Ensure nothing remains under sites/ even if move left residues (NFS locks).
+            _force_remove_site_dir(job, site_name)
     tenant.reload()
     tenant.status = "deleted"
     tenant.save(ignore_permissions=True)
     frappe.db.commit()
+
+
+def _force_remove_site_dir(job, site_name: str) -> None:
+    site_path = os.path.join(_bench_root(), "sites", site_name)
+    if not os.path.isdir(site_path):
+        return
+    try:
+        import shutil
+        shutil.rmtree(site_path, ignore_errors=True)
+        _log(job, f"Removed site directory {site_path}")
+    except Exception as exc:
+        _log(job, f"Could not fully remove {site_path}: {exc}")
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -212,14 +242,29 @@ def _bench_root() -> str:
     return os.environ.get("FRAPPE_BENCH_ROOT", "/home/frappe/frappe-bench")
 
 
-def _bench_exec(job, cmd: list[str]) -> None:
+def _bench_exec(job, cmd: list[str], env: dict | None = None) -> None:
     result = subprocess.run(
         cmd, cwd=_bench_root(),
         capture_output=True, text=True, timeout=600,
+        env=env,
     )
-    _log(job, result.stdout[-3000:] if result.stdout else "")
+    _log(job, _redact_secrets(result.stdout[-3000:] if result.stdout else ""))
     if result.returncode != 0:
-        raise RuntimeError(f"Command {' '.join(cmd)} failed:\n{result.stderr[-2000:]}")
+        raise RuntimeError(
+            f"Command {_redact_secrets(' '.join(cmd))} failed:\n"
+            f"{_redact_secrets(result.stderr[-2000:] if result.stderr else '')}"
+        )
+
+
+def _redact_secrets(text: str) -> str:
+    """Strip credential material from provisioner logs / error strings."""
+    if not text:
+        return text
+    import re
+    text = re.sub(r"(--db-root-password|--admin-password|--mariadb-root-password)\s+\S+",
+                  r"\1 ***REDACTED***", text)
+    text = re.sub(r"(password=)[^\s&]+", r"\1***REDACTED***", text, flags=re.I)
+    return text
 
 
 def _bench_exec_out(job, cmd: list[str]) -> str:
