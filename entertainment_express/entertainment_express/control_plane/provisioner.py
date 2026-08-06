@@ -191,7 +191,14 @@ def _provision_deprovision(job) -> None:
     tenant = frappe.get_doc("Tenant", job.tenant)
     _log(job, f"Deprovisioning tenant {tenant.tenant_slug} — THIS IS DESTRUCTIVE.")
     if tenant.site_name:
-        _bench_exec(job, ["bench", "drop-site", tenant.site_name, "--force"])
+        # Must pass root password non-interactively — bare `drop-site --force` prompts
+        # and aborts in containerized / CI environments.
+        _bench_exec(job, [
+            "bench", "drop-site", tenant.site_name,
+            "--force",
+            "--no-backup",
+            "--db-root-password", _get_secret("mariadb-root-password"),
+        ])
     tenant.reload()
     tenant.status = "deleted"
     tenant.save(ignore_permissions=True)
