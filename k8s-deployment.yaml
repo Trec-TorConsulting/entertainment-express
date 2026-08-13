@@ -1243,9 +1243,12 @@ spec:
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
   jobTemplate:
     spec:
       backoffLimit: 2
+      ttlSecondsAfterFinished: 604800
+      activeDeadlineSeconds: 1800
       template:
         metadata:
           labels:
@@ -1292,7 +1295,8 @@ spec:
               mountPath: /config
             - name: sites
               mountPath: /mnt/sites
-          containers:
+          # Must finish before upload-to-minio; running them as sibling containers
+          # races and fails the Job (BackoffLimitExceeded) when mc copies an empty dir.
           - name: bench-backup
             image: 192.168.4.10:30500/entertainment-express/bench:0.0.45-ee
             imagePullPolicy: Always
@@ -1313,6 +1317,7 @@ spec:
             resources:
               requests: { cpu: 200m, memory: 512Mi }
               limits:   { cpu: "1", memory: 1Gi }
+          containers:
           - name: upload-to-minio
             image: minio/mc:latest
             command:
