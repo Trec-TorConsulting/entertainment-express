@@ -1,5 +1,6 @@
 export * from "./api/client";
 export * from "./api/session";
+export * from "./components/AccountMenu";
 export * from "./components/AppShell";
 export * from "./components/BookingDetail";
 export * from "./components/CommandPalette";

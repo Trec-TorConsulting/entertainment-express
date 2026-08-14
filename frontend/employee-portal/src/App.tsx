@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import {
+  AccountPanel,
   AppShell,
   CommandPalette,
   DataTable,
@@ -249,13 +250,7 @@ function DispatchWorkspace() {
 }
 
 function MeWorkspace() {
-  const bootstrap = getSessionBootstrap();
-  return (
-    <section style={{ display: "grid", gap: "0.75rem" }}>
-      <StatCard compact label="Signed in" value={bootstrap.user || "Unknown"} />
-      <StatCard compact label="Roles" value={(bootstrap.roles || []).join(", ") || "None"} />
-    </section>
-  );
+  return <AccountPanel />;
 }
 
 function ReportsWorkspace() {
@@ -351,7 +346,7 @@ export function EmployeeApp() {
   );
 
   return (
-    <AppShell title="Employee Portal" density="ops" sidebar={sidebar} bottom={bottom}>
+    <AppShell title="Staff" portal="employee" density="ops" sidebar={sidebar} bottom={bottom}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route

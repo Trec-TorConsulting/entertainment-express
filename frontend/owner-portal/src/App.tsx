@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import {
+  AccountPanel,
   AppShell,
   BookingDetail,
   DataTable,
@@ -17,22 +18,40 @@ import {
 } from "../../portal-kit/src";
 
 const OWNER_NAV = [
-  { to: "/", label: "Today" },
-  { to: "/calendar", label: "Calendar" },
-  { to: "/pipeline", label: "Pipeline" },
-  { to: "/dispatch", label: "Dispatch" },
-  { to: "/catalog", label: "Catalog" },
-  { to: "/gear", label: "Gear" },
-  { to: "/people", label: "People" },
-  { to: "/money", label: "Money" },
-  { to: "/reports", label: "Reports" },
-  { to: "/automations", label: "Automations" },
-  { to: "/brand", label: "Brand" },
+  {
+    label: "Operations",
+    items: [
+      { to: "/", label: "Today" },
+      { to: "/calendar", label: "Calendar" },
+      { to: "/pipeline", label: "Pipeline" },
+      { to: "/dispatch", label: "Dispatch" },
+    ],
+  },
+  {
+    label: "Catalog",
+    items: [
+      { to: "/catalog", label: "Packages" },
+      { to: "/gear", label: "Gear" },
+      { to: "/people", label: "People" },
+    ],
+  },
+  {
+    label: "Business",
+    items: [
+      { to: "/money", label: "Money" },
+      { to: "/reports", label: "Reports" },
+      { to: "/automations", label: "Reminders" },
+      { to: "/brand", label: "Brand" },
+    ],
+  },
 ];
 
 function Today() {
+  const person = getSessionBootstrap().person;
   const [stats, setStats] = React.useState<any>(null);
   const [approvals, setApprovals] = React.useState<any[]>([]);
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   React.useEffect(() => {
     call("entertainment_express.api.portal_owner.get_owner_dashboard", {})
@@ -44,29 +63,49 @@ function Today() {
   }, []);
 
   const jobs = stats?.jobs || [];
+  const first = (person?.full_name || "there").split(" ")[0];
 
   return (
-    <section style={{ display: "grid", gap: "1rem" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+    <section className="ee-today">
+      <div className="ee-today__hero">
+        <div>
+          <p className="ee-lead" style={{ marginBottom: "0.2rem" }}>
+            {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+          </p>
+          <h1>
+            {hello}, {first}
+          </h1>
+        </div>
+      </div>
+      <div className="ee-metrics">
         <StatCard label="What customers owe" value={String(stats?.outstanding_balance || "0.00")} />
         <StatCard label="Jobs on the books" value={String(stats?.new_bookings || jobs.length || 0)} />
         <StatCard label="Needs a crew" value={String(stats?.at_risk_count || 0)} />
-        <StatCard label="Inbox" value={String((approvals.length || 0) + (stats?.unread_chat || 0))} />
+        <StatCard label="Open tasks" value={String((approvals.length || 0) + (stats?.unread_chat || 0))} />
       </div>
-      {jobs.length ? (
-        <DataTable
-          id="owner-today-jobs"
-          columns={[
-            { key: "event_name", label: "Event" },
-            { key: "event_date", label: "Date" },
-            { key: "status", label: "Status" },
-          ]}
-          rows={jobs}
-        />
-      ) : (
-        <EmptyState title="No jobs this week" message="When a booking is confirmed it shows up here." actionLabel="Open pipeline" onAction={() => (window.location.href = "/owner/pipeline")} />
-      )}
-      {approvals.length ? <ApprovalsList rows={approvals} onChanged={() => call("entertainment_express.api.portal_owner.get_approvals", {}).then((res) => setApprovals(res || [])).catch(() => setApprovals([]))} /> : <EmptyState title="Nothing waiting on you" message="Discounts, refunds, and payouts that need a yes/no land here." />}
+      <div className="ee-split">
+        <div className="ee-job-grid">
+          {jobs.length ? (
+            jobs.slice(0, 8).map((job: any) => (
+              <article key={job.name} className="ee-job-card">
+                <h3>{job.event_name || job.name}</h3>
+                <p>
+                  {job.event_date} {job.start_time ? `· ${job.start_time}` : ""} · {job.status}
+                </p>
+                {job.venue_address ? <p>{job.venue_address}</p> : null}
+                {job.balance_due ? <p>Left {job.balance_due}</p> : null}
+              </article>
+            ))
+          ) : (
+            <EmptyState title="No jobs this week" message="When a booking is confirmed it shows up here." actionLabel="Open pipeline" onAction={() => (window.location.href = "/owner/pipeline")} />
+          )}
+        </div>
+        {approvals.length ? (
+          <ApprovalsList rows={approvals} onChanged={() => call("entertainment_express.api.portal_owner.get_approvals", {}).then((res) => setApprovals(res || [])).catch(() => setApprovals([]))} />
+        ) : (
+          <EmptyState title="You're clear" message="Open Frappe tasks assigned to your team land here. Chat from events is in Inbox." />
+        )}
+      </div>
     </section>
   );
 }
@@ -90,10 +129,10 @@ function ApprovalsList({ rows, onChanged }: { rows: any[]; onChanged: () => void
           <p style={{ margin: "0.25rem 0 0.75rem", color: "var(--ee-muted)" }}>{row.id || row.name}</p>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <button type="button" onClick={() => act(row, "approved")} style={{ background: "var(--ee-success)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              Approve
+              {row.type === "todo" ? "Done" : "Approve"}
             </button>
             <button type="button" onClick={() => act(row, "rejected")} style={{ background: "var(--ee-danger)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              Reject
+              {row.type === "todo" ? "Dismiss" : "Reject"}
             </button>
           </div>
         </article>
@@ -399,15 +438,25 @@ export function OwnerApp() {
   const showTalent = roles.includes("EE Entertainer") || roles.includes("EE Crew");
   const [mode, setMode] = React.useState<"company" | "talent">("company");
 
-  const sidebar = OWNER_NAV.map((item) => (
-    <NavLink key={item.to} to={item.to} end={item.to === "/"} className={({ isActive }) => (isActive ? "ee-nav-active" : "")}>
-      {item.label}
-    </NavLink>
-  ));
+  const sidebar = (
+    <>
+      {OWNER_NAV.map((group) => (
+        <React.Fragment key={group.label}>
+          <p className="ee-nav-label">{group.label}</p>
+          {group.items.map((item) => (
+            <NavLink key={item.to} to={item.to} end={item.to === "/"} className={({ isActive }) => (isActive ? "ee-nav-active" : "")}>
+              {item.label}
+            </NavLink>
+          ))}
+        </React.Fragment>
+      ))}
+    </>
+  );
 
   return (
     <AppShell
-      title="Your company"
+      title="Company"
+      portal="owner"
       density="cockpit"
       sidebar={mode === "company" ? sidebar : undefined}
       headerExtra={
@@ -439,6 +488,7 @@ export function OwnerApp() {
           <Route path="/reports" element={<ReportsWorkspace />} />
           <Route path="/automations" element={<AutomationsWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
+          <Route path="/account" element={<AccountPanel />} />
           <Route path="/settings" element={<Navigate to="/brand" replace />} />
           <Route path="/approvals" element={<ApprovalsWorkspace />} />
           <Route path="*" element={<EmptyState title="Not found" message="That page is not in your company workspace." />} />

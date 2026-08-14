@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, Route, Routes, useParams, useSearchParams } from "react-router-dom";
 import {
+  AccountPanel,
   AppShell,
   BookingDetail,
   DataTable,
@@ -295,7 +296,7 @@ export function ClientApp() {
   );
 
   return (
-    <AppShell title={guest ? "Event" : "Your events"} density="consumer" sidebar={sidebar}>
+    <AppShell title={guest ? "This event" : "Your events"} portal="client" density="consumer" sidebar={sidebar} showSearch={!guest}>
       <Routes>
         <Route path="/" element={<Home booking={booking} events={events} />} />
         <Route path="/events" element={guest ? <EmptyState title="Events" message="You only see this event." /> : <Events />} />
@@ -305,6 +306,7 @@ export function ClientApp() {
         <Route path="/people" element={scoped(<People booking={booking} />)} />
         <Route path="/chat" element={scoped(<Chat booking={booking} />)} />
         <Route path="/photos" element={<Photos />} />
+        <Route path="/account" element={<AccountPanel />} />
         <Route path="/events/:booking" element={<EventScoped>{(b) => <Planning booking={b} />}</EventScoped>} />
         <Route path="*" element={<EmptyState title="Not found" message="That page is not in your event portal." />} />
       </Routes>

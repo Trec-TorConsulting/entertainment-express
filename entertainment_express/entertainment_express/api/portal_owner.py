@@ -93,12 +93,39 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
 @frappe.whitelist()
 def get_approvals() -> list[dict]:
     _require_owner()
-    return []
+    rows = []
+    try:
+        for todo in frappe.get_all(
+            "ToDo",
+            filters={"status": "Open"},
+            fields=["name", "description", "allocated_to", "date", "reference_type", "reference_name"],
+            order_by="modified desc",
+            limit_page_length=20,
+        ):
+            rows.append(
+                {
+                    "type": "todo",
+                    "id": todo.name,
+                    "name": todo.name,
+                    "doctype": "ToDo",
+                    "summary": todo.description or "Open task",
+                    "allocated_to": todo.allocated_to,
+                    "date": str(todo.date or ""),
+                }
+            )
+    except Exception:
+        rows = []
+    return rows
 
 
 @frappe.whitelist()
 def act_on_approval(approval_type: str, doctype: str, name: str, decision: str, note: str | None = None) -> dict:
     _require_owner()
+
+    if doctype == "ToDo":
+        doc = frappe.get_doc("ToDo", name)
+        doc.status = "Closed" if decision == "approved" else "Cancelled"
+        doc.save(ignore_permissions=True)
 
     _audit(
         "approval_decision",

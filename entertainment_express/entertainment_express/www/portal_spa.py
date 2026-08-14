@@ -26,11 +26,31 @@ def portal_bootstrap() -> dict:
         data = getattr(session, "data", None) or {}
         csrf = data.get("csrf_token") or ""
 
+    person = {"name": user, "full_name": user, "email": user if user != "Guest" else "", "image": None}
+    inbox_count = 0
+    if user and user != "Guest":
+        try:
+            row = frappe.db.get_value("User", user, ["full_name", "user_image", "email", "first_name"], as_dict=True) or {}
+            person = {
+                "name": user,
+                "full_name": row.get("full_name") or row.get("first_name") or user,
+                "email": row.get("email") or user,
+                "image": row.get("user_image"),
+            }
+        except Exception:
+            pass
+        try:
+            inbox_count = int(frappe.db.count("ToDo", {"allocated_to": user, "status": "Open"}) or 0)
+        except Exception:
+            inbox_count = 0
+
     return {
         "user": user,
+        "person": person,
         "roles": frappe.get_roles(user) if user != "Guest" else [],
         "csrf_token": csrf,
         "branding": branding,
+        "inbox_count": inbox_count,
     }
 
 
