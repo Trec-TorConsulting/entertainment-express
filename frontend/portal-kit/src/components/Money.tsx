@@ -5,5 +5,5 @@ type Props = {
 };
 
 export function Money({ amount }: Props) {
-  return <span>{amount}</span>;
+  return <span style={{ fontVariantNumeric: "tabular-nums" }}>{amount}</span>;
 }

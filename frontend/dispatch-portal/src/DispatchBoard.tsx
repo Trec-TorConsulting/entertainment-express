@@ -108,7 +108,7 @@ export const DispatchBoard: React.FC = () => {
               key={tab}
               onClick={() => setMainTab(tab)}
               className={`px-4 py-2 rounded capitalize ${
-                mainTab === tab ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+                mainTab === tab ? 'bg-ee-brand' : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
               {tab}
@@ -165,7 +165,7 @@ const BookingCard: React.FC<{ booking: any; selected: boolean; onClick: () => vo
   <button
     onClick={onClick}
     className={`w-full text-left p-4 rounded-lg border ${
-      selected ? 'border-blue-500 bg-gray-700' : 'border-gray-700 bg-gray-800 hover:bg-gray-750'
+      selected ? 'border-ee-brand bg-gray-700' : 'border-gray-700 bg-gray-800 hover:bg-gray-750'
     }`}
   >
     <div className="flex justify-between gap-2">
@@ -211,7 +211,7 @@ const BookingDetail: React.FC<{ bookingId: string }> = ({ bookingId }) => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 px-4 py-3 font-medium capitalize ${
-                activeTab === tab ? 'text-white border-b-2 border-blue-500' : 'text-gray-400 hover:text-white'
+                activeTab === tab ? 'text-white border-b-2 border-ee-brand' : 'text-gray-400 hover:text-white'
               }`}
             >
               {tab}
@@ -239,7 +239,7 @@ const CrewAssignmentPanel: React.FC<{ booking: any }> = ({ booking }) => {
             <div className="font-medium">{assign.crew_member}</div>
             <div className="text-sm text-gray-400">{assign.role}</div>
           </div>
-          <span className="text-xs uppercase tracking-wide text-blue-300">{assign.status}</span>
+          <span className="text-xs uppercase tracking-wide text-ee-brand">{assign.status}</span>
         </div>
       ))}
     </div>
@@ -361,7 +361,7 @@ const CrewScheduler: React.FC<{ bookings: any[]; selectedDate: string }> = ({ bo
             onDrop={(e) => onDrop(e, booking.name)}
             className={`rounded-lg border p-4 transition ${
               dragOverBooking === booking.name
-                ? 'border-blue-400 bg-blue-950/40'
+                ? 'border-ee-brand bg-ee-brand/20'
                 : 'border-gray-700 bg-gray-800'
             }`}
           >
@@ -445,7 +445,7 @@ const RunSheetPanel: React.FC<{ bookingId: string }> = ({ bookingId }) => {
             <button
               onClick={() => publishMutation.mutate()}
               disabled={publishMutation.isPending}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-600"
+              className="bg-ee-brand text-white px-4 py-2 rounded hover:opacity-90 disabled:bg-gray-600"
             >
               {publishMutation.isPending ? 'Publishing...' : 'Publish to Crew'}
             </button>
@@ -469,7 +469,7 @@ const MessagesPanel: React.FC<{ bookingId: string }> = ({ bookingId }) => {
       />
       <button
         disabled={!message.trim()}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-600"
+        className="bg-ee-brand text-white px-4 py-2 rounded hover:opacity-90 disabled:bg-gray-600"
         onClick={() => setMessage('')}
       >
         Send Message

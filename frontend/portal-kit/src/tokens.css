@@ -6,6 +6,10 @@
   --ee-brand: #006c67;
   --ee-danger: #a5332a;
   --ee-success: #1f7a49;
+  --ee-border: #d9dee5;
   --ee-radius: 14px;
   --ee-shadow: 0 10px 30px rgba(31, 41, 51, 0.08);
+  --ee-nav-width: 14rem;
+  --ee-bottom-nav-height: 3.5rem;
+  --ee-ops-font-size: 0.875rem;
 }

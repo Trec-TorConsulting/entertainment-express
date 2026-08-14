@@ -3,14 +3,17 @@
 {% block title %}Owner Portal{% endblock %}
 
 {% block page_content %}
-<section class="container" style="padding: 2rem 1rem;">
-  <div id="root" data-portal="owner"></div>
-  <script>
-    window.eePortalBootstrap = {{ portal_bootstrap | tojson }};
-  </script>
-  <script type="module" src="/assets/entertainment_express/owner/main.js"></script>
-  <noscript>
-    <p>Owner portal requires JavaScript.</p>
-  </noscript>
-</section>
+<style>
+  .navbar, .web-footer, .page-header, .breadcrumb { display: none !important; }
+  .container { max-width: none !important; padding: 0 !important; width: 100% !important; }
+  #root { min-height: 100vh; }
+</style>
+<div id="root" data-portal="owner"></div>
+<script>
+  window.eePortalBootstrap = {{ portal_bootstrap | tojson }};
+</script>
+<script type="module" src="/assets/entertainment_express/owner/main.js"></script>
+<noscript>
+  <p>Owner portal requires JavaScript.</p>
+</noscript>
 {% endblock %}

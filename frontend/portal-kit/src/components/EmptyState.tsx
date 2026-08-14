@@ -9,7 +9,7 @@ type Props = {
 
 export function EmptyState({ title, message, actionLabel, onAction }: Props) {
   return (
-    <section style={{ background: "var(--ee-panel)", border: "1px dashed #c4ccd6", borderRadius: "var(--ee-radius)", padding: "1rem" }}>
+    <section style={{ background: "var(--ee-panel)", border: "1px dashed var(--ee-border)", borderRadius: "var(--ee-radius)", padding: "1rem" }}>
       <h3 style={{ marginTop: 0 }}>{title}</h3>
       <p>{message}</p>
       {actionLabel ? (

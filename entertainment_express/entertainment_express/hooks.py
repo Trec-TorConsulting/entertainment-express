@@ -111,9 +111,6 @@ website_route_rules = [
     {"from_route": "/request-quote", "to_route": "request-quote"},
     {"from_route": "/signup", "to_route": "signup"},
     {"from_route": "/owner/<path:app_path>", "to_route": "owner"},
-    # Product alias: tenant admin cockpit at /admin (same SPA shell as /owner)
-    {"from_route": "/admin", "to_route": "owner"},
-    {"from_route": "/admin/<path:app_path>", "to_route": "owner"},
     {"from_route": "/employee/<path:app_path>", "to_route": "employee"},
     # Phase-4 React SPAs — deep links stay on the shell page
     {"from_route": "/customer", "to_route": "customer"},

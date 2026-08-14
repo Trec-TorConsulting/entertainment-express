@@ -54,7 +54,7 @@ export function DataTable<T extends Record<string, any>>({ id = "default", colum
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Filter rows"
-          style={{ padding: "0.5rem", border: "1px solid #d9dee5", borderRadius: "0.5rem", minWidth: 220 }}
+          style={{ padding: "0.5rem", border: "1px solid var(--ee-border)", borderRadius: "0.5rem", minWidth: 220, background: "var(--ee-panel)", color: "var(--ee-text)" }}
         />
         <button onClick={saveCurrentView} style={{ padding: "0.5rem 0.8rem" }}>Save View</button>
         {savedViews.map((view) => (
@@ -68,9 +68,9 @@ export function DataTable<T extends Record<string, any>>({ id = "default", colum
       <table style={{ width: "100%", borderCollapse: "collapse", background: "var(--ee-panel)" }}>
         <thead>
           <tr>
-            <th style={{ borderBottom: "1px solid #d9dee5", padding: "0.65rem" }}>Pick</th>
+            <th style={{ borderBottom: "1px solid var(--ee-border)", padding: "0.65rem", position: "sticky", top: 0, background: "var(--ee-panel)" }}>Pick</th>
             {columns.map((col) => (
-              <th key={String(col.key)} style={{ textAlign: "left", borderBottom: "1px solid #d9dee5", padding: "0.65rem" }}>
+              <th key={String(col.key)} style={{ textAlign: "left", borderBottom: "1px solid var(--ee-border)", padding: "0.65rem", position: "sticky", top: 0, background: "var(--ee-panel)" }}>
                 {col.label}
               </th>
             ))}

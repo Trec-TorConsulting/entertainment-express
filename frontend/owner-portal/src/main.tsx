@@ -6,7 +6,7 @@ import "../../portal-kit/src/tokens.css";
 
 createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/owner">
       <OwnerApp />
     </BrowserRouter>
   </React.StrictMode>

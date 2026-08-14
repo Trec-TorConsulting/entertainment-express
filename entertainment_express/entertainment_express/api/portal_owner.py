@@ -37,11 +37,25 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
     outstanding_total = flt(sum(flt(row.get("outstanding_amount")) for row in open_invoices))
     currency = (open_invoices[0].get("currency") if open_invoices else None) or frappe.db.get_default("currency") or "USD"
 
+    pending_approvals = 0
+    at_risk_count = 0
+    try:
+        pending_approvals = len(get_approvals())
+    except Exception:
+        pending_approvals = 0
+    try:
+        from entertainment_express.api.dispatch_realtime import build_day_view
+
+        at_risk_count = int((build_day_view().get("summary") or {}).get("at_risk_count") or 0)
+    except Exception:
+        at_risk_count = 0
+
     return {
         "revenue": fmt_money(0, currency=currency),
         "new_bookings": bookings,
         "pipeline_value": fmt_money(0, currency=currency),
-        "at_risk_count": 0,
+        "at_risk_count": at_risk_count,
+        "pending_approvals": pending_approvals,
         "outstanding_balance": fmt_money(outstanding_total, currency=currency),
         "series": [],
         "from_date": from_date,

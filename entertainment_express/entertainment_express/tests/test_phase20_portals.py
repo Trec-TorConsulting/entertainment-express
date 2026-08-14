@@ -67,8 +67,8 @@ class _FakeFrappeApi:
 def test_resolve_home_portal_routes_by_role(monkeypatch):
     fake = _FakeFrappeRG(roles=["EE Tenant Admin"])
     monkeypatch.setattr(request_guards, "frappe", fake)
-    assert request_guards.EE_OWNER_PORTAL == "/admin"
-    assert request_guards.resolve_home_portal("owner@test.local") == "/admin"
+    assert request_guards.EE_OWNER_PORTAL == "/owner"
+    assert request_guards.resolve_home_portal("owner@test.local") == "/owner"
 
     fake = _FakeFrappeRG(roles=["EE Dispatcher"])
     monkeypatch.setattr(request_guards, "frappe", fake)
@@ -91,15 +91,15 @@ def test_sanitize_backend_urls_enforce_redirects_owner(monkeypatch):
     assert getattr(fake.local.request, "path") == request_guards.EE_OWNER_PORTAL
 
 
-def test_sanitize_app_home_rewrites_owner_to_admin(monkeypatch):
+def test_sanitize_app_home_rewrites_owner_to_owner_portal(monkeypatch):
     fake = _FakeFrappeRG(roles=["EE Tenant Admin"], path="/app/home")
     fake.local.request.__dict__["path"] = "/app/home"
     monkeypatch.setattr(request_guards, "frappe", fake)
 
     request_guards.sanitize_backend_urls()
 
-    assert fake.local.request.environ["PATH_INFO"] == "/admin"
-    assert getattr(fake.local.request, "path") == "/admin"
+    assert fake.local.request.environ["PATH_INFO"] == "/owner"
+    assert getattr(fake.local.request, "path") == "/owner"
 
 
 def test_rewrite_path_rehydrates_path_attribute(monkeypatch):
@@ -124,9 +124,9 @@ def test_rewrite_path_rehydrates_path_attribute(monkeypatch):
         local = _Local()
 
     monkeypatch.setattr(request_guards, "frappe", _Fake())
-    request_guards._rewrite_path("/admin")
-    assert req.environ["PATH_INFO"] == "/admin"
-    assert req.path == "/admin"
+    request_guards._rewrite_path("/owner")
+    assert req.environ["PATH_INFO"] == "/owner"
+    assert req.path == "/owner"
 
 
 def test_sanitize_backend_urls_warn_keeps_owner_on_app(monkeypatch):
@@ -230,9 +230,20 @@ def test_portal_api_signatures_no_cross_site_param():
         assert "tenant" not in params
 
 
-def test_admin_alias_routes_to_owner_shell():
+def test_require_owner_login_denies_employee(monkeypatch):
+    fake = _FakeFrappeRG(roles=["EE Sales"], path="/owner")
+    monkeypatch.setattr(request_guards, "frappe", fake)
+
+    with pytest.raises(_FakeRedirect):
+        request_guards.require_owner_login()
+
+    assert fake.flags.redirect_location == "/employee"
+
+
+def test_owner_canonical_route_is_owner_not_admin():
     from entertainment_express import hooks
 
     rules = {(r.get("from_route"), r.get("to_route")) for r in hooks.website_route_rules}
-    assert ("/admin", "owner") in rules
-    assert ("/admin/<path:app_path>", "owner") in rules
+    assert ("/owner/<path:app_path>", "owner") in rules
+    assert ("/admin", "owner") not in rules
+    assert ("/admin/<path:app_path>", "owner") not in rules

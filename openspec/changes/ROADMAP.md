@@ -152,6 +152,27 @@ provisioning, email notifications). Enhanced later by phase-8 (marketing-engagem
 control plane).
 **Folder:** [`phase-19-marketing-website/`](phase-19-marketing-website/)
 
+## Phase 21 — Front Page UI ✅
+**Goal:** Shared visual system (portal-kit tokens + marketing CSS) and a designed SaaS home + tenant
+public home. Frappe-native public pages; no new backend.
+**Specs:** `ui-design-system` (new), `marketing-website` (UX). **Depends on:** phase-19, phase-20.
+**Folder:** [`phase-21-front-page-ui/`](phase-21-front-page-ui/)
+
+## Phase 22 — /client UI ✅
+**Goal:** Designed customer portal IA and consumer-density UI over existing `/client` APIs.
+**Specs:** `customer-portal`. **Depends on:** phase-21.
+**Folder:** [`phase-22-client-ui/`](phase-22-client-ui/)
+
+## Phase 23 — /employee UI ✅
+**Goal:** Designed ops-density employee shell (My Day, workspaces, field bottom nav).
+**Specs:** `employee-portal`. **Depends on:** phase-21, phase-20, phase-2.
+**Folder:** [`phase-23-employee-ui/`](phase-23-employee-ui/)
+
+## Phase 24 — Owner UI (`/owner`) ✅
+**Goal:** Designed tenant-owner cockpit at `/owner`. Operator Desk stays `/app`.
+**Specs:** `owner-portal`. **Depends on:** phase-21, phase-20.
+**Folder:** [`phase-24-owner-ui/`](phase-24-owner-ui/)
+
 ## Phase 20 — Role-Based Portals ✅
 **Goal:** Modernize the experience layer by giving each audience its own purpose-built portal over the **one**
 existing backend, and reserve the operator Desk for the platform operator: `/app` → `System Manager`/

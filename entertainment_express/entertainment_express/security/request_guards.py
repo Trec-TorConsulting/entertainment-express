@@ -49,8 +49,8 @@ BRANDED_BACKEND_PATH_PARTS = (
 )
 EE_BACKEND_HOME = "/app/workspace/entertainment-express"
 EE_OPERATOR_HOME = EE_BACKEND_HOME
-# Product URL for tenant admins is /admin; /owner remains a backed-compatible alias.
-EE_OWNER_PORTAL = "/admin"
+# Canonical tenant-admin cockpit. Do not alias this to /admin.
+EE_OWNER_PORTAL = "/owner"
 EE_EMPLOYEE_PORTAL = "/employee"
 EE_CLIENT_PORTAL = "/client"
 EE_LOGIN = "/login"

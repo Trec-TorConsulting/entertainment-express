@@ -20,5 +20,5 @@ def get_context(context):
     if user == "Administrator" or roles.intersection(SUPER_ADMIN_ROLES):
         return
 
-    # Tenant admins land on /admin (not /app/home → Page doctype).
+    # Tenant admins land on /owner (not /app/home → Page doctype).
     _redirect(resolve_home_portal(user))

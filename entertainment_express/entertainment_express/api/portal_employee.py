@@ -55,11 +55,28 @@ def get_my_day() -> dict:
             limit_page_length=10,
         )
 
+    today_jobs = schedule
+    at_risk: list[dict] = []
+    at_risk_count = 0
+    if "EE Dispatcher" in roles:
+        try:
+            from entertainment_express.api.dispatch_realtime import build_day_view
+
+            day = build_day_view()
+            today_jobs = day.get("bookings") or []
+            at_risk = [row for row in today_jobs if row.get("at_risk")]
+            at_risk_count = int((day.get("summary") or {}).get("at_risk_count") or len(at_risk))
+        except Exception:
+            pass
+
     return {
         "roles": sorted(roles),
         "tasks": tasks,
         "assignments": assignments,
         "schedule": schedule,
+        "today_jobs": today_jobs,
+        "at_risk": at_risk,
+        "at_risk_count": at_risk_count,
     }
 
 
