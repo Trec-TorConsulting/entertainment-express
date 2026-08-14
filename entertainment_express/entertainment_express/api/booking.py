@@ -33,6 +33,10 @@ def convert_to_booking(contract_name: str = None, quotation_name: str = None) ->
         "customer": quote.party_name,
         "status": "confirmed" if contract_name else "tentative",
         "source": "portal",
+        "event_name": (
+            getattr(quote, "ee_event_name", None)
+            or f"{quote.party_name} — {quote.ee_event_date}"
+        ),
         "event_date": quote.ee_event_date,
         "start_time": quote.ee_event_start,
         "end_time": quote.ee_event_end,
@@ -206,7 +210,13 @@ def expire_holds() -> None:
 
 def _create_deposit_invoice(booking) -> None:
     """Create a deposit Sales Invoice linked to the booking."""
-    company = frappe.db.get_single_value("Global Defaults", "default_company")
+    company = (
+        frappe.defaults.get_user_default("Company")
+        or frappe.db.get_single_value("Global Defaults", "default_company")
+        or frappe.db.get_value("Company", {}, "name")
+    )
+    if not company:
+        frappe.throw("No Company found — cannot create a deposit invoice.")
     income_account = frappe.db.get_value(
         "Account",
         {"account_type": "Income Account", "company": company},
@@ -216,6 +226,9 @@ def _create_deposit_invoice(booking) -> None:
     si = frappe.get_doc({
         "doctype": "Sales Invoice",
         "customer": booking.customer,
+        "company": company,
+        "currency": "USD",
+        "conversion_rate": 1,
         "posting_date": frappe.utils.today(),
         "ee_booking": booking.name,
         "ee_is_deposit": 1,
@@ -225,6 +238,7 @@ def _create_deposit_invoice(booking) -> None:
             "description": f"Deposit for booking {booking.name} on {booking.event_date}",
             "qty": 1,
             "rate": flt(booking.deposit_amount),
+            "uom": frappe.db.get_value("UOM", {"name": "Nos"}, "name") or "Unit",
             "income_account": income_account,
         }],
     })

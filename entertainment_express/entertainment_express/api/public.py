@@ -29,6 +29,16 @@ def submit_lead(
     if not contact_name or len(contact_name) > 140:
         frappe.throw("Contact name is required (max 140 chars).", frappe.ValidationError)
 
+    # ERPNext v15 Lead.notes is a child table, not a text field — store the
+    # quote-request details as a Comment so insert does not TypeError.
+    details = (
+        f"Event Type: {event_type}\n"
+        f"Event Date: {event_date}\n"
+        f"Venue: {venue_address}\n"
+        f"Service Interest: {service_interest}\n"
+        f"Message: {message[:2000]}"
+    )[:3000]
+
     lead = frappe.get_doc({
         "doctype": "Lead",
         "lead_name": contact_name[:140],
@@ -37,15 +47,9 @@ def submit_lead(
         "mobile_no": phone[:20] if phone else "",
         "source": "Campaign",  # ERPNext built-in source field
         "status": "Open",
-        "notes": (
-            f"Event Type: {event_type}\n"
-            f"Event Date: {event_date}\n"
-            f"Venue: {venue_address}\n"
-            f"Service Interest: {service_interest}\n"
-            f"Message: {message[:2000]}"
-        )[:3000],
     })
     lead.insert(ignore_permissions=True)
+    lead.add_comment("Comment", text=details)
     frappe.db.commit()
 
     # Notify assigned Sales user (if any) — async

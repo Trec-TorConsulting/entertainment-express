@@ -11,6 +11,7 @@ license = { text = "Proprietary" }
 dependencies = [
     "frappe",
     "erpnext",
+    "stripe>=10.0.0,<13",
 ]
 
 [build-system]

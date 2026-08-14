@@ -76,9 +76,12 @@
 ## 7. Documentation & validation
 - [x] 7.1 `HL/entertainment-express/README.md` with deploy order + commands + secret-fill steps.
       **Accept:** a fresh operator can follow it to reproduce the deployment.
-- [ ] 7.2 Persistence check: delete the MariaDB and python pods; confirm data survives.
+- [x] 7.2 Persistence check: delete the MariaDB and python pods; confirm data survives.
       **Accept:** after restart, `base.app.{base_domain}` still serves and data is intact.
-      **Note:** Run on the cluster after deployment — see README §Persistence Test.
+      **Note:** 2026-08-14 — deleted `mariadb-0` and both `frappe-python` pods. Recreated with new UIDs;
+      Longhorn PVCs stayed Bound; sites marker `ee-persist-20260814T104736Z` survived; `bench list-apps`
+      still shows frappe + erpnext + entertainment_express on `base.app.entertainmentexpress.app` and
+      `admin.entertainmentexpress.app`; `/api/method/ping` returned 200 for those hosts plus `entx.app`.
 
 ## Definition of Done (phase gate)
 All boxes checked; `base.app.{base_domain}` reachable over valid wildcard TLS with ERPNext +

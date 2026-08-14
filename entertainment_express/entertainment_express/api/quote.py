@@ -49,12 +49,6 @@ def build_quote(
 
     quote.grand_total = grand_total
     quote.ee_deposit_percent = flt(deposit_percent)
-    # Store deposit_amount in a custom field (added via fixtures)
-    frappe.db.set_value("Quotation", quotation_name, {
-        "ee_travel_fee": quote.ee_travel_fee,
-        "ee_deposit_percent": flt(deposit_percent),
-    })
-
     quote.save(ignore_permissions=False)
     frappe.db.commit()
     return quote.as_dict()

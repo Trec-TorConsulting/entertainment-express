@@ -194,6 +194,14 @@ CUSTOM_FIELDS = {
             "label": "Event Date",
             "insert_after": "ee_is_deposit",
         },
+        {
+            "dt": "Sales Invoice",
+            "fieldname": "ee_stripe_session_id",
+            "fieldtype": "Data",
+            "label": "Stripe Checkout Session",
+            "insert_after": "ee_event_date",
+            "read_only": 1,
+        },
     ],
 
     # ─── Customer → EE fields ────────────────────────────────────────────────

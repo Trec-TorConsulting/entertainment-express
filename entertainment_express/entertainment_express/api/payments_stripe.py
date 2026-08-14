@@ -82,8 +82,9 @@ def create_checkout(invoice_name: str) -> dict:
     )
 
     # Store the Stripe session id on the invoice for reconciliation
-    frappe.db.set_value("Sales Invoice", invoice_name, "ee_stripe_session_id", session.id)
-    frappe.db.commit()
+    if frappe.get_meta("Sales Invoice").has_field("ee_stripe_session_id"):
+        frappe.db.set_value("Sales Invoice", invoice_name, "ee_stripe_session_id", session.id)
+        frappe.db.commit()
 
     return {"checkout_url": session.url, "session_id": session.id}
 
@@ -146,8 +147,21 @@ def _handle_payment_succeeded(event_data: dict) -> None:
     if invoice.status == "Paid":
         return  # Already reconciled
 
-    # Create Payment Entry
-    company = frappe.db.get_single_value("Global Defaults", "default_company")
+    company = (
+        invoice.company
+        or frappe.defaults.get_user_default("Company")
+        or frappe.db.get_single_value("Global Defaults", "default_company")
+        or frappe.db.get_value("Company", {}, "name")
+    )
+    company_doc = frappe.get_doc("Company", company)
+    paid_from = company_doc.default_receivable_account
+    paid_to = company_doc.default_bank_account or company_doc.default_cash_account
+    if not paid_from or not paid_to:
+        frappe.throw(
+            f"Company {company} is missing default Bank/Cash or Receivable account — cannot reconcile Stripe payment."
+        )
+
+    amount = flt(invoice.grand_total)
     pe = frappe.get_doc({
         "doctype": "Payment Entry",
         "payment_type": "Receive",
@@ -155,12 +169,16 @@ def _handle_payment_succeeded(event_data: dict) -> None:
         "company": company,
         "party_type": "Customer",
         "party": invoice.customer,
-        "paid_amount": flt(invoice.grand_total),
-        "received_amount": flt(invoice.grand_total),
+        "paid_from": paid_from,
+        "paid_to": paid_to,
+        "paid_amount": amount,
+        "received_amount": amount,
+        "source_exchange_rate": 1,
+        "target_exchange_rate": 1,
         "references": [{
             "reference_doctype": "Sales Invoice",
             "reference_name": invoice_name,
-            "allocated_amount": flt(invoice.grand_total),
+            "allocated_amount": amount,
         }],
         "reference_no": payment_intent_id,
         "reference_date": frappe.utils.today(),

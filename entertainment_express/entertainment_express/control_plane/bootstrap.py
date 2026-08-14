@@ -70,6 +70,7 @@ def _run_steps(ctx) -> None:
     _ensure_erpnext_baseline()
     _ensure_setup_complete()
     _ensure_company(ctx)
+    _ensure_usd_selling_defaults(ctx)
     _ensure_current_fiscal_year(ctx)
     _ensure_roles_permissions()
     _ensure_focus_desk_mode()
@@ -122,6 +123,41 @@ def _ensure_company(tenant_doc) -> None:
     })
     company.insert(ignore_permissions=True)
     frappe.db.set_single_value("Global Defaults", "default_company", company_name)
+
+
+def _ensure_usd_selling_defaults(tenant_doc) -> None:
+    """ERPNext fixtures can leave selling in INR even when Company is USD.
+
+    Without this, Quotation insert fails: Currency Exchange is not created for INR to USD.
+    """
+    frappe.db.set_single_value("Global Defaults", "default_currency", "USD")
+    frappe.db.set_default("currency", "USD")
+    pl_name = frappe.db.get_value("Price List", {"currency": "USD", "selling": 1}, "name")
+    if not pl_name:
+        if not frappe.db.exists("Price List", "Standard Selling"):
+            frappe.get_doc({
+                "doctype": "Price List",
+                "price_list_name": "Standard Selling",
+                "currency": "USD",
+                "selling": 1,
+                "enabled": 1,
+            }).insert(ignore_permissions=True)
+            pl_name = "Standard Selling"
+        else:
+            frappe.db.set_value("Price List", "Standard Selling", "currency", "USD")
+            pl_name = "Standard Selling"
+    frappe.db.set_single_value("Selling Settings", "selling_price_list", pl_name)
+    if not frappe.db.exists("Currency Exchange", {"from_currency": "INR", "to_currency": "USD"}):
+        try:
+            frappe.get_doc({
+                "doctype": "Currency Exchange",
+                "from_currency": "INR",
+                "to_currency": "USD",
+                "exchange_rate": 0.012,
+                "date": frappe.utils.today(),
+            }).insert(ignore_permissions=True)
+        except Exception:
+            frappe.log_error(title="EE bootstrap currency exchange")
 
 
 def _ensure_current_fiscal_year(tenant_doc) -> None:
