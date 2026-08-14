@@ -173,6 +173,27 @@ public home. Frappe-native public pages; no new backend.
 **Specs:** `owner-portal`. **Depends on:** phase-21, phase-20.
 **Folder:** [`phase-24-owner-ui/`](phase-24-owner-ui/)
 
+## Phase 25 — Experience OS (owner / employee / client) ✅
+**Goal:** Replace portal chrome with one product family, three skins: `/owner` company OS (optional Talent
+tab), `/employee` role-sliced ops, `/client` complete client OS plus event guests (planning, votes, chat;
+payer-only money). Canned reports per URL. New `event-collaboration` backend.
+**Specs:** `owner-portal`, `employee-portal`, `customer-portal`, `event-collaboration` (new),
+`identity-access`, `reporting-bi`, `notifications`.
+**Depends on:** phase-20 shells, phase-1/2/5/15 APIs.
+**Folder:** [`phase-25-experience-os/`](phase-25-experience-os/)
+
+## Phase 26 — Core Completeness (usable revenue + planning loops) ✅ proposal
+**Goal:** Make the shells usable without Desk: interactive Proposal (packages + contract + deposit) in
+`/owner` and `/client`; working Pay / Documents / Planning (not empty states); event-type workflow
+checklists; potential vs actual quote conflicts; clone job; public catalog/wishlist; warehouse-only
+lines on pull sheets. Explicitly **not** Eventsquid ticketing/CEU, eventplanner.net marketplace, or
+EventPlanner.ai decks.
+**Specs:** `crm`, `customer-portal`, `owner-portal`, `employee-portal`, `booking-availability`,
+`service-catalog`, `equipment-inventory-fleet`, `event-planning-forms`, `event-timeline`,
+`music-planning`, `event-collaboration`, `billing-payments`, `notifications`, `identity-access`.
+**Depends on:** phase-1 quotes/contracts, phase-5 payments, phase-15 planning, phase-25 OS.
+**Folder:** [`phase-26-core-completeness/`](phase-26-core-completeness/)
+
 ## Phase 20 — Role-Based Portals ✅
 **Goal:** Modernize the experience layer by giving each audience its own purpose-built portal over the **one**
 existing backend, and reserve the operator Desk for the platform operator: `/app` → `System Manager`/
