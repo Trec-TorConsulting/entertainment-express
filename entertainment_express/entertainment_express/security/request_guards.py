@@ -265,25 +265,35 @@ def require_client_login() -> None:
 
 
 def require_owner_login() -> None:
+    """Allow an explicit /owner visit if the user has EE Tenant Admin.
+
+    System Manager / SaaS Operator still *home* to Desk (resolve_home_portal), but a
+    dual-role operator who opens /owner is not bounced off the cockpit.
+    """
     user = frappe.session.user or "Guest"
     if user == "Guest":
         req = getattr(frappe.local, "request", None)
         dest = (getattr(req, "path", None) or EE_OWNER_PORTAL) if req else EE_OWNER_PORTAL
         _redirect(f"{EE_LOGIN}?redirect-to={quote(dest, safe='/')}")
 
-    if resolve_home_portal(user) != EE_OWNER_PORTAL:
-        _redirect(resolve_home_portal(user))
+    roles = _get_user_roles(user)
+    if _is_owner(roles):
+        return
+    _redirect(resolve_home_portal(user))
 
 
 def require_employee_login() -> None:
+    """Allow an explicit /employee visit if the user has an employee role."""
     user = frappe.session.user or "Guest"
     if user == "Guest":
         req = getattr(frappe.local, "request", None)
         dest = (getattr(req, "path", None) or EE_EMPLOYEE_PORTAL) if req else EE_EMPLOYEE_PORTAL
         _redirect(f"{EE_LOGIN}?redirect-to={quote(dest, safe='/')}")
 
-    if resolve_home_portal(user) != EE_EMPLOYEE_PORTAL:
-        _redirect(resolve_home_portal(user))
+    roles = _get_user_roles(user)
+    if _is_employee(roles):
+        return
+    _redirect(resolve_home_portal(user))
 
 
 def _is_control_plane() -> bool:
