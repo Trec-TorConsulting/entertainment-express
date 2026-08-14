@@ -152,5 +152,23 @@
     "subject": "Action needed: Entertainment Express billing",
     "active": 1,
     "body_html": "<p>We could not collect payment for {{ tenant }}. Please update your card within {{ grace_days }} days to keep the site active.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "event_invite",
+    "template_key": "event_invite",
+    "subject": "You're invited to help plan {{ event_name }}",
+    "active": 1,
+    "channels": "email",
+    "body_html": "<p>Hi {{ full_name }},</p><p>You've been invited to help plan <b>{{ event_name }}</b>.</p><p><a href='{{ link }}'>Open the event</a></p><p>You can share ideas, vote, and chat. Payments stay with the host.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "booking_chat",
+    "template_key": "booking_chat",
+    "subject": "New message about {{ event_name }}",
+    "active": 1,
+    "channels": "email",
+    "body_html": "<p>There's a new note on {{ event_name }}:</p><p>{{ preview }}</p>"
   }
 ]

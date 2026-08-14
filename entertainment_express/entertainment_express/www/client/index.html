@@ -1,29 +1,19 @@
-{% extends "entertainment_express/templates/portal/base.html" %}
+{% extends "templates/web.html" %}
 
-{% block portal_content %}
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <p class="eyebrow">Client Portal</p>
-    <h2>Work with your event team in one secure place</h2>
-    <p>Use this portal for contracts, event details, music planning, and payment support without any internal operator tools.</p>
+{% block title %}Your events{% endblock %}
 
-    <div class="ee-grid ee-grid-features">
-      <article>
-        <h3>Sign Contract</h3>
-        <p>Open your secure contract link and complete your e-signature.</p>
-        <a class="ee-btn ee-btn-primary" href="/client/sign">Open Contract Signing</a>
-      </article>
-        <article>
-          <h3>Payments</h3>
-          <p>Use your secure invoice link to complete deposit and final balance milestones.</p>
-          <a class="ee-btn ee-btn-secondary" href="/client/pay">Open Payment Help</a>
-        </article>
-        <article>
-          <h3>Music Planning</h3>
-          <p>Submit your playlist preferences and event timeline details before event week.</p>
-          <a class="ee-btn ee-btn-secondary" href="/client/music">Open Music Planner</a>
-        </article>
-    </div>
-  </div>
-</section>
+{% block page_content %}
+<style>
+  .navbar, .web-footer, .page-header, .breadcrumb { display: none !important; }
+  .container { max-width: none !important; padding: 0 !important; width: 100% !important; }
+  #root { min-height: 100vh; }
+</style>
+<div id="root" data-portal="client"></div>
+<script>
+  window.eePortalBootstrap = {{ portal_bootstrap | tojson }};
+</script>
+<script type="module" src="/assets/entertainment_express/client/main.js"></script>
+<noscript>
+  <p>This portal requires JavaScript.</p>
+</noscript>
 {% endblock %}

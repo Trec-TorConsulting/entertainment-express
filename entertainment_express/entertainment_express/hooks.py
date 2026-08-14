@@ -112,6 +112,7 @@ website_route_rules = [
     {"from_route": "/signup", "to_route": "signup"},
     {"from_route": "/owner/<path:app_path>", "to_route": "owner"},
     {"from_route": "/employee/<path:app_path>", "to_route": "employee"},
+    {"from_route": "/client/<path:app_path>", "to_route": "client"},
     # Phase-4 React SPAs — deep links stay on the shell page
     {"from_route": "/customer", "to_route": "customer"},
     {"from_route": "/customer/<path:app_path>", "to_route": "customer"},

@@ -2,55 +2,71 @@ import React from "react";
 import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import {
   AppShell,
+  BookingDetail,
   DataTable,
   EmptyState,
   FormField,
   Money,
+  ModeSwitch,
   StatCard,
   call,
+  downloadBase64,
+  downloadText,
+  getSessionBootstrap,
   resource,
 } from "../../portal-kit/src";
 
 const OWNER_NAV = [
-  { to: "/", label: "Overview" },
-  { to: "/approvals", label: "Approvals" },
-  { to: "/money", label: "Money" },
-  { to: "/team", label: "Team" },
+  { to: "/", label: "Today" },
+  { to: "/calendar", label: "Calendar" },
+  { to: "/pipeline", label: "Pipeline" },
+  { to: "/dispatch", label: "Dispatch" },
   { to: "/catalog", label: "Catalog" },
-  { to: "/settings", label: "Settings" },
+  { to: "/gear", label: "Gear" },
+  { to: "/people", label: "People" },
+  { to: "/money", label: "Money" },
+  { to: "/reports", label: "Reports" },
+  { to: "/automations", label: "Automations" },
+  { to: "/brand", label: "Brand" },
 ];
 
-function Overview() {
+function Today() {
   const [stats, setStats] = React.useState<any>(null);
   const [approvals, setApprovals] = React.useState<any[]>([]);
 
   React.useEffect(() => {
     call("entertainment_express.api.portal_owner.get_owner_dashboard", {})
       .then(setStats)
-      .catch(() => setStats({ revenue: "0.00", new_bookings: 0, pipeline_value: "0.00", outstanding_balance: "0.00", at_risk_count: 0 }));
+      .catch(() => setStats({ revenue: "0.00", outstanding_balance: "0.00", at_risk_count: 0, unread_chat: 0, jobs: [] }));
     call("entertainment_express.api.portal_owner.get_approvals", {})
       .then((res) => setApprovals(res || []))
       .catch(() => setApprovals([]));
   }, []);
 
+  const jobs = stats?.jobs || [];
+
   return (
     <section style={{ display: "grid", gap: "1rem" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
-        <StatCard label="Revenue" value={String(stats?.revenue || "0.00")} />
-        <StatCard label="Pipeline" value={String(stats?.pipeline_value || "0.00")} />
-        <StatCard label="Outstanding" value={String(stats?.outstanding_balance || "0.00")} />
-        <StatCard label="New bookings" value={String(stats?.new_bookings || 0)} />
-        <StatCard label="At risk" value={String(stats?.at_risk_count || 0)} />
-        <StatCard label="Pending approvals" value={String(approvals.length)} />
+        <StatCard label="What customers owe" value={String(stats?.outstanding_balance || "0.00")} />
+        <StatCard label="Jobs on the books" value={String(stats?.new_bookings || jobs.length || 0)} />
+        <StatCard label="Needs a crew" value={String(stats?.at_risk_count || 0)} />
+        <StatCard label="Inbox" value={String((approvals.length || 0) + (stats?.unread_chat || 0))} />
       </div>
-      <p style={{ margin: 0, color: "var(--ee-muted)" }}>
-        Money figures are API strings: <Money amount={String(stats?.revenue || "0.00")} /> revenue.
-      </p>
-      {approvals.length ? (
-        <ApprovalsList rows={approvals} onChanged={() => call("entertainment_express.api.portal_owner.get_approvals", {}).then((res) => setApprovals(res || [])).catch(() => setApprovals([]))} />
+      {jobs.length ? (
+        <DataTable
+          id="owner-today-jobs"
+          columns={[
+            { key: "event_name", label: "Event" },
+            { key: "event_date", label: "Date" },
+            { key: "status", label: "Status" },
+          ]}
+          rows={jobs}
+        />
       ) : (
-        <EmptyState title="Approvals" message="No pending approvals." />
+        <EmptyState title="No jobs this week" message="When a booking is confirmed it shows up here." actionLabel="Open pipeline" onAction={() => (window.location.href = "/owner/pipeline")} />
       )}
+      {approvals.length ? <ApprovalsList rows={approvals} onChanged={() => call("entertainment_express.api.portal_owner.get_approvals", {}).then((res) => setApprovals(res || [])).catch(() => setApprovals([]))} /> : <EmptyState title="Nothing waiting on you" message="Discounts, refunds, and payouts that need a yes/no land here." />}
     </section>
   );
 }
@@ -214,7 +230,123 @@ function CatalogWorkspace() {
       rows={rows}
     />
   ) : (
-    <EmptyState title="Catalog" message="Service items will appear here." />
+    <EmptyState title="Packages" message="Add what you sell so quotes pick it up automatically." />
+  );
+}
+
+function CalendarWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_owner.get_owner_dashboard", {})
+      .then((res) => setRows(res?.jobs || []))
+      .catch(() => setRows([]));
+  }, []);
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      {rows.length ? (
+        <DataTable id="owner-calendar" columns={[{ key: "event_name", label: "Event" }, { key: "event_date", label: "Date" }, { key: "status", label: "Status" }]} rows={rows} />
+      ) : (
+        <EmptyState title="Calendar is empty" message="Confirmed events show here by date." />
+      )}
+      <BookingDetail booking={rows[0] || null} emptyMessage="Your next event details show here." />
+    </section>
+  );
+}
+
+function PipelineWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    call("frappe.client.get_list", { doctype: "Lead", fields: ["name", "lead_name", "status", "modified"], order_by: "modified desc", limit_page_length: 20 })
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  }, []);
+  return rows.length ? (
+    <DataTable id="owner-pipeline" columns={[{ key: "lead_name", label: "Lead" }, { key: "status", label: "Status" }, { key: "modified", label: "Updated" }]} rows={rows} />
+  ) : (
+    <EmptyState title="No leads yet" message="New inquiries land here until they become a booking." />
+  );
+}
+
+function DispatchWorkspace() {
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <p style={{ margin: 0 }}>
+        <a href="/dispatch" style={{ color: "var(--ee-brand)" }}>Open the dispatch board</a>
+      </p>
+      <iframe title="Dispatch" src="/dispatch" style={{ width: "100%", minHeight: "70vh", border: "1px solid var(--ee-border)", borderRadius: "var(--ee-radius)" }} />
+    </section>
+  );
+}
+
+function GearWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    call("frappe.client.get_list", { doctype: "Vehicle", fields: ["name", "vehicle_name", "status"], limit_page_length: 20 })
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  }, []);
+  return rows.length ? (
+    <DataTable id="owner-gear" columns={[{ key: "name", label: "Gear" }, { key: "vehicle_name", label: "Name" }, { key: "status", label: "Status" }]} rows={rows} />
+  ) : (
+    <EmptyState title="No gear listed" message="Trucks, booths, and bounce units you track show here." />
+  );
+}
+
+function ReportsWorkspace() {
+  const [pack, setPack] = React.useState<any>(null);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_reports.owner_pack", {}).then(setPack).catch(() => setPack(null));
+  }, []);
+  if (!pack) return <EmptyState title="Reports" message="Company snapshots appear here." />;
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <StatCard label="Jobs" value={String(pack.jobs ?? 0)} />
+        <StatCard label="Billed" value={String(pack.revenue || "0.00")} />
+        <StatCard label="Still owed" value={String(pack.outstanding || "0.00")} />
+        <StatCard label="Needs a crew" value={String(pack.at_risk ?? 0)} />
+        <StatCard label="Payouts due" value={String(pack.payouts_due || "0.00")} />
+      </div>
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={async () => {
+            const csv = await call("entertainment_express.api.portal_reports.owner_pack_csv", {});
+            downloadText("company-reports.csv", String(csv || ""), "text/csv");
+          }}
+          style={{ background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+        >
+          Download spreadsheet
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            const pdf = await call("entertainment_express.api.portal_reports.owner_pack_pdf", {});
+            if (pdf?.content_b64) downloadBase64(pdf.filename || "company-reports.pdf", pdf.content_b64, "application/pdf");
+          }}
+          style={{ background: "var(--ee-panel)", color: "var(--ee-text)", border: "1px solid var(--ee-border)", borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+        >
+          Download for accountant
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function AutomationsWorkspace() {
+  return <EmptyState title="Reminders" message="Deposit chasers and planning nudges use your existing notification settings. Nothing extra to install." />;
+}
+
+function TalentHome() {
+  const [day, setDay] = React.useState<any>(null);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_employee.get_my_day", {}).then(setDay).catch(() => setDay({ assignments: [] }));
+  }, []);
+  const rows = day?.assignments || [];
+  return rows.length ? (
+    <DataTable id="owner-talent" columns={[{ key: "name", label: "Gig" }, { key: "booking", label: "Event" }, { key: "status", label: "Status" }]} rows={rows} />
+  ) : (
+    <EmptyState title="No gigs on your calendar" message="When you are booked as talent, those jobs show here." />
   );
 }
 
@@ -263,6 +395,10 @@ function SettingsWorkspace() {
 }
 
 export function OwnerApp() {
+  const roles = getSessionBootstrap().roles || [];
+  const showTalent = roles.includes("EE Entertainer") || roles.includes("EE Crew");
+  const [mode, setMode] = React.useState<"company" | "talent">("company");
+
   const sidebar = OWNER_NAV.map((item) => (
     <NavLink key={item.to} to={item.to} end={item.to === "/"} className={({ isActive }) => (isActive ? "ee-nav-active" : "")}>
       {item.label}
@@ -270,17 +406,44 @@ export function OwnerApp() {
   ));
 
   return (
-    <AppShell title="Owner Portal" density="cockpit" sidebar={sidebar}>
-      <Routes>
-        <Route path="/" element={<Overview />} />
-        <Route path="/approvals" element={<ApprovalsWorkspace />} />
-        <Route path="/money" element={<MoneyWorkspace />} />
-        <Route path="/finances" element={<Navigate to="/money" replace />} />
-        <Route path="/team" element={<TeamWorkspace />} />
-        <Route path="/catalog" element={<CatalogWorkspace />} />
-        <Route path="/settings" element={<SettingsWorkspace />} />
-        <Route path="*" element={<EmptyState title="Owner Workspace" message="That page is not in the owner cockpit." />} />
-      </Routes>
+    <AppShell
+      title="Your company"
+      density="cockpit"
+      sidebar={mode === "company" ? sidebar : undefined}
+      headerExtra={
+        showTalent ? (
+          <ModeSwitch
+            value={mode}
+            options={[
+              { id: "company", label: "Company" },
+              { id: "talent", label: "Talent" },
+            ]}
+            onChange={(id) => setMode(id as "company" | "talent")}
+          />
+        ) : null
+      }
+    >
+      {mode === "talent" ? (
+        <TalentHome />
+      ) : (
+        <Routes>
+          <Route path="/" element={<Today />} />
+          <Route path="/calendar" element={<CalendarWorkspace />} />
+          <Route path="/pipeline" element={<PipelineWorkspace />} />
+          <Route path="/dispatch" element={<DispatchWorkspace />} />
+          <Route path="/catalog" element={<CatalogWorkspace />} />
+          <Route path="/gear" element={<GearWorkspace />} />
+          <Route path="/people" element={<TeamWorkspace />} />
+          <Route path="/team" element={<Navigate to="/people" replace />} />
+          <Route path="/money" element={<MoneyWorkspace />} />
+          <Route path="/reports" element={<ReportsWorkspace />} />
+          <Route path="/automations" element={<AutomationsWorkspace />} />
+          <Route path="/brand" element={<SettingsWorkspace />} />
+          <Route path="/settings" element={<Navigate to="/brand" replace />} />
+          <Route path="/approvals" element={<ApprovalsWorkspace />} />
+          <Route path="*" element={<EmptyState title="Not found" message="That page is not in your company workspace." />} />
+        </Routes>
+      )}
     </AppShell>
   );
 }

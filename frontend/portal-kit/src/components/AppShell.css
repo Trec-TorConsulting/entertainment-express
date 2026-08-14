@@ -11,6 +11,38 @@
   font-size: var(--ee-ops-font-size);
 }
 
+.ee-shell--consumer .ee-shell__main {
+  padding: 1.25rem 1.5rem 2rem;
+  max-width: 960px;
+}
+
+.ee-shell__header-extra {
+  margin-left: auto;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.ee-mode-switch {
+  display: inline-flex;
+  border: 1px solid var(--ee-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ee-mode-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--ee-text);
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ee-mode-switch button[aria-pressed="true"] {
+  background: var(--ee-brand);
+  color: #fff;
+}
+
 .ee-shell__header {
   grid-column: 1 / -1;
   padding: 0.75rem 1.25rem;

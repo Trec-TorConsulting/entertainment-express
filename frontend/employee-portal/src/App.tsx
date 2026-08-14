@@ -9,6 +9,8 @@ import {
   focusCommandPalette,
   getSessionBootstrap,
   call,
+  downloadBase64,
+  downloadText,
 } from "../../portal-kit/src";
 
 type SearchItem = {
@@ -256,17 +258,58 @@ function MeWorkspace() {
   );
 }
 
+function ReportsWorkspace() {
+  const [pack, setPack] = React.useState<any>(null);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_reports.employee_pack", {}).then(setPack).catch(() => setPack(null));
+  }, []);
+  if (!pack) return <EmptyState title="Reports" message="Your numbers for this role show here." />;
+  const cards = Object.entries(pack).filter(([, value]) => value !== undefined && typeof value !== "object");
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        {cards.map(([key, value]) => (
+          <StatCard key={key} label={key.replace(/_/g, " ")} value={String(value)} />
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={async () => {
+            const csv = await call("entertainment_express.api.portal_reports.employee_pack_csv", {});
+            downloadText("my-reports.csv", String(csv || ""), "text/csv");
+          }}
+          style={{ background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+        >
+          Download spreadsheet
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            const pdf = await call("entertainment_express.api.portal_reports.employee_pack_pdf", {});
+            if (pdf?.content_b64) downloadBase64(pdf.filename || "my-reports.pdf", pdf.content_b64, "application/pdf");
+          }}
+          style={{ background: "var(--ee-panel)", color: "var(--ee-text)", border: "1px solid var(--ee-border)", borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+        >
+          Download PDF
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export function EmployeeApp() {
   const roles = getSessionBootstrap().roles || [];
   const navigate = useNavigate();
   const primary = useMemo(() => ROLE_PRIMARY.find((entry) => entry.roles.some((role) => roles.includes(role))), [roles]);
 
   const nav = [
-    { to: "/", label: "Home" },
+    { to: "/", label: "My Day" },
     { to: "/dispatch", label: "Dispatch" },
     { to: "/field", label: "Field" },
     { to: "/sales", label: "Sales" },
-    { to: "/accounting", label: "Accounting" },
+    { to: "/accounting", label: "Money" },
+    { to: "/reports", label: "Reports" },
     { to: "/me", label: "Me" },
   ];
 
@@ -344,6 +387,7 @@ export function EmployeeApp() {
           }
         />
         <Route path="/me" element={<MeWorkspace />} />
+        <Route path="/reports" element={<ReportsWorkspace />} />
         <Route path="*" element={<EmptyState title="Employee Workspace" message="That page is not in this portal." />} />
       </Routes>
     </AppShell>

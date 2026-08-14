@@ -173,6 +173,15 @@ public home. Frappe-native public pages; no new backend.
 **Specs:** `owner-portal`. **Depends on:** phase-21, phase-20.
 **Folder:** [`phase-24-owner-ui/`](phase-24-owner-ui/)
 
+## Phase 25 — Experience OS (owner / employee / client) ✅
+**Goal:** Replace portal chrome with one product family, three skins: `/owner` company OS (optional Talent
+tab), `/employee` role-sliced ops, `/client` complete client OS plus event guests (planning, votes, chat;
+payer-only money). Canned reports per URL. New `event-collaboration` backend.
+**Specs:** `owner-portal`, `employee-portal`, `customer-portal`, `event-collaboration` (new),
+`identity-access`, `reporting-bi`, `notifications`.
+**Depends on:** phase-20 shells, phase-1/2/5/15 APIs.
+**Folder:** [`phase-25-experience-os/`](phase-25-experience-os/)
+
 ## Phase 20 — Role-Based Portals ✅
 **Goal:** Modernize the experience layer by giving each audience its own purpose-built portal over the **one**
 existing backend, and reserve the operator Desk for the platform operator: `/app` → `System Manager`/

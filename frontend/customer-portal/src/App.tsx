@@ -1,0 +1,313 @@
+import React from "react";
+import { NavLink, Route, Routes, useParams, useSearchParams } from "react-router-dom";
+import {
+  AppShell,
+  BookingDetail,
+  DataTable,
+  EmptyState,
+  FormField,
+  MoneySummary,
+  call,
+  getSessionBootstrap,
+} from "../../portal-kit/src";
+
+function isGuest(roles: string[]) {
+  return roles.includes("EE Event Guest") && !roles.includes("EE Customer");
+}
+
+function Home({ booking, events }: { booking: string; events: any[] }) {
+  const roles = getSessionBootstrap().roles || [];
+  const guest = isGuest(roles);
+  const [money, setMoney] = React.useState<any>(null);
+  const current = events.find((row) => row.name === booking);
+
+  React.useEffect(() => {
+    if (guest) return;
+    call("entertainment_express.api.portal_reports.client_money_summary", {})
+      .then(setMoney)
+      .catch(() => setMoney({ owed: "0.00", paid: "0.00", remaining: "0.00" }));
+  }, [guest]);
+
+  if (guest) {
+    return (
+      <EmptyState
+        title={current?.event_name || "You're helping plan an event"}
+        message="Open Planning or Chat from the menu. Payments stay with the host."
+      />
+    );
+  }
+
+  const needsPay = money && String(money.remaining) && !String(money.remaining).match(/^[0$.]*0(\.0+)?$/);
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      {money ? <MoneySummary owed={money.owed} paid={money.paid} remaining={money.remaining} /> : null}
+      {needsPay ? (
+        <EmptyState title="A payment is due" message="Finish the deposit or balance to lock the date." actionLabel="Pay" onAction={() => (window.location.href = "/client/pay")} />
+      ) : (
+        <EmptyState title="You're all set for now" message="When something needs a signature or a payment, it shows up here." />
+      )}
+    </section>
+  );
+}
+
+function Events() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    call("frappe.client.get_list", {
+      doctype: "Event Booking",
+      fields: ["name", "event_name", "event_date", "status", "venue_address", "grand_total", "balance_due", "deposit_status"],
+      limit_page_length: 20,
+    })
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  }, []);
+  return rows.length ? (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <DataTable id="client-events" columns={[{ key: "event_name", label: "Event" }, { key: "event_date", label: "Date" }, { key: "status", label: "Status" }]} rows={rows} />
+      <BookingDetail booking={rows[0]} />
+    </section>
+  ) : (
+    <EmptyState title="No events yet" message="When you book, your events show here." />
+  );
+}
+
+function Pay() {
+  return <EmptyState title="Pay" message="Open your invoice to pay a deposit or remaining balance." actionLabel="Payment help" onAction={() => (window.location.href = "/client/pay")} />;
+}
+
+function Documents() {
+  return <EmptyState title="Documents" message="Contracts to sign and receipts live here." actionLabel="Sign" onAction={() => (window.location.href = "/client/sign")} />;
+}
+
+function EventPicker({ booking, events, onChange }: { booking: string; events: any[]; onChange: (name: string) => void }) {
+  if (events.length < 2) return null;
+  return (
+    <FormField label="Event">
+      <select value={booking} onChange={(e) => onChange(e.target.value)}>
+        {events.map((row) => (
+          <option key={row.name} value={row.name}>
+            {row.event_name || row.name}
+          </option>
+        ))}
+      </select>
+    </FormField>
+  );
+}
+
+function Planning({ booking }: { booking?: string }) {
+  const [items, setItems] = React.useState<any[]>([]);
+  const [title, setTitle] = React.useState("");
+  const eventId = booking || "";
+
+  const reload = () => {
+    if (!eventId) return;
+    call("entertainment_express.api.portal_collaboration.list_plan_items", { booking: eventId })
+      .then((res) => setItems(res || []))
+      .catch(() => setItems([]));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [eventId]);
+
+  if (!eventId) {
+    return <EmptyState title="Pick an event" message="Open an event first, then add songs, add-ons, and ideas." />;
+  }
+
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <FormField label="Suggest an idea">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} />
+      </FormField>
+      <button
+        type="button"
+        onClick={async () => {
+          await call("entertainment_express.api.portal_collaboration.suggest_plan_item", { booking: eventId, title });
+          setTitle("");
+          reload();
+        }}
+        style={{ width: "fit-content", background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+      >
+        Add idea
+      </button>
+      {items.length ? (
+        <DataTable id="plan-items" columns={[{ key: "title", label: "Idea" }, { key: "source", label: "From" }, { key: "status", label: "Status" }, { key: "votes", label: "Votes" }]} rows={items} />
+      ) : (
+        <EmptyState title="No ideas yet" message="Guests and the host can suggest add-ons and vote." />
+      )}
+    </section>
+  );
+}
+
+function People({ booking }: { booking?: string }) {
+  const roles = getSessionBootstrap().roles || [];
+  const guest = isGuest(roles);
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [email, setEmail] = React.useState("");
+  const [name, setName] = React.useState("");
+  const eventId = booking || "";
+
+  const reload = () => {
+    if (!eventId) return;
+    call("entertainment_express.api.portal_collaboration.list_invites", { booking: eventId })
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [eventId]);
+
+  if (guest) {
+    return <EmptyState title="People" message="Only the host can invite others." />;
+  }
+
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <FormField label="Invite email">
+        <input value={email} onChange={(e) => setEmail(e.target.value)} />
+      </FormField>
+      <FormField label="Name">
+        <input value={name} onChange={(e) => setName(e.target.value)} />
+      </FormField>
+      <button
+        type="button"
+        disabled={!eventId}
+        onClick={async () => {
+          await call("entertainment_express.api.portal_collaboration.invite_guest", { booking: eventId, email, full_name: name });
+          setEmail("");
+          setName("");
+          reload();
+        }}
+        style={{ width: "fit-content", background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+      >
+        Send invite
+      </button>
+      {rows.length ? (
+        <DataTable id="invites" columns={[{ key: "full_name", label: "Name" }, { key: "email", label: "Email" }, { key: "status", label: "Status" }]} rows={rows} />
+      ) : (
+        <EmptyState title="No guests yet" message="Invite wedding-party or co-hosts. They can plan and chat, not pay." />
+      )}
+    </section>
+  );
+}
+
+function Chat({ booking }: { booking?: string }) {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [text, setText] = React.useState("");
+  const eventId = booking || "";
+  const reload = () => {
+    if (!eventId) return;
+    call("entertainment_express.api.portal_collaboration.list_messages", { booking: eventId })
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, [eventId]);
+  if (!eventId) return <EmptyState title="Chat" message="Open an event to message the host and talent." />;
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <ul>
+        {rows.map((row) => (
+          <li key={row.name}>
+            <strong>{row.author}</strong>: {row.message_body}
+          </li>
+        ))}
+      </ul>
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} />
+      <button
+        type="button"
+        onClick={async () => {
+          await call("entertainment_express.api.portal_collaboration.post_message", { booking: eventId, message_body: text });
+          setText("");
+          reload();
+        }}
+        style={{ width: "fit-content", background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+      >
+        Send
+      </button>
+    </section>
+  );
+}
+
+function Photos() {
+  return <EmptyState title="Photos" message="Galleries show here after the event." />;
+}
+
+function EventScoped({ children }: { children: (booking: string) => React.ReactNode }) {
+  const { booking } = useParams();
+  return <>{children(booking || "")}</>;
+}
+
+export function ClientApp() {
+  const roles = getSessionBootstrap().roles || [];
+  const guest = isGuest(roles);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [events, setEvents] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_collaboration.list_my_events", {})
+      .then((res) => setEvents(res || []))
+      .catch(() => setEvents([]));
+  }, []);
+
+  const booking = searchParams.get("booking") || events[0]?.name || "";
+
+  React.useEffect(() => {
+    if (searchParams.get("booking") || !events[0]?.name) return;
+    setSearchParams({ booking: events[0].name }, { replace: true });
+  }, [events, searchParams, setSearchParams]);
+
+  const setBooking = (name: string) => setSearchParams({ booking: name });
+
+  const nav = guest
+    ? [
+        { to: "/", label: "This event" },
+        { to: "/planning", label: "Planning" },
+        { to: "/chat", label: "Chat" },
+        { to: "/photos", label: "Photos" },
+      ]
+    : [
+        { to: "/", label: "Home" },
+        { to: "/events", label: "Events" },
+        { to: "/pay", label: "Pay" },
+        { to: "/documents", label: "Documents" },
+        { to: "/planning", label: "Planning" },
+        { to: "/people", label: "People" },
+        { to: "/chat", label: "Chat" },
+        { to: "/photos", label: "Photos" },
+      ];
+
+  const href = (to: string) => (booking ? `${to}?booking=${encodeURIComponent(booking)}` : to);
+
+  const sidebar = nav.map((item) => (
+    <NavLink key={item.to} to={href(item.to)} end={item.to === "/"} className={({ isActive }) => (isActive ? "ee-nav-active" : "")}>
+      {item.label}
+    </NavLink>
+  ));
+
+  const scoped = (node: React.ReactNode) => (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <EventPicker booking={booking} events={events} onChange={setBooking} />
+      {node}
+    </section>
+  );
+
+  return (
+    <AppShell title={guest ? "Event" : "Your events"} density="consumer" sidebar={sidebar}>
+      <Routes>
+        <Route path="/" element={<Home booking={booking} events={events} />} />
+        <Route path="/events" element={guest ? <EmptyState title="Events" message="You only see this event." /> : <Events />} />
+        <Route path="/pay" element={guest ? <EmptyState title="Payments" message="Only the host can pay." /> : <Pay />} />
+        <Route path="/documents" element={guest ? <EmptyState title="Documents" message="Contracts stay with the host." /> : <Documents />} />
+        <Route path="/planning" element={scoped(<Planning booking={booking} />)} />
+        <Route path="/people" element={scoped(<People booking={booking} />)} />
+        <Route path="/chat" element={scoped(<Chat booking={booking} />)} />
+        <Route path="/photos" element={<Photos />} />
+        <Route path="/events/:booking" element={<EventScoped>{(b) => <Planning booking={b} />}</EventScoped>} />
+        <Route path="*" element={<EmptyState title="Not found" message="That page is not in your event portal." />} />
+      </Routes>
+    </AppShell>
+  );
+}

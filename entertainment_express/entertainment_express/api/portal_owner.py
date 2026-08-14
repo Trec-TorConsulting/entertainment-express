@@ -50,6 +50,31 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
     except Exception:
         at_risk_count = 0
 
+    jobs = []
+    try:
+        jobs = frappe.get_all(
+            "Event Booking",
+            filters={"status": ["in", ["confirmed", "in_progress", "tentative"]]},
+            fields=["name", "event_name", "event_date", "start_time", "status", "venue_address", "grand_total", "balance_due", "deposit_status"],
+            order_by="event_date asc",
+            limit_page_length=20,
+        )
+        for row in jobs:
+            if row.get("grand_total") is not None:
+                row["grand_total"] = fmt_money(flt(row.get("grand_total")), currency=currency)
+            if row.get("balance_due") is not None:
+                row["balance_due"] = fmt_money(flt(row.get("balance_due")), currency=currency)
+    except Exception:
+        jobs = []
+
+    unread_chat = 0
+    try:
+        from entertainment_express.api.portal_collaboration import unread_chat_count
+
+        unread_chat = int(unread_chat_count() or 0)
+    except Exception:
+        unread_chat = 0
+
     return {
         "revenue": fmt_money(0, currency=currency),
         "new_bookings": bookings,
@@ -57,6 +82,8 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
         "at_risk_count": at_risk_count,
         "pending_approvals": pending_approvals,
         "outstanding_balance": fmt_money(outstanding_total, currency=currency),
+        "unread_chat": unread_chat,
+        "jobs": jobs,
         "series": [],
         "from_date": from_date,
         "to_date": to_date,
