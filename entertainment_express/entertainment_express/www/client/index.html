@@ -1,19 +1,19 @@
-{% extends "templates/web.html" %}
-
-{% block title %}Your events{% endblock %}
-
-{% block page_content %}
-<style>
-  .navbar, .web-footer, .page-header, .breadcrumb { display: none !important; }
-  .container { max-width: none !important; padding: 0 !important; width: 100% !important; }
-  #root { min-height: 100vh; }
-</style>
-<div id="root" data-portal="client"></div>
-<script>
-  window.eePortalBootstrap = {{ portal_bootstrap | tojson }};
-</script>
-<script type="module" src="/assets/entertainment_express/client/main.js"></script>
-<noscript>
-  <p>This portal requires JavaScript.</p>
-</noscript>
-{% endblock %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ spa_title or "Your events" }}</title>
+  <link rel="stylesheet" href="{{ spa_css or "/assets/entertainment_express/client/assets/main.css" }}">
+  <style>
+    html, body, #root { margin: 0; min-height: 100vh; background: #f7f7f2; color: #1f2933; }
+  </style>
+</head>
+<body>
+  <div id="root" data-portal="client">Loading your events…</div>
+  <script>
+    window.eePortalBootstrap = {{ portal_bootstrap | tojson }};
+  </script>
+  <script type="module" src="{{ spa_js or "/assets/entertainment_express/client/main.js" }}"></script>
+</body>
+</html>
