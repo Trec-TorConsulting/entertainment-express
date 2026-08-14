@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Damage Report",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "autoname": "format:EE-DMG-{#####}",
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "field_order": [
+  "resource_type",
+  "asset",
+  "vehicle",
+  "booking",
+  "description",
+  "photos",
+  "severity",
+  "cost",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "resource_type",
+   "fieldtype": "Select",
+   "label": "Resource",
+   "options": "asset\\nvehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "label": "Asset",
+   "options": "Service Asset",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Vehicle"
+  },
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "label": "Booking",
+   "options": "Event Booking",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "photos",
+   "fieldtype": "Attach Image",
+   "label": "Photos"
+  },
+  {
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "label": "Severity",
+   "options": "minor\\nmoderate\\nmajor",
+   "default": "minor",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cost",
+   "fieldtype": "Currency",
+   "label": "Repair Cost"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "open\\nin_repair\\nclosed",
+   "default": "open"
+  }
+ ]
+}

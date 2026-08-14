@@ -1,0 +1,124 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Event Planning",
+ "name": "Music Selection",
+ "owner": "Administrator",
+ "istable": 0,
+ "autoname": "format:EE-MS-{#####}",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "field_order": [
+  "booking",
+  "category",
+  "moment",
+  "song",
+  "free_text",
+  "requested_by",
+  "requester_name",
+  "status",
+  "notes",
+  "in_library"
+ ],
+ "fields": [
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "label": "Booking",
+   "options": "Event Booking",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "must_play\\ndo_not_play\\nspecial_moment\\ngeneral_request",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "moment",
+   "fieldtype": "Data",
+   "label": "Moment"
+  },
+  {
+   "fieldname": "song",
+   "fieldtype": "Link",
+   "label": "Song",
+   "options": "Song"
+  },
+  {
+   "fieldname": "free_text",
+   "fieldtype": "Data",
+   "label": "Song (free text)",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "requested_by",
+   "fieldtype": "Select",
+   "label": "Requested By",
+   "options": "client\\nguest\\nstaff",
+   "default": "client"
+  },
+  {
+   "fieldname": "requester_name",
+   "fieldtype": "Data",
+   "label": "Requester Name"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "requested\\napproved\\nrejected\\nplayed",
+   "default": "requested",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "in_library",
+   "fieldtype": "Check",
+   "label": "In Library",
+   "read_only": 1,
+   "default": "0"
+  }
+ ]
+}

@@ -1,0 +1,112 @@
+{% extends "entertainment_express/templates/portal/base.html" %}
+
+{% block portal_content %}
+<section class="ee-shell ee-section-spaced">
+  <div class="ee-panel" style="max-width:820px;margin:0 auto;">
+    <p class="eyebrow">Your event</p>
+    <h2>Planning form</h2>
+    <p>Answer at your own pace. We save as you go and only remind you until it is complete.</p>
+    <div id="ee-plan-status" class="text-muted mb-3"></div>
+    <form id="ee-plan-form" class="ee-panel ee-section-spaced"></form>
+    <p id="ee-plan-msg" class="ee-proof-title" hidden></p>
+  </div>
+</section>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const booking = params.get("booking");
+  const statusEl = document.getElementById("ee-plan-status");
+  const form = document.getElementById("ee-plan-form");
+  const msg = document.getElementById("ee-plan-msg");
+  if (!booking) {
+    statusEl.textContent = "Open this page from your booking confirmation email, or ask your coordinator for your planning link.";
+    return;
+  }
+  function render(data) {
+    statusEl.textContent = (data.template_name || "Planning") + " — " + Math.round(data.completion_percent || 0) + "% complete";
+    form.innerHTML = "";
+    (data.fields || []).forEach(function (field) {
+      if (!field.visible || field.field_type === "section") {
+        if (field.field_type === "section") {
+          const h = document.createElement("h3");
+          h.textContent = field.label;
+          form.appendChild(h);
+        }
+        return;
+      }
+      const wrap = document.createElement("div");
+      wrap.className = "mb-3";
+      const label = document.createElement("label");
+      label.className = "form-label";
+      label.textContent = field.label + (field.required ? " *" : "");
+      wrap.appendChild(label);
+      let input;
+      if (field.field_type === "long_text") {
+        input = document.createElement("textarea");
+        input.className = "form-control";
+        input.rows = 4;
+      } else if (field.field_type === "select") {
+        input = document.createElement("select");
+        input.className = "form-control";
+        const blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = "Select";
+        input.appendChild(blank);
+        (field.options || []).forEach(function (opt) {
+          const o = document.createElement("option");
+          o.value = opt; o.textContent = opt;
+          input.appendChild(o);
+        });
+      } else if (field.field_type === "checkbox") {
+        input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = field.value === "1" || field.value === "Yes";
+      } else {
+        input = document.createElement("input");
+        input.className = "form-control";
+        input.type = field.field_type === "date" ? "date" : "text";
+      }
+      input.name = field.field_key;
+      if (field.field_type !== "checkbox") input.value = field.value || "";
+      wrap.appendChild(input);
+      if (field.help_text) {
+        const help = document.createElement("small");
+        help.className = "text-muted";
+        help.textContent = field.help_text;
+        wrap.appendChild(help);
+      }
+      form.appendChild(wrap);
+    });
+    const btn = document.createElement("button");
+    btn.type = "submit";
+    btn.className = "btn btn-primary";
+    btn.textContent = "Save progress";
+    form.appendChild(btn);
+    form.dataset.instance = data.name;
+  }
+  frappe.call({
+    method: "entertainment_express.api.planning.get_form",
+    args: { booking_name: booking },
+    callback: function (r) { render(r.message); },
+    error: function (e) { statusEl.textContent = (e._server_messages && JSON.parse(e._server_messages)[0]) || "We could not load this form." }
+  });
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    const answers = {};
+    Array.from(form.elements).forEach(function (el) {
+      if (!el.name) return;
+      answers[el.name] = el.type === "checkbox" ? (el.checked ? "Yes" : "No") : el.value;
+    });
+    frappe.call({
+      method: "entertainment_express.api.planning.save_answers",
+      args: { instance_name: form.dataset.instance, answers: answers },
+      callback: function (r) {
+        render(r.message);
+        msg.hidden = false;
+        msg.textContent = r.message.completion_percent >= 100 ? "You are done — thank you." : "Saved. You can come back any time.";
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

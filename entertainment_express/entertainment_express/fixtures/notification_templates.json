@@ -118,5 +118,39 @@
     "subject": "💰 Payout processed — {{ period }}",
     "active": 1,
     "body_html": "<p>Hi {{ employee_name }},</p><p>Your payout for <b>{{ period }}</b> has been processed.</p><p>Amount: <b>${{ amount }}</b></p><p>Transaction ID: {{ txn_id }}</p><p>Funds should appear in your account within 1-2 business days.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "planning_form_reminder",
+    "template_key": "planning_form_reminder",
+    "subject": "A few details still needed for {{ booking_name }}",
+    "active": 1,
+    "channels": "email",
+    "priority": "transactional",
+    "body_html": "<p>Hi {{ customer_name }},</p><p>Your planning form for booking <b>{{ booking_name }}</b> is not finished yet.</p><p><a href='{{ form_link }}'>Continue planning</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "timeline_change_reviewed",
+    "template_key": "timeline_change_reviewed",
+    "subject": "Timeline update — {{ status }}",
+    "active": 1,
+    "body_html": "<p>Your timeline request for {{ booking_name }} was <b>{{ status }}</b>.</p><p>{{ staff_note }}</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "balance_reminder",
+    "template_key": "balance_reminder",
+    "subject": "Balance of ${{ amount }} is due {{ due_date }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ customer_name }},</p><p>Your remaining balance of <b>${{ amount }}</b> for {{ booking_name }} is due {{ due_date }}.</p><p><a href='{{ pay_link }}'>Pay now</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "saas_dunning",
+    "template_key": "saas_dunning",
+    "subject": "Action needed: Entertainment Express billing",
+    "active": 1,
+    "body_html": "<p>We could not collect payment for {{ tenant }}. Please update your card within {{ grace_days }} days to keep the site active.</p>"
   }
 ]

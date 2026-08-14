@@ -40,6 +40,16 @@ def has_entitlement(feature_key: str, site_name: str | None = None) -> bool | in
         return bool(entitlement and entitlement != "0")
 
 
+def require_entitlement(feature_key: str) -> None:
+    """Block a feature when the tenant plan does not include it."""
+    value = has_entitlement(feature_key)
+    if value in (False, 0, None):
+        frappe.throw(
+            "This feature is not on your plan. Upgrade in Entertainment Express billing to unlock it.",
+            frappe.PermissionError,
+        )
+
+
 def _get_tenant_name(site_name: str | None) -> str | None:
     """Look up the Tenant record for the given site (or current site)."""
     site = site_name or frappe.local.site

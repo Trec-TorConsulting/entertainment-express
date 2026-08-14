@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Event Planning",
+ "name": "Timeline Change Request",
+ "owner": "Administrator",
+ "istable": 0,
+ "autoname": "format:EE-TCR-{#####}",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "field_order": [
+  "timeline",
+  "item_idx",
+  "requested_by",
+  "payload_json",
+  "status",
+  "staff_note"
+ ],
+ "fields": [
+  {
+   "fieldname": "timeline",
+   "fieldtype": "Link",
+   "label": "Timeline",
+   "options": "Event Timeline",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "item_idx",
+   "fieldtype": "Int",
+   "label": "Item Index"
+  },
+  {
+   "fieldname": "requested_by",
+   "fieldtype": "Data",
+   "label": "Requested By",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "payload_json",
+   "fieldtype": "Code",
+   "label": "Requested Change",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "pending\\napproved\\nrejected",
+   "default": "pending",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "staff_note",
+   "fieldtype": "Small Text",
+   "label": "Staff Note"
+  }
+ ]
+}

@@ -41,7 +41,7 @@ def _get_stripe_key() -> str:
 
 
 @frappe.whitelist()
-def create_checkout(invoice_name: str) -> dict:
+def create_checkout(invoice_name: str, tip_amount: float = 0) -> dict:
     """
     Create a Stripe Checkout Session for the given deposit Sales Invoice.
     Returns {checkout_url, session_id}.
@@ -50,33 +50,46 @@ def create_checkout(invoice_name: str) -> dict:
     stripe = _stripe()
 
     invoice = frappe.get_doc("Sales Invoice", invoice_name)
-    if not invoice.ee_is_deposit:
-        frappe.throw("This invoice is not a deposit invoice.")
     if invoice.status == "Paid":
         frappe.throw("Invoice is already paid.")
+    if not (invoice.get("ee_is_deposit") or invoice.get("ee_is_balance") or invoice.get("ee_booking")):
+        frappe.throw("This invoice is not an Entertainment Express event invoice.")
 
     amount_cents = int(flt(invoice.grand_total) * 100)
+    tip_cents = int(flt(tip_amount) * 100)
     currency = (invoice.currency or "usd").lower()
     site_url = frappe.utils.get_url()
+    label = "Event Deposit" if invoice.get("ee_is_deposit") else "Event Payment"
+    line_items = [{
+        "price_data": {
+            "currency": currency,
+            "unit_amount": amount_cents,
+            "product_data": {"name": f"{label} — {invoice.ee_booking or invoice_name}"},
+        },
+        "quantity": 1,
+    }]
+    if tip_cents > 0:
+        line_items.append({
+            "price_data": {
+                "currency": currency,
+                "unit_amount": tip_cents,
+                "product_data": {"name": "Gratuity"},
+            },
+            "quantity": 1,
+        })
+        if frappe.get_meta("Sales Invoice").has_field("ee_tip_amount"):
+            frappe.db.set_value("Sales Invoice", invoice_name, "ee_tip_amount", flt(tip_amount))
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
-        line_items=[{
-            "price_data": {
-                "currency": currency,
-                "unit_amount": amount_cents,
-                "product_data": {
-                    "name": f"Event Deposit — {invoice.ee_booking or invoice_name}",
-                },
-            },
-            "quantity": 1,
-        }],
+        line_items=line_items,
         mode="payment",
-        success_url=f"{site_url}/portal/booking?invoice={invoice_name}&paid=1",
-        cancel_url=f"{site_url}/portal/booking?invoice={invoice_name}&paid=0",
+        success_url=f"{site_url}/client/pay?invoice={invoice_name}&paid=1",
+        cancel_url=f"{site_url}/client/pay?invoice={invoice_name}&paid=0",
         metadata={
             "invoice_name": invoice_name,
             "booking_name": invoice.ee_booking or "",
+            "tip_amount": str(flt(tip_amount)),
         },
         customer_email=frappe.db.get_value("Customer", invoice.customer, "email_id") or "",
     )
@@ -123,6 +136,12 @@ def stripe_webhook() -> dict:
     if event["type"] in ("checkout.session.completed", "payment_intent.succeeded"):
         frappe.enqueue(
             "entertainment_express.api.payments_stripe._handle_payment_succeeded",
+            event_data=event,
+            queue="short",
+        )
+    if event["type"] in ("charge.dispute.created", "payment_intent.payment_failed"):
+        frappe.enqueue(
+            "entertainment_express.api.payments_stripe._handle_payment_failed",
             event_data=event,
             queue="short",
         )
@@ -210,6 +229,31 @@ def _handle_payment_succeeded(event_data: dict) -> None:
         }
         send("booking_confirmed", customer_email, context)
         send("deposit_receipt", customer_email, context)
+
+
+def _handle_payment_failed(event_data: dict) -> None:
+    obj = event_data.get("data", {}).get("object", {})
+    invoice_name = (obj.get("metadata") or {}).get("invoice_name")
+    booking_name = (obj.get("metadata") or {}).get("booking_name")
+    if invoice_name and frappe.db.exists("Sales Invoice", invoice_name):
+        frappe.get_doc("Sales Invoice", invoice_name).add_comment(
+            "Comment",
+            f"Payment failed or disputed ({event_data.get('type')}).",
+        )
+    if booking_name:
+        frappe.db.set_value("Event Booking", booking_name, "deposit_status", "invoiced")
+    from entertainment_express.notifications import send
+    for user in frappe.get_all("Has Role", filters={"role": "EE Accounting", "parenttype": "User"}, fields=["parent"], limit=5):
+        email = frappe.db.get_value("User", user.parent, "email")
+        if email:
+            send("balance_reminder", email, {
+                "customer_name": "Accounting",
+                "booking_name": booking_name or invoice_name,
+                "amount": obj.get("amount") or "",
+                "due_date": "now",
+                "pay_link": "/app",
+            })
+    frappe.db.commit()
 
 
 def _mark_event_processed(event_id: str, event_type: str) -> None:

@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Event Planning",
+ "name": "Curated Playlist",
+ "owner": "Administrator",
+ "istable": 0,
+ "autoname": "format:EE-CPL-{#####}",
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "title_field": "list_name",
+ "field_order": [
+  "list_name",
+  "moment",
+  "genre",
+  "active",
+  "songs"
+ ],
+ "fields": [
+  {
+   "fieldname": "list_name",
+   "fieldtype": "Data",
+   "label": "List Name",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "moment",
+   "fieldtype": "Data",
+   "label": "Moment",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "genre",
+   "fieldtype": "Data",
+   "label": "Genre"
+  },
+  {
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active",
+   "default": "1"
+  },
+  {
+   "fieldname": "songs",
+   "fieldtype": "Table",
+   "label": "Songs",
+   "options": "Curated Playlist Song"
+  }
+ ]
+}

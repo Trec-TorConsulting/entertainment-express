@@ -1,0 +1,54 @@
+{% extends "entertainment_express/templates/portal/base.html" %}
+
+{% block portal_content %}
+<section class="ee-shell ee-section-spaced">
+  <div class="ee-panel" style="max-width:820px;margin:0 auto;">
+    <p class="eyebrow">Run of show</p>
+    <h2>Event timeline</h2>
+    <p>This is the program for your day. Suggest a change and your coordinator will confirm it.</p>
+    <div id="ee-tl" class="ee-panel ee-section-spaced">Open this page with your booking link to see the timeline.</div>
+  </div>
+</section>
+<script>
+(function () {
+  const booking = new URLSearchParams(location.search).get("booking");
+  const root = document.getElementById("ee-tl");
+  if (!booking) return;
+  frappe.call({
+    method: "entertainment_express.api.timeline.get_timeline",
+    args: { booking_name: booking },
+    callback: function (r) {
+      const data = r.message || {};
+      if (!data.items || !data.items.length) {
+        root.textContent = "Your coordinator has not published a timeline yet.";
+        return;
+      }
+      root.innerHTML = "<p>Status: " + (data.status || "draft") + "</p>";
+      data.items.forEach(function (item, idx) {
+        const row = document.createElement("div");
+        row.className = "ee-panel";
+        row.style.marginBottom = "12px";
+        row.innerHTML = "<strong>" + (item.start_time || "") + " — " + (item.title || "") + "</strong>"
+          + "<p>" + (item.description || "") + "</p>";
+        if (data.status !== "finalized") {
+          const btn = document.createElement("button");
+          btn.className = "btn btn-sm btn-outline-primary";
+          btn.textContent = "Request a change";
+          btn.onclick = function () {
+            const next = prompt("What should this moment be instead?", item.title || "");
+            if (!next) return;
+            frappe.call({
+              method: "entertainment_express.api.timeline.suggest_change",
+              args: { booking_name: booking, item_idx: idx, payload: { title: next } },
+              callback: function () { alert("Sent to your coordinator."); }
+            });
+          };
+          row.appendChild(btn);
+        }
+        root.appendChild(row);
+      });
+    }
+  });
+})();
+</script>
+{% endblock %}

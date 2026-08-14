@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Vehicle",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "autoname": "format:EE-VEH-{#####}",
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "title_field": "vehicle_name",
+ "field_order": [
+  "vehicle_name",
+  "plate",
+  "vin",
+  "vehicle_type",
+  "status",
+  "capacity",
+  "assigned_crew",
+  "odometer",
+  "fuel_level",
+  "home_location",
+  "barcode",
+  "registration_expiry",
+  "insurance_expiry"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Name",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "plate",
+   "fieldtype": "Data",
+   "label": "Plate",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "vin",
+   "fieldtype": "Data",
+   "label": "VIN"
+  },
+  {
+   "fieldname": "vehicle_type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "van\\nbox_truck\\ntrailer\\ncar\\nother",
+   "default": "van"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "active\\nin_service\\nout_of_service",
+   "default": "active",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "capacity",
+   "fieldtype": "Data",
+   "label": "Capacity"
+  },
+  {
+   "fieldname": "assigned_crew",
+   "fieldtype": "Link",
+   "label": "Default Crew",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "odometer",
+   "fieldtype": "Float",
+   "label": "Odometer"
+  },
+  {
+   "fieldname": "fuel_level",
+   "fieldtype": "Percent",
+   "label": "Fuel %"
+  },
+  {
+   "fieldname": "home_location",
+   "fieldtype": "Link",
+   "label": "Home Location",
+   "options": "EE Location"
+  },
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Data",
+   "label": "Barcode / QR",
+   "unique": 1
+  },
+  {
+   "fieldname": "registration_expiry",
+   "fieldtype": "Date",
+   "label": "Registration Expiry"
+  },
+  {
+   "fieldname": "insurance_expiry",
+   "fieldtype": "Date",
+   "label": "Insurance Expiry"
+  }
+ ]
+}

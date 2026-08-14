@@ -33,10 +33,17 @@ def check(asset_name: str, event_start: datetime, event_end: datetime) -> dict:
             "conflicts": [],
         }
 
-    # Compute buffered window
     setup_buf, teardown_buf = _get_buffers(asset)
     window_start = event_start - timedelta(minutes=setup_buf)
     window_end = event_end + timedelta(minutes=teardown_buf)
+    try:
+        from entertainment_express.api.fleet_ops import asset_is_blocked
+
+        blocked = asset_is_blocked(asset_name, window_start, window_end)
+        if blocked:
+            return {"available": False, "reason": blocked, "conflicts": []}
+    except Exception:
+        pass
 
     if asset.quantity <= 1:
         return _check_unique(asset, window_start, window_end)

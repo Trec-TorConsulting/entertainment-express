@@ -37,6 +37,7 @@ def convert_to_booking(contract_name: str = None, quotation_name: str = None) ->
             getattr(quote, "ee_event_name", None)
             or f"{quote.party_name} — {quote.ee_event_date}"
         ),
+        "event_type": (getattr(quote, "ee_event_type", None) or "") if hasattr(quote, "ee_event_type") else "",
         "event_date": quote.ee_event_date,
         "start_time": quote.ee_event_start,
         "end_time": quote.ee_event_end,

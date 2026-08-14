@@ -1,0 +1,65 @@
+{% extends "templates/web.html" %}
+{% block title %}Request a song{% endblock %}
+{% block page_content %}
+<div class="container mt-4 mb-5" style="max-width:560px">
+  <h2>Request a song</h2>
+  <p class="text-muted" id="ee-ev"></p>
+  <div id="ee-ok" class="alert alert-success d-none">Got it — the DJ will review your request.</div>
+  <div id="ee-err" class="alert alert-danger d-none"></div>
+  <form id="ee-gr">
+    <div class="mb-3">
+      <label class="form-label">Your name</label>
+      <input class="form-control" name="requester_name" maxlength="140">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Song title *</label>
+      <input class="form-control" name="title" required maxlength="140">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Artist</label>
+      <input class="form-control" name="artist" maxlength="140">
+    </div>
+    <button class="btn btn-primary" type="submit">Send request</button>
+  </form>
+</div>
+<script>
+(function () {
+  const token = new URLSearchParams(location.search).get("token") || "";
+  const err = document.getElementById("ee-err");
+  frappe.call({
+    method: "entertainment_express.api.music.guest_context",
+    args: { token: token },
+    callback: function (r) {
+      const d = r.message || {};
+      document.getElementById("ee-ev").textContent = (d.event_name || "This event") + (d.event_date ? " · " + d.event_date : "");
+    },
+    error: function () {
+      err.classList.remove("d-none");
+      err.textContent = "This link is invalid or expired.";
+      document.getElementById("ee-gr").hidden = true;
+    }
+  });
+  document.getElementById("ee-gr").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    const fd = new FormData(ev.target);
+    frappe.call({
+      method: "entertainment_express.api.music.submit_guest_request",
+      args: {
+        token: token,
+        title: fd.get("title"),
+        artist: fd.get("artist"),
+        requester_name: fd.get("requester_name")
+      },
+      callback: function () {
+        document.getElementById("ee-ok").classList.remove("d-none");
+        ev.target.reset();
+      },
+      error: function (e) {
+        err.classList.remove("d-none");
+        err.textContent = "That song cannot be requested, or the link is no longer valid.";
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

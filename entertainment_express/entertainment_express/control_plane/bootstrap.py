@@ -427,6 +427,26 @@ def _ensure_notification_templates() -> None:
             "subject": "Deposit received",
             "body_html": "<p>We received your payment. Remaining balance and due dates are available in your invoice.</p>",
         },
+        "planning_form_reminder": {
+            "subject": "Please finish your event planning form",
+            "body_html": "<p>Hi {{ customer_name }}, <a href='{{ form_link }}'>continue your planning form</a> for {{ booking_name }}.</p>",
+        },
+        "timeline_change_reviewed": {
+            "subject": "Timeline request {{ status }}",
+            "body_html": "<p>Your timeline request for {{ booking_name }} was {{ status }}. {{ staff_note }}</p>",
+        },
+        "balance_reminder": {
+            "subject": "Balance due {{ due_date }}",
+            "body_html": "<p>Hi {{ customer_name }}, ${{ amount }} is due {{ due_date }}. <a href='{{ pay_link }}'>Pay now</a>.</p>",
+        },
+        "saas_dunning": {
+            "subject": "Update your Entertainment Express billing",
+            "body_html": "<p>Payment failed for {{ tenant }}. You have {{ grace_days }} days before the site is paused.</p>",
+        },
+        "fleet_alert": {
+            "subject": "Fleet: {{ title }}",
+            "body_html": "<p>{{ detail }}</p>",
+        },
     }
 
     for template_key, payload in defaults.items():

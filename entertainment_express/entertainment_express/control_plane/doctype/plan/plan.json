@@ -6,15 +6,20 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "plan_name", "plan_code", "price_monthly", "currency", "trial_days",
+  "plan_name", "plan_code", "price_monthly", "price_annual", "currency", "trial_days", "grace_days",
+  "stripe_price_monthly", "stripe_price_annual",
   "status", "section_entitlements", "entitlements"
  ],
  "fields": [
   {"fieldname": "plan_name", "fieldtype": "Data", "label": "Plan Name", "reqd": 1, "in_list_view": 1},
   {"fieldname": "plan_code", "fieldtype": "Data", "label": "Plan Code", "reqd": 1, "unique": 1, "description": "Slug used in entitlement checks, e.g. starter, pro, enterprise"},
   {"fieldname": "price_monthly", "fieldtype": "Currency", "label": "Monthly Price", "reqd": 1},
+  {"fieldname": "price_annual", "fieldtype": "Currency", "label": "Annual Price"},
   {"fieldname": "currency", "fieldtype": "Link", "label": "Currency", "options": "Currency", "default": "USD"},
   {"fieldname": "trial_days", "fieldtype": "Int", "label": "Trial Days", "default": "0"},
+  {"fieldname": "grace_days", "fieldtype": "Int", "label": "Dunning Grace Days", "default": "7"},
+  {"fieldname": "stripe_price_monthly", "fieldtype": "Data", "label": "Stripe Price (monthly)"},
+  {"fieldname": "stripe_price_annual", "fieldtype": "Data", "label": "Stripe Price (annual)"},
   {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Active\nArchived", "default": "Active", "in_list_view": 1},
   {"fieldname": "section_entitlements", "fieldtype": "Section Break", "label": "Entitlements"},
   {"fieldname": "entitlements", "fieldtype": "Table", "label": "Entitlements", "options": "Plan Entitlement"}

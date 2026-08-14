@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing Payments",
+ "name": "Payment Schedule Milestone",
+ "owner": "Administrator",
+ "istable": 1,
+ "field_order": [
+  "kind",
+  "due_date",
+  "amount",
+  "invoice",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "kind",
+   "fieldtype": "Select",
+   "label": "Kind",
+   "options": "deposit\\nbalance\\ninstallment\\ndamage_hold",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "invoice",
+   "fieldtype": "Link",
+   "label": "Invoice",
+   "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "scheduled\\ninvoiced\\npaid\\noverdue\\ncanceled",
+   "default": "scheduled",
+   "in_list_view": 1
+  }
+ ],
+ "permissions": []
+}

@@ -5,3 +5,5 @@ Scheduling Dispatch
 HR Workforce
 Billing Payments
 Control Plane
+Event Planning
+Equipment Fleet

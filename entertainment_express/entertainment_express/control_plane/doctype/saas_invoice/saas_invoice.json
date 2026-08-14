@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Control Plane",
+ "name": "SaaS Invoice",
+ "owner": "Administrator",
+ "istable": 0,
+ "autoname": "format:EE-SINV-{#####}",
+ "permissions": [
+  {
+   "role": "SaaS Operator",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "export": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "field_order": [
+  "tenant",
+  "subscription",
+  "amount",
+  "currency",
+  "status",
+  "provider_invoice_id",
+  "issued_on",
+  "paid_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "label": "Currency",
+   "default": "USD"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "draft\\nopen\\npaid\\nvoid\\nuncollectible",
+   "default": "open",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "provider_invoice_id",
+   "fieldtype": "Data",
+   "label": "Provider Invoice ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "issued_on",
+   "fieldtype": "Date",
+   "label": "Issued On"
+  },
+  {
+   "fieldname": "paid_on",
+   "fieldtype": "Date",
+   "label": "Paid On"
+  }
+ ]
+}

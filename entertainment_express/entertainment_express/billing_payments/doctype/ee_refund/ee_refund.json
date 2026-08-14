@@ -1,0 +1,111 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing Payments",
+ "name": "EE Refund",
+ "owner": "Administrator",
+ "istable": 0,
+ "autoname": "format:EE-REF-{#####}",
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "EE Accounting",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "export": 1
+  }
+ ],
+ "track_changes": 1,
+ "field_order": [
+  "payment_entry",
+  "invoice",
+  "amount",
+  "reason",
+  "processor",
+  "processor_refund_id",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "invoice",
+   "fieldtype": "Link",
+   "label": "Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason",
+   "reqd": 1
+  },
+  {
+   "fieldname": "processor",
+   "fieldtype": "Select",
+   "label": "Processor",
+   "options": "stripe\\nsquare\\npaypal\\nach\\nauthorizenet\\nmanual",
+   "default": "stripe"
+  },
+  {
+   "fieldname": "processor_refund_id",
+   "fieldtype": "Data",
+   "label": "Processor Refund ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "pending\\nsucceeded\\nfailed",
+   "default": "pending",
+   "in_list_view": 1
+  }
+ ]
+}

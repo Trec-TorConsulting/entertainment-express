@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Stock Transfer",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "autoname": "format:EE-XFER-{#####}",
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "field_order": [
+  "from_location",
+  "to_location",
+  "item_code",
+  "qty",
+  "status",
+  "transferred_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_location",
+   "fieldtype": "Link",
+   "label": "From",
+   "options": "EE Location",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "to_location",
+   "fieldtype": "Link",
+   "label": "To",
+   "options": "EE Location",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "label": "Item Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Qty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "draft\\ncomplete",
+   "default": "complete",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "transferred_on",
+   "fieldtype": "Datetime",
+   "label": "Transferred On"
+  }
+ ]
+}

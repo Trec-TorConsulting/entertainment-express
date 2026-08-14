@@ -202,6 +202,60 @@ CUSTOM_FIELDS = {
             "insert_after": "ee_event_date",
             "read_only": 1,
         },
+        {
+            "dt": "Sales Invoice",
+            "fieldname": "ee_is_balance",
+            "fieldtype": "Check",
+            "label": "Is Balance Invoice",
+            "insert_after": "ee_is_deposit",
+        },
+        {
+            "dt": "Sales Invoice",
+            "fieldname": "ee_is_damage_hold",
+            "fieldtype": "Check",
+            "label": "Is Damage Hold",
+            "insert_after": "ee_is_balance",
+        },
+        {
+            "dt": "Sales Invoice",
+            "fieldname": "ee_tip_amount",
+            "fieldtype": "Currency",
+            "label": "Tip Amount",
+            "insert_after": "ee_is_damage_hold",
+        },
+        {
+            "dt": "Sales Invoice",
+            "fieldname": "ee_payment_intent_id",
+            "fieldtype": "Data",
+            "label": "Stripe PaymentIntent",
+            "insert_after": "ee_stripe_session_id",
+            "read_only": 1,
+        },
+    ],
+
+    "Payment Entry": [
+        {
+            "dt": "Payment Entry",
+            "fieldname": "ee_processor",
+            "fieldtype": "Select",
+            "label": "EE Processor",
+            "options": "\nstripe\nsquare\npaypal\nach\nauthorizenet\nmanual",
+            "insert_after": "mode_of_payment",
+        },
+        {
+            "dt": "Payment Entry",
+            "fieldname": "ee_processor_txn_id",
+            "fieldtype": "Data",
+            "label": "Processor Transaction ID",
+            "insert_after": "ee_processor",
+        },
+        {
+            "dt": "Payment Entry",
+            "fieldname": "ee_tip_amount",
+            "fieldtype": "Currency",
+            "label": "Tip Amount",
+            "insert_after": "ee_processor_txn_id",
+        },
     ],
 
     # ─── Customer → EE fields ────────────────────────────────────────────────

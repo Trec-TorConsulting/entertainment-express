@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing Payments",
+ "name": "Stored Payment Method",
+ "owner": "Administrator",
+ "istable": 0,
+ "autoname": "format:EE-PM-{#####}",
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "EE Accounting",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "export": 1
+  }
+ ],
+ "field_order": [
+  "customer",
+  "processor",
+  "processor_customer_id",
+  "processor_payment_method_id",
+  "brand",
+  "last4",
+  "exp_month",
+  "exp_year",
+  "is_default"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "processor",
+   "fieldtype": "Select",
+   "label": "Processor",
+   "options": "stripe\\nsquare\\npaypal\\nach\\nauthorizenet",
+   "default": "stripe",
+   "reqd": 1
+  },
+  {
+   "fieldname": "processor_customer_id",
+   "fieldtype": "Data",
+   "label": "Processor Customer ID"
+  },
+  {
+   "fieldname": "processor_payment_method_id",
+   "fieldtype": "Data",
+   "label": "Payment Method ID"
+  },
+  {
+   "fieldname": "brand",
+   "fieldtype": "Data",
+   "label": "Brand",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "last4",
+   "fieldtype": "Data",
+   "label": "Last 4",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "exp_month",
+   "fieldtype": "Int",
+   "label": "Exp Month"
+  },
+  {
+   "fieldname": "exp_year",
+   "fieldtype": "Int",
+   "label": "Exp Year"
+  },
+  {
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Default",
+   "default": "0"
+  }
+ ]
+}

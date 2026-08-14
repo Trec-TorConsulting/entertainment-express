@@ -2,23 +2,59 @@
 
 {% block portal_content %}
 <section class="ee-shell ee-section-spaced">
-  <div class="ee-panel" style="max-width:720px;margin:0 auto;">
+  <div class="ee-panel" style="max-width:820px;margin:0 auto;">
     <p class="eyebrow">Client Portal</p>
-    <h2>Music Planning</h2>
-    <p>Use your event planning link from your account manager to submit playlist details.</p>
-
-    <div class="ee-panel ee-section-spaced">
-      <h3>What to Prepare</h3>
-      <ul class="ee-checklist">
-        <li>Must-play songs</li>
-        <li>Do-not-play songs</li>
-        <li>Special moments and timing notes</li>
-      </ul>
+    <h2>Music planning</h2>
+    <p>Build must-play and do-not-play lists, pick special-moment songs, or paste a Spotify playlist.</p>
+    <label class="form-label">Booking ID</label>
+    <input id="ee-bk" class="form-control mb-3" placeholder="EE-BK-…">
+    <div class="mb-3">
+      <input id="ee-song" class="form-control" placeholder="Song title — Artist">
     </div>
-
-    <div class="ee-panel ee-section-spaced">
-      <p class="ee-proof-title">If you do not have your planning link yet, contact your coordinator and ask for your event portal access.</p>
+    <div class="mb-3" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" data-cat="must_play">Add must-play</button>
+      <button class="btn btn-outline-danger" data-cat="do_not_play">Add do-not-play</button>
+      <button class="btn btn-outline-primary" data-cat="special_moment">Add special moment</button>
     </div>
+    <div class="mb-3">
+      <input id="ee-pl" class="form-control" placeholder="Spotify playlist URL">
+      <button id="ee-import" class="btn btn-secondary mt-2">Import playlist</button>
+    </div>
+    <pre id="ee-list" class="ee-panel" style="white-space:pre-wrap"></pre>
   </div>
 </section>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const bk = document.getElementById("ee-bk");
+  bk.value = params.get("booking") || "";
+  function refresh() {
+    if (!bk.value) return;
+    frappe.call({
+      method: "entertainment_express.api.music.list_selections",
+      args: { booking_name: bk.value },
+      callback: function (r) {
+        document.getElementById("ee-list").textContent = JSON.stringify(r.message, null, 2);
+      }
+    });
+  }
+  document.querySelectorAll("button[data-cat]").forEach(function (btn) {
+    btn.onclick = function () {
+      frappe.call({
+        method: "entertainment_express.api.music.add_selection",
+        args: { booking_name: bk.value, category: btn.dataset.cat, free_text: document.getElementById("ee-song").value },
+        callback: refresh
+      });
+    };
+  });
+  document.getElementById("ee-import").onclick = function () {
+    frappe.call({
+      method: "entertainment_express.api.music.import_playlist",
+      args: { booking_name: bk.value, playlist_url: document.getElementById("ee-pl").value },
+      callback: refresh
+    });
+  };
+  refresh();
+})();
+</script>
 {% endblock %}

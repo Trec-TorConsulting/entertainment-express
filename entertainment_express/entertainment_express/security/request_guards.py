@@ -140,6 +140,24 @@ def _rewrite_path(location: str) -> None:
     frappe.local.path = location.strip("/")
 
 
+def enforce_tenant_suspension() -> None:
+    """Tenant sites with ee_suspended refuse API work except health and login."""
+    if not frappe.conf.get("ee_suspended"):
+        return
+    req = getattr(frappe.local, "request", None)
+    if not req:
+        return
+    path = (getattr(req, "path", "") or "").strip() or "/"
+    if _is_health_path(path) or path.startswith("/login") or path.startswith("/api/method/login"):
+        return
+    if path.startswith("/assets") or path.startswith("/files"):
+        return
+    frappe.throw(
+        "This Entertainment Express account is suspended. Update billing to restore access.",
+        frappe.PermissionError,
+    )
+
+
 def sanitize_backend_urls() -> None:
     """Keep human-facing backend routes free of framework-brand path segments."""
     req = getattr(frappe.local, "request", None)

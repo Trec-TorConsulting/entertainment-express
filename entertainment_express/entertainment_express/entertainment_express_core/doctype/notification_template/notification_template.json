@@ -6,7 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "template_key", "subject", "active",
+  "template_key", "subject", "active", "channels", "fallback_channel", "priority",
   "section_body", "body_html"
  ],
  "fields": [
@@ -14,6 +14,9 @@
    "description": "e.g. quote_sent, contract_sent, contract_signed, booking_confirmed, deposit_receipt, lead_assigned"},
   {"fieldname": "subject", "fieldtype": "Data", "label": "Email Subject", "reqd": 1, "description": "Jinja2 — e.g. Your quote from {{ company_name }} is ready"},
   {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1"},
+  {"fieldname": "channels", "fieldtype": "Small Text", "label": "Channels", "default": "email", "description": "Comma-separated: email,sms,whatsapp,push"},
+  {"fieldname": "fallback_channel", "fieldtype": "Select", "label": "Fallback Channel", "options": "email\nsms\nwhatsapp\npush", "default": "email"},
+  {"fieldname": "priority", "fieldtype": "Select", "label": "Priority", "options": "transactional\npromotional", "default": "transactional"},
   {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Body (HTML + Jinja2)"},
   {"fieldname": "body_html", "fieldtype": "Code", "label": "HTML Body", "options": "HTML", "reqd": 1}
  ],

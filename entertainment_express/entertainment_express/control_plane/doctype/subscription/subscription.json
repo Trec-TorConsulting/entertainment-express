@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Control Plane",
+ "name": "Subscription",
+ "owner": "Administrator",
+ "istable": 0,
+ "autoname": "format:EE-SUB-{#####}",
+ "track_changes": 1,
+ "permissions": [
+  {
+   "role": "SaaS Operator",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "export": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "field_order": [
+  "tenant",
+  "plan",
+  "status",
+  "provider",
+  "provider_subscription_id",
+  "provider_customer_id",
+  "current_period_start",
+  "current_period_end",
+  "seats",
+  "mrr",
+  "cancel_at_period_end",
+  "grace_until"
+ ],
+ "fields": [
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Link",
+   "label": "Plan",
+   "options": "Plan",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "trialing\\nactive\\npast_due\\ncanceled\\nsuspended",
+   "default": "trialing",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "label": "Provider",
+   "options": "stripe",
+   "default": "stripe"
+  },
+  {
+   "fieldname": "provider_subscription_id",
+   "fieldtype": "Data",
+   "label": "Provider Subscription ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "provider_customer_id",
+   "fieldtype": "Data",
+   "label": "Provider Customer ID"
+  },
+  {
+   "fieldname": "current_period_start",
+   "fieldtype": "Datetime",
+   "label": "Period Start"
+  },
+  {
+   "fieldname": "current_period_end",
+   "fieldtype": "Datetime",
+   "label": "Period End"
+  },
+  {
+   "fieldname": "seats",
+   "fieldtype": "Int",
+   "label": "Seats",
+   "default": "1"
+  },
+  {
+   "fieldname": "mrr",
+   "fieldtype": "Currency",
+   "label": "MRR",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "cancel_at_period_end",
+   "fieldtype": "Check",
+   "label": "Cancel At Period End",
+   "default": "0"
+  },
+  {
+   "fieldname": "grace_until",
+   "fieldtype": "Datetime",
+   "label": "Grace Until"
+  }
+ ]
+}

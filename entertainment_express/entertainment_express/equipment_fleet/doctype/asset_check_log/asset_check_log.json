@@ -1,0 +1,124 @@
+{
+ "actions": [],
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Asset Check Log",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "autoname": "format:EE-CK-{#####}",
+ "permissions": [
+  {
+   "role": "EE Tenant Admin",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "export": 1
+  },
+  {
+   "role": "EE Dispatcher",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Crew",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "EE Sales",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  }
+ ],
+ "field_order": [
+  "resource_type",
+  "asset",
+  "vehicle",
+  "booking",
+  "direction",
+  "at",
+  "condition_before",
+  "condition_after",
+  "scanned_code",
+  "crew"
+ ],
+ "fields": [
+  {
+   "fieldname": "resource_type",
+   "fieldtype": "Select",
+   "label": "Resource",
+   "options": "asset\\nvehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "label": "Asset",
+   "options": "Service Asset",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Vehicle"
+  },
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "label": "Booking",
+   "options": "Event Booking",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "direction",
+   "fieldtype": "Select",
+   "label": "Direction",
+   "options": "out\\nin",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "at",
+   "fieldtype": "Datetime",
+   "label": "At",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "condition_before",
+   "fieldtype": "Data",
+   "label": "Condition Before"
+  },
+  {
+   "fieldname": "condition_after",
+   "fieldtype": "Data",
+   "label": "Condition After"
+  },
+  {
+   "fieldname": "scanned_code",
+   "fieldtype": "Data",
+   "label": "Scanned Code"
+  },
+  {
+   "fieldname": "crew",
+   "fieldtype": "Link",
+   "label": "Crew",
+   "options": "Employee"
+  }
+ ]
+}

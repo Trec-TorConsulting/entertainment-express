@@ -16,6 +16,7 @@ get_website_user_home_page = "entertainment_express.security.request_guards.get_
 
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [
+    "entertainment_express.security.request_guards.enforce_tenant_suspension",
     "entertainment_express.security.request_guards.sanitize_backend_urls",
     "entertainment_express.security.request_guards.enforce_backend_boundary",
 ]
@@ -81,10 +82,16 @@ scheduler_events = {
         "entertainment_express.api.contract_scheduler.expire_contracts",
         # Flag at-risk events (no crew within 48h)
         "entertainment_express.scheduling_dispatch.scheduler.flag_at_risk_events",
+        "entertainment_express.notifications.retry_failed",
+        "entertainment_express.api.saas_billing.apply_dunning",
     ],
     "daily": [
         # Check compliance expiry (phase-3)
         "entertainment_express.hr_workforce.scheduler.check_compliance_expiry",
+        "entertainment_express.event_planning.scheduler.send_form_reminders",
+        "entertainment_express.api.billing.send_balance_reminders",
+        "entertainment_express.notifications.send_deferred",
+        "entertainment_express.equipment_fleet.scheduler.daily_fleet_alerts",
     ],
     "cron": {
         "0 9 * * *": [
@@ -121,7 +128,14 @@ website_route_rules = [
     {"from_route": "/solutions/performers", "to_route": "solutions?vertical=performers"},
     {"from_route": "/start-trial", "to_route": "start_trial"},
     {"from_route": "/resources", "to_route": "resources"},
+    {"from_route": "/guest-requests", "to_route": "guest_requests"},
 ]
+
+doc_events = {
+    "Event Booking": {
+        "on_update": "entertainment_express.event_planning.attach.on_booking_update",
+    }
+}
 
 # Permanent redirects for renamed public routes.
 website_redirects = [
