@@ -1,7 +1,7 @@
 /**
  * Guards for GHSA-w3rx-r6r6-pgpr / GHSA-5p2g-fcmc-qvqq (zero-length ICNS/JXL).
  */
-import { ICNS } from '../vendor/image-size/dist/types/icns';
+import { ICNS } from '../vendor/image-size/lib/types/icns';
 
 function icnsWithZeroLengthEntry(): Uint8Array {
   const buf = Buffer.alloc(16);
