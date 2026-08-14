@@ -1,0 +1,15 @@
+{
+  "name": "image-size",
+  "version": "2.0.3",
+  "description": "Vendored image-size 1.2.1 with ICNS/HEIF/JXL zero-length loop guards (upstream has not published 2.0.3).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": "bin/image-size.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.x"
+  },
+  "dependencies": {
+    "queue": "6.0.2"
+  }
+}
