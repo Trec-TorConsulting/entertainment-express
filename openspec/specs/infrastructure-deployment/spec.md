@@ -3,10 +3,11 @@
 ## Purpose
 Defines the K3S deployment of the EE Frappe bench (ERPNext + `entertainment_express`) in the
 `entertainment-express` namespace of the HomeLab-Redo cluster, including data services, ingress, storage,
-provisioning tooling, and backups. Manifests live in `HomeLab-Redo/entertainment-express/`.
+provisioning tooling, and backups. Kubernetes manifests live in `HomeLab-Redo/entertainment-express/`;
+the multi-arch bench **Dockerfile** lives in this product repo root.
 
 ### Components
-- **Frappe bench image**: ERPNext + `entertainment_express`, multi-arch, pushed to `192.168.4.10:30500`.
+- **Frappe bench image**: ERPNext + `entertainment_express`, multi-arch, built from repo-root `Dockerfile`, pushed to `192.168.4.10:30500`.
 - **Workloads**: `frappe-python` (gunicorn, :8000), `frappe-socketio` (:9000), `frappe-workers` (RQ),
   `frappe-scheduler`.
 - **Data**: MariaDB (StatefulSet, Longhorn PVC), Redis (cache/queue/socketio).
