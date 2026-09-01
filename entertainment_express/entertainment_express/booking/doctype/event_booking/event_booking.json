@@ -5,7 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series", "status", "source",
+  "naming_series", "status", "source", "is_template",
   "col1", "customer", "contact", "col2",
   "section_event", "event_name", "event_type", "event_date", "start_time", "end_time", "timezone",
   "col3", "venue_address", "venue_geo", "col4",
@@ -24,6 +24,8 @@
    "default": "inquiry", "reqd": 1, "in_list_view": 1},
   {"fieldname": "source", "fieldtype": "Select", "label": "Source",
    "options": "portal\nstaff\nimport", "default": "staff"},
+  {"fieldname": "is_template", "fieldtype": "Check", "label": "Job Template", "default": "0",
+   "description": "Excluded from calendar and availability when checked"},
   {"fieldname": "col1", "fieldtype": "Column Break"},
   {"fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer", "reqd": 1, "in_list_view": 1},
   {"fieldname": "contact", "fieldtype": "Link", "label": "Contact", "options": "Contact"},

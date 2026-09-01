@@ -1,0 +1,72 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<section class="ee-section-spaced" style="max-width: 720px; margin: 0 auto; padding: 48px 20px;">
+  <h1>Book a time</h1>
+  <p style="color:#5a5a5a;">Pick a meeting, then an open slot. We'll email a confirmation.</p>
+  {% if not meeting_types %}
+  <p>Times will show here once the company publishes them.</p>
+  {% else %}
+  <form id="ee-sched" style="display:grid;gap:.75rem;margin-top:1.5rem;">
+    <label>Meeting
+      <select name="meeting_type" required>
+        {% for row in meeting_types %}
+        <option value="{{ row.id }}">{{ row.name }} ({{ row.duration }} min)</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Open times
+      <select name="start" id="ee-slots" required>
+        <option value="">Choose a meeting first</option>
+      </select>
+    </label>
+    <input name="full_name" required placeholder="Your name">
+    <input name="email" type="email" required placeholder="Email">
+    <input name="phone" placeholder="Phone">
+    <button type="submit" class="btn btn-primary">Book</button>
+    <p id="ee-sched-status" style="margin:0;color:#5a5a5a;"></p>
+  </form>
+  {% endif %}
+</section>
+{% if meeting_types %}
+<script>
+const typeSelect = document.querySelector("[name=meeting_type]");
+const slotSelect = document.getElementById("ee-slots");
+async function loadSlots() {
+  const res = await frappe.call({
+    method: "entertainment_express.api.appointments.list_slots",
+    args: { meeting_type: typeSelect.value },
+  });
+  const slots = (res && res.message) || [];
+  slotSelect.innerHTML = slots.length
+    ? slots.map((row) => `<option value="${row.start}">${row.start}</option>`).join("")
+    : `<option value="">No times this period</option>`;
+}
+typeSelect.addEventListener("change", loadSlots);
+loadSlots();
+document.getElementById("ee-sched").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.target;
+  const status = document.getElementById("ee-sched-status");
+  status.textContent = "Booking…";
+  try {
+    await frappe.call({
+      method: "entertainment_express.api.appointments.book",
+      args: {
+        meeting_type: form.meeting_type.value,
+        start: form.start.value,
+        full_name: form.full_name.value,
+        email: form.email.value,
+        phone: form.phone.value,
+      },
+    });
+    status.textContent = "You're booked — check your email.";
+    form.reset();
+    loadSlots();
+  } catch (err) {
+    status.textContent = (err && err.message) || "That time just filled. Pick another.";
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

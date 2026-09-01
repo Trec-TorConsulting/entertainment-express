@@ -121,11 +121,13 @@ import/preview, music library & availability check). Surfaces to crew on run she
 **Specs:** `event-planning-forms`, `event-timeline`, `music-planning`. **Depends on:** phase-1, phase-7
 (portal), phase-13 (streaming integrations), phase-9 (mobile crew view).
 
-## Phase 16 — Appointments & Consultation Scheduling 📝
-Calendly-style self-service scheduler for consultations/planning meetings: bookable meeting types,
-availability/conflict prevention, calendar sync, reminders, reschedule/cancel, video links, meeting
-confirmations.
-**Spec:** `appointments-scheduling`. **Depends on:** phase-1, phase-6 (reminders), phase-13 (calendar sync).
+## Phase 16 — Appointments & Consultation Scheduling ✅ proposal
+**Goal:** Calendly-style self-service scheduler for consultations/planning meetings: bookable meeting types,
+availability/conflict prevention against events and time-off, reminders, reschedule/cancel. Native EE
+calendars this phase; Google/Microsoft two-way sync stays phase 13.
+**Spec:** `appointments-scheduling` (plus portal/CRM/notification deltas). **Depends on:** phase-3 workers,
+phase-6 reminders, phase-26 portals.
+**Folder:** [`phase-16-appointments-scheduling/`](phase-16-appointments-scheduling/)
 
 ## Phase 17 — Venues, Vendors & Insurance/Compliance 📝
 Reusable **venue database** (logistics, access, COI flags), **vendor/partner network** (referrals,
@@ -182,7 +184,7 @@ payer-only money). Canned reports per URL. New `event-collaboration` backend.
 **Depends on:** phase-20 shells, phase-1/2/5/15 APIs.
 **Folder:** [`phase-25-experience-os/`](phase-25-experience-os/)
 
-## Phase 26 — Core Completeness (usable revenue + planning loops) ✅ proposal
+## Phase 26 — Core Completeness (usable revenue + planning loops) ✅ archived 2026-09-01
 **Goal:** Make the shells usable without Desk: interactive Proposal (packages + contract + deposit) in
 `/owner` and `/client`; working Pay / Documents / Planning (not empty states); event-type workflow
 checklists; potential vs actual quote conflicts; clone job; public catalog/wishlist; warehouse-only
@@ -192,7 +194,7 @@ EventPlanner.ai decks.
 `service-catalog`, `equipment-inventory-fleet`, `event-planning-forms`, `event-timeline`,
 `music-planning`, `event-collaboration`, `billing-payments`, `notifications`, `identity-access`.
 **Depends on:** phase-1 quotes/contracts, phase-5 payments, phase-15 planning, phase-25 OS.
-**Folder:** [`phase-26-core-completeness/`](phase-26-core-completeness/)
+**Folder:** [`archive/2026-09-01-phase-26-core-completeness/`](archive/2026-09-01-phase-26-core-completeness/)
 
 ## Phase 20 — Role-Based Portals ✅
 **Goal:** Modernize the experience layer by giving each audience its own purpose-built portal over the **one**

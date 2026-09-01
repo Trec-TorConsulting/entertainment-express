@@ -6,7 +6,7 @@ import re
 import secrets
 
 import frappe
-from frappe.utils import flt, fmt_money, nowdate
+from frappe.utils import cint, flt, fmt_money, nowdate
 
 from entertainment_express.api.portal_owner import _require_owner
 
@@ -348,10 +348,21 @@ def _ensure_customer(customer_name: str) -> str:
     return doc.name
 
 
+def _not_template_filters(extra: dict | None = None) -> dict:
+    filters = dict(extra or {})
+    try:
+        if frappe.get_meta("Event Booking").has_field("is_template"):
+            filters["is_template"] = 0
+    except Exception:
+        pass
+    return filters
+
+
 def _list_jobs() -> list[dict]:
     rows = []
     for row in frappe.get_all(
         "Event Booking",
+        filters=_not_template_filters(),
         fields=["name", "event_name", "event_date", "status", "customer"],
         order_by="event_date desc",
         limit_page_length=200,
@@ -664,7 +675,13 @@ def _as_time(val, default: str = "18:00:00"):
 
 
 @frappe.whitelist()
-def clone_job(name: str, event_date: str, start_time: str | None = None, end_time: str | None = None) -> dict:
+def clone_job(
+    name: str,
+    event_date: str,
+    start_time: str | None = None,
+    end_time: str | None = None,
+    as_template: int = 0,
+) -> dict:
     _require_owner()
     src = frappe.get_doc("Event Booking", name)
     start = _as_time(start_time or src.start_time)
@@ -676,13 +693,14 @@ def clone_job(name: str, event_date: str, start_time: str | None = None, end_tim
     window_end = datetime.combine(day, end)
     from entertainment_express.booking.availability import check
 
-    for row in src.assigned_assets or []:
-        result = check(row.asset, window_start, window_end)
-        if not result.get("available"):
-            frappe.throw("That date is not open for the gear on this job.")
+    if not cint(as_template):
+        for row in src.assigned_assets or []:
+            result = check(row.asset, window_start, window_end)
+            if not result.get("available"):
+                frappe.throw("That date is not open for the gear on this job.")
     payload = {
         "doctype": "Event Booking",
-        "event_name": f"{src.event_name} (copy)",
+        "event_name": f"{src.event_name} (copy)" if not cint(as_template) else f"{src.event_name} template",
         "customer": src.customer,
         "event_date": event_date,
         "start_time": str(start),
@@ -696,17 +714,70 @@ def clone_job(name: str, event_date: str, start_time: str | None = None, end_tim
     }
     if src.meta.has_field("event_type"):
         payload["event_type"] = src.event_type
+    if src.meta.has_field("is_template"):
+        payload["is_template"] = 1 if cint(as_template) else 0
     doc = frappe.get_doc(payload)
     for row in src.service_items or []:
-        doc.append(
-            "service_items",
+        item = {
+            "item": row.item,
+            "qty": row.qty,
+            "rate": row.rate,
+            "amount": row.amount,
+            "service_package": getattr(row, "service_package", None),
+        }
+        if getattr(row, "client_visible", None) is not None:
+            item["client_visible"] = row.client_visible
+        doc.append("service_items", item)
+    doc.insert(ignore_permissions=True)
+    _clone_timeline(src.name, doc.name)
+    _clone_planning_templates(src.name, doc.name)
+    return {"name": doc.name, "id": doc.name}
+
+
+def _clone_timeline(source: str, dest: str) -> None:
+    if not frappe.db.table_exists("Event Timeline"):
+        return
+    src_name = frappe.db.get_value("Event Timeline", {"booking": source}, "name")
+    if not src_name:
+        return
+    old = frappe.get_doc("Event Timeline", src_name)
+    neu = frappe.get_doc(
+        {
+            "doctype": "Event Timeline",
+            "booking": dest,
+            "timezone": old.timezone,
+            "status": "draft",
+            "share_with_client": 0,
+        }
+    )
+    for item in old.items or []:
+        neu.append(
+            "items",
             {
-                "item": row.item,
-                "qty": row.qty,
-                "rate": row.rate,
-                "amount": row.amount,
-                "service_package": getattr(row, "service_package", None),
+                "start_time": item.start_time,
+                "end_time": item.end_time,
+                "title": item.title,
+                "description": item.description,
+                "responsible": item.responsible,
+                "location": item.location,
+                "visible_to_client": getattr(item, "visible_to_client", 1),
+                "song": getattr(item, "song", None),
             },
         )
-    doc.insert(ignore_permissions=True)
-    return {"name": doc.name, "id": doc.name}
+    neu.insert(ignore_permissions=True)
+
+
+def _clone_planning_templates(source: str, dest: str) -> None:
+    if not frappe.db.table_exists("Planning Form Instance"):
+        return
+    for row in frappe.get_all("Planning Form Instance", filters={"booking": source}, fields=["template"]):
+        if frappe.db.exists("Planning Form Instance", {"booking": dest, "template": row.template}):
+            continue
+        frappe.get_doc(
+            {
+                "doctype": "Planning Form Instance",
+                "booking": dest,
+                "template": row.template,
+                "status": "not_started",
+            }
+        ).insert(ignore_permissions=True)

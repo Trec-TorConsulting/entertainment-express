@@ -1,0 +1,34 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "template", "template_task", "title", "due_date", "assigned_user", "role", "status", "action_key"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Event", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "template", "fieldtype": "Link", "label": "Template", "options": "EE Workflow Template"},
+  {"fieldname": "template_task", "fieldtype": "Data", "label": "Template Task"},
+  {"fieldname": "title", "fieldtype": "Data", "label": "Title", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "due_date", "fieldtype": "Date", "label": "Due Date", "in_list_view": 1},
+  {"fieldname": "assigned_user", "fieldtype": "Link", "label": "Assigned User", "options": "User"},
+  {"fieldname": "role", "fieldtype": "Select", "label": "Role", "options": "EE Sales\nEE Dispatcher\nEE Tenant Admin\nEE Customer\nEE Crew\nEE Accounting"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "open\ndone\ndismissed", "default": "open", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "action_key", "fieldtype": "Select", "label": "Action", "options": "send_planning_form\nconfirm_timeline\nfinal_payment\nday_of_checklist\ncustom", "default": "custom"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Workflow Task",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1},
+  {"role": "EE Crew", "read": 1, "write": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "due_date",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

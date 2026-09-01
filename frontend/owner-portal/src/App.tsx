@@ -3,6 +3,7 @@ import { Navigate, NavLink, Route, Routes, useNavigate, useParams } from "react-
 import {
   AccountPanel,
   AppShell,
+  ConflictBanner,
   DataTable,
   DispatchBoard,
   EmptyState,
@@ -25,6 +26,7 @@ const OWNER_NAV = [
       { to: "/", label: "Today" },
       { to: "/calendar", label: "Calendar" },
       { to: "/pipeline", label: "Pipeline" },
+      { to: "/schedule", label: "Consults" },
       { to: "/dispatch", label: "Dispatch" },
     ],
   },
@@ -100,6 +102,7 @@ function Today() {
                   {job.event_date} {job.start_time ? `· ${job.start_time}` : ""} · {job.status}
                 </p>
                 {job.venue_address ? <p>{job.venue_address}</p> : null}
+                {job.planning_incomplete ? <p>Planning {Math.round(Number(job.planning_percent) || 0)}% complete</p> : null}
                 {job.balance_due ? <p>Left {job.balance_due}</p> : null}
               </article>
             ))
@@ -146,13 +149,13 @@ function ApprovalsList({ rows, onChanged }: { rows: any[]; onChanged: () => void
       {rows.map((row) => (
         <article key={String(row.id || row.name)} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", boxShadow: "var(--ee-shadow)", padding: "0.85rem" }}>
           <p style={{ margin: 0, fontWeight: 700 }}>{row.summary || row.type || "Approval"}</p>
-          <p style={{ margin: "0.25rem 0 0.75rem", color: "var(--ee-muted)" }}>{row.id || row.name}</p>
+          <p style={{ margin: "0.25rem 0 0.75rem", color: "var(--ee-muted)" }}>{row.event || row.date || ""}</p>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <button type="button" onClick={() => act(row, "approved")} style={{ background: "var(--ee-success)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" ? "Done" : "Approve"}
+              {row.type === "todo" || row.type === "workflow" ? "Done" : "Approve"}
             </button>
             <button type="button" onClick={() => act(row, "rejected")} style={{ background: "var(--ee-danger)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" ? "Dismiss" : "Reject"}
+              {row.type === "todo" || row.type === "workflow" ? "Dismiss" : "Reject"}
             </button>
           </div>
         </article>
@@ -468,6 +471,9 @@ function ProposalWorkspace() {
         </div>
       </header>
       <div className="ee-form" style={{ maxWidth: "none" }}>
+        {(doc.conflicts || []).map((row: any) => (
+          <ConflictBanner key={row.id || row.title} title={row.title} message={row.message} severity={row.severity || "potential"} />
+        ))}
         {(doc.catalog || []).map((row: any) => (
           <label key={`${row.kind}:${row.id}`} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
             <input type="checkbox" checked={!!picked[row.id]} onChange={() => setPicked((prev) => ({ ...prev, [row.id]: !prev[row.id] }))} />
@@ -535,8 +541,166 @@ function ReportsWorkspace() {
   );
 }
 
+function ScheduleWorkspace() {
+  const [types, setTypes] = React.useState<any[]>([]);
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [name, setName] = React.useState("Free consultation");
+  const [duration, setDuration] = React.useState("30");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.appointments.list_types", {})
+      .then(setTypes)
+      .catch(() => setTypes([]));
+    call("entertainment_express.api.appointments.list_mine", {})
+      .then(setRows)
+      .catch(() => setRows([]));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Consults</h1>
+        <p className="ee-muted">Times people can book on your public schedule page.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.appointments.save_meeting_type", { values: { name, duration } });
+            setName("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that meeting.");
+          }
+        }}
+      >
+        <FormField label="Meeting name">
+          <input value={name} onChange={(e) => setName(e.target.value)} />
+        </FormField>
+        <FormField label="Length (minutes)">
+          <input value={duration} onChange={(e) => setDuration(e.target.value)} />
+        </FormField>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save meeting type
+        </button>
+      </form>
+      {types.length ? (
+        <ul>
+          {types.map((row) => (
+            <li key={row.id}>
+              {row.name} · {row.duration} min
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add a meeting type to open public booking.</p>
+      )}
+      {rows.length ? (
+        <div style={{ display: "grid", gap: "0.75rem" }}>
+          {rows.map((row) => (
+            <article key={row.id} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
+              <p style={{ margin: 0, fontWeight: 700 }}>
+                {row.title} · {row.who}
+              </p>
+              <p className="ee-muted" style={{ margin: "0.25rem 0 0.5rem" }}>
+                {row.start}
+              </p>
+              <button
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.appointments.complete", { name: row.id, decision: "completed" });
+                  reload();
+                }}
+              >
+                Done
+              </button>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="ee-muted">Upcoming consults show here.</p>
+      )}
+    </section>
+  );
+}
+
 function AutomationsWorkspace() {
-  return <EmptyState title="Reminders" message="Deposit chasers and planning nudges use your existing notification settings. Nothing extra to install." />;
+  const [doc, setDoc] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.workflow.get_automations", {})
+      .then(setDoc)
+      .catch((err) => setError(err.message || "Could not load reminders."));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  const toggle = async (key: string, enabled: boolean) => {
+    setError("");
+    try {
+      const next = await call("entertainment_express.api.workflow.set_automation", { key, enabled: enabled ? 0 : 1 });
+      setDoc(next);
+    } catch (err: any) {
+      setError(err.message || "Could not save that reminder.");
+    }
+  };
+
+  if (error && !doc) return <EmptyState title="Reminders" message={error} />;
+  if (!doc) return <p className="ee-muted">Loading…</p>;
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Reminders</h1>
+        <p className="ee-muted">Turn automatic follow-ups on or off for this company.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        {(doc.toggles || []).map((row: any) => (
+          <label key={row.key} style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+            <input type="checkbox" checked={!!row.enabled} onChange={() => toggle(row.key, !!row.enabled)} />
+            <span>{row.label}</span>
+          </label>
+        ))}
+      </div>
+      {(doc.templates || []).length ? (
+        <div>
+          <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.05rem" }}>Checklists</h2>
+          <ul style={{ margin: 0, paddingLeft: "1.1rem", display: "grid", gap: "0.75rem" }}>
+            {(doc.templates || []).map((tmpl: any) => (
+              <li key={tmpl.id}>
+                <strong>{tmpl.name}</strong>
+                {tmpl.event_type ? <span className="ee-muted"> · {tmpl.event_type}</span> : null}
+                <span className="ee-muted"> · {tmpl.active ? "on" : "off"}</span>
+                <ul>
+                  {(tmpl.tasks || []).map((task: any, idx: number) => (
+                    <li key={`${tmpl.id}:${idx}`}>
+                      {task.title} ({task.offset_days >= 0 ? "+" : ""}
+                      {task.offset_days} days)
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="ee-muted">No checklists yet. Add one in settings when you are ready.</p>
+      )}
+    </section>
+  );
 }
 
 function TalentHome() {
@@ -648,6 +812,7 @@ export function OwnerApp() {
           <Route path="/pipeline/new" element={<CrudEditor kind="inquiry" basePath="/pipeline" />} />
           <Route path="/pipeline/:id/proposal" element={<ProposalWorkspace />} />
           <Route path="/pipeline/:id" element={<CrudEditor kind="inquiry" basePath="/pipeline" />} />
+          <Route path="/schedule" element={<ScheduleWorkspace />} />
           <Route path="/dispatch" element={<DispatchWorkspace />} />
           <Route path="/catalog" element={<CatalogWorkspace />} />
           <Route path="/catalog/new" element={<CrudEditor kind="package" basePath="/catalog" />} />

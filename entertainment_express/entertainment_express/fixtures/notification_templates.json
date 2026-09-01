@@ -17,6 +17,22 @@
   },
   {
     "doctype": "Notification Template",
+    "name": "proposal_sent",
+    "template_key": "proposal_sent",
+    "subject": "Your proposal from {{ company_name }} is ready",
+    "active": 1,
+    "body_html": "<p>Hi {{ customer_name }},</p><p>Your proposal <b>#{{ quote_number }}</b> is ready to review, sign, and pay.</p><p><a href='{{ proposal_link }}'>Open your proposal</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "proposal_viewed",
+    "template_key": "proposal_viewed",
+    "subject": "{{ customer_name }} opened a proposal",
+    "active": 1,
+    "body_html": "<p>{{ customer_name }} opened proposal <b>#{{ quote_number }}</b>.</p>"
+  },
+  {
+    "doctype": "Notification Template",
     "name": "contract_sent",
     "template_key": "contract_sent",
     "subject": "Please sign your contract — {{ company_name }}",
@@ -170,5 +186,29 @@
     "active": 1,
     "channels": "email",
     "body_html": "<p>There's a new note on {{ event_name }}:</p><p>{{ preview }}</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "appointment_booked",
+    "template_key": "appointment_booked",
+    "subject": "You're booked with {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ invitee_name }},</p><p>Your {{ meeting_name }} is confirmed for <b>{{ start_label }}</b>.</p><p><a href='{{ manage_link }}'>Reschedule or cancel</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "appointment_reminder",
+    "template_key": "appointment_reminder",
+    "subject": "Reminder: {{ meeting_name }} with {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ invitee_name }},</p><p>This is a reminder that {{ meeting_name }} is <b>{{ start_label }}</b>.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "appointment_canceled",
+    "template_key": "appointment_canceled",
+    "subject": "Canceled: {{ meeting_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ invitee_name }},</p><p>Your {{ meeting_name }} on {{ start_label }} was canceled.</p>"
   }
 ]

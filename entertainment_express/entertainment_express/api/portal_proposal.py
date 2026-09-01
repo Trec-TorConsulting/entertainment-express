@@ -35,6 +35,19 @@ def _require_staff() -> None:
         frappe.throw("Proposal access denied.", frappe.PermissionError)
 
 
+def _assert_party_access(source: str, name: str) -> None:
+    roles = set(frappe.get_roles() or [])
+    if roles.intersection(OWNER_ROLES | {"System Manager"}):
+        return
+    if source == "inquiry":
+        if not frappe.has_permission("Lead", "write", name):
+            frappe.throw("You cannot send a proposal for this inquiry.", frappe.PermissionError)
+        return
+    customer = frappe.db.get_value("Event Booking", name, "customer")
+    if customer and not frappe.has_permission("Customer", "read", customer):
+        frappe.throw("You cannot send a proposal for this client.", frappe.PermissionError)
+
+
 def _require_not_guest() -> None:
     roles = set(frappe.get_roles() or [])
     if GUEST_ROLE in roles and PAYER_ROLE not in roles:
@@ -43,6 +56,31 @@ def _require_not_guest() -> None:
 
 def _company() -> str:
     return frappe.db.get_single_value("Global Defaults", "default_company") or frappe.db.get_value("Company", {}, "name")
+
+
+@frappe.whitelist()
+def list_inquiries() -> list[dict]:
+    _require_staff()
+    rows = frappe.get_all(
+        "Lead",
+        fields=["name", "lead_name", "status", "modified"],
+        order_by="modified desc",
+        limit_page_length=40,
+    )
+    out = []
+    for row in rows:
+        if not frappe.has_permission("Lead", "read", row.name):
+            continue
+        out.append(
+            {
+                "id": row.name,
+                "name": row.name,
+                "contact": row.lead_name or row.name,
+                "status": row.status or "",
+                "updated": str(row.modified or ""),
+            }
+        )
+    return out
 
 
 @frappe.whitelist()
@@ -124,15 +162,25 @@ def _proposal_status(quote) -> str:
     deposit = None
     if booking:
         deposit = frappe.db.get_value("Event Booking", booking, "deposit_status")
+    stamped = ""
+    if getattr(quote, "ee_proposal_status", None):
+        stamped = {
+            "draft": "Draft",
+            "sent": "Sent",
+            "viewed": "Viewed",
+            "accepted": "Accepted",
+        }.get(quote.ee_proposal_status, quote.ee_proposal_status)
     if deposit == "paid":
         return "Deposit paid"
     if contract and contract.status == "signed":
         return "Signed"
+    if stamped in ("Viewed", "Accepted", "Sent"):
+        return stamped
     if quote.docstatus == 1 or (quote.status or "") in ("Open", "Ordered"):
         return "Sent"
     if contract and contract.status in ("sent", "viewed"):
         return "Sent"
-    return "Draft"
+    return stamped or "Draft"
 
 
 def _lines_from_quote(quote) -> list[dict]:
@@ -140,14 +188,23 @@ def _lines_from_quote(quote) -> list[dict]:
         return []
     out = []
     for row in quote.items or []:
+        visible = True
+        if hasattr(row, "ee_client_visible"):
+            visible = bool(row.ee_client_visible)
+        elif hasattr(row, "client_visible"):
+            visible = bool(row.client_visible)
+        name = row.item_name or row.item_code
+        if not visible:
+            continue
         out.append(
             {
                 "id": row.item_code,
                 "kind": "item",
-                "name": row.item_name or row.item_code,
+                "name": name,
                 "qty": flt(row.qty or 1),
                 "rate": _money(row.rate),
                 "amount": _money(row.amount),
+                "client_visible": True,
             }
         )
     return out
@@ -156,6 +213,7 @@ def _lines_from_quote(quote) -> list[dict]:
 @frappe.whitelist()
 def get_proposal(source: str, name: str) -> dict:
     _require_staff()
+    _assert_party_access(source, name)
     if source not in {"inquiry", "job"}:
         frappe.throw("Unknown proposal source.")
     quote = _quote_for(source, name)
@@ -175,8 +233,38 @@ def get_proposal(source: str, name: str) -> dict:
         "catalog": catalog_choices(),
         "can_send": True,
         "checklist": job_checklist(name) if source == "job" else [],
-        "conflicts": quote_conflicts(name) if source == "job" else [],
+        "conflicts": _availability_banners(quote) + (quote_conflicts(name) if source == "job" else []),
     }
+
+
+def _availability_banners(quote) -> list[dict]:
+    if not quote:
+        return []
+    try:
+        from entertainment_express.api.quote import check_asset_availability
+
+        result = check_asset_availability(quote.name)
+    except Exception:
+        return []
+    if result.get("severity") == "actual":
+        return [
+            {
+                "id": "actual-gear",
+                "severity": "actual",
+                "title": "Already booked",
+                "message": "This gear is already committed on another confirmed job. You can still send this proposal; locking the date later will need a different package or time.",
+            }
+        ]
+    if result.get("severity") == "potential":
+        return [
+            {
+                "id": "potential-gear",
+                "severity": "potential",
+                "title": "Another proposal overlaps",
+                "message": "An open proposal already uses this gear on the same date. Sending is allowed. The first confirmed job keeps the gear.",
+            }
+        ]
+    return []
 
 
 def _explode_package(package_name: str) -> list[dict]:
@@ -188,7 +276,7 @@ def _explode_package(package_name: str) -> list[dict]:
             continue
         qty = flt(row.qty or 1)
         rate = flt(getattr(row, "unit_price", None) or frappe.db.get_value("Item", code, "standard_rate") or 0)
-        lines.append({"item_code": code, "qty": qty, "rate": rate})
+        lines.append({"item_code": code, "qty": qty, "rate": rate, "client_visible": int(getattr(row, "client_visible", 1) or 0)})
     if not lines:
         frappe.throw("This package isn't set up yet.")
     return lines
@@ -234,7 +322,12 @@ def _upsert_quote(customer: str, lines: list[dict], deposit_percent: float, extr
                 quote.naming_series = options[0]
     quote.set("items", [])
     for line in lines:
-        quote.append("items", {"item_code": line["item_code"], "qty": line["qty"], "rate": line["rate"]})
+        child = quote.append("items", {"item_code": line["item_code"], "qty": line["qty"], "rate": line["rate"]})
+        if line.get("client_visible") is not None and getattr(child, "meta", None):
+            if child.meta.has_field("ee_client_visible"):
+                child.ee_client_visible = 1 if line.get("client_visible") else 0
+        elif line.get("client_visible") is not None and hasattr(child, "ee_client_visible"):
+            child.ee_client_visible = 1 if line.get("client_visible") else 0
     if quote.meta.has_field("ee_deposit_percent"):
         quote.ee_deposit_percent = flt(deposit_percent or 25)
     if quote.meta.has_field("ee_event_date") and extras.get("event_date"):
@@ -260,6 +353,7 @@ def _upsert_quote(customer: str, lines: list[dict], deposit_percent: float, extr
 @frappe.whitelist()
 def save_proposal(source: str, name: str, selected: list | str | None = None, deposit_percent: float = 25) -> dict:
     _require_staff()
+    _assert_party_access(source, name)
     if isinstance(selected, str):
         selected = frappe.parse_json(selected) or []
     lines = _item_lines(selected or [])
@@ -289,6 +383,7 @@ def save_proposal(source: str, name: str, selected: list | str | None = None, de
 @frappe.whitelist()
 def send_proposal(source: str, name: str) -> dict:
     _require_staff()
+    _assert_party_access(source, name)
     quote = _quote_for(source, name)
     if not quote or not quote.items:
         frappe.throw("Save the proposal with at least one package first.")
@@ -301,6 +396,25 @@ def send_proposal(source: str, name: str) -> dict:
         frappe.logger().error("proposal quote send failed")
         if quote.docstatus == 0:
             quote.db_set("status", "Open")
+    from entertainment_express.api.proposal import issue_token
+
+    issue_token(quote)
+    try:
+        from entertainment_express.notifications import send
+
+        email = frappe.db.get_value("Customer", quote.party_name, "email_id") or ""
+        if email:
+            send(
+                "proposal_sent",
+                email,
+                {
+                    "customer_name": quote.party_name,
+                    "quote_number": quote.name,
+                    "proposal_link": f"{frappe.utils.get_url()}/client/events",
+                },
+            )
+    except Exception:
+        frappe.logger().error("proposal_sent notify failed")
     contract_name = frappe.db.get_value("EE Contract", {"quotation": quote.name}, "name")
     if not contract_name:
         try:
@@ -373,6 +487,7 @@ def job_checklist(name: str) -> list[dict]:
     elif quote:
         contract_status = frappe.db.get_value("EE Contract", {"quotation": quote.name}, "status")
     planning_done = False
+    planning_percent = None
     if frappe.db.table_exists("Planning Form Instance"):
         row = frappe.db.get_value(
             "Planning Form Instance",
@@ -382,6 +497,7 @@ def job_checklist(name: str) -> list[dict]:
         )
         if row:
             planning_done = row.get("status") == "complete" or flt(row.get("completion_percent")) >= 100
+            planning_percent = flt(row.get("completion_percent"))
     done = {
         "proposal": bool(quote and (quote.items or quote.docstatus)),
         "contract": contract_status == "signed",
@@ -404,7 +520,11 @@ def job_checklist(name: str) -> list[dict]:
     for step in WORKFLOW_STEPS:
         if flags and step["key"] not in flags:
             continue
-        steps.append({**step, "done": bool(done.get(step["key"]))})
+        extra = {}
+        if step["key"] == "planning" and planning_percent is not None:
+            extra["percent"] = planning_percent
+            extra["label"] = f"{step['label']} ({int(planning_percent)}%)"
+        steps.append({**step, "done": bool(done.get(step["key"])), **extra})
     return steps
 
 

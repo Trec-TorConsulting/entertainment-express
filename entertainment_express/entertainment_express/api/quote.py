@@ -58,25 +58,24 @@ def build_quote(
 def check_asset_availability(quotation_name: str) -> dict:
     """
     Check availability for every Service Asset referenced in the quote's items.
-    Returns {available: bool, conflicts: [...]}.
+    Returns {available, severity, actual, potential, conflicts}.
+    Sending a quote is allowed when severity is only `potential`.
     """
-    from entertainment_express.booking.availability import check
-    from datetime import datetime, date, time, timedelta
+    from entertainment_express.booking.availability import classify
+    from datetime import datetime, time
 
     quote = frappe.get_doc("Quotation", quotation_name)
     if not quote.ee_event_date:
-        return {"available": True, "message": "No event date set — skipping check"}
+        return {"available": True, "severity": None, "actual": [], "potential": [], "conflicts": []}
 
     event_date = quote.ee_event_date
     event_start_t = quote.ee_event_start or time(9, 0)
     event_end_t = quote.ee_event_end or time(17, 0)
-
     event_start = datetime.combine(event_date, event_start_t)
     event_end = datetime.combine(event_date, event_end_t)
 
-    all_conflicts = []
+    actual, potential = [], []
     for item in quote.items:
-        # Find Service Asset linked to this item
         assets = frappe.get_all(
             "Service Asset Linked Item",
             filters={"item": item.item_code},
@@ -84,14 +83,22 @@ def check_asset_availability(quotation_name: str) -> dict:
             ignore_permissions=True,
         )
         for asset_row in assets:
-            result = check(asset_row["parent"], event_start, event_end)
-            if not result.get("available"):
-                all_conflicts.append({
-                    "asset": asset_row["parent"],
-                    "reason": result.get("reason"),
-                })
+            result = classify(asset_row["parent"], event_start, event_end, exclude_quotation=quotation_name)
+            for name in result.get("actual") or []:
+                actual.append({"asset": asset_row["parent"], "source": name, "severity": "actual"})
+            for name in result.get("potential") or []:
+                potential.append({"asset": asset_row["parent"], "source": name, "severity": "potential"})
+            if result.get("severity") == "actual" and result.get("reason"):
+                actual.append({"asset": asset_row["parent"], "reason": result["reason"], "severity": "actual"})
 
-    return {"available": len(all_conflicts) == 0, "conflicts": all_conflicts}
+    severity = "actual" if actual else ("potential" if potential else None)
+    return {
+        "available": severity != "actual",
+        "severity": severity,
+        "actual": actual,
+        "potential": potential,
+        "conflicts": actual + potential,
+    }
 
 
 @frappe.whitelist()

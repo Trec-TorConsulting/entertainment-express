@@ -52,3 +52,10 @@ The system SHALL finalize a timeline and distribute it to crew (run sheet) and, 
 - **WHEN** staff finalize the timeline
 - **THEN** it locks against client edits, appears on the crew run sheet/mobile app, and (if enabled) is
   shared with the client
+
+### Requirement: Timeline On Client Planning
+The system SHALL show the booking timeline on `/client/planning` with existing client-visible flags and suggestion/approval rules.
+
+#### Scenario: Client opens timeline in SPA
+- **WHEN** a customer opens Planning for a booking that has a timeline
+- **THEN** client-visible items render in order and client-hidden items are omitted

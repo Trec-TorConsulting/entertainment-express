@@ -168,6 +168,43 @@ CUSTOM_FIELDS = {
             "insert_after": "ee_deposit_percent",
             "read_only": 1,
         },
+        {
+            "dt": "Quotation",
+            "fieldname": "ee_proposal_status",
+            "fieldtype": "Select",
+            "label": "Proposal Status",
+            "options": "draft\nsent\nviewed\naccepted",
+            "default": "draft",
+            "insert_after": "ee_booking",
+        },
+        {
+            "dt": "Quotation",
+            "fieldname": "ee_proposal_token",
+            "fieldtype": "Data",
+            "label": "Proposal Token",
+            "insert_after": "ee_proposal_status",
+            "hidden": 1,
+        },
+        {
+            "dt": "Quotation",
+            "fieldname": "ee_last_viewed_at",
+            "fieldtype": "Datetime",
+            "label": "Proposal Last Viewed",
+            "insert_after": "ee_proposal_token",
+            "read_only": 1,
+        },
+    ],
+
+    "Quotation Item": [
+        {
+            "dt": "Quotation Item",
+            "fieldname": "ee_client_visible",
+            "fieldtype": "Check",
+            "label": "Client Visible",
+            "default": "1",
+            "insert_after": "item_name",
+            "description": "Uncheck to hide this line name on the client Proposal; amount still counts in totals",
+        },
     ],
 
     # ─── Sales Invoice → EE deposit fields ──────────────────────────────────
@@ -325,6 +362,22 @@ CUSTOM_FIELDS = {
             "label": "Default Pay Rate",
             "insert_after": "ee_pay_basis",
             "description": "Per-event flat rate or hourly rate",
+        },
+        {
+            "dt": "Employee",
+            "fieldname": "ee_consult_hours",
+            "fieldtype": "Table",
+            "label": "Consult Hours",
+            "options": "EE Staff Hours",
+            "insert_after": "ee_default_pay_rate",
+        },
+        {
+            "dt": "Employee",
+            "fieldname": "ee_consult_overrides",
+            "fieldtype": "Table",
+            "label": "Consult Hour Overrides",
+            "options": "EE Staff Hour Override",
+            "insert_after": "ee_consult_hours",
         },
     ],
 

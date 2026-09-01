@@ -102,11 +102,26 @@ def _audit(action: str, details: dict) -> None:
     ).insert(ignore_permissions=True)
 
 
+def _planning_percent(booking: str | None) -> float | None:
+    if not booking or not getattr(frappe.db, "table_exists", lambda *_: False)("Planning Form Instance"):
+        return None
+    row = frappe.db.get_value(
+        "Planning Form Instance",
+        {"booking": booking},
+        "completion_percent",
+    )
+    if row is None:
+        return None
+    return flt(row)
+
+
 @frappe.whitelist()
 def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None) -> dict:
     _require_owner()
 
-    bookings = frappe.db.count("Event Booking", {"status": ["in", ["confirmed", "in_progress"]]})
+    from entertainment_express.api.portal_crud import _not_template_filters
+
+    bookings = frappe.db.count("Event Booking", _not_template_filters({"status": ["in", ["confirmed", "in_progress"]]}))
     open_invoices = frappe.get_all(
         "Sales Invoice",
         filters={"docstatus": 1, "outstanding_amount": [">", 0]},
@@ -133,7 +148,7 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
     try:
         jobs = frappe.get_all(
             "Event Booking",
-            filters={"status": ["in", ["confirmed", "in_progress", "tentative"]]},
+            filters=_not_template_filters({"status": ["in", ["confirmed", "in_progress", "tentative"]]}),
             fields=["name", "event_name", "event_date", "start_time", "status", "venue_address", "grand_total", "balance_due", "deposit_status"],
             order_by="event_date asc",
             limit_page_length=20,
@@ -143,6 +158,8 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
                 row["grand_total"] = fmt_money(flt(row.get("grand_total")), currency=currency)
             if row.get("balance_due") is not None:
                 row["balance_due"] = fmt_money(flt(row.get("balance_due")), currency=currency)
+            row["planning_percent"] = _planning_percent(row.get("name"))
+            row["planning_incomplete"] = row["planning_percent"] is not None and flt(row["planning_percent"]) < 100
     except Exception:
         jobs = []
 
@@ -194,6 +211,12 @@ def get_approvals() -> list[dict]:
             )
     except Exception:
         rows = []
+    try:
+        from entertainment_express.api.workflow import list_open_tasks
+
+        rows.extend(list_open_tasks())
+    except Exception:
+        pass
     return rows
 
 
@@ -205,6 +228,10 @@ def act_on_approval(approval_type: str, doctype: str, name: str, decision: str, 
         doc = frappe.get_doc("ToDo", name)
         doc.status = "Closed" if decision == "approved" else "Cancelled"
         doc.save(ignore_permissions=True)
+    elif doctype == "EE Workflow Task":
+        from entertainment_express.api.workflow import complete_task
+
+        complete_task(name, decision)
 
     _audit(
         "approval_decision",

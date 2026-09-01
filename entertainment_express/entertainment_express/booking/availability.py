@@ -51,6 +51,24 @@ def check(asset_name: str, event_start: datetime, event_end: datetime) -> dict:
         return _check_pool(asset, window_start, window_end)
 
 
+def classify(asset_name: str, event_start: datetime, event_end: datetime, exclude_quotation: str | None = None) -> dict:
+    """Actual vs potential conflicts. `available` is False only for actual (booking/hold/maintenance)."""
+    actual = check(asset_name, event_start, event_end)
+    potential = _overlapping_quotations(asset_name, event_start, event_end, exclude_quotation)
+    severity = None
+    if not actual.get("available"):
+        severity = "actual"
+    elif potential:
+        severity = "potential"
+    return {
+        "available": bool(actual.get("available")),
+        "severity": severity,
+        "reason": actual.get("reason") or ("Another open proposal uses this gear" if potential else None),
+        "actual": actual.get("conflicts") or [],
+        "potential": potential,
+    }
+
+
 def _get_buffers(asset) -> tuple[int, int]:
     """Return (setup_minutes, teardown_minutes) from the asset's first linked item."""
     if not asset.linked_items:
@@ -101,17 +119,26 @@ def _check_pool(asset, window_start: datetime, window_end: datetime) -> dict:
 
 # ── DB helpers ───────────────────────────────────────────────────────────────
 
+def _template_sql() -> str:
+    try:
+        if frappe.get_meta("Event Booking").has_field("is_template"):
+            return "AND IFNULL(eb.is_template, 0) = 0"
+    except Exception:
+        pass
+    return ""
+
+
 def _overlapping_bookings(asset_name: str, window_start, window_end, qty: int) -> list:
     """Return list of booking names that have this asset in the overlap window."""
-    # Event Booking Asset child table rows that reference the asset
     results = frappe.db.sql(
-        """
+        f"""
         SELECT DISTINCT eb.name
         FROM `tabEvent Booking` eb
         JOIN `tabEvent Booking Asset` eba ON eba.parent = eb.name
         WHERE eba.asset = %(asset)s
           AND eb.status IN ('tentative', 'confirmed', 'in_progress')
           AND eb.docstatus < 2
+          {_template_sql()}
           AND TIMESTAMP(eb.event_date, eb.start_time) < %(window_end)s
           AND TIMESTAMP(eb.event_date, eb.end_time)   > %(window_start)s
         """,
@@ -123,13 +150,14 @@ def _overlapping_bookings(asset_name: str, window_start, window_end, qty: int) -
 
 def _overlapping_booking_qty(asset_name: str, window_start, window_end) -> int:
     result = frappe.db.sql(
-        """
+        f"""
         SELECT COALESCE(SUM(eba.quantity_reserved), 0) AS total
         FROM `tabEvent Booking` eb
         JOIN `tabEvent Booking Asset` eba ON eba.parent = eb.name
         WHERE eba.asset = %(asset)s
           AND eb.status IN ('tentative', 'confirmed', 'in_progress')
           AND eb.docstatus < 2
+          {_template_sql()}
           AND TIMESTAMP(eb.event_date, eb.start_time) < %(window_end)s
           AND TIMESTAMP(eb.event_date, eb.end_time)   > %(window_start)s
         """,
@@ -173,3 +201,38 @@ def _overlapping_hold_qty(asset_name: str, window_start, window_end) -> int:
         as_dict=True,
     )
     return int(result[0]["total"] if result else 0)
+
+
+def _overlapping_quotations(asset_name: str, window_start, window_end, exclude_quotation: str | None) -> list:
+    """Open/sent quotations that want the same unique gear — potential, not a confirm block."""
+    if not frappe.db.table_exists("Quotation") or not frappe.get_meta("Quotation").has_field("ee_event_date"):
+        return []
+    if not frappe.db.table_exists("Service Asset Linked Item"):
+        return []
+    params = {
+        "asset": asset_name,
+        "window_start": window_start,
+        "window_end": window_end,
+        "exclude": exclude_quotation or "",
+    }
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT DISTINCT q.name
+            FROM `tabQuotation` q
+            JOIN `tabQuotation Item` qi ON qi.parent = q.name
+            JOIN `tabService Asset Linked Item` sal ON sal.item = qi.item_code
+            WHERE sal.parent = %(asset)s
+              AND q.docstatus < 2
+              AND IFNULL(q.status, '') IN ('Draft', 'Open', 'Submitted', '')
+              AND q.name != %(exclude)s
+              AND q.ee_event_date IS NOT NULL
+              AND TIMESTAMP(q.ee_event_date, IFNULL(q.ee_event_start, '09:00:00')) < %(window_end)s
+              AND TIMESTAMP(q.ee_event_date, IFNULL(q.ee_event_end, '17:00:00')) > %(window_start)s
+            """,
+            params,
+            as_dict=True,
+        )
+    except Exception:
+        return []
+    return [r["name"] for r in rows]

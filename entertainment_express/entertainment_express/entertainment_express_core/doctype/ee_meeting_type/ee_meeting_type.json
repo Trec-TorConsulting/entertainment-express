@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "autoname": "field:slug",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["type_name", "slug", "active", "duration_minutes", "location_type", "buffer_before", "buffer_after", "assigned_staff", "location_label", "video_url"],
+ "fields": [
+  {"fieldname": "type_name", "fieldtype": "Data", "label": "Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "slug", "fieldtype": "Data", "label": "Public Link", "reqd": 1, "unique": 1, "in_list_view": 1},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1", "in_list_view": 1},
+  {"fieldname": "duration_minutes", "fieldtype": "Int", "label": "Length (minutes)", "reqd": 1, "default": "30", "in_list_view": 1},
+  {"fieldname": "location_type", "fieldtype": "Select", "label": "Where", "options": "phone\nvideo\nin_person", "default": "video", "reqd": 1},
+  {"fieldname": "buffer_before", "fieldtype": "Int", "label": "Buffer before (minutes)", "default": "0"},
+  {"fieldname": "buffer_after", "fieldtype": "Int", "label": "Buffer after (minutes)", "default": "0"},
+  {"fieldname": "assigned_staff", "fieldtype": "Link", "label": "Staff", "options": "Employee"},
+  {"fieldname": "location_label", "fieldtype": "Data", "label": "Place or phone"},
+  {"fieldname": "video_url", "fieldtype": "Data", "label": "Video link"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Meeting Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "type_name",
+ "sort_order": "ASC",
+ "title_field": "type_name",
+ "track_changes": 1
+}

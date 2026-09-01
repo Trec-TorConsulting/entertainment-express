@@ -20,7 +20,7 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
   const roles = getSessionBootstrap().roles || [];
   const guest = isGuest(roles);
   const [money, setMoney] = React.useState<any>(null);
-  const [needsSign, setNeedsSign] = React.useState(false);
+  const [action, setAction] = React.useState<{ key: string; label: string; href: string } | null>(null);
   const current = events.find((row) => row.name === booking);
 
   React.useEffect(() => {
@@ -28,9 +28,9 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
     call("entertainment_express.api.portal_reports.client_money_summary", {})
       .then(setMoney)
       .catch(() => setMoney({ owed: "0.00", paid: "0.00", remaining: "0.00" }));
-    call("entertainment_express.api.portal_client.list_contracts", {})
-      .then((res) => setNeedsSign((res || []).some((row: any) => row.can_sign)))
-      .catch(() => setNeedsSign(false));
+    call("entertainment_express.api.portal_client.next_action", {})
+      .then(setAction)
+      .catch(() => setAction({ key: "none", label: "", href: "" }));
   }, [guest]);
 
   if (guest) {
@@ -42,18 +42,24 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
     );
   }
 
-  const remainingAmount = Number(money?.remaining_amount);
-  const needsPay = Number.isFinite(remainingAmount) ? remainingAmount > 0 : false;
+  const copy =
+    action?.key === "sign"
+      ? { title: "A contract is waiting", message: "Review and sign to lock in the date." }
+      : action?.key === "pay"
+        ? { title: "A payment is due", message: "Finish the deposit or balance to lock the date." }
+        : action?.key === "planning"
+          ? { title: "Finish event details", message: "A few planning questions are still open." }
+          : { title: "You're all set for now", message: "When something needs a signature or a payment, it shows up here." };
+
   return (
     <section style={{ display: "grid", gap: "1rem" }}>
       {money ? <MoneySummary owed={money.owed} paid={money.paid} remaining={money.remaining} /> : null}
-      {needsSign ? (
-        <EmptyState title="A contract is waiting" message="Review and sign to lock in the date." actionLabel="Sign" onAction={() => (window.location.href = "/client/documents")} />
-      ) : needsPay ? (
-        <EmptyState title="A payment is due" message="Finish the deposit or balance to lock the date." actionLabel="Pay" onAction={() => (window.location.href = "/client/pay")} />
-      ) : (
-        <EmptyState title="You're all set for now" message="When something needs a signature or a payment, it shows up here." />
-      )}
+      <EmptyState
+        title={copy.title}
+        message={copy.message}
+        actionLabel={action?.label || undefined}
+        onAction={action?.href ? () => (window.location.href = action.href) : undefined}
+      />
     </section>
   );
 }
@@ -178,6 +184,7 @@ function Documents() {
   }, []);
 
   const openContract = async (row: any) => {
+    if (row.kind === "receipt") return;
     setError("");
     try {
       const doc = await call("entertainment_express.api.portal_client.get_contract", { name: row.id });
