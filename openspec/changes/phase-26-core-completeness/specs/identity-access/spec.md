@@ -1,8 +1,8 @@
 ## ADDED Requirements
 
-### Requirement: Guests Stay Non-Payers On Money APIs
-The system SHALL deny `EE Event Guest` (without `EE Customer`) on invoice checkout and contract sign APIs even when the booking membership check would pass.
+### Requirement: Proposal Money Is Payer-Only
+The system SHALL allow Proposal accept, contract sign, and deposit pay only for the booking’s `EE Customer` (or a valid signing token bound to that contract). `EE Event Guest` SHALL NOT gain `EE Customer` via proposal links.
 
-#### Scenario: Guest checkout denied
-- **WHEN** an event guest calls `start_checkout` or `sign_contract` portal methods
-- **THEN** the request is denied
+#### Scenario: Guest token cannot pay
+- **WHEN** a guest uses an invite link and calls sign-and-pay
+- **THEN** the request is denied and the Quotation is unchanged

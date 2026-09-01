@@ -1,8 +1,8 @@
 ## ADDED Requirements
 
-### Requirement: Portal Timeline
-The system SHALL let the paying customer and owner view and edit the event timeline/run-of-show from the portal using existing timeline APIs.
+### Requirement: Timeline On Client Planning
+The system SHALL show the booking timeline on `/client/planning` with existing client-visible flags and suggestion/approval rules.
 
-#### Scenario: Client adds a first dance
-- **WHEN** the customer adds a timeline beat
-- **THEN** it is stored on that booking and visible to assigned talent
+#### Scenario: Client opens timeline in SPA
+- **WHEN** a customer opens Planning for a booking that has a timeline
+- **THEN** client-visible items render in order and client-hidden items are omitted

@@ -1,42 +1,48 @@
 ## Why
 
-Phase 25 shipped one product family with three skins, but owners and clients still hit empty states on the money path: no interactive Proposal (packages + contract + deposit), Pay/Documents/Planning that are not lists-or-nothing, and no clone-job / catalog-wishlist / pull-sheet completeness. The shells exist; the revenue and planning loops are not yet runnable without Desk.
+Phase 25 shipped owner / employee / client *shells*. A tenant still cannot run the money-making loop without Desk: send a visual proposal, have the client sign and pay, complete planning, see quote-level gear conflicts, clone a job, or show a public catalog. Adjacent products (HoneyBook, Goodshuffle Pro, eventplanner.net checklists) win on those loops. Conference features from Eventsquid (ticketing, CEU, exhibitors) are out of scope.
 
 ## What Changes
 
-- **Proposal workspace** in `/owner` and `/client`: pick packages/add-ons, generate quote + contract, collect deposit — one flow, no Desk.
-- **Working Pay, Documents, Planning** in `/client` (not empty states): list own invoices and pay via Stripe checkout; review/sign contracts as the logged-in payer; planning forms/timeline/music already behind APIs, surfaced in the SPA.
-- **Event-type workflow checklists** so a DJ vs bounce-house job shows the right next steps (data-driven, not hard-coded verticals).
-- **Quote conflict flags**: potential vs actual (requested add-ons vs billed lines).
-- **Clone job** from an existing booking (new date, same package/gear pattern).
-- **Public catalog + wishlist** on the tenant booking site (guest browse, customer save).
-- **Warehouse-only lines on pull sheets** so field crew see pack-from-warehouse items only.
-- Explicitly **not**: Eventsquid ticketing/CEU, eventplanner.net marketplace, or EventPlanner.ai decks.
+- Close the **revenue loop in the portals**: owner sends an interactive proposal (packages + price + contract + deposit); client reviews, optionally adjusts allowed add-ons, e-signs, and pays without leaving `/client`.
+- Replace `/client` Pay / Documents / Planning **empty states** with working screens over existing billing, e-sign, planning-form, timeline, and music APIs. Home next action is Sign or Pay when either is outstanding.
+- Make **event-type workflow checklists** usable: templates with due dates offset from the event; owner Today / Reminders show open tasks; auto-apply on booking by event type.
+- **Potential conflicts** on unsigned quotes (and holds), not only confirmed bookings — warn, do not silently block sending a quote.
+- **Clone job** and save-as-template (packages, timeline, checklist, planning form, hidden warehouse lines).
+- **Public catalog / wishlist** on the tenant site: browse packages with images, request a quote or book; branding beyond name + color.
+- **Client-visible vs warehouse-only** quote lines (cables, spare parts stay on pull sheets).
+- Wire `/owner/automations` to existing notification settings (deposit chase, planning-form reminders, unsigned-proposal follow-up).
+- **Explicit non-goals:** attendee ticketing, CEU/speakers/exhibitors, virtual event hub, public vendor marketplace, AI concept→deck (phase 11), appointments/venues/COI/vendor network (phases 16–17), marketing campaigns (phase 8), calendar two-way sync (phase 13).
 
 ## Capabilities
 
 ### New Capabilities
-None. This phase completes existing loops.
+
+- (none) — all behavior extends existing specs. No marketplace, no ticketing product.
 
 ### Modified Capabilities
-- `crm`: interactive Proposal (quote + contract + deposit) from owner and client, not Desk-only.
-- `customer-portal`: Pay, Documents, and Planning are functional; home next-action is Sign then Pay.
-- `owner-portal`: Proposal + clone job from Calendar/Pipeline; catalog drives quotes.
-- `employee-portal`: pull sheets show warehouse-only lines; sales can open Proposal for their pipeline.
-- `booking-availability`: clone job respects availability/conflicts.
-- `service-catalog`: public catalog + wishlist.
-- `equipment-inventory-fleet`: warehouse-only pull-sheet lines.
-- `event-planning-forms`: planning hub uses real forms, not an idea-only list.
-- `event-timeline`: client/owner can view/edit run-of-show in portal.
-- `music-planning`: client/guest music requests in Planning.
-- `event-collaboration`: approved plan items can become quote lines (conflict flag if they do not).
-- `billing-payments`: paying customer may start Stripe checkout on **their** invoices; guests 403.
-- `notifications`: proposal sent, contract to sign, payment receipt (existing templates).
-- `identity-access`: guests remain non-payers on checkout and sign APIs.
+
+- `crm`: Interactive Proposals must be sendable from `/owner` and completable by the client; proposal view tracking; Tasks & Workflow Templates auto-apply and appear in owner Reminders.
+- `customer-portal`: Pay, Documents (sign), and Planning are functional; proposal accept flow; guests still cannot pay or sign.
+- `owner-portal`: Send proposal, clone job, conflict warnings, checklist inbox, catalog images; Automations is not an empty state.
+- `employee-portal`: Sales can send/view proposals; dispatch/field see checklist + hidden packing lines, not client-only copy.
+- `booking-availability`: Potential (quote/hold) vs actual (confirmed) conflicts; public catalog/wishlist on the tenant booking site.
+- `service-catalog`: Packages expose public vs warehouse-only lines; images for storefront and proposals.
+- `equipment-inventory-fleet`: Pull sheets include warehouse-only lines that quotes hide.
+- `event-planning-forms`: Client completes forms on `/client/planning`; owner sees completion on the job.
+- `event-timeline`: Client and assigned crew edit/view timeline in portals (existing finalize rules).
+- `music-planning`: Client/guest song lists on `/client/planning`; crew play view unchanged.
+- `event-collaboration`: Planning hub includes forms/timeline/music, not only suggest/vote.
+- `billing-payments`: Deposit capture from the proposal and `/client/pay` uses existing processors; guests 403.
+- `notifications`: Proposal viewed, unsigned follow-up, checklist due, planning-form reminder — existing channels.
+- `identity-access`: Proposal accept and pay remain `EE Customer` on that booking’s customer; guests denied.
 
 ## Impact
 
-- Frontends: `frontend/owner-portal`, `frontend/customer-portal`, `frontend/employee-portal`, `frontend/portal-kit`; rebuild `public/{owner,employee,client}/`.
-- Backend: `api/portal_client.py` (new), `api/payments_stripe.py` (customer-owned checkout), `api/contract.py` (session sign/view), `api/portal_crud.py` (owner records), quote/booking APIs for Proposal and clone.
-- Tests: guest denied pay/sign; customer A cannot pay customer B’s invoice; money strings only.
-- Cluster: bench image bump after SPA + API land.
+- Frontends: `frontend/owner-portal`, `frontend/employee-portal`, `frontend/customer-portal`, `frontend/portal-kit`; rebuild `public/{owner,employee,client}/`. Tenant public home / booking pages under `entertainment_express/www/`.
+- Backend: `entertainment_express/api/` (proposal, checklist, conflict, clone, storefront, client pay/sign/planning); reuse ERPNext Quotation / Sales Invoice / Payment Entry; no new money math.
+- DocTypes: proposal view log, workflow template (+ child tasks), clone/template flag on booking or a small `EE Job Template`; catalog `client_visible` on package/item child; no new tenant databases.
+- Tests: tenant isolation; guest cannot pay/sign; quote conflict is warning not silent overbook of confirmed assets; clone does not copy payments.
+- Cluster: bench image bump after SPA + API land; `bench migrate` on tenant sites.
+- Depends on: phase-1 quotes/contracts/deposits, phase-5 payments, phase-15 planning/timeline/music, phase-25 portal OS.
+- Does not: Desk replacement for SaaS operator; GL; Eventsquid-style registration.

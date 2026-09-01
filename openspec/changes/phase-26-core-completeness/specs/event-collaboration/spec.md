@@ -1,8 +1,8 @@
 ## ADDED Requirements
 
-### Requirement: Approved Ideas Versus Quote
-The system SHALL flag when an approved plan item is not yet a billable quote/booking line (potential vs actual).
+### Requirement: Planning Hub Includes Forms Timeline Music
+The system SHALL treat `/client/planning` as one hub: phase-15 forms, timeline, music, plus existing suggest/vote plan items and chat nearby. Guests SHALL NOT receive payer screens from this hub.
 
-#### Scenario: Approved add-on missing on quote
-- **WHEN** the customer approves a suggested add-on that is not on the quotation
-- **THEN** owner Today/approvals and the proposal show a conflict until the line is added or the idea is rejected
+#### Scenario: Guest uses the hub
+- **WHEN** an accepted guest opens Planning
+- **THEN** they see that booking’s collaborative items (and allowed music/form fields) and no Pay or Documents money

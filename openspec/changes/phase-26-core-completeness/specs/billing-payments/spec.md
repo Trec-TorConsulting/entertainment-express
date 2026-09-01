@@ -1,12 +1,12 @@
 ## ADDED Requirements
 
-### Requirement: Customer Checkout On Own Invoice
-The system SHALL allow an `EE Customer` to create a Stripe Checkout session only for a Sales Invoice whose Customer matches that user’s customer record. Staff roles keep existing checkout access. Guests SHALL be denied.
+### Requirement: Deposit From Proposal And Client Pay
+The system SHALL capture the deposit through existing processors when the client completes Proposal sign-and-pay or `/client/pay`. Guests SHALL NOT create Payment Entries.
 
-#### Scenario: Payer checkout
-- **WHEN** the customer of invoice `SINV-1` starts checkout
-- **THEN** a Checkout session is created for `SINV-1`
+#### Scenario: Proposal deposit
+- **WHEN** a customer completes Proposal payment for the required deposit percent
+- **THEN** a Payment Entry (or processor equivalent) is recorded against the deposit invoice using `flt` and webhook reconciliation rules already in force
 
-#### Scenario: Other customer denied
-- **WHEN** a different customer starts checkout on `SINV-1`
-- **THEN** access is denied and no Stripe session is created
+#### Scenario: Guest payment rejected
+- **WHEN** a guest submits a pay API for the booking
+- **THEN** the call is 403 and no processor charge is created

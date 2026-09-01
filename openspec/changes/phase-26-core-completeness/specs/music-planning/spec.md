@@ -1,8 +1,8 @@
 ## ADDED Requirements
 
-### Requirement: Portal Music Requests
-The system SHALL accept must-play / do-not-play / special-moment requests from the paying customer and accepted guests in `/client/planning` using existing music-planning APIs.
+### Requirement: Music Lists On Client Planning
+The system SHALL let the paying customer manage must-play, do-not-play, and special-moment lists on `/client/planning`. Accepted guests MAY submit general requests subject to existing guest-request rules.
 
-#### Scenario: Guest requests a song
-- **WHEN** an accepted guest submits a must-play
-- **THEN** it appears on that booking’s music list and not on any other booking
+#### Scenario: Customer adds a must-play in the SPA
+- **WHEN** a customer adds a must-play song on `/client/planning`
+- **THEN** the Music Selection is stored on that booking and appears for assigned crew
