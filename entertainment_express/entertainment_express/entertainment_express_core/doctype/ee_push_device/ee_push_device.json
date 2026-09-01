@@ -1,0 +1,28 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["user", "token", "platform"],
+ "fields": [
+  {"fieldname": "user", "fieldtype": "Link", "label": "User", "options": "User", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "token", "fieldtype": "Data", "label": "Device token", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "platform", "fieldtype": "Select", "label": "Platform", "options": "web\nandroid\nios", "default": "web", "in_list_view": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Push Device",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Crew", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

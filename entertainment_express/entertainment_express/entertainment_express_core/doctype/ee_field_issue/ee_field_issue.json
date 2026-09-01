@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "assignment", "kind", "status", "detail", "photo_b64", "reported_by"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Job", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "assignment", "fieldtype": "Link", "label": "Shift", "options": "Crew Assignment"},
+  {"fieldname": "kind", "fieldtype": "Select", "label": "Kind", "options": "damage\nno_show\naccess\nother", "default": "other", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "open\nacked", "default": "open", "in_list_view": 1},
+  {"fieldname": "detail", "fieldtype": "Small Text", "label": "Detail", "reqd": 1},
+  {"fieldname": "photo_b64", "fieldtype": "Long Text", "label": "Photo", "hidden": 1},
+  {"fieldname": "reported_by", "fieldtype": "Link", "label": "Reported by", "options": "User", "read_only": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Field Issue",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Crew", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

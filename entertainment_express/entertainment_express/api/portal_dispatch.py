@@ -231,10 +231,10 @@ def respond(assignment: str, decision: str) -> dict:
 
 
 @frappe.whitelist()
-def check_in(assignment: str) -> dict:
+def check_in(assignment: str, latitude: float | None = None, longitude: float | None = None) -> dict:
     _require_field()
     _assert_own_or_dispatch(assignment)
-    _dispatch.crew_check_in(assignment)
+    _dispatch.crew_check_in(assignment, latitude=latitude, longitude=longitude)
     return {"status": STATUS_LABELS["checked_in"]}
 
 

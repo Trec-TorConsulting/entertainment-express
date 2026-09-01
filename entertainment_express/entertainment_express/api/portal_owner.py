@@ -240,6 +240,29 @@ def get_approvals() -> list[dict]:
                 )
     except Exception:
         pass
+    try:
+        if frappe.db.table_exists("EE Field Issue"):
+            for row in frappe.get_all(
+                "EE Field Issue",
+                filters={"status": "open"},
+                fields=["name", "booking", "kind", "detail"],
+                order_by="modified desc",
+                limit_page_length=20,
+            ):
+                event = frappe.db.get_value("Event Booking", row.booking, "event_name") if row.booking else row.booking
+                labels = {"damage": "Damage", "no_show": "No-show", "access": "Access", "other": "On-site issue"}
+                rows.append(
+                    {
+                        "type": "field_issue",
+                        "id": row.name,
+                        "name": row.name,
+                        "doctype": "EE Field Issue",
+                        "summary": f"{labels.get(row.kind, 'Issue')} · {event or row.booking}",
+                        "date": "",
+                    }
+                )
+    except Exception:
+        pass
     return rows
 
 
@@ -259,6 +282,10 @@ def act_on_approval(approval_type: str, doctype: str, name: str, decision: str, 
         from entertainment_express.api.booking_changes import decide_change
 
         decide_change(name, decision)
+    elif doctype == "EE Field Issue":
+        doc = frappe.get_doc("EE Field Issue", name)
+        doc.status = "acked"
+        doc.save(ignore_permissions=True)
 
     _audit(
         "approval_decision",

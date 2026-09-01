@@ -7,6 +7,12 @@ import "../../portal-kit/src/tokens.css";
 
 const queryClient = new QueryClient();
 
+if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/assets/entertainment_express/employee/sw.js").catch(() => undefined);
+  });
+}
+
 createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

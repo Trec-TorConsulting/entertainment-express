@@ -243,23 +243,57 @@ def _twilio(channel, to, body):
         return False, str(exc)[:180], "", "twilio"
 
 
+def _push_tokens(recipient: str) -> list[str]:
+    if not recipient:
+        return []
+    if not frappe.db.table_exists("EE Push Device"):
+        return [recipient] if recipient.count(":") >= 1 or len(recipient) > 40 else []
+    users = {recipient}
+    try:
+        user = frappe.db.get_value("User", {"email": recipient}, "name")
+        if user:
+            users.add(user)
+        users.add(frappe.db.get_value("User", recipient, "name") or recipient)
+    except Exception:
+        pass
+    tokens = []
+    for user in users:
+        if not user:
+            continue
+        for row in frappe.get_all(
+            "EE Push Device",
+            filters={"user": user},
+            fields=["token"],
+            limit_page_length=20,
+        ):
+            if row.token and row.token not in tokens:
+                tokens.append(row.token)
+    return tokens
+
+
 def _fcm(to, title, body):
     cred = os.environ.get("EE_FCM_SERVER_KEY", "")
     if not cred:
         return False, "not_configured", "", "fcm"
-    payload = json.dumps({"to": to, "notification": {"title": title, "body": body[:240]}}).encode()
-    req = Request(
-        "https://fcm.googleapis.com/fcm/send",
-        data=payload,
-        headers={"Authorization": f"key={cred}", "Content-Type": "application/json"},
-        method="POST",
-    )
-    try:
-        with urlopen(req, timeout=20) as resp:
-            data = json.loads(resp.read().decode())
-        return True, "", str(data.get("message_id") or ""), "fcm"
-    except Exception as exc:
-        return False, str(exc)[:180], "", "fcm"
+    tokens = _push_tokens(to)
+    if not tokens:
+        return False, "not_configured", "", "fcm"
+    last_ok, last_err, last_id = False, "", ""
+    for token in tokens:
+        payload = json.dumps({"to": token, "notification": {"title": title, "body": body[:240]}}).encode()
+        req = Request(
+            "https://fcm.googleapis.com/fcm/send",
+            data=payload,
+            headers={"Authorization": f"key={cred}", "Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urlopen(req, timeout=20) as resp:
+                data = json.loads(resp.read().decode())
+            last_ok, last_err, last_id = True, "", str(data.get("message_id") or "")
+        except Exception as exc:
+            last_err = str(exc)[:180]
+    return last_ok, last_err, last_id, "fcm"
 
 
 def _log(recipient, channel, template_key, status, provider="", provider_message_id="", error="", related_doctype=None, related_name=None, scheduled_for=None):

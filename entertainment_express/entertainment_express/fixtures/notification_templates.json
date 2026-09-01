@@ -93,7 +93,7 @@
     "template_key": "shift_offered",
     "subject": "Shift offer for {{ event_date }} — {{ role }}",
     "active": 1,
-    "body_html": "<p>Hi {{ employee_name }},</p><p>You've been offered a shift:</p><ul><li><b>Date:</b> {{ event_date }}</li><li><b>Role:</b> {{ role }}</li><li><b>Call Time:</b> {{ call_time }}</li><li><b>Venue:</b> {{ venue_address }}</li></ul><p><a href='{{ accept_link }}' style='background:#4CAF50;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;margin-right:10px'>Accept</a><a href='{{ decline_link }}' style='background:#F44336;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none'>Decline</a></p>"
+    "body_html": "<p>Hi {{ employee_name }},</p><p>You've been offered a shift:</p><ul><li><b>Date:</b> {{ event_date }}</li><li><b>Role:</b> {{ role }}</li><li><b>Call Time:</b> {{ call_time }}</li><li><b>Venue:</b> {{ venue_address }}</li></ul><p><a href='{{ field_link }}'>Open Field</a></p><p><a href='{{ accept_link }}' style='background:#4CAF50;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;margin-right:10px'>Accept</a><a href='{{ decline_link }}' style='background:#F44336;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none'>Decline</a></p>"
   },
   {
     "doctype": "Notification Template",
@@ -117,7 +117,17 @@
     "template_key": "run_sheet_published",
     "subject": "📋 Run sheet published — {{ event_date }}",
     "active": 1,
-    "body_html": "<p>Hi {{ employee_name }},</p><p>Your run sheet for the <b>{{ event_date }}</b> event (role: <b>{{ role }}</b>) at <b>{{ venue_address }}</b> has been published.</p><p>Log in to your portal to view full details, checklist, and directions.</p>"
+    "body_html": "<p>Hi {{ employee_name }},</p><p>Your run sheet for the <b>{{ event_date }}</b> event (role: <b>{{ role }}</b>) at <b>{{ venue_address }}</b> has been published.</p><p><a href='{{ field_link }}'>Open Field</a> for the checklist and directions.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "field_issue",
+    "template_key": "field_issue",
+    "subject": "On-site issue: {{ kind_label }} — {{ job }}",
+    "active": 1,
+    "channels": "email,push",
+    "priority": "transactional",
+    "body_html": "<p><b>{{ person }}</b> reported {{ kind_label }} on {{ job }}.</p><p>{{ detail }}</p>"
   },
   {
     "doctype": "Notification Template",

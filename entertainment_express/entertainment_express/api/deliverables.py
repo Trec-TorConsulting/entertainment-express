@@ -14,6 +14,7 @@ from entertainment_express.api.portal_owner import OWNER_ROLES
 GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
 STAFF = OWNER_ROLES | {"EE Sales", "EE Dispatcher", "System Manager"}
+CREW = {"EE Crew", "EE Entertainer"}
 MAX_BYTES = 5 * 1024 * 1024
 KINDS = ("photo", "video", "receipt", "other")
 
@@ -32,6 +33,19 @@ def _is_staff() -> bool:
 def _require_staff() -> None:
     if not _is_staff():
         frappe.throw("Not allowed.", frappe.PermissionError)
+
+
+def _require_upload(booking: str) -> None:
+    if _is_staff():
+        return
+    roles = _roles()
+    if GUEST_ROLE in roles and PAYER_ROLE not in roles:
+        frappe.throw("Not allowed.", frappe.PermissionError)
+    if roles.intersection(CREW):
+        emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+        if emp and frappe.db.exists("Crew Assignment", {"booking": booking, "crew_member": emp}):
+            return
+    frappe.throw("Not allowed.", frappe.PermissionError)
 
 
 def _require_member(booking: str) -> None:
@@ -77,7 +91,7 @@ def _payload(doc, include_file: bool = False) -> dict:
 
 @frappe.whitelist()
 def save_deliverable(booking: str, title: str, content_b64: str, file_name: str = "", kind: str = "photo", mime: str = "") -> dict:
-    _require_staff()
+    _require_upload(booking)
     if not frappe.db.exists("Event Booking", booking):
         frappe.throw("That job was not found.")
     raw = (content_b64 or "").split(",")[-1].strip()

@@ -177,10 +177,10 @@ function ApprovalsList({ rows, onChanged }: { rows: any[]; onChanged: () => void
           <p style={{ margin: "0.25rem 0 0.75rem", color: "var(--ee-muted)" }}>{row.event || row.date || ""}</p>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <button type="button" onClick={() => act(row, "approved")} style={{ background: "var(--ee-success)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" || row.type === "workflow" ? "Done" : "Approve"}
+              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Done" : "Approve"}
             </button>
             <button type="button" onClick={() => act(row, "rejected")} style={{ background: "var(--ee-danger)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" || row.type === "workflow" ? "Dismiss" : "Reject"}
+              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Dismiss" : "Reject"}
             </button>
           </div>
         </article>

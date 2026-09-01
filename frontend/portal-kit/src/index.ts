@@ -15,4 +15,5 @@ export * from "./components/Skeleton";
 export * from "./components/StatCard";
 export * from "./components/RecordWorkspace";
 export * from "./components/DispatchBoard";
+export * from "./components/FieldBoard";
 export * from "./components/Toast";

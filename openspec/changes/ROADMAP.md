@@ -85,10 +85,11 @@ campaign analytics.
 **Spec:** `marketing-engagement`. **Depends on:** phase-6.
 **Folder:** [`archive/2026-09-01-phase-8-marketing-engagement/`](archive/2026-09-01-phase-8-marketing-engagement/)
 
-## Phase 9 — Mobile Field App (PWA) 📝
+## Phase 9 — Mobile Field App (PWA) ✅
 Crew PWA: job list/details, navigation, check-in/out, on-site workflows, media/signature capture, offline
 tolerance, push, issue reporting.
 **Spec:** `mobile-field-app`. **Depends on:** phase-2, phase-3, phase-6.
+**Folder:** [`archive/2026-09-01-phase-9-mobile-field-app/`](archive/2026-09-01-phase-9-mobile-field-app/)
 
 ## Phase 10 — Reporting & BI 📝
 Operational dashboards, financial reports, utilization/ops KPIs, custom reports/exports, scheduled delivery,
