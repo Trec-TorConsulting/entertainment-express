@@ -128,3 +128,10 @@ The system SHALL show warehouse-only package lines on crew packing lists / run s
 #### Scenario: Cables on the truck list
 - **WHEN** a package includes a client-hidden cable line
 - **THEN** `/employee` field/dispatch packing view lists the cable and the client Proposal does not name it
+
+### Requirement: Sales Sees Own Appointments
+The system SHALL show `EE Sales` their assigned appointments on `/employee`. They SHALL NOT see another salesperson’s appointments unless they are the assigned staff or an owner.
+
+#### Scenario: Salesperson opens My Day
+- **WHEN** an `EE Sales` user opens `/employee`
+- **THEN** today’s assigned consults appear and another salesperson’s consults do not

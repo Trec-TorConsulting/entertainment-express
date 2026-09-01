@@ -110,3 +110,10 @@ The system SHALL publish tenant Service Packages that are marked public on the t
 #### Scenario: Unpublished package hidden
 - **WHEN** a package is not published
 - **THEN** it does not appear on the public catalog
+
+### Requirement: Event Work Blocks Consults
+The system SHALL treat overlapping confirmed/in-progress Event Booking crew assignments as busy for appointment slot calculation for that staff member.
+
+#### Scenario: Saturday gig blocks Saturday consult
+- **WHEN** staff is assigned to a confirmed booking 2pm–6pm
+- **THEN** consult slots overlapping that window are not offered

@@ -543,6 +543,115 @@ function Chat({ booking }: { booking?: string }) {
   );
 }
 
+function Appointments() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [pick, setPick] = React.useState("");
+  const [slots, setSlots] = React.useState<any[]>([]);
+  const [start, setStart] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.appointments.list_mine", {})
+      .then((res) => setRows(res || []))
+      .catch((err) => setError(err.message || "Could not load meetings."));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  const loadSlots = async (row: any) => {
+    setError("");
+    setPick(row.id);
+    setStart("");
+    try {
+      const next = await call("entertainment_express.api.appointments.list_slots", { meeting_type: row.meeting_type });
+      setSlots(next || []);
+    } catch (err: any) {
+      setSlots([]);
+      setError(err.message || "Could not load open times.");
+    }
+  };
+
+  if (error && !rows.length) return <EmptyState title="Meetings" message={error} />;
+
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Meetings</h1>
+        <p className="ee-muted">Consults you booked with us. Event jobs stay under Events.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {rows.length ? (
+        rows.map((row) => (
+          <article key={row.id} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
+            <p style={{ margin: 0, fontWeight: 700 }}>
+              {row.title} · {row.start}
+            </p>
+            <p className="ee-muted" style={{ margin: "0.25rem 0 0.5rem" }}>
+              {row.status}
+            </p>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              <button type="button" className="ee-btn" onClick={() => loadSlots(row)}>
+                Move
+              </button>
+              <button
+                type="button"
+                className="ee-btn ee-btn--ghost"
+                onClick={async () => {
+                  setError("");
+                  try {
+                    await call("entertainment_express.api.appointments.cancel", { name: row.id });
+                    setPick("");
+                    reload();
+                  } catch (err: any) {
+                    setError(err.message || "Could not cancel.");
+                  }
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+            {pick === row.id ? (
+              <form
+                className="ee-form"
+                style={{ marginTop: "0.75rem" }}
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  setError("");
+                  try {
+                    await call("entertainment_express.api.appointments.reschedule", { name: row.id, start });
+                    setPick("");
+                    reload();
+                  } catch (err: any) {
+                    setError(err.message || "That time just filled.");
+                  }
+                }}
+              >
+                <FormField label="New time">
+                  <select value={start} onChange={(e) => setStart(e.target.value)} required>
+                    <option value="">Pick a time</option>
+                    {slots.map((slot) => (
+                      <option key={slot.start} value={slot.start}>
+                        {slot.start}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+                <button type="submit" className="ee-btn" disabled={!start}>
+                  Save new time
+                </button>
+              </form>
+            ) : null}
+          </article>
+        ))
+      ) : (
+        <EmptyState title="No meetings" message="When you book a consult, it shows up here." />
+      )}
+    </section>
+  );
+}
+
 function Photos() {
   return <EmptyState title="Photos" message="Galleries show here after the event." />;
 }
@@ -585,6 +694,7 @@ export function ClientApp() {
         { to: "/events", label: "Events" },
         { to: "/pay", label: "Pay" },
         { to: "/documents", label: "Documents" },
+        { to: "/appointments", label: "Meetings" },
         { to: "/planning", label: "Planning" },
         { to: "/people", label: "People" },
         { to: "/chat", label: "Chat" },
@@ -613,6 +723,7 @@ export function ClientApp() {
         <Route path="/events" element={guest ? <EmptyState title="Events" message="You only see this event." /> : <Events />} />
         <Route path="/pay" element={guest ? <EmptyState title="Payments" message="Only the host can pay." /> : <Pay />} />
         <Route path="/documents" element={guest ? <EmptyState title="Documents" message="Contracts stay with the host." /> : <Documents />} />
+        <Route path="/appointments" element={guest ? <EmptyState title="Meetings" message="Only the host can manage meetings." /> : <Appointments />} />
         <Route path="/planning" element={scoped(<Planning booking={booking} />)} />
         <Route path="/people" element={scoped(<People booking={booking} />)} />
         <Route path="/chat" element={scoped(<Chat booking={booking} />)} />

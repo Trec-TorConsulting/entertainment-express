@@ -138,3 +138,10 @@ tasks/milestones with due dates relative to the event date.
 #### Scenario: Owner sees open tasks
 - **WHEN** an owner opens Today or Reminders
 - **THEN** open workflow tasks for this tenant appear with due date and a complete action
+
+### Requirement: Appointment Creates Lead
+The system SHALL create or match a Lead on the current tenant when a public appointment is booked (email match). The Appointment SHALL store the Lead link. No other tenant’s Leads SHALL be read or written.
+
+#### Scenario: New prospect
+- **WHEN** a new email books a consult
+- **THEN** a Lead is created on this site with that email and the appointment is linked

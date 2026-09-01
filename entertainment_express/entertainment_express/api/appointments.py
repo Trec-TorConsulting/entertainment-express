@@ -268,6 +268,11 @@ def book(
             lead.ee_lead_type = "quote"
         lead.insert(ignore_permissions=True)
         lead_name = lead.name
+    customer = ""
+    if frappe.session.user and frappe.session.user != "Guest":
+        session_roles = set(frappe.get_roles() or [])
+        if PAYER_ROLE in session_roles:
+            customer = frappe.db.get_value("Customer", {"email_id": frappe.session.user}, "name") or ""
     token = secrets.token_urlsafe(18)
     doc = frappe.get_doc(
         {
@@ -281,6 +286,7 @@ def book(
             "invitee_email": email[:240],
             "invitee_phone": (phone or "")[:30],
             "lead": lead_name,
+            "customer": customer,
             "video_url": meeting.video_url,
             "cancel_token": token,
             "timezone": "America/New_York",
@@ -319,7 +325,7 @@ def cancel(name: str | None = None, token: str | None = None) -> dict:
     return {"ok": True}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def reschedule(name: str, start: str, token: str | None = None) -> dict:
     doc = _load_manageable(name, token)
     meeting = frappe.get_doc("EE Meeting Type", doc.meeting_type)
@@ -394,6 +400,7 @@ def list_mine() -> list[dict]:
                 "who": row.invitee_name,
                 "start": str(row.start or ""),
                 "status": row.status,
+                "meeting_type": row.meeting_type,
             }
         )
     return rows
@@ -429,6 +436,30 @@ def save_meeting_type(values: dict | str | None = None, name: str | None = None)
 
 
 @frappe.whitelist()
+def list_consult_staff() -> list[dict]:
+    _require_staff()
+    rows = []
+    for emp in frappe.get_all(
+        "Employee",
+        filters={"status": "Active"},
+        fields=["name", "employee_name"],
+        limit_page_length=50,
+    ):
+        doc = frappe.get_doc("Employee", emp.name)
+        hours = []
+        for row in doc.get("ee_consult_hours") or []:
+            hours.append(
+                {
+                    "weekday": row.weekday,
+                    "start_time": str(row.start_time or "")[:8],
+                    "end_time": str(row.end_time or "")[:8],
+                }
+            )
+        rows.append({"id": emp.name, "name": emp.employee_name or emp.name, "hours": hours})
+    return rows
+
+
+@frappe.whitelist()
 def save_hours(employee: str, hours: list | str | None = None) -> dict:
     _require_staff()
     if isinstance(hours, str):
@@ -436,6 +467,8 @@ def save_hours(employee: str, hours: list | str | None = None) -> dict:
     emp = frappe.get_doc("Employee", employee)
     emp.set("ee_consult_hours", [])
     for row in hours or []:
+        if not row.get("weekday") or not row.get("start_time") or not row.get("end_time"):
+            continue
         emp.append(
             "ee_consult_hours",
             {"weekday": row.get("weekday"), "start_time": row.get("start_time"), "end_time": row.get("end_time")},

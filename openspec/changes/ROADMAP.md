@@ -121,13 +121,13 @@ import/preview, music library & availability check). Surfaces to crew on run she
 **Specs:** `event-planning-forms`, `event-timeline`, `music-planning`. **Depends on:** phase-1, phase-7
 (portal), phase-13 (streaming integrations), phase-9 (mobile crew view).
 
-## Phase 16 — Appointments & Consultation Scheduling ✅ proposal
+## Phase 16 — Appointments & Consultation Scheduling ✅ archived 2026-09-01
 **Goal:** Calendly-style self-service scheduler for consultations/planning meetings: bookable meeting types,
 availability/conflict prevention against events and time-off, reminders, reschedule/cancel. Native EE
 calendars this phase; Google/Microsoft two-way sync stays phase 13.
 **Spec:** `appointments-scheduling` (plus portal/CRM/notification deltas). **Depends on:** phase-3 workers,
 phase-6 reminders, phase-26 portals.
-**Folder:** [`phase-16-appointments-scheduling/`](phase-16-appointments-scheduling/)
+**Folder:** [`archive/2026-09-01-phase-16-appointments-scheduling/`](archive/2026-09-01-phase-16-appointments-scheduling/)
 
 ## Phase 17 — Venues, Vendors & Insurance/Compliance 📝
 Reusable **venue database** (logistics, access, COI flags), **vendor/partner network** (referrals,

@@ -42,12 +42,14 @@ function Home() {
   React.useEffect(() => {
     call("entertainment_express.api.portal_employee.get_my_day", {})
       .then(setDay)
-      .catch(() => setDay({ tasks: [], assignments: [], schedule: [], today_jobs: [], at_risk: [], at_risk_count: 0 }));
+      .catch(() => setDay({ tasks: [], assignments: [], schedule: [], today_jobs: [], at_risk: [], at_risk_count: 0, appointments: [] }));
   }, []);
 
   const isDispatcher = roles.includes("EE Dispatcher");
   const jobs = day?.today_jobs?.length ? day.today_jobs : day?.schedule || [];
   const atRisk = day?.at_risk || jobs.filter((row: any) => row.at_risk);
+  const consults = day?.appointments || [];
+  const hasMain = isDispatcher ? jobs.length : day?.assignments?.length || day?.tasks?.length;
 
   return (
     <section style={{ display: "grid", gap: "0.75rem" }}>
@@ -101,9 +103,36 @@ function Home() {
           ]}
           rows={day.tasks}
         />
-      ) : (
+      ) : hasMain || consults.length ? null : (
         <EmptyState title="My Day" message="Nothing queued for your roles yet." />
       )}
+
+      {consults.length ? (
+        <div style={{ display: "grid", gap: "0.75rem" }}>
+          <h2 style={{ margin: 0, fontSize: "1.05rem" }}>Consults</h2>
+          {consults.map((row: any) => (
+            <article key={row.name} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
+              <p style={{ margin: 0, fontWeight: 700 }}>
+                {row.title} · {row.who}
+              </p>
+              <p className="ee-muted" style={{ margin: "0.25rem 0 0.5rem" }}>
+                {row.start}
+              </p>
+              <button
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.appointments.complete", { name: row.name, decision: "completed" });
+                  const next = await call("entertainment_express.api.portal_employee.get_my_day", {});
+                  setDay(next);
+                }}
+              >
+                Done
+              </button>
+            </article>
+          ))}
+        </div>
+      ) : null}
 
       {isDispatcher && atRisk.length ? (
         <DataTable

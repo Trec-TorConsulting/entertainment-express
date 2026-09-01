@@ -542,11 +542,31 @@ function ReportsWorkspace() {
 }
 
 function ScheduleWorkspace() {
+  const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const [types, setTypes] = React.useState<any[]>([]);
   const [rows, setRows] = React.useState<any[]>([]);
+  const [staff, setStaff] = React.useState<any[]>([]);
+  const [employee, setEmployee] = React.useState("");
+  const [hours, setHours] = React.useState<{ weekday: string; start_time: string; end_time: string }[]>([]);
   const [name, setName] = React.useState("Free consultation");
   const [duration, setDuration] = React.useState("30");
   const [error, setError] = React.useState("");
+
+  const applyStaff = (row: any) => {
+    setEmployee(row.id);
+    const byDay = Object.fromEntries((row.hours || []).map((h: any) => [h.weekday, h]));
+    setHours(
+      weekdays.map((day) => {
+        const saved = byDay[day];
+        const weekend = day === "Saturday" || day === "Sunday";
+        return {
+          weekday: day,
+          start_time: saved?.start_time || (weekend ? "" : "09:00:00"),
+          end_time: saved?.end_time || (weekend ? "" : "17:00:00"),
+        };
+      })
+    );
+  };
 
   const reload = () => {
     call("entertainment_express.api.appointments.list_types", {})
@@ -555,6 +575,17 @@ function ScheduleWorkspace() {
     call("entertainment_express.api.appointments.list_mine", {})
       .then(setRows)
       .catch(() => setRows([]));
+    call("entertainment_express.api.appointments.list_consult_staff", {})
+      .then((list) => {
+        const next = list || [];
+        setStaff(next);
+        setEmployee((current) => {
+          const row = next.find((s: any) => s.id === current) || next[0];
+          if (row) applyStaff(row);
+          return row?.id || "";
+        });
+      })
+      .catch(() => setStaff([]));
   };
 
   React.useEffect(() => {
@@ -603,6 +634,65 @@ function ScheduleWorkspace() {
       ) : (
         <p className="ee-muted">Add a meeting type to open public booking.</p>
       )}
+      {staff.length ? (
+        <form
+          className="ee-form"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            setError("");
+            try {
+              await call("entertainment_express.api.appointments.save_hours", { employee, hours });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not save hours.");
+            }
+          }}
+        >
+          <FormField label="Who is bookable">
+            <select
+              value={employee}
+              onChange={(e) => {
+                const row = staff.find((s) => s.id === e.target.value);
+                if (row) applyStaff(row);
+              }}
+            >
+              {staff.map((row) => (
+                <option key={row.id} value={row.id}>
+                  {row.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          {hours.map((row, idx) => (
+            <div key={row.weekday} style={{ display: "grid", gridTemplateColumns: "7rem 1fr 1fr", gap: "0.5rem", alignItems: "center" }}>
+              <span>{row.weekday.slice(0, 3)}</span>
+              <input
+                type="time"
+                value={(row.start_time || "").slice(0, 5)}
+                onChange={(e) => {
+                  const next = hours.slice();
+                  next[idx] = { ...row, start_time: e.target.value ? `${e.target.value}:00` : "" };
+                  setHours(next);
+                }}
+              />
+              <input
+                type="time"
+                value={(row.end_time || "").slice(0, 5)}
+                onChange={(e) => {
+                  const next = hours.slice();
+                  next[idx] = { ...row, end_time: e.target.value ? `${e.target.value}:00` : "" };
+                  setHours(next);
+                }}
+              />
+            </div>
+          ))}
+          <button type="submit" className="ee-btn">
+            Save hours
+          </button>
+        </form>
+      ) : (
+        <p className="ee-muted">Add active people first, then set the hours they can be booked.</p>
+      )}
       {rows.length ? (
         <div style={{ display: "grid", gap: "0.75rem" }}>
           {rows.map((row) => (
@@ -613,16 +703,28 @@ function ScheduleWorkspace() {
               <p className="ee-muted" style={{ margin: "0.25rem 0 0.5rem" }}>
                 {row.start}
               </p>
-              <button
-                type="button"
-                className="ee-btn"
-                onClick={async () => {
-                  await call("entertainment_express.api.appointments.complete", { name: row.id, decision: "completed" });
-                  reload();
-                }}
-              >
-                Done
-              </button>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="ee-btn"
+                  onClick={async () => {
+                    await call("entertainment_express.api.appointments.complete", { name: row.id, decision: "completed" });
+                    reload();
+                  }}
+                >
+                  Done
+                </button>
+                <button
+                  type="button"
+                  className="ee-btn ee-btn--ghost"
+                  onClick={async () => {
+                    await call("entertainment_express.api.appointments.cancel", { name: row.id });
+                    reload();
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
             </article>
           ))}
         </div>

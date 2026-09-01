@@ -28,16 +28,17 @@
 
 - [x] 3.1 Tenant `www/schedule` lists active types and slots; form calls `book`.
       **Accept:** unpublished/inactive types hidden; no DocType names in copy.
-- [ ] 3.2 `/owner/schedule`: CRUD meeting types + hours; appointment list with cancel/complete.
+- [x] 3.2 `/owner/schedule`: CRUD meeting types + hours; appointment list with cancel/complete.
       **Accept:** not EmptyState; no `/app`.
-- [ ] 3.3 `/employee` My Day shows assigned consults for `EE Sales`.
+- [x] 3.3 `/employee` My Day shows assigned consults for `EE Sales`.
       **Accept:** other salesperson’s consults omitted.
-- [ ] 3.4 `/client/appointments`: customer lists own, reschedule/cancel; guests 403.
+- [x] 3.4 `/client/appointments`: customer lists own, reschedule/cancel; guests 403.
       **Accept:** pytest.
+
 
 ## 4. Ship
 
-- [ ] 4.1 `tests/test_phase16_appointments.py`: isolation, overlap with event, rate-limit, guest not payer.
+- [x] 4.1 `tests/test_phase16_appointments.py`: isolation, overlap with event, rate-limit, guest not payer.
       **Accept:** pytest on tenant site.
-- [ ] 4.2 Rebuild `public/{owner,employee,client}/`; bump bench image; migrate tenant sites.
+- [x] 4.2 Rebuild `public/{owner,employee,client}/`; bump bench image; migrate tenant sites.
       **Accept:** public book and `/owner/schedule` load for the right roles.
