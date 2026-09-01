@@ -210,5 +210,29 @@
     "subject": "Canceled: {{ meeting_name }}",
     "active": 1,
     "body_html": "<p>Hi {{ invitee_name }},</p><p>Your {{ meeting_name }} on {{ start_label }} was canceled.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "coi_required",
+    "template_key": "coi_required",
+    "subject": "Certificate still needed for {{ event_name }}",
+    "active": 1,
+    "body_html": "<p>{{ event_name }} still needs a certificate of insurance.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "policy_expiring",
+    "template_key": "policy_expiring",
+    "subject": "Coverage expiring: {{ provider }}",
+    "active": 1,
+    "body_html": "<p>{{ provider }} coverage expires {{ expires }}.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "waiver_needed",
+    "template_key": "waiver_needed",
+    "subject": "Please sign a waiver for {{ event_name }}",
+    "active": 1,
+    "body_html": "<p>Open your event portal to sign the waiver for {{ event_name }}.</p>"
   }
 ]

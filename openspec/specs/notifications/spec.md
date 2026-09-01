@@ -89,3 +89,10 @@ The system SHALL send appointment-booked, reminder, rescheduled, and canceled me
 #### Scenario: Twilio down on book
 - **WHEN** Twilio is unconfigured and a consult is booked
 - **THEN** email still queues if configured and the book API does not raise
+
+### Requirement: Compliance Reminders
+The system SHALL send COI-missing, waiver-needed, and policy-expiry messages on existing channels. Missing Twilio SHALL NOT crash the job.
+
+#### Scenario: Twilio down on COI reminder
+- **WHEN** Twilio is unconfigured and a COI reminder runs
+- **THEN** email still queues if configured and the job does not raise

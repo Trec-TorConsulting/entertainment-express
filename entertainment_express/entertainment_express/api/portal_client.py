@@ -112,6 +112,13 @@ def list_contracts() -> list[dict]:
         for row in rows
     ]
     if customer:
+        try:
+            from entertainment_express.api.compliance import list_my_waivers
+
+            docs.extend(list_my_waivers())
+        except Exception:
+            pass
+    if customer:
         inv_fields = ["name", "grand_total"]
         if frappe.get_meta("Sales Invoice").has_field("ee_booking"):
             inv_fields.append("ee_booking")

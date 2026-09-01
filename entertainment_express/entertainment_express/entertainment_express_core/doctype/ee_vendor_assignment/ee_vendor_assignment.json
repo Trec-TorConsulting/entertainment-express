@@ -1,0 +1,29 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "vendor", "role", "agreed_cost", "status"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Job", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "vendor", "fieldtype": "Link", "label": "Partner", "options": "EE Vendor", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "role", "fieldtype": "Data", "label": "Role", "in_list_view": 1},
+  {"fieldname": "agreed_cost", "fieldtype": "Currency", "label": "Agreed cost"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "planned\nconfirmed\ncanceled", "default": "planned", "in_list_view": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Vendor Assignment",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

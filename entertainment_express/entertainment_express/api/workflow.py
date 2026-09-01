@@ -13,6 +13,8 @@ DEFAULT_AUTOMATIONS = {
     "planning_form_reminder": True,
     "proposal_follow_up": True,
     "unsigned_contract": True,
+    "policy_expiry": True,
+    "coi_required": True,
 }
 
 
@@ -135,6 +137,8 @@ def get_automations() -> dict:
             {"key": "planning_form_reminder", "label": "Remind clients to finish planning", "enabled": autos["planning_form_reminder"]},
             {"key": "proposal_follow_up", "label": "Follow up on unsigned proposals", "enabled": autos["proposal_follow_up"]},
             {"key": "unsigned_contract", "label": "Nudge unsigned contracts", "enabled": autos["unsigned_contract"]},
+            {"key": "policy_expiry", "label": "Remind when coverage is about to expire", "enabled": autos["policy_expiry"]},
+            {"key": "coi_required", "label": "Remind when a job still needs a certificate", "enabled": autos["coi_required"]},
         ],
         "templates": list_templates(),
     }

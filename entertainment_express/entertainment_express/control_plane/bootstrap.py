@@ -467,6 +467,18 @@ def _ensure_notification_templates() -> None:
             "subject": "Canceled: {{ meeting_name }}",
             "body_html": "<p>Hi {{ invitee_name }},</p><p>Your {{ meeting_name }} on {{ start_label }} was canceled.</p>",
         },
+        "coi_required": {
+            "subject": "Certificate still needed for {{ event_name }}",
+            "body_html": "<p>{{ event_name }} still needs a certificate of insurance.</p>",
+        },
+        "policy_expiring": {
+            "subject": "Coverage expiring: {{ provider }}",
+            "body_html": "<p>{{ provider }} coverage expires {{ expires }}.</p>",
+        },
+        "waiver_needed": {
+            "subject": "Please sign a waiver for {{ event_name }}",
+            "body_html": "<p>Open your event portal to sign the waiver for {{ event_name }}.</p>",
+        },
     }
 
     for template_key, payload in defaults.items():

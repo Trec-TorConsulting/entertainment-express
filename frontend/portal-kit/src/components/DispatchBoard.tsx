@@ -266,6 +266,11 @@ type Shift = {
   when: string;
   role: string;
   status: string;
+  load_in?: string;
+  parking?: string;
+  power?: string;
+  curfew?: string;
+  vendors?: { name: string; role: string; phone: string }[];
   can_accept?: boolean;
   can_check_in?: boolean;
   can_check_out?: boolean;
@@ -318,6 +323,18 @@ export function FieldBoard() {
                 {shift.role ? ` · ${shift.role}` : ""}
               </p>
               <p style={{ margin: 0 }}>{shift.status}</p>
+              {shift.load_in || shift.parking || shift.power || shift.curfew ? (
+                <p className="ee-muted" style={{ margin: "0.35rem 0 0" }}>
+                  {[shift.load_in && `Load-in: ${shift.load_in}`, shift.parking && `Parking: ${shift.parking}`, shift.power && `Power: ${shift.power}`, shift.curfew && `Curfew: ${shift.curfew}`]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              ) : null}
+              {shift.vendors?.length ? (
+                <p className="ee-muted" style={{ margin: "0.25rem 0 0" }}>
+                  Other vendors: {shift.vendors.map((v) => `${v.name}${v.phone ? ` (${v.phone})` : ""}`).join(", ")}
+                </p>
+              ) : null}
             </div>
             <div className="ee-form__actions">
               {shift.can_accept ? (

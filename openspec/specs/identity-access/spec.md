@@ -95,3 +95,10 @@ The system SHALL allow guest POST to book an appointment only on the current ten
 #### Scenario: Consult book does not mint a payer
 - **WHEN** a guest books a consult
 - **THEN** a Lead is created and the user is not granted `EE Customer` or `System Manager`
+
+### Requirement: Guest Is Not The Risk Payer
+The system SHALL deny `EE Event Guest` (without `EE Customer`) on waiver sign, damage hold, and vendor commission APIs.
+
+#### Scenario: Guest denied waiver
+- **WHEN** a guest signs a waiver
+- **THEN** the request is denied (403) and the waiver is unchanged

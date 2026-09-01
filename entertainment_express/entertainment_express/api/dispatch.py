@@ -226,6 +226,14 @@ def generate_run_sheet(booking_name: str) -> dict:
     client = frappe.get_doc("Customer", booking.customer)
     rs.venue_address = booking.venue_address or ""
     rs.venue_geo = booking.venue_geo or ""
+    notes = []
+    for label, field in (("Load-in", "load_in_notes"), ("Parking", "parking_notes"), ("Power", "power_notes"), ("Curfew", "noise_curfew")):
+        value = getattr(booking, field, None) or ""
+        if value:
+            notes.append(f"{label}: {value}")
+    if notes:
+        extra = "\n".join(notes)
+        rs.access_notes = f"{rs.access_notes or ''}\n{extra}".strip() if rs.access_notes else extra
     rs.client_name = booking.customer
     rs.client_phone = frappe.db.get_value("Contact", {"link_name": booking.customer}, "mobile_no") or ""
     rs.generated_at = now_datetime()

@@ -12,3 +12,4 @@ entertainment_express.patches.v0_0_1.hide_unused_erpnext_workspaces
 entertainment_express.patches.v0_0_2.enforce_portal_mode
 entertainment_express.patches.v0_0_3.phase26_custom_fields
 entertainment_express.patches.v0_0_3.phase16_consult_hours
+entertainment_express.patches.v0_0_3.phase17_venue_compliance

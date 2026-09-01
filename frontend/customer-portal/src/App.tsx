@@ -186,9 +186,14 @@ function Documents() {
   const openContract = async (row: any) => {
     if (row.kind === "receipt") return;
     setError("");
+    if (row.kind === "waiver") {
+      setOpen({ kind: "waiver", id: row.id, title: row.title, rendered_html: row.body || "", status: row.status, signer_name: row.signer_name || "" });
+      setSigner(row.signer_name || "");
+      return;
+    }
     try {
       const doc = await call("entertainment_express.api.portal_client.get_contract", { name: row.id });
-      setOpen(doc);
+      setOpen({ ...doc, kind: "contract" });
       setSigner(doc.signer_name || "");
     } catch (err: any) {
       setError(err.message || "Could not open this contract.");
@@ -200,11 +205,15 @@ function Documents() {
     setBusy(true);
     setError("");
     try {
-      await call("entertainment_express.api.portal_client.sign_contract", {
-        name: open.contract_name,
-        signer_name: signer,
-        signature_typed: signer,
-      });
+      if (open.kind === "waiver") {
+        await call("entertainment_express.api.compliance.sign_waiver", { name: open.id, signer_name: signer });
+      } else {
+        await call("entertainment_express.api.portal_client.sign_contract", {
+          name: open.contract_name,
+          signer_name: signer,
+          signature_typed: signer,
+        });
+      }
       setOpen(null);
       reload();
     } catch (err: any) {
@@ -220,7 +229,7 @@ function Documents() {
         <button type="button" className="ee-back" onClick={() => setOpen(null)}>
           ← Documents
         </button>
-        <h1 style={{ margin: 0 }}>Contract</h1>
+        <h1 style={{ margin: 0 }}>{open.kind === "waiver" ? "Waiver" : "Contract"}</h1>
         <div dangerouslySetInnerHTML={{ __html: open.rendered_html || "" }} />
         {open.status === "signed" ? (
           <p style={{ color: "var(--ee-success)", margin: 0 }}>This is already signed.</p>

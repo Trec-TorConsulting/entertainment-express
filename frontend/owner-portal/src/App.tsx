@@ -36,6 +36,8 @@ const OWNER_NAV = [
       { to: "/catalog", label: "Packages" },
       { to: "/gear", label: "Gear" },
       { to: "/people", label: "People" },
+      { to: "/places", label: "Places" },
+      { to: "/partners", label: "Partners" },
     ],
   },
   {
@@ -44,6 +46,7 @@ const OWNER_NAV = [
       { to: "/money", label: "Money" },
       { to: "/reports", label: "Reports" },
       { to: "/automations", label: "Reminders" },
+      { to: "/coverage", label: "Coverage" },
       { to: "/brand", label: "Brand" },
     ],
   },
@@ -347,6 +350,187 @@ function CrudEditor({ kind, basePath }: { kind: string; basePath: string }) {
   );
 }
 
+function JobRiskPanel({ jobId }: { jobId: string }) {
+  const [risk, setRisk] = React.useState<any>(null);
+  const [venues, setVenues] = React.useState<any[]>([]);
+  const [vendors, setVendors] = React.useState<any[]>([]);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [venue, setVenue] = React.useState("");
+  const [partner, setPartner] = React.useState("");
+  const [role, setRole] = React.useState("");
+  const [cost, setCost] = React.useState("");
+  const [hold, setHold] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.compliance.job_risk", { booking: jobId })
+      .then((res) => {
+        setRisk(res);
+        setVenue(res.venue_id || "");
+      })
+      .catch(() => setRisk(null));
+    call("entertainment_express.api.venues.list_venues", {})
+      .then((res) => setVenues(res || []))
+      .catch(() => setVenues([]));
+    call("entertainment_express.api.vendors.list_vendors", {})
+      .then((res) => setVendors(res || []))
+      .catch(() => setVendors([]));
+    call("entertainment_express.api.compliance.list_waiver_templates", {})
+      .then((res) => setTemplates(res || []))
+      .catch(() => setTemplates([]));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  if (!risk) return null;
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Place, partners, and coverage</h2>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <FormField label="Place">
+        <select
+          value={venue}
+          onChange={async (e) => {
+            const next = e.target.value;
+            setVenue(next);
+            if (!next) return;
+            try {
+              await call("entertainment_express.api.venues.attach_to_booking", { booking: jobId, venue: next });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not attach that place.");
+            }
+          }}
+        >
+          <option value="">Pick a saved place</option>
+          {venues.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.name}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      {risk.coi_needed ? <p style={{ color: "var(--ee-danger)", margin: 0 }}>This place still needs a certificate of insurance.</p> : null}
+      {risk.coi?.status === "delivered" ? <p style={{ color: "var(--ee-success)", margin: 0 }}>Certificate is on file.</p> : null}
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          setError("");
+          try {
+            await call("entertainment_express.api.compliance.save_coi", { booking: jobId, status: "delivered" });
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not mark the certificate delivered.");
+          }
+        }}
+      >
+        Mark certificate delivered
+      </button>
+      {templates.length ? (
+        <FormField label="Send a waiver">
+          <select
+            defaultValue=""
+            onChange={async (e) => {
+              const tmpl = e.target.value;
+              if (!tmpl) return;
+              try {
+                await call("entertainment_express.api.compliance.issue_waiver", { booking: jobId, template: tmpl });
+                e.target.value = "";
+                reload();
+              } catch (err: any) {
+                setError(err.message || "Could not send that waiver.");
+              }
+            }}
+          >
+            <option value="">Pick a waiver</option>
+            {templates.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.title}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      ) : null}
+      {(risk.waivers || []).map((row: any) => (
+        <p key={row.id} className="ee-muted" style={{ margin: 0 }}>
+          Waiver {row.status}
+          {row.signed_at ? ` · ${row.signed_at}` : ""}
+        </p>
+      ))}
+      <p className="ee-muted" style={{ margin: 0 }}>
+        Damage hold: {risk.hold_status}
+      </p>
+      <FormField label="Hold amount">
+        <input value={hold} onChange={(e) => setHold(e.target.value)} inputMode="decimal" />
+      </FormField>
+      <div className="ee-form__actions">
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.compliance.place_hold", { booking: jobId, amount: hold });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not place a hold.");
+            }
+          }}
+        >
+          Place hold
+        </button>
+        <button type="button" className="ee-btn ee-btn--ghost" onClick={async () => call("entertainment_express.api.compliance.release_hold", { booking: jobId }).then(reload)}>
+          Release
+        </button>
+      </div>
+      <FormField label="Add a partner on this job">
+        <select value={partner} onChange={(e) => setPartner(e.target.value)}>
+          <option value="">Pick a partner</option>
+          {vendors.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.name}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      <FormField label="Their role">
+        <input value={role} onChange={(e) => setRole(e.target.value)} />
+      </FormField>
+      <FormField label="Agreed cost">
+        <input value={cost} onChange={(e) => setCost(e.target.value)} inputMode="decimal" />
+      </FormField>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!partner}
+        onClick={async () => {
+          setError("");
+          try {
+            await call("entertainment_express.api.vendors.save_assignment", { booking: jobId, vendor: partner, role, cost });
+            setPartner("");
+            setRole("");
+            setCost("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not add that partner.");
+          }
+        }}
+      >
+        Add partner
+      </button>
+      {(risk.vendors || []).map((row: any) => (
+        <p key={row.id} className="ee-muted" style={{ margin: 0 }}>
+          {row.vendor} · {row.role} · {row.cost}
+        </p>
+      ))}
+    </section>
+  );
+}
+
 function RecordExtras({ kind, id }: { kind: string; id: string }) {
   const go = useNavigate();
   const [cloneDate, setCloneDate] = React.useState("");
@@ -408,6 +592,7 @@ function RecordExtras({ kind, id }: { kind: string; id: string }) {
           </>
         ) : null}
       </section>
+      {kind === "job" ? <JobRiskPanel jobId={id} /> : null}
       {kind === "job" ? <JobCrewPanel jobId={id} /> : null}
     </>
   );
@@ -537,6 +722,257 @@ function ReportsWorkspace() {
           Download for accountant
         </button>
       </div>
+    </section>
+  );
+}
+
+function PlacesWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [name, setName] = React.useState("");
+  const [address, setAddress] = React.useState("");
+  const [loadIn, setLoadIn] = React.useState("");
+  const [coi, setCoi] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.venues.list_venues", {})
+      .then(setRows)
+      .catch(() => setRows([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Places</h1>
+        <p className="ee-muted">Save halls and parks once. Jobs pick them up with load-in notes.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.venues.save_venue", { values: { name, address, load_in: loadIn, coi_required: coi ? 1 : 0 } });
+            setName("");
+            setAddress("");
+            setLoadIn("");
+            setCoi(false);
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that place.");
+          }
+        }}
+      >
+        <FormField label="Name">
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+        </FormField>
+        <FormField label="Address">
+          <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} />
+        </FormField>
+        <FormField label="Load-in">
+          <textarea value={loadIn} onChange={(e) => setLoadIn(e.target.value)} rows={2} />
+        </FormField>
+        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <input type="checkbox" checked={coi} onChange={(e) => setCoi(e.target.checked)} />
+          Certificate of insurance required
+        </label>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save place
+        </button>
+      </form>
+      {rows.length ? (
+        <ul>
+          {rows.map((row) => (
+            <li key={row.id}>
+              {row.name}
+              {row.coi_required ? " · certificate required" : ""}
+              {row.address ? ` · ${row.address}` : ""}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add a place so jobs stop retyping the address.</p>
+      )}
+    </section>
+  );
+}
+
+function PartnersWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [referrals, setReferrals] = React.useState<any[]>([]);
+  const [name, setName] = React.useState("");
+  const [category, setCategory] = React.useState("Photographer");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.vendors.list_vendors", {})
+      .then(setRows)
+      .catch(() => setRows([]));
+    call("entertainment_express.api.vendors.list_referrals", {})
+      .then(setReferrals)
+      .catch(() => setReferrals([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Partners</h1>
+        <p className="ee-muted">Photographers, planners, and overflow help — not your own crew.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.vendors.save_vendor", { values: { name, category, preferred: 1 } });
+            setName("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that partner.");
+          }
+        }}
+      >
+        <FormField label="Name">
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+        </FormField>
+        <FormField label="Category">
+          <input value={category} onChange={(e) => setCategory(e.target.value)} />
+        </FormField>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save partner
+        </button>
+      </form>
+      {rows.length ? (
+        <ul>
+          {rows.map((row) => (
+            <li key={row.id}>
+              {row.name} · {row.category}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add partners you send or receive work with.</p>
+      )}
+      {referrals.length ? (
+        <div>
+          <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.05rem" }}>Referrals</h2>
+          <ul>
+            {referrals.map((row) => (
+              <li key={row.id}>
+                {row.direction} · {row.vendor} · {row.commission}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function CoverageWorkspace() {
+  const [policies, setPolicies] = React.useState<any[]>([]);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [provider, setProvider] = React.useState("");
+  const [expires, setExpires] = React.useState("");
+  const [title, setTitle] = React.useState("Liability waiver");
+  const [body, setBody] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.compliance.list_policies", {})
+      .then(setPolicies)
+      .catch(() => setPolicies([]));
+    call("entertainment_express.api.compliance.list_waiver_templates", {})
+      .then(setTemplates)
+      .catch(() => setTemplates([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Coverage</h1>
+        <p className="ee-muted">Your policies, certificates on jobs, and waivers clients sign.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.compliance.save_policy", { values: { provider, expires } });
+            setProvider("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that policy.");
+          }
+        }}
+      >
+        <FormField label="Provider">
+          <input value={provider} onChange={(e) => setProvider(e.target.value)} required />
+        </FormField>
+        <FormField label="Expires">
+          <input type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save policy
+        </button>
+      </form>
+      {policies.length ? (
+        <ul>
+          {policies.map((row) => (
+            <li key={row.id}>
+              {row.provider}
+              {row.expires ? ` · expires ${row.expires}` : ""}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add the coverage you carry so expiry reminders have somewhere to look.</p>
+      )}
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.compliance.save_waiver_template", { values: { title, body } });
+            setBody("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that waiver.");
+          }
+        }}
+      >
+        <FormField label="Waiver title">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} />
+        </FormField>
+        <FormField label="Waiver text">
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
+        </FormField>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save waiver
+        </button>
+      </form>
+      {templates.length ? (
+        <ul>
+          {templates.map((row) => (
+            <li key={row.id}>{row.title}</li>
+          ))}
+        </ul>
+      ) : null}
     </section>
   );
 }
@@ -915,6 +1351,9 @@ export function OwnerApp() {
           <Route path="/pipeline/:id/proposal" element={<ProposalWorkspace />} />
           <Route path="/pipeline/:id" element={<CrudEditor kind="inquiry" basePath="/pipeline" />} />
           <Route path="/schedule" element={<ScheduleWorkspace />} />
+          <Route path="/places" element={<PlacesWorkspace />} />
+          <Route path="/partners" element={<PartnersWorkspace />} />
+          <Route path="/coverage" element={<CoverageWorkspace />} />
           <Route path="/dispatch" element={<DispatchWorkspace />} />
           <Route path="/catalog" element={<CatalogWorkspace />} />
           <Route path="/catalog/new" element={<CrudEditor kind="package" basePath="/catalog" />} />

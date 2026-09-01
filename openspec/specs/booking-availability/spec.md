@@ -117,3 +117,10 @@ The system SHALL treat overlapping confirmed/in-progress Event Booking crew assi
 #### Scenario: Saturday gig blocks Saturday consult
 - **WHEN** staff is assigned to a confirmed booking 2pm–6pm
 - **THEN** consult slots overlapping that window are not offered
+
+### Requirement: Booking Stores Venue Snapshot
+The system SHALL link a job to a Venue and keep address/geo snapshots on the booking so availability and history do not depend on later venue edits.
+
+#### Scenario: Venue change does not move past jobs
+- **WHEN** a venue address is updated after a confirmed job
+- **THEN** that job’s stored address remains the snapshot from link time

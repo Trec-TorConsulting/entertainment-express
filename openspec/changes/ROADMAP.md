@@ -129,12 +129,13 @@ calendars this phase; Google/Microsoft two-way sync stays phase 13.
 phase-6 reminders, phase-26 portals.
 **Folder:** [`archive/2026-09-01-phase-16-appointments-scheduling/`](archive/2026-09-01-phase-16-appointments-scheduling/)
 
-## Phase 17 — Venues, Vendors & Insurance/Compliance 📝
+## Phase 17 — Venues, Vendors & Insurance/Compliance ✅ archived 2026-09-01
 Reusable **venue database** (logistics, access, COI flags), **vendor/partner network** (referrals,
 subcontracting/overflow), and **insurance & compliance** (COI tracking, liability/damage waivers, security/
 damage deposits & pre-auth, per-event insurance, policy expiry).
 **Specs:** `venue-management`, `vendor-network`, `insurance-compliance`. **Depends on:** phase-1, phase-4
 (equipment/sub-rentals), phase-5 (deposits/pre-auth).
+**Folder:** [`archive/2026-09-01-phase-17-venues-vendors-insurance/`](archive/2026-09-01-phase-17-venues-vendors-insurance/)
 
 ## Phase 18 — Data Migration & Onboarding 📝
 Guided CSV/Excel import with mapping/validation, competitor-export mapping presets, idempotent resumable

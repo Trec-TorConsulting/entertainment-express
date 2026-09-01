@@ -413,10 +413,18 @@ def _save_job(name: str | None, values: dict) -> str:
         doc = frappe.get_doc("Event Booking", name)
         doc.update(payload)
         _maybe_notes(doc, values.get("notes"))
+        if values.get("venue"):
+            from entertainment_express.api.venues import apply_venue_to_booking
+
+            apply_venue_to_booking(doc, values.get("venue"))
         doc.save(ignore_permissions=True)
         return doc.name
     doc = frappe.get_doc({"doctype": "Event Booking", **payload})
     _maybe_notes(doc, values.get("notes"))
+    if values.get("venue"):
+        from entertainment_express.api.venues import apply_venue_to_booking
+
+        apply_venue_to_booking(doc, values.get("venue"))
     doc.insert(ignore_permissions=True)
     return doc.name
 
@@ -712,6 +720,13 @@ def clone_job(
         "notes": src.notes if isinstance(src.notes, str) else "",
         "deposit_percent": src.deposit_percent or 25,
     }
+    if src.meta.has_field("venue"):
+        payload["venue"] = src.venue
+    if src.meta.has_field("load_in_notes"):
+        payload["load_in_notes"] = src.load_in_notes
+        payload["parking_notes"] = src.parking_notes
+        payload["power_notes"] = src.power_notes
+        payload["noise_curfew"] = src.noise_curfew
     if src.meta.has_field("event_type"):
         payload["event_type"] = src.event_type
     if src.meta.has_field("is_template"):

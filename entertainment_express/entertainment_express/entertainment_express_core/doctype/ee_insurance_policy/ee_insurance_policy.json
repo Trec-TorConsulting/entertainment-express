@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["provider", "policy_number", "coverage", "effective_on", "expires_on", "file", "active"],
+ "fields": [
+  {"fieldname": "provider", "fieldtype": "Data", "label": "Provider", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "policy_number", "fieldtype": "Data", "label": "Policy number", "in_list_view": 1},
+  {"fieldname": "coverage", "fieldtype": "Data", "label": "Coverage"},
+  {"fieldname": "effective_on", "fieldtype": "Date", "label": "Starts"},
+  {"fieldname": "expires_on", "fieldtype": "Date", "label": "Expires", "in_list_view": 1},
+  {"fieldname": "file", "fieldtype": "Attach", "label": "File"},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Insurance Policy",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "expires_on",
+ "sort_order": "ASC",
+ "track_changes": 1
+}
