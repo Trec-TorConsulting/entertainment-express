@@ -6,9 +6,10 @@ type Props<T> = {
   id?: string;
   columns: Array<Column<T>>;
   rows: T[];
+  onRowClick?: (row: T) => void;
 };
 
-export function DataTable<T extends Record<string, any>>({ id = "default", columns, rows }: Props<T>) {
+export function DataTable<T extends Record<string, any>>({ id = "default", columns, rows, onRowClick }: Props<T>) {
   const [selected, setSelected] = React.useState<Record<string, boolean>>({});
   const [search, setSearch] = React.useState("");
   const [savedViews, setSavedViews] = React.useState<string[]>([]);
@@ -80,8 +81,12 @@ export function DataTable<T extends Record<string, any>>({ id = "default", colum
           {filteredRows.map((row, idx) => {
             const rowKey = String((row as any).name || idx);
             return (
-              <tr key={rowKey}>
-                <td style={{ borderBottom: "1px solid #eef1f4", padding: "0.65rem" }}>
+              <tr
+                key={rowKey}
+                onClick={() => onRowClick?.(row)}
+                style={onRowClick ? { cursor: "pointer" } : undefined}
+              >
+                <td style={{ borderBottom: "1px solid #eef1f4", padding: "0.65rem" }} onClick={(event) => event.stopPropagation()}>
                   <input type="checkbox" checked={!!selected[rowKey]} onChange={() => toggleRow(rowKey)} />
                 </td>
                 {columns.map((col) => (

@@ -59,5 +59,13 @@ def assert_booking_access(booking_name: str) -> None:
         return
     customer = customer_name_for_user()
     booking_customer = frappe.db.get_value("Event Booking", booking_name, "customer")
-    if not customer or customer != booking_customer:
-        frappe.throw("You cannot access this booking.", frappe.PermissionError)
+    if customer and customer == booking_customer:
+        return
+    try:
+        from entertainment_express.api.portal_collaboration import is_booking_member
+
+        if is_booking_member(booking_name, frappe.session.user):
+            return
+    except Exception:
+        pass
+    frappe.throw("You cannot access this booking.", frappe.PermissionError)

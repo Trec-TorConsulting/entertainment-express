@@ -1,0 +1,128 @@
+"""Paying-customer portal APIs. Guests never reach money or contracts."""
+
+from __future__ import annotations
+
+import frappe
+from frappe.utils import flt, fmt_money
+
+from entertainment_express.api.portal_owner import OWNER_ROLES
+
+PAYER_ROLE = "EE Customer"
+GUEST_ROLE = "EE Event Guest"
+
+
+def _require_payer() -> None:
+    roles = set(frappe.get_roles() or [])
+    if GUEST_ROLE in roles and PAYER_ROLE not in roles:
+        frappe.throw("Only the host can do this.", frappe.PermissionError)
+    if PAYER_ROLE not in roles and not roles.intersection(OWNER_ROLES):
+        frappe.throw("Client portal access denied.", frappe.PermissionError)
+
+
+def _customer_name() -> str | None:
+    user = frappe.session.user
+    return frappe.db.get_value("Customer", {"email_id": user}, "name")
+
+
+def _money(amount) -> str:
+    return fmt_money(flt(amount), currency=frappe.db.get_default("currency") or "USD")
+
+
+@frappe.whitelist()
+def list_invoices() -> list[dict]:
+    _require_payer()
+    customer = _customer_name()
+    filters: dict = {"docstatus": ["<", 2]}
+    if customer:
+        filters["customer"] = customer
+    else:
+        return []
+    fields = ["name", "customer_name", "outstanding_amount", "grand_total", "status"]
+    if frappe.get_meta("Sales Invoice").has_field("ee_booking"):
+        fields.append("ee_booking")
+    rows = []
+    for row in frappe.get_all(
+        "Sales Invoice",
+        filters=filters,
+        fields=fields,
+        order_by="modified desc",
+        limit_page_length=100,
+    ):
+        event_name = ""
+        booking = row.get("ee_booking") if hasattr(row, "get") else None
+        if booking:
+            event_name = frappe.db.get_value("Event Booking", booking, "event_name") or ""
+        title = event_name or row.customer_name or "Invoice"
+        rows.append(
+            {
+                "id": row.name,
+                "title": title,
+                "customer_name": row.customer_name or "",
+                "event": event_name,
+                "total": _money(row.grand_total),
+                "outstanding": _money(row.outstanding_amount),
+                "status": row.status or "",
+                "can_pay": flt(row.outstanding_amount) > 0,
+            }
+        )
+    return rows
+
+
+@frappe.whitelist()
+def start_checkout(invoice_name: str, tip_amount: float = 0) -> dict:
+    _require_payer()
+    from entertainment_express.api.payments_stripe import create_checkout
+
+    return create_checkout(invoice_name, tip_amount)
+
+
+@frappe.whitelist()
+def list_contracts() -> list[dict]:
+    _require_payer()
+    user = frappe.session.user
+    customer = _customer_name()
+    filters = {"signer_email": user}
+    rows = frappe.get_all(
+        "EE Contract",
+        filters=filters,
+        fields=["name", "status", "signer_name", "booking", "quotation", "expires_at"],
+        order_by="modified desc",
+        limit_page_length=50,
+    )
+    if not rows and customer:
+        bookings = frappe.get_all("Event Booking", filters={"customer": customer}, pluck="name")
+        if bookings:
+            rows = frappe.get_all(
+                "EE Contract",
+                filters={"booking": ["in", bookings]},
+                fields=["name", "status", "signer_name", "booking", "quotation", "expires_at"],
+                order_by="modified desc",
+                limit_page_length=50,
+            )
+    return [
+        {
+            "id": row.name,
+            "title": row.name,
+            "status": row.status,
+            "signer_name": row.signer_name or "",
+            "event": row.booking or "",
+            "can_sign": row.status in ("sent", "viewed"),
+        }
+        for row in rows
+    ]
+
+
+@frappe.whitelist()
+def get_contract(name: str) -> dict:
+    _require_payer()
+    from entertainment_express.api.contract import view_my_contract
+
+    return view_my_contract(name)
+
+
+@frappe.whitelist()
+def sign_contract(name: str, signer_name: str, signature_typed: str | None = None) -> dict:
+    _require_payer()
+    from entertainment_express.api.contract import sign_my_contract
+
+    return sign_my_contract(name, signer_name=signer_name, signature_typed=signature_typed)

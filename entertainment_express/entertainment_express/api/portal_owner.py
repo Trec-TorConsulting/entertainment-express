@@ -3,6 +3,85 @@ from frappe.utils import flt, fmt_money
 
 OWNER_ROLES = {"EE Tenant Admin"}
 DISALLOWED_ESCALATION_ROLES = {"System Manager", "SaaS Operator"}
+STAFF_ROLE_LABELS = {
+    "EE Sales": "Sales",
+    "EE Dispatcher": "Dispatch",
+    "EE Crew": "Field crew",
+    "EE Entertainer": "Talent",
+    "EE Accounting": "Money",
+    "EE Office": "Office",
+    "EE Marketing": "Marketing",
+}
+FIELD_ACCESS = {"EE Dispatcher", "EE Crew", "EE Entertainer"}
+
+
+def _as_role_list(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = value.strip()
+        if text.startswith("["):
+            parsed = frappe.parse_json(text) if hasattr(frappe, "parse_json") else None
+            return list(parsed or [])
+        return [part.strip() for part in text.split(",") if part.strip()]
+    return list(value)
+
+
+def ensure_employee_for_user(user_name: str, full_name: str, roles: list[str]) -> None:
+    """Create an Active Employee so invited field staff show up in dispatch."""
+    if user_name in ("Administrator", "Guest"):
+        return
+    if not set(roles or []).intersection(FIELD_ACCESS):
+        return
+    if frappe.db.exists("Employee", {"user_id": user_name}):
+        return
+    company = frappe.db.get_default("company") or frappe.db.get_single_value("Global Defaults", "default_company")
+    if not company:
+        return
+    parts = (full_name or user_name.split("@")[0]).strip().split()
+    first = parts[0] if parts else user_name
+    last = " ".join(parts[1:]) if len(parts) > 1 else first
+    labels = []
+    if "EE Entertainer" in (roles or []):
+        labels.append("Talent")
+    if set(roles or []).intersection({"EE Crew", "EE Dispatcher"}):
+        labels.append("Field")
+    for label in labels:
+        if not frappe.db.exists("EE Crew Role", label):
+            frappe.get_doc({"doctype": "EE Crew Role", "role_name": label, "active": 1}).insert(ignore_permissions=True)
+    payload = {
+        "doctype": "Employee",
+        "first_name": first,
+        "last_name": last,
+        "employee_name": full_name or first,
+        "status": "Active",
+        "date_of_joining": frappe.utils.nowdate() if hasattr(frappe.utils, "nowdate") else frappe.utils.today(),
+        "company": company,
+        "user_id": user_name,
+        "ee_crew_roles": ",".join(labels),
+        "ee_employment_type": "1099",
+        "ee_pay_basis": "per_event",
+        "gender": "Other",
+    }
+    if hasattr(frappe.db, "table_exists") and frappe.db.table_exists("Gender"):
+        payload["gender"] = frappe.db.get_value("Gender", {}, "name") or payload["gender"]
+    frappe.get_doc(payload).insert(ignore_permissions=True)
+
+
+def backfill_field_employees() -> None:
+    users = frappe.get_all(
+        "User",
+        filters={"enabled": 1, "user_type": "System User", "name": ["not in", ["Administrator", "Guest"]]},
+        fields=["name", "full_name"],
+        limit_page_length=200,
+    )
+    for user in users:
+        roles = [role for role in (frappe.get_roles(user["name"]) or []) if role in FIELD_ACCESS]
+        if roles:
+            try:
+                ensure_employee_for_user(user["name"], user.get("full_name") or user["name"], roles)
+            except Exception:
+                pass
 
 
 def _require_owner() -> None:
@@ -171,21 +250,30 @@ def list_staff() -> list[dict]:
 
     users = frappe.get_all(
         "User",
-        filters={"enabled": 1, "user_type": "System User"},
+        filters={"enabled": 1, "user_type": "System User", "name": ["not in", ["Administrator", "Guest"]]},
         fields=["name", "email", "full_name"],
         limit_page_length=50,
     )
 
+    staff = []
     for user in users:
-        user["roles"] = frappe.get_roles(user["name"])
+        roles = [role for role in frappe.get_roles(user["name"]) if role in STAFF_ROLE_LABELS or role in OWNER_ROLES]
+        if not roles:
+            continue
+        user["roles"] = [role for role in roles if role in STAFF_ROLE_LABELS]
+        user["access"] = ", ".join(
+            STAFF_ROLE_LABELS.get(role, "Owner" if role in OWNER_ROLES else role) for role in roles
+        )
+        staff.append(user)
 
-    return users
+    return staff
 
 
 @frappe.whitelist()
 def invite_staff(email: str, full_name: str, roles: list[str]) -> dict:
     _require_owner()
 
+    roles = _as_role_list(roles)
     disallowed = set(roles or []).intersection(DISALLOWED_ESCALATION_ROLES)
     if disallowed:
         frappe.throw("Cannot assign restricted roles.", frappe.PermissionError)
@@ -204,6 +292,7 @@ def invite_staff(email: str, full_name: str, roles: list[str]) -> dict:
     for role in roles or []:
         user.append("roles", {"role": role})
     user.save(ignore_permissions=True)
+    ensure_employee_for_user(user.name, full_name, roles)
 
     _audit("invite_staff", {"user": user.name, "roles": roles or []})
     return {"user": user.name}
@@ -213,6 +302,7 @@ def invite_staff(email: str, full_name: str, roles: list[str]) -> dict:
 def set_staff_roles(user: str, roles: list[str]) -> dict:
     _require_owner()
 
+    roles = _as_role_list(roles)
     disallowed = set(roles or []).intersection(DISALLOWED_ESCALATION_ROLES)
     if disallowed:
         frappe.throw("Cannot assign restricted roles.", frappe.PermissionError)
@@ -222,6 +312,7 @@ def set_staff_roles(user: str, roles: list[str]) -> dict:
     for role in roles or []:
         doc.append("roles", {"role": role})
     doc.save(ignore_permissions=True)
+    ensure_employee_for_user(user, doc.full_name or user, roles)
 
     _audit("set_staff_roles", {"user": user, "roles": roles or []})
     return {"ok": True}
@@ -235,4 +326,33 @@ def deactivate_staff(user: str) -> dict:
     doc.enabled = 0
     doc.save(ignore_permissions=True)
     _audit("deactivate_staff", {"user": user})
+    return {"ok": True}
+
+
+@frappe.whitelist()
+def get_brand() -> dict:
+    _require_owner()
+    try:
+        settings = frappe.get_cached_doc("EE Portal Settings", "EE Portal Settings")
+        return {
+            "brand_name": getattr(settings, "brand_name", None) or "",
+            "brand_color": getattr(settings, "brand_color", None) or "#0f766e",
+            "brand_logo": getattr(settings, "brand_logo", None) or "",
+        }
+    except Exception:
+        return {"brand_name": "", "brand_color": "#0f766e", "brand_logo": ""}
+
+
+@frappe.whitelist()
+def save_brand(brand_name: str | None = None, brand_color: str | None = None) -> dict:
+    _require_owner()
+    if not frappe.db.exists("EE Portal Settings", "EE Portal Settings"):
+        frappe.get_doc({"doctype": "EE Portal Settings"}).insert(ignore_permissions=True)
+    settings = frappe.get_single("EE Portal Settings")
+    if brand_name is not None:
+        settings.brand_name = brand_name
+    if brand_color is not None:
+        settings.brand_color = brand_color
+    settings.save(ignore_permissions=True)
+    _audit("save_brand", {"brand_name": brand_name, "brand_color": brand_color})
     return {"ok": True}

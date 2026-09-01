@@ -13,6 +13,7 @@ entitlement checks tied to the tenant's plan.
 - **EE Marketing** — campaigns, reviews, referrals.
 - **EE Crew** — mobile app only: assigned events, run sheets, check-in/out, media upload.
 - **EE Customer** — customer portal only (end clients of the tenant).
+- **EE Event Guest** — invited to a single booking for planning/chat; never a payer.
 - **SaaS Operator** — control-plane only (not present on tenant sites).
 
 ## Requirements
@@ -69,3 +70,14 @@ The system SHALL log authentication events and role/permission changes with acto
 #### Scenario: Role change logged
 - **WHEN** an admin grants or revokes a role
 - **THEN** an audit entry records who changed what, when, and the before/after roles
+
+### Requirement: Event Guest Identity
+The system SHALL seed an `EE Event Guest` role on tenant sites. Event invites SHALL assign only that role (plus Website User). Owners and staff SHALL NOT grant `System Manager` or `SaaS Operator`. Guests SHALL be authorized only for APIs in `event-collaboration` and read of that booking’s published planning/media.
+
+#### Scenario: Invite does not create a payer
+- **WHEN** a customer invites a guest
+- **THEN** the new or linked user has `EE Event Guest` and does not have `EE Customer`
+
+#### Scenario: Guest blocked from staff APIs
+- **WHEN** an `EE Event Guest` calls owner or employee portal methods
+- **THEN** access is denied

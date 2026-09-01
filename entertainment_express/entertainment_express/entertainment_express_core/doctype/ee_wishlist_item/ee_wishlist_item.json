@@ -1,0 +1,24 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "module": "Entertainment Express Core",
+ "name": "EE Wishlist Item",
+ "owner": "Administrator",
+ "istable": 0,
+ "track_changes": 1,
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Customer", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "field_order": ["customer", "item", "item_name", "kind"],
+ "fields": [
+  {"fieldname": "customer", "fieldtype": "Link", "label": "Client", "options": "Customer", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "item", "fieldtype": "Data", "label": "Catalog Id", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "item_name", "fieldtype": "Data", "label": "Name", "in_list_view": 1},
+  {"fieldname": "kind", "fieldtype": "Select", "label": "Kind", "options": "item\npackage", "default": "item"}
+ ]
+}

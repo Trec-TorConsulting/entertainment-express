@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Billing Payments",
  "name": "Stored Payment Method",
@@ -72,7 +72,7 @@
    "fieldname": "processor",
    "fieldtype": "Select",
    "label": "Processor",
-   "options": "stripe\\nsquare\\npaypal\\nach\\nauthorizenet",
+   "options": "stripe\nsquare\npaypal\nach\nauthorizenet",
    "default": "stripe",
    "reqd": 1
   },

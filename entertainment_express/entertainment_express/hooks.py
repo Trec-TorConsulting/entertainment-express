@@ -14,6 +14,10 @@ required_apps = ["erpnext"]
 # on login (Frappe handles that), so this only governs the public root.
 get_website_user_home_page = "entertainment_express.security.request_guards.get_website_user_home_page"
 
+update_website_context = [
+    "entertainment_express.www.branding.update_website_context",
+]
+
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [
     "entertainment_express.security.request_guards.enforce_tenant_suspension",

@@ -1,0 +1,49 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<section class="ee-section-spaced" style="max-width: 920px; margin: 0 auto; padding: 48px 20px;">
+  <h1>What we offer</h1>
+  <p style="color:#5a5a5a;">Pick a package for your event. Signed-in clients can save favorites.</p>
+
+  <div style="display:grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 2rem;">
+    {% for row in packages %}
+    <article class="ee-panel" style="padding:1rem;border:1px solid #e5e7eb;border-radius:12px;">
+      <h2 style="margin:0 0 .35rem;font-size:1.1rem;">{{ row.name }}</h2>
+      <p style="margin:0;font-weight:600;">{{ row.rate }}</p>
+      <p style="color:#5a5a5a;">{{ row.description }}</p>
+      {% if logged_in %}
+      <button class="btn btn-primary btn-sm ee-wish" data-id="{{ row.id }}" data-name="{{ row.name }}" data-kind="package">Save</button>
+      {% endif %}
+    </article>
+    {% endfor %}
+    {% for row in items %}
+    <article class="ee-panel" style="padding:1rem;border:1px solid #e5e7eb;border-radius:12px;">
+      <h2 style="margin:0 0 .35rem;font-size:1.1rem;">{{ row.name }}</h2>
+      <p style="margin:0;font-weight:600;">{{ row.rate }}</p>
+      <p style="color:#5a5a5a;">{{ row.description }}</p>
+      {% if logged_in %}
+      <button class="btn btn-primary btn-sm ee-wish" data-id="{{ row.id }}" data-name="{{ row.name }}" data-kind="item">Save</button>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% if not packages and not items %}
+  <p>Packages will show here once the company publishes them.</p>
+  {% endif %}
+  <p style="margin-top:2rem;"><a href="/request-quote">Request a quote</a></p>
+</section>
+{% if logged_in %}
+<script>
+document.querySelectorAll(".ee-wish").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    await frappe.call({
+      method: "entertainment_express.api.catalog.wishlist_add",
+      args: { item: btn.dataset.id, item_name: btn.dataset.name, kind: btn.dataset.kind },
+    });
+    btn.textContent = "Saved";
+    btn.disabled = true;
+  });
+});
+</script>
+{% endif %}
+{% endblock %}

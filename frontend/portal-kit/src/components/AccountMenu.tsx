@@ -126,7 +126,7 @@ export function InboxMenu() {
               </div>
             ))
           ) : (
-            <p className="ee-menu__empty">Nothing waiting. Tasks from Frappe ToDo show here.</p>
+            <p className="ee-menu__empty">Nothing waiting. Assigned tasks show up here.</p>
           )}
         </div>
       ) : null}
@@ -195,7 +195,7 @@ export function HeaderSearch({ onPick }: { onPick?: (row: any) => void }) {
       <input
         id="ee-command-search"
         value={query}
-        placeholder="Search events, customers, leads — /"
+        placeholder="Search events, clients, inquiries — /"
         aria-label="Search"
         onChange={(e) => {
           const value = e.target.value;

@@ -215,7 +215,7 @@ def client_money_summary(booking: str | None = None) -> dict:
         elif "EE Customer" in set(frappe.get_roles() or []):
             pass
         else:
-            return {"owed": _money(0), "paid": _money(0), "remaining": _money(0)}
+            return {"owed": _money(0), "paid": _money(0), "remaining": _money(0), "remaining_amount": 0}
 
     rows = frappe.get_all(
         "Sales Invoice",
@@ -226,4 +226,9 @@ def client_money_summary(booking: str | None = None) -> dict:
     owed = flt(sum(flt(r.get("grand_total")) for r in rows))
     remaining = flt(sum(flt(r.get("outstanding_amount")) for r in rows))
     paid = owed - remaining
-    return {"owed": _money(owed), "paid": _money(paid), "remaining": _money(remaining)}
+    return {
+        "owed": _money(owed),
+        "paid": _money(paid),
+        "remaining": _money(remaining),
+        "remaining_amount": remaining,
+    }

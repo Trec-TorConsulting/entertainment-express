@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Equipment Fleet",
  "name": "Stock Transfer",
@@ -85,7 +85,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "draft\\ncomplete",
+   "options": "draft\ncomplete",
    "default": "complete",
    "in_list_view": 1
   },

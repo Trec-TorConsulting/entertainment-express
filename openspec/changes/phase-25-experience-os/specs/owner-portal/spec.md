@@ -7,6 +7,10 @@ The system SHALL present `/owner` as the tenant owner’s full company OS (not a
 - **WHEN** an `EE Tenant Admin` opens `/owner`
 - **THEN** they see this week’s jobs, money in/out (API strings), at-risk jobs, and an inbox of approvals plus unread booking chats, with a single next action per empty panel
 
+#### Scenario: Owner edits pipeline without desk
+- **WHEN** an owner opens `/owner/pipeline`
+- **THEN** they can list, open, create, update, and remove inquiries without using `/app`
+
 #### Scenario: Owner is not technical
 - **WHEN** the owner opens Catalog or Money
 - **THEN** labels are business words (Packages, What customers owe) and no DocType or ERP module names are shown

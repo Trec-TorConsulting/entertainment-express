@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Event Planning",
  "name": "Music Selection",
@@ -67,7 +67,7 @@
    "fieldname": "category",
    "fieldtype": "Select",
    "label": "Category",
-   "options": "must_play\\ndo_not_play\\nspecial_moment\\ngeneral_request",
+   "options": "must_play\ndo_not_play\nspecial_moment\ngeneral_request",
    "reqd": 1,
    "in_list_view": 1
   },
@@ -92,7 +92,7 @@
    "fieldname": "requested_by",
    "fieldtype": "Select",
    "label": "Requested By",
-   "options": "client\\nguest\\nstaff",
+   "options": "client\nguest\nstaff",
    "default": "client"
   },
   {
@@ -104,7 +104,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "requested\\napproved\\nrejected\\nplayed",
+   "options": "requested\napproved\nrejected\nplayed",
    "default": "requested",
    "in_list_view": 1
   },

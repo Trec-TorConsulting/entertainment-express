@@ -46,7 +46,7 @@ def create_checkout(invoice_name: str, tip_amount: float = 0) -> dict:
     Create a Stripe Checkout Session for the given deposit Sales Invoice.
     Returns {checkout_url, session_id}.
     """
-    _check_role(["EE Tenant Admin", "EE Sales", "EE Accounting", "System Manager"])
+    _assert_checkout_access(invoice_name)
     stripe = _stripe()
 
     invoice = frappe.get_doc("Sales Invoice", invoice_name)
@@ -269,6 +269,23 @@ def _mark_event_processed(event_id: str, event_type: str) -> None:
         (event_id, event_type, now_datetime(), now_datetime(), now_datetime()),
     )
     frappe.db.commit()
+
+
+def _assert_checkout_access(invoice_name: str) -> None:
+    if frappe.session.user == "Guest":
+        frappe.throw("Authentication required.", frappe.PermissionError)
+    roles = set(frappe.get_roles(frappe.session.user) or [])
+    if "EE Event Guest" in roles and "EE Customer" not in roles:
+        frappe.throw("Insufficient permissions.", frappe.PermissionError)
+    staff = {"EE Tenant Admin", "EE Sales", "EE Accounting", "System Manager"}
+    if roles.intersection(staff):
+        return
+    if "EE Customer" not in roles:
+        frappe.throw("Insufficient permissions.", frappe.PermissionError)
+    customer = frappe.db.get_value("Customer", {"email_id": frappe.session.user}, "name")
+    invoice_customer = frappe.db.get_value("Sales Invoice", invoice_name, "customer")
+    if not customer or invoice_customer != customer:
+        frappe.throw("Insufficient permissions.", frappe.PermissionError)
 
 
 def _check_role(allowed_roles: list[str]) -> None:

@@ -5,7 +5,10 @@ import {
   AppShell,
   CommandPalette,
   DataTable,
+  DispatchBoard,
   EmptyState,
+  FieldBoard,
+  FormField,
   StatCard,
   focusCommandPalette,
   getSessionBootstrap,
@@ -91,7 +94,7 @@ function Home() {
         <DataTable
           id="employee-my-day-tasks"
           columns={[
-            { key: "name", label: "Lead" },
+            { key: "name", label: "Inquiry" },
             { key: "lead_name", label: "Contact" },
             { key: "status", label: "Status" },
           ]}
@@ -138,42 +141,7 @@ function GuardedWorkspace({ roles, allow, children }: { roles: string[]; allow: 
 }
 
 function FieldWorkspace() {
-  const [assignments, setAssignments] = React.useState<any[]>([]);
-  const [statusMsg, setStatusMsg] = React.useState("");
-
-  React.useEffect(() => {
-    call("entertainment_express.api.mobile_api_v2.crew_assignments", { page: 1 })
-      .then((res) => setAssignments(res?.data?.items || []))
-      .catch(() => setAssignments([]));
-  }, []);
-
-  return (
-    <section style={{ display: "grid", gap: "0.75rem" }}>
-      <h2 style={{ margin: 0 }}>Field</h2>
-      <button
-        type="button"
-        onClick={() => setStatusMsg("Check-in/out uses mobile_api_v2 endpoints during full crew flow.")}
-        style={{ width: "fit-content", padding: "0.5rem 0.8rem", background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem" }}
-      >
-        Check-In Actions
-      </button>
-      {statusMsg ? <p>{statusMsg}</p> : null}
-      {assignments.length ? (
-        <DataTable
-          id="employee-field-assignments"
-          columns={[
-            { key: "name", label: "Assignment" },
-            { key: "booking", label: "Booking" },
-            { key: "status", label: "Status" },
-            { key: "role", label: "Role" },
-          ]}
-          rows={assignments}
-        />
-      ) : (
-        <EmptyState title="No Assignments" message="Your upcoming shifts will appear here." />
-      )}
-    </section>
-  );
+  return <FieldBoard />;
 }
 
 function SalesWorkspace() {
@@ -194,7 +162,7 @@ function SalesWorkspace() {
     <DataTable
       id="employee-sales-leads"
       columns={[
-        { key: "name", label: "Lead" },
+        { key: "name", label: "Inquiry" },
         { key: "lead_name", label: "Contact" },
         { key: "status", label: "Status" },
         { key: "modified", label: "Updated" },
@@ -202,7 +170,7 @@ function SalesWorkspace() {
       rows={rows}
     />
   ) : (
-    <EmptyState title="Sales Workspace" message="Open leads will appear here." />
+    <EmptyState title="Sales Workspace" message="Open inquiries will appear here." />
   );
 }
 
@@ -225,7 +193,7 @@ function AccountingWorkspace() {
       id="employee-accounting-invoices"
       columns={[
         { key: "name", label: "Invoice" },
-        { key: "customer", label: "Customer" },
+        { key: "customer", label: "Client" },
         { key: "outstanding_amount", label: "Outstanding" },
         { key: "currency", label: "Currency" },
       ]}
@@ -236,17 +204,66 @@ function AccountingWorkspace() {
   );
 }
 
-function DispatchWorkspace() {
+function PullSheetWorkspace() {
+  const [jobs, setJobs] = React.useState<any[]>([]);
+  const [booking, setBooking] = React.useState("");
+  const [sheet, setSheet] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_employee.get_my_day", {})
+      .then((day) => {
+        const rows = day?.schedule?.length ? day.schedule : day?.today_jobs || [];
+        setJobs(rows);
+        if (rows[0]?.name) setBooking(rows[0].name);
+      })
+      .catch(() => setJobs([]));
+  }, []);
+
+  React.useEffect(() => {
+    if (!booking) return;
+    call("entertainment_express.api.fleet_ops.generate_packing_list", { booking_name: booking })
+      .then(setSheet)
+      .catch(() =>
+        call("entertainment_express.api.fleet_ops.packing_status", { booking_name: booking })
+          .then(setSheet)
+          .catch(() => setSheet({ items: [] }))
+      );
+  }, [booking]);
+
   return (
     <section style={{ display: "grid", gap: "0.75rem" }}>
-      <p style={{ margin: 0 }}>
-        <a href="/dispatch" style={{ color: "var(--ee-brand)" }}>
-          Open full dispatch board
-        </a>
-      </p>
-      <iframe title="Dispatch board" src="/dispatch" style={{ width: "100%", minHeight: "70vh", border: "1px solid var(--ee-border)", borderRadius: "var(--ee-radius)", background: "var(--ee-panel)" }} />
+      <h1 style={{ margin: 0 }}>Pull sheet</h1>
+      {jobs.length ? (
+        <FormField label="Job">
+          <select value={booking} onChange={(e) => setBooking(e.target.value)}>
+            {jobs.map((job: any) => (
+              <option key={job.name} value={job.name}>
+                {job.event_name || job.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      ) : null}
+      {sheet?.items?.length ? (
+        <DataTable
+          id="pull-sheet"
+          columns={[
+            { key: "item_name", label: "Item" },
+            { key: "qty", label: "Qty" },
+            { key: "kind", label: "From" },
+          ]}
+          rows={sheet.items}
+        />
+      ) : (
+        <EmptyState title="Nothing to pull" message="Warehouse and rental gear for today’s jobs shows here." />
+      )}
     </section>
   );
+}
+
+function DispatchWorkspace() {
+  const roles = getSessionBootstrap().roles || [];
+  return <DispatchBoard canAssign={roles.includes("EE Dispatcher")} />;
 }
 
 function MeWorkspace() {
@@ -301,6 +318,7 @@ export function EmployeeApp() {
   const nav = [
     { to: "/", label: "My Day" },
     { to: "/dispatch", label: "Dispatch" },
+    { to: "/pull-sheet", label: "Pull sheet" },
     { to: "/field", label: "Field" },
     { to: "/sales", label: "Sales" },
     { to: "/accounting", label: "Money" },
@@ -354,6 +372,14 @@ export function EmployeeApp() {
           element={
             <GuardedWorkspace roles={roles} allow={["EE Dispatcher"]}>
               <DispatchWorkspace />
+            </GuardedWorkspace>
+          }
+        />
+        <Route
+          path="/pull-sheet"
+          element={
+            <GuardedWorkspace roles={roles} allow={["EE Dispatcher", "EE Crew"]}>
+              <PullSheetWorkspace />
             </GuardedWorkspace>
           }
         />

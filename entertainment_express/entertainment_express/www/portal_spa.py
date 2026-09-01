@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import frappe
 
 
@@ -17,6 +19,13 @@ def portal_bootstrap() -> dict:
         }
     except Exception:
         pass
+    if not branding.get("name"):
+        branding["name"] = (
+            frappe.db.get_default("company")
+            or frappe.db.get_single_value("Global Defaults", "default_company")
+            or frappe.db.get_single_value("Website Settings", "app_name")
+            or "Your company"
+        )
 
     csrf = ""
     try:
@@ -63,6 +72,18 @@ def apply_spa_context(context, *, title: str, portal: str) -> None:
     context.base_template = None
     context.spa_title = title
     context.spa_portal = portal
-    context.spa_css = f"/assets/entertainment_express/{portal}/assets/main.css"
-    context.spa_js = f"/assets/entertainment_express/{portal}/main.js"
+    # Frappe SharedDataMiddleware serves /assets with max-age=43200 and these
+    # files are not content-hashed. A query string is required so browsers and
+    # reverse proxies pick up a new bundle after a deploy.
+    ver = _portal_asset_version(portal)
+    context.spa_css = f"/assets/entertainment_express/{portal}/assets/main.css?v={ver}"
+    context.spa_js = f"/assets/entertainment_express/{portal}/main.js?v={ver}"
     context.portal_bootstrap = portal_bootstrap()
+
+
+def _portal_asset_version(portal: str) -> str:
+    try:
+        path = frappe.get_app_path("entertainment_express", "public", portal, "main.js")
+        return str(int(os.path.getmtime(path)))
+    except Exception:
+        return "1"

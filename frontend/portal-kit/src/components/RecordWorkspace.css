@@ -1,0 +1,81 @@
+.ee-records {
+  display: grid;
+  gap: 1rem;
+}
+
+.ee-records__bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ee-records h1 {
+  margin: 0.15rem 0 0;
+  font-size: 1.45rem;
+}
+
+.ee-back {
+  color: var(--ee-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ee-btn {
+  display: inline-flex;
+  align-items: center;
+  background: var(--ee-brand);
+  color: #fff;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ee-btn--danger {
+  background: var(--ee-danger);
+}
+
+.ee-form {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 40rem;
+  background: var(--ee-panel);
+  padding: 1.1rem;
+  border-radius: var(--ee-radius);
+  box-shadow: var(--ee-shadow);
+}
+
+.ee-form input,
+.ee-form select,
+.ee-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--ee-border);
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--ee-text);
+  font: inherit;
+}
+
+.ee-form__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ee-form__error {
+  color: var(--ee-danger);
+  margin: 0;
+}
+
+.ee-muted {
+  color: var(--ee-muted);
+}

@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Event Planning",
  "name": "Planning Form Field",
@@ -39,7 +39,7 @@
    "fieldname": "field_type",
    "fieldtype": "Select",
    "label": "Type",
-   "options": "text\\nlong_text\\nselect\\nmultiselect\\ndate\\ntime\\nnumber\\ncheckbox\\nfile_upload\\nsong_picker\\nplaylist_link\\nsection",
+   "options": "text\nlong_text\nselect\nmultiselect\ndate\ntime\nnumber\ncheckbox\nfile_upload\nsong_picker\nplaylist_link\nsection",
    "reqd": 1,
    "in_list_view": 1
   },

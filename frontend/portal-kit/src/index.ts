@@ -12,4 +12,6 @@ export * from "./components/FormField";
 export * from "./components/Money";
 export * from "./components/Skeleton";
 export * from "./components/StatCard";
+export * from "./components/RecordWorkspace";
+export * from "./components/DispatchBoard";
 export * from "./components/Toast";

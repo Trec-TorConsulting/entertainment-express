@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Entertainment Express Core",
  "name": "Notification Preference",
@@ -58,7 +58,7 @@
    "fieldname": "party_type",
    "fieldtype": "Select",
    "label": "Party Type",
-   "options": "Customer\\nEmployee\\nUser",
+   "options": "Customer\nEmployee\nUser",
    "reqd": 1
   },
   {

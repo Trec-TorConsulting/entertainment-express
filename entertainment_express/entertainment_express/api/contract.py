@@ -137,6 +137,51 @@ def sign_contract(contract_name: str = None, token: str = None,
     return {"status": "signed", "content_hash": content_hash}
 
 
+def _require_my_contract(contract_name: str):
+    if frappe.session.user == "Guest":
+        frappe.throw("Authentication required.", frappe.PermissionError)
+    roles = set(frappe.get_roles() or [])
+    if "EE Event Guest" in roles and "EE Customer" not in roles:
+        frappe.throw("Insufficient permissions.", frappe.PermissionError)
+    if "EE Customer" not in roles and "EE Tenant Admin" not in roles:
+        frappe.throw("Insufficient permissions.", frappe.PermissionError)
+    contract = frappe.get_doc("EE Contract", contract_name)
+    if "EE Tenant Admin" in roles:
+        return contract
+    if contract.signer_email == frappe.session.user:
+        return contract
+    customer = frappe.db.get_value("Customer", {"email_id": frappe.session.user}, "name")
+    if customer and contract.booking:
+        booking_customer = frappe.db.get_value("Event Booking", contract.booking, "customer")
+        if booking_customer == customer:
+            return contract
+    frappe.throw("Insufficient permissions.", frappe.PermissionError)
+
+
+@frappe.whitelist()
+def view_my_contract(contract_name: str) -> dict:
+    contract = _require_my_contract(contract_name)
+    if contract.status == "sent":
+        contract.db_set("status", "viewed")
+    return {
+        "contract_name": contract.name,
+        "signer_name": contract.signer_name,
+        "rendered_html": contract.rendered_html,
+        "status": contract.status,
+    }
+
+
+@frappe.whitelist()
+def sign_my_contract(contract_name: str, signer_name: str | None = None, signature_typed: str | None = None) -> dict:
+    contract = _require_my_contract(contract_name)
+    return sign_contract(
+        contract_name=contract.name,
+        token=_signing_token(contract.name),
+        signature_typed=signature_typed,
+        signer_name=signer_name,
+    )
+
+
 @frappe.whitelist(allow_guest=True)
 def view_contract(contract_name: str = None, token: str = None) -> dict:
     """Mark contract as viewed when the signer opens the signing page."""

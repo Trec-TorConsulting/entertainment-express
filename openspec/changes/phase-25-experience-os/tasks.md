@@ -26,6 +26,8 @@
       **Accept:** date range; money strings from API.
 - [x] 3.3 Company | Talent switch when owner also has Entertainer or Crew.
       **Accept:** no switch if owner-only; Talent shows that user’s assignments.
+- [x] 3.4 Owner CRUD for pipeline, calendar jobs, catalog, gear, people, brand (invoices view/edit notes).
+      **Accept:** `/owner/pipeline` new/open/save/remove inquiry; no DocType names in the UI.
 
 ## 4. Employee OS
 

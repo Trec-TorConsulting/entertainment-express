@@ -1,4 +1,4 @@
-"""Header chrome: search, inbox, and identity from Frappe/ERPNext primitives."""
+"""Header chrome: search, inbox, and identity for the portals."""
 
 from __future__ import annotations
 
@@ -90,7 +90,7 @@ def search(query: str) -> list[dict]:
             fields=["name", "customer_name"],
             limit_page_length=5,
         ):
-            results.append({"type": "customer", "id": row.name, "label": row.customer_name or row.name, "meta": "Customer"})
+            results.append({"type": "customer", "id": row.name, "label": row.customer_name or row.name, "meta": "Client"})
     except Exception:
         pass
     try:
@@ -100,7 +100,7 @@ def search(query: str) -> list[dict]:
             fields=["name", "lead_name", "status"],
             limit_page_length=5,
         ):
-            results.append({"type": "lead", "id": row.name, "label": row.lead_name or row.name, "meta": row.status or "Lead"})
+            results.append({"type": "lead", "id": row.name, "label": row.lead_name or row.name, "meta": row.status or "Inquiry"})
     except Exception:
         pass
     return results

@@ -20,6 +20,7 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
   const roles = getSessionBootstrap().roles || [];
   const guest = isGuest(roles);
   const [money, setMoney] = React.useState<any>(null);
+  const [needsSign, setNeedsSign] = React.useState(false);
   const current = events.find((row) => row.name === booking);
 
   React.useEffect(() => {
@@ -27,6 +28,9 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
     call("entertainment_express.api.portal_reports.client_money_summary", {})
       .then(setMoney)
       .catch(() => setMoney({ owed: "0.00", paid: "0.00", remaining: "0.00" }));
+    call("entertainment_express.api.portal_client.list_contracts", {})
+      .then((res) => setNeedsSign((res || []).some((row: any) => row.can_sign)))
+      .catch(() => setNeedsSign(false));
   }, [guest]);
 
   if (guest) {
@@ -38,11 +42,14 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
     );
   }
 
-  const needsPay = money && String(money.remaining) && !String(money.remaining).match(/^[0$.]*0(\.0+)?$/);
+  const remainingAmount = Number(money?.remaining_amount);
+  const needsPay = Number.isFinite(remainingAmount) ? remainingAmount > 0 : false;
   return (
     <section style={{ display: "grid", gap: "1rem" }}>
       {money ? <MoneySummary owed={money.owed} paid={money.paid} remaining={money.remaining} /> : null}
-      {needsPay ? (
+      {needsSign ? (
+        <EmptyState title="A contract is waiting" message="Review and sign to lock in the date." actionLabel="Sign" onAction={() => (window.location.href = "/client/documents")} />
+      ) : needsPay ? (
         <EmptyState title="A payment is due" message="Finish the deposit or balance to lock the date." actionLabel="Pay" onAction={() => (window.location.href = "/client/pay")} />
       ) : (
         <EmptyState title="You're all set for now" message="When something needs a signature or a payment, it shows up here." />
@@ -53,6 +60,7 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
 
 function Events() {
   const [rows, setRows] = React.useState<any[]>([]);
+  const [proposal, setProposal] = React.useState<any>(null);
   React.useEffect(() => {
     call("frappe.client.get_list", {
       doctype: "Event Booking",
@@ -61,11 +69,31 @@ function Events() {
     })
       .then((res) => setRows(res || []))
       .catch(() => setRows([]));
+    call("entertainment_express.api.portal_proposal.client_proposal", {})
+      .then(setProposal)
+      .catch(() => setProposal(null));
   }, []);
-  return rows.length ? (
+  return rows.length || proposal?.lines?.length ? (
     <section style={{ display: "grid", gap: "1rem" }}>
-      <DataTable id="client-events" columns={[{ key: "event_name", label: "Event" }, { key: "event_date", label: "Date" }, { key: "status", label: "Status" }]} rows={rows} />
-      <BookingDetail booking={rows[0]} />
+      {proposal?.lines?.length ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>Your proposal</h2>
+          <p style={{ margin: 0 }}>
+            {proposal.status} · {proposal.total} · deposit {proposal.deposit}
+          </p>
+          {proposal.lines.map((line: any) => (
+            <p key={line.id} style={{ margin: 0 }}>
+              {line.name} · {line.amount || line.rate}
+            </p>
+          ))}
+        </div>
+      ) : null}
+      {rows.length ? (
+        <>
+          <DataTable id="client-events" columns={[{ key: "event_name", label: "Event" }, { key: "event_date", label: "Date" }, { key: "status", label: "Status" }]} rows={rows} />
+          <BookingDetail booking={rows[0]} />
+        </>
+      ) : null}
     </section>
   ) : (
     <EmptyState title="No events yet" message="When you book, your events show here." />
@@ -73,11 +101,159 @@ function Events() {
 }
 
 function Pay() {
-  return <EmptyState title="Pay" message="Open your invoice to pay a deposit or remaining balance." actionLabel="Payment help" onAction={() => (window.location.href = "/client/pay")} />;
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.portal_client.list_invoices", {})
+      .then((res) => setRows(res || []))
+      .catch((err) => setError(err.message || "Could not load invoices."));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  const pay = async (invoice: any) => {
+    setBusy(invoice.id);
+    setError("");
+    try {
+      const session = await call("entertainment_express.api.portal_client.start_checkout", { invoice_name: invoice.id });
+      if (session?.checkout_url) {
+        window.location.href = session.checkout_url;
+        return;
+      }
+      setError("Checkout is not ready yet. Ask your coordinator to send a payment link.");
+    } catch (err: any) {
+      setError(err.message || "Could not start checkout.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  if (error && !rows.length) return <EmptyState title="Pay" message={error} />;
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {rows.length ? (
+        rows.map((row) => (
+          <article key={row.id} className="ee-job-card" style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
+            <h3 style={{ margin: 0 }}>{row.title}</h3>
+            <p style={{ margin: "0.35rem 0", color: "var(--ee-muted)" }}>
+              {row.event ? `${row.event} · ` : ""}
+              {row.status} · still owed {row.outstanding}
+            </p>
+            {row.can_pay ? (
+              <button type="button" className="ee-btn" disabled={busy === row.id} onClick={() => pay(row)}>
+                {busy === row.id ? "Opening checkout…" : "Pay now"}
+              </button>
+            ) : (
+              <p style={{ margin: 0, color: "var(--ee-success)" }}>Paid</p>
+            )}
+          </article>
+        ))
+      ) : (
+        <EmptyState title="Nothing due" message="When an invoice is ready, you can pay the deposit or balance here." />
+      )}
+    </section>
+  );
 }
 
 function Documents() {
-  return <EmptyState title="Documents" message="Contracts to sign and receipts live here." actionLabel="Sign" onAction={() => (window.location.href = "/client/sign")} />;
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [open, setOpen] = React.useState<any>(null);
+  const [signer, setSigner] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const reload = () => {
+    call("entertainment_express.api.portal_client.list_contracts", {})
+      .then((res) => setRows(res || []))
+      .catch((err) => setError(err.message || "Could not load documents."));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  const openContract = async (row: any) => {
+    setError("");
+    try {
+      const doc = await call("entertainment_express.api.portal_client.get_contract", { name: row.id });
+      setOpen(doc);
+      setSigner(doc.signer_name || "");
+    } catch (err: any) {
+      setError(err.message || "Could not open this contract.");
+    }
+  };
+
+  const sign = async () => {
+    if (!open) return;
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.portal_client.sign_contract", {
+        name: open.contract_name,
+        signer_name: signer,
+        signature_typed: signer,
+      });
+      setOpen(null);
+      reload();
+    } catch (err: any) {
+      setError(err.message || "Could not sign.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (open) {
+    return (
+      <section className="ee-form" style={{ maxWidth: "48rem" }}>
+        <button type="button" className="ee-back" onClick={() => setOpen(null)}>
+          ← Documents
+        </button>
+        <h1 style={{ margin: 0 }}>Contract</h1>
+        <div dangerouslySetInnerHTML={{ __html: open.rendered_html || "" }} />
+        {open.status === "signed" ? (
+          <p style={{ color: "var(--ee-success)", margin: 0 }}>This is already signed.</p>
+        ) : (
+          <>
+            <FormField label="Your full legal name">
+              <input value={signer} onChange={(e) => setSigner(e.target.value)} />
+            </FormField>
+            <p style={{ color: "var(--ee-muted)", margin: 0 }}>
+              Typing your name is your electronic signature.
+            </p>
+            {error ? <p className="ee-form__error">{error}</p> : null}
+            <button type="button" className="ee-btn" disabled={busy || !signer.trim()} onClick={sign}>
+              {busy ? "Signing…" : "I agree and sign"}
+            </button>
+          </>
+        )}
+      </section>
+    );
+  }
+
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {rows.length ? (
+        <DataTable
+          id="client-documents"
+          columns={[
+            { key: "title", label: "Document" },
+            { key: "status", label: "Status" },
+            { key: "event", label: "Event" },
+          ]}
+          rows={rows}
+          onRowClick={openContract}
+        />
+      ) : (
+        <EmptyState title="No documents yet" message="Contracts to sign and copies of signed agreements show here." />
+      )}
+    </section>
+  );
 }
 
 function EventPicker({ booking, events, onChange }: { booking: string; events: any[]; onChange: (name: string) => void }) {
@@ -96,8 +272,16 @@ function EventPicker({ booking, events, onChange }: { booking: string; events: a
 }
 
 function Planning({ booking }: { booking?: string }) {
+  const roles = getSessionBootstrap().roles || [];
+  const guest = isGuest(roles);
   const [items, setItems] = React.useState<any[]>([]);
   const [title, setTitle] = React.useState("");
+  const [form, setForm] = React.useState<any>(null);
+  const [answers, setAnswers] = React.useState<Record<string, string>>({});
+  const [timeline, setTimeline] = React.useState<any>(null);
+  const [songs, setSongs] = React.useState<any[]>([]);
+  const [song, setSong] = React.useState("");
+  const [wish, setWish] = React.useState<any[]>([]);
   const eventId = booking || "";
 
   const reload = () => {
@@ -105,18 +289,122 @@ function Planning({ booking }: { booking?: string }) {
     call("entertainment_express.api.portal_collaboration.list_plan_items", { booking: eventId })
       .then((res) => setItems(res || []))
       .catch(() => setItems([]));
+    call("entertainment_express.api.planning.get_form", { booking_name: eventId })
+      .then((res) => {
+        setForm(res);
+        const seed: Record<string, string> = {};
+        for (const field of res.fields || []) seed[field.field_key] = field.value || "";
+        setAnswers(seed);
+      })
+      .catch(() => setForm(null));
+    call("entertainment_express.api.timeline.get_timeline", { booking_name: eventId })
+      .then(setTimeline)
+      .catch(() => setTimeline(null));
+    call("entertainment_express.api.music.list_selections", { booking_name: eventId })
+      .then((res) => setSongs(res || []))
+      .catch(() => setSongs([]));
+    if (!guest) {
+      call("entertainment_express.api.catalog.wishlist_list", {})
+        .then((res) => setWish(res || []))
+        .catch(() => setWish([]));
+    }
   };
 
   React.useEffect(() => {
     reload();
-  }, [eventId]);
+  }, [eventId, guest]);
 
   if (!eventId) {
     return <EmptyState title="Pick an event" message="Open an event first, then add songs, add-ons, and ideas." />;
   }
 
   return (
-    <section style={{ display: "grid", gap: "0.75rem" }}>
+    <section style={{ display: "grid", gap: "1.25rem" }}>
+      {form ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>{form.template_name || "Event details"}</h2>
+          {(form.fields || [])
+            .filter((field: any) => field.visible !== false)
+            .map((field: any) => (
+              <FormField key={field.field_key} label={field.label}>
+                {field.field_type === "select" ? (
+                  <select value={answers[field.field_key] || ""} onChange={(e) => setAnswers((prev) => ({ ...prev, [field.field_key]: e.target.value }))} disabled={guest}>
+                    <option value="">Choose</option>
+                    {(field.options || []).map((opt: string) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input value={answers[field.field_key] || ""} onChange={(e) => setAnswers((prev) => ({ ...prev, [field.field_key]: e.target.value }))} readOnly={guest} />
+                )}
+              </FormField>
+            ))}
+          {!guest ? (
+            <button
+              type="button"
+              className="ee-btn"
+              onClick={async () => {
+                await call("entertainment_express.api.planning.save_answers", { instance_name: form.name, answers });
+                reload();
+              }}
+            >
+              Save details
+            </button>
+          ) : null}
+        </div>
+      ) : (
+        <EmptyState title="Event details" message="Your questionnaire shows here after the date is confirmed." />
+      )}
+
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Run of show</h2>
+        {timeline?.items?.length ? (
+          timeline.items.map((row: any, idx: number) => (
+            <p key={row.name || idx} style={{ margin: 0 }}>
+              {row.start_time || row.time || ""} {row.title || row.label}
+            </p>
+          ))
+        ) : (
+          <p className="ee-muted">The timeline appears here once it is shared.</p>
+        )}
+      </div>
+
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Music</h2>
+        <FormField label="Must-play or request">
+          <input value={song} onChange={(e) => setSong(e.target.value)} />
+        </FormField>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            await call("entertainment_express.api.music.add_selection", { booking_name: eventId, category: "must_play", free_text: song });
+            setSong("");
+            reload();
+          }}
+        >
+          Add song
+        </button>
+        {songs.map((row: any) => (
+          <p key={row.name} style={{ margin: 0 }}>
+            {row.category}: {row.free_text || row.song}
+          </p>
+        ))}
+      </div>
+
+      {wish.length ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>Saved packages</h2>
+          {wish.map((row: any) => (
+            <p key={row.name} style={{ margin: 0 }}>
+              {row.item_name || row.item}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
       <FormField label="Suggest an idea">
         <input value={title} onChange={(e) => setTitle(e.target.value)} />
       </FormField>
@@ -184,9 +472,25 @@ function People({ booking }: { booking?: string }) {
       >
         Send invite
       </button>
-      {rows.length ? (
-        <DataTable id="invites" columns={[{ key: "full_name", label: "Name" }, { key: "email", label: "Email" }, { key: "status", label: "Status" }]} rows={rows} />
-      ) : (
+      {rows.length
+        ? rows.map((row: any) => (
+            <div key={row.name} style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", background: "var(--ee-panel)", padding: "0.75rem", borderRadius: "var(--ee-radius)" }}>
+              <span>
+                {row.full_name || row.email} · {row.status}
+              </span>
+              <button
+                type="button"
+                className="ee-btn ee-btn--danger"
+                onClick={async () => {
+                  await call("entertainment_express.api.portal_collaboration.revoke_invite", { booking: eventId, invite: row.name });
+                  reload();
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          ))
+        : (
         <EmptyState title="No guests yet" message="Invite wedding-party or co-hosts. They can plan and chat, not pay." />
       )}
     </section>

@@ -28,7 +28,7 @@ def run():
     if meta.has_field("main_section"):
         values["main_section"] = (
             "<h1>Our Company Story</h1>"
-            "<p>This page is CMS-managed in Frappe Desk and can be edited without a deploy.</p>"
+            "<p>Tell guests who you are. Edit this page anytime from your company workspace.</p>"
         )
 
     frappe.get_doc(values).insert(ignore_permissions=True)

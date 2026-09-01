@@ -173,7 +173,7 @@ def decline_shift(assignment: str = None, token: str = None) -> dict:
 @frappe.whitelist()
 def crew_check_in(assignment_name: str) -> dict:
     """Mark a crew member as checked in (event has started)."""
-    _check_role(["EE Tenant Admin", "EE Dispatcher", "EE Crew", "System Manager"])
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "EE Crew", "EE Entertainer", "System Manager"])
     ca = frappe.get_doc("Crew Assignment", assignment_name)
     if ca.status != "accepted":
         frappe.throw(f"Cannot check in from status '{ca.status}'.")
@@ -186,7 +186,7 @@ def crew_check_in(assignment_name: str) -> dict:
 @frappe.whitelist()
 def crew_check_out(assignment_name: str) -> dict:
     """Mark a crew member as checked out (event complete)."""
-    _check_role(["EE Tenant Admin", "EE Dispatcher", "EE Crew", "System Manager"])
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "EE Crew", "EE Entertainer", "System Manager"])
     ca = frappe.get_doc("Crew Assignment", assignment_name)
     if ca.status != "checked_in":
         frappe.throw(f"Cannot check out from status '{ca.status}'.")
@@ -465,7 +465,7 @@ def get_dispatch_board(date: str) -> list:
     bookings = frappe.get_all(
         "Event Booking",
         filters={"event_date": event_date, "status": ["in", ["tentative", "confirmed", "in_progress"]]},
-        fields=["name", "customer", "status", "ee_dispatch_status", "event_date",
+        fields=["name", "customer", "event_name", "status", "ee_dispatch_status", "event_date",
                 "start_time", "end_time", "venue_address", "grand_total"],
         order_by="start_time asc",
     )
