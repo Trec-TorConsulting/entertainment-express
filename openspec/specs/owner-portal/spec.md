@@ -201,3 +201,10 @@ The system SHALL show pending booking change requests on `/owner` Today and let 
 #### Scenario: Owner approves a reschedule
 - **WHEN** an owner approves a pending date change
 - **THEN** `reschedule_booking` runs and the request is marked applied
+
+### Requirement: Grow Without Desk
+The system SHALL offer `/owner/grow` for lists, campaigns, promo codes, referrals, and review URL without `/app`. Labels SHALL be business language.
+
+#### Scenario: Owner sends a campaign
+- **WHEN** an owner sends a list from Grow
+- **THEN** the campaign shows how many were sent and skipped, with no Desk URL

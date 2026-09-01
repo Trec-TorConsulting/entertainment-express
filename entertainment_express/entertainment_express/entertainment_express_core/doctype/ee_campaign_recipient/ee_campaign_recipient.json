@@ -1,0 +1,21 @@
+{
+ "actions": [],
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["email", "customer", "status", "skip_reason", "track_token"],
+ "fields": [
+  {"fieldname": "email", "fieldtype": "Data", "label": "Email", "in_list_view": 1},
+  {"fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "queued\nsent\nskipped\nfailed\nopened\nclicked", "default": "queued", "in_list_view": 1},
+  {"fieldname": "skip_reason", "fieldtype": "Data", "label": "Skip"},
+  {"fieldname": "track_token", "fieldtype": "Data", "label": "Token", "hidden": 1}
+ ],
+ "istable": 1,
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Campaign Recipient",
+ "owner": "Administrator",
+ "permissions": []
+}

@@ -79,10 +79,11 @@ phase-15).
 **Spec:** `customer-portal`. **Depends on:** phase-1, phase-5, phase-6.
 **Folder:** [`archive/2026-09-01-phase-7-customer-portal/`](archive/2026-09-01-phase-7-customer-portal/)
 
-## Phase 8 — Marketing & Engagement 📝
+## Phase 8 — Marketing & Engagement ✅ archived 2026-09-01
 Segmentation, email/SMS/WhatsApp campaigns, lifecycle journeys, review generation, referrals/promotions,
 campaign analytics.
 **Spec:** `marketing-engagement`. **Depends on:** phase-6.
+**Folder:** [`archive/2026-09-01-phase-8-marketing-engagement/`](archive/2026-09-01-phase-8-marketing-engagement/)
 
 ## Phase 9 — Mobile Field App (PWA) 📝
 Crew PWA: job list/details, navigation, check-in/out, on-site workflows, media/signature capture, offline

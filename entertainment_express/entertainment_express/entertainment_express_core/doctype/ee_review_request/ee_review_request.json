@@ -1,0 +1,28 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "customer", "status", "review_url", "sent_at"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Job", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "pending\nsent\nopened\nreviewed", "default": "pending", "in_list_view": 1},
+  {"fieldname": "review_url", "fieldtype": "Data", "label": "Review link"},
+  {"fieldname": "sent_at", "fieldtype": "Datetime", "label": "Sent"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Review Request",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Marketing", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["campaign_name", "channel", "segment", "status", "subject", "body", "sent_count", "skipped_count", "opened_count", "clicked_count", "recipients"],
+ "fields": [
+  {"fieldname": "campaign_name", "fieldtype": "Data", "label": "Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "channel", "fieldtype": "Select", "label": "Channel", "options": "email\nsms\nwhatsapp", "default": "email", "in_list_view": 1},
+  {"fieldname": "segment", "fieldtype": "Link", "label": "List", "options": "EE Segment"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "draft\nsent", "default": "draft", "in_list_view": 1},
+  {"fieldname": "subject", "fieldtype": "Data", "label": "Subject"},
+  {"fieldname": "body", "fieldtype": "Text Editor", "label": "Message"},
+  {"fieldname": "sent_count", "fieldtype": "Int", "label": "Sent", "read_only": 1},
+  {"fieldname": "skipped_count", "fieldtype": "Int", "label": "Skipped", "read_only": 1},
+  {"fieldname": "opened_count", "fieldtype": "Int", "label": "Opened", "read_only": 1},
+  {"fieldname": "clicked_count", "fieldtype": "Int", "label": "Clicked", "read_only": 1},
+  {"fieldname": "recipients", "fieldtype": "Table", "label": "Recipients", "options": "EE Campaign Recipient", "editable_grid": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Campaign",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Marketing", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

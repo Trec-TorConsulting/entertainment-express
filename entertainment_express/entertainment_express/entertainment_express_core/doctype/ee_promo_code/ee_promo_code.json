@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "autoname": "field:code",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["code", "kind", "value", "max_uses", "uses", "expires", "active"],
+ "fields": [
+  {"fieldname": "code", "fieldtype": "Data", "label": "Code", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "kind", "fieldtype": "Select", "label": "Kind", "options": "percent\namount", "default": "percent", "in_list_view": 1},
+  {"fieldname": "value", "fieldtype": "Currency", "label": "Value", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "max_uses", "fieldtype": "Int", "label": "Max uses", "default": "100"},
+  {"fieldname": "uses", "fieldtype": "Int", "label": "Used", "default": "0", "read_only": 1},
+  {"fieldname": "expires", "fieldtype": "Date", "label": "Expires"},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Promo Code",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Marketing", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

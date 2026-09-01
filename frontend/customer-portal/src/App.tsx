@@ -100,6 +100,7 @@ function Events() {
           <DataTable id="client-events" columns={[{ key: "event_name", label: "Event" }, { key: "event_date", label: "Date" }, { key: "status", label: "Status" }]} rows={rows} />
           <BookingDetail booking={rows[0]} />
           {rows[0]?.name ? <ChangeRequestForm booking={rows[0].name} /> : null}
+          {rows[0]?.name ? <PromoForm booking={rows[0].name} /> : null}
         </>
       ) : null}
     </section>
@@ -193,6 +194,39 @@ function ChangeRequestForm({ booking }: { booking: string }) {
           ))}
         </ul>
       ) : null}
+    </form>
+  );
+}
+
+function PromoForm({ booking }: { booking: string }) {
+  const [code, setCode] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [note, setNote] = React.useState("");
+  return (
+    <form
+      className="ee-form"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setError("");
+        setNote("");
+        try {
+          const result = await call("entertainment_express.api.engagement.apply_promo", { code, booking });
+          setNote(`Applied ${result.code}. Discount ${result.discount}.`);
+          setCode("");
+        } catch (err: any) {
+          setError(err.message || "That code did not apply.");
+        }
+      }}
+    >
+      <h2 style={{ margin: 0 }}>Have a code?</h2>
+      <FormField label="Code">
+        <input value={code} onChange={(e) => setCode(e.target.value)} required />
+      </FormField>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {note ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{note}</p> : null}
+      <button type="submit" className="ee-btn">
+        Apply code
+      </button>
     </form>
   );
 }

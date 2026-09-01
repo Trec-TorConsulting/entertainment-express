@@ -100,6 +100,7 @@ scheduler_events = {
         "entertainment_express.api.workflow.run_daily",
         "entertainment_express.api.appointments.run_daily",
         "entertainment_express.api.compliance.run_daily",
+        "entertainment_express.api.engagement.run_lifecycle",
         "entertainment_express.notifications.send_deferred",
         "entertainment_express.equipment_fleet.scheduler.daily_fleet_alerts",
     ],

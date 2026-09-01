@@ -1,0 +1,28 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["promo", "party", "amount", "quotation", "booking"],
+ "fields": [
+  {"fieldname": "promo", "fieldtype": "Link", "label": "Code", "options": "EE Promo Code", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "party", "fieldtype": "Data", "label": "Who"},
+  {"fieldname": "amount", "fieldtype": "Currency", "label": "Discount", "in_list_view": 1},
+  {"fieldname": "quotation", "fieldtype": "Link", "label": "Quote", "options": "Quotation"},
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Job", "options": "Event Booking"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Promo Redemption",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

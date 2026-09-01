@@ -10,6 +10,7 @@
   "brand_name",
   "brand_logo",
   "brand_color",
+  "review_url",
   "section_flags",
   "feature_flags"
  ],
@@ -41,6 +42,11 @@
    "fieldname": "brand_color",
    "fieldtype": "Data",
    "label": "Brand Color"
+  },
+  {
+   "fieldname": "review_url",
+   "fieldtype": "Data",
+   "label": "Review link"
   },
   {
    "fieldname": "section_flags",

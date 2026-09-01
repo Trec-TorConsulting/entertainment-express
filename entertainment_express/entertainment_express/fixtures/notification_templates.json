@@ -234,5 +234,41 @@
     "subject": "Please sign a waiver for {{ event_name }}",
     "active": 1,
     "body_html": "<p>Open your event portal to sign the waiver for {{ event_name }}.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "campaign_blast",
+    "template_key": "campaign_blast",
+    "subject": "{{ subject }}",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>{{ body }}</p><p><img src='{{ open_pixel }}' width='1' height='1' alt=''/></p><p>You can opt out of these notes anytime.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "review_request",
+    "template_key": "review_request",
+    "subject": "How was {{ event_name }}?",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>Thanks for having us at {{ event_name }}. If it went well, a review helps other families find us.</p><p><a href='{{ review_url }}'>Leave a review</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "thank_you_event",
+    "template_key": "thank_you_event",
+    "subject": "Thank you for {{ event_name }}",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>Thank you for letting us be part of {{ event_name }}. We would love to see you again.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "referral_reward",
+    "template_key": "referral_reward",
+    "subject": "Your thank-you code: {{ code }}",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>Someone you referred booked with us. Use code <b>{{ code }}</b> on a future quote.</p>"
   }
 ]

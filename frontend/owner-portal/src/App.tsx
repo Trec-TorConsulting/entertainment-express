@@ -46,6 +46,7 @@ const OWNER_NAV = [
       { to: "/money", label: "Money" },
       { to: "/reports", label: "Reports" },
       { to: "/automations", label: "Reminders" },
+      { to: "/grow", label: "Grow" },
       { to: "/coverage", label: "Coverage" },
       { to: "/move", label: "Move" },
       { to: "/brand", label: "Brand" },
@@ -1583,6 +1584,256 @@ function TalentHome() {
   );
 }
 
+function GrowWorkspace() {
+  const [data, setData] = React.useState<any>(null);
+  const [segName, setSegName] = React.useState("");
+  const [match, setMatch] = React.useState("all_customers");
+  const [campName, setCampName] = React.useState("");
+  const [channel, setChannel] = React.useState("email");
+  const [segment, setSegment] = React.useState("");
+  const [subject, setSubject] = React.useState("");
+  const [body, setBody] = React.useState("");
+  const [code, setCode] = React.useState("");
+  const [kind, setKind] = React.useState("percent");
+  const [value, setValue] = React.useState("10");
+  const [reviewUrl, setReviewUrl] = React.useState("");
+  const [referrer, setReferrer] = React.useState("");
+  const [refEmail, setRefEmail] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [note, setNote] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.engagement.get_grow", {})
+      .then((res) => {
+        setData(res);
+        setReviewUrl(res.review_url || "");
+        if (!segment && res.segments?.[0]) setSegment(res.segments[0].id);
+        if (!referrer && res.customers?.[0]) setReferrer(res.customers[0].id);
+      })
+      .catch(() => setData({ segments: [], campaigns: [], promos: [], referrals: [], customers: [] }));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  if (!data) return <p className="ee-muted">Loading lists…</p>;
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1.25rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Grow</h1>
+        <p className="ee-muted">Lists, campaigns, review asks, and thank-you codes — this company only.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {note ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{note}</p> : null}
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_segment", { values: { name: segName, match } });
+            setSegName("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that list.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Lists</h2>
+        <FormField label="List name">
+          <input value={segName} onChange={(e) => setSegName(e.target.value)} required />
+        </FormField>
+        <FormField label="Who">
+          <select value={match} onChange={(e) => setMatch(e.target.value)}>
+            <option value="all_customers">All customers</option>
+            <option value="completed_jobs">Completed jobs (last year)</option>
+            <option value="upcoming_jobs">Upcoming jobs</option>
+            <option value="leads">Inquiries</option>
+          </select>
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save list
+        </button>
+        {(data.segments || []).length ? (
+          <ul>
+            {data.segments.map((row: any) => (
+              <li key={row.id}>{row.name}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="ee-muted">Save a list before you send.</p>
+        )}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          setNote("");
+          try {
+            const saved = await call("entertainment_express.api.engagement.save_campaign", {
+              values: { name: campName, channel, segment, subject, body },
+            });
+            const result = await call("entertainment_express.api.engagement.send_campaign", { name: saved.id });
+            setCampName("");
+            setBody("");
+            setNote(`Sent ${result.sent || 0}, skipped ${result.skipped || 0}.`);
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not send that campaign.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Campaign</h2>
+        <FormField label="Name">
+          <input value={campName} onChange={(e) => setCampName(e.target.value)} required />
+        </FormField>
+        <FormField label="Channel">
+          <select value={channel} onChange={(e) => setChannel(e.target.value)}>
+            <option value="email">Email</option>
+            <option value="sms">Text</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </FormField>
+        <FormField label="List">
+          <select value={segment} onChange={(e) => setSegment(e.target.value)}>
+            <option value="">Pick a list</option>
+            {(data.segments || []).map((row: any) => (
+              <option key={row.id} value={row.id}>
+                {row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Subject">
+          <input value={subject} onChange={(e) => setSubject(e.target.value)} />
+        </FormField>
+        <FormField label="Message">
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Send
+        </button>
+        {(data.campaigns || []).length ? (
+          <ul>
+            {data.campaigns.map((row: any) => (
+              <li key={row.id}>
+                {row.name} · sent {row.sent} · skipped {row.skipped} · opened {row.opened}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_promo", { values: { code, kind, value } });
+            setCode("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that code.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Thank-you codes</h2>
+        <FormField label="Code">
+          <input value={code} onChange={(e) => setCode(e.target.value)} required />
+        </FormField>
+        <FormField label="Kind">
+          <select value={kind} onChange={(e) => setKind(e.target.value)}>
+            <option value="percent">Percent off</option>
+            <option value="amount">Amount off</option>
+          </select>
+        </FormField>
+        <FormField label="Value">
+          <input value={value} onChange={(e) => setValue(e.target.value)} />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save code
+        </button>
+        {(data.promos || []).length ? (
+          <ul>
+            {data.promos.map((row: any) => (
+              <li key={row.id}>
+                {row.code} · {row.value} · used {row.uses}/{row.max_uses}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="ee-muted">Codes apply on quotes and jobs.</p>
+        )}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_referral", { values: { referrer, email: refEmail } });
+            setRefEmail("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that referral.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Referrals</h2>
+        <FormField label="Who sent them">
+          <select value={referrer} onChange={(e) => setReferrer(e.target.value)}>
+            <option value="">Pick a customer</option>
+            {(data.customers || []).map((row: any) => (
+              <option key={row.id} value={row.id}>
+                {row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="New person email">
+          <input type="email" value={refEmail} onChange={(e) => setRefEmail(e.target.value)} required />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save referral
+        </button>
+        {(data.referrals || []).length ? (
+          <ul>
+            {data.referrals.map((row: any) => (
+              <li key={row.id}>
+                {row.referrer} → {row.email} · {row.status}
+                {row.reward ? ` · ${row.reward}` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_review_url", { url: reviewUrl });
+            setNote("Review link saved. Completed jobs will get a thank-you.");
+          } catch (err: any) {
+            setError(err.message || "Could not save that link.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Review link</h2>
+        <FormField label="Google (or other) review URL">
+          <input value={reviewUrl} onChange={(e) => setReviewUrl(e.target.value)} placeholder="https://" />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save review link
+        </button>
+      </form>
+    </section>
+  );
+}
+
 function SettingsWorkspace() {
   const [row, setRow] = React.useState<any>(null);
   const [brandName, setBrandName] = React.useState("");
@@ -1697,6 +1948,7 @@ export function OwnerApp() {
           <Route path="/money/:id" element={<CrudEditor kind="invoice" basePath="/money" />} />
           <Route path="/reports" element={<ReportsWorkspace />} />
           <Route path="/automations" element={<AutomationsWorkspace />} />
+          <Route path="/grow" element={<GrowWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
           <Route path="/account" element={<AccountPanel />} />
           <Route path="/settings" element={<Navigate to="/brand" replace />} />
