@@ -217,6 +217,29 @@ def get_approvals() -> list[dict]:
         rows.extend(list_open_tasks())
     except Exception:
         pass
+    try:
+        if frappe.db.table_exists("EE Booking Change"):
+            for row in frappe.get_all(
+                "EE Booking Change",
+                filters={"status": "pending"},
+                fields=["name", "booking", "request_type", "requested_date"],
+                order_by="modified desc",
+                limit_page_length=20,
+            ):
+                event = frappe.db.get_value("Event Booking", row.booking, "event_name") if row.booking else row.booking
+                label = {"reschedule": "Date change", "add_on": "Add-on", "cancel": "Cancel"}.get(row.request_type, "Change")
+                rows.append(
+                    {
+                        "type": "booking_change",
+                        "id": row.name,
+                        "name": row.name,
+                        "doctype": "EE Booking Change",
+                        "summary": f"{label} · {event or row.booking}",
+                        "date": str(row.requested_date or ""),
+                    }
+                )
+    except Exception:
+        pass
     return rows
 
 
@@ -232,6 +255,10 @@ def act_on_approval(approval_type: str, doctype: str, name: str, decision: str, 
         from entertainment_express.api.workflow import complete_task
 
         complete_task(name, decision)
+    elif doctype == "EE Booking Change":
+        from entertainment_express.api.booking_changes import decide_change
+
+        decide_change(name, decision)
 
     _audit(
         "approval_decision",

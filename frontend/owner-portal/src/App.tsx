@@ -552,6 +552,97 @@ function JobRiskPanel({ jobId }: { jobId: string }) {
   );
 }
 
+function JobFilesPanel({ jobId }: { jobId: string }) {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [title, setTitle] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const reload = () => {
+    call("entertainment_express.api.deliverables.list_deliverables", { booking: jobId })
+      .then(setRows)
+      .catch(() => setRows([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  const readFile = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Could not read that file."));
+      reader.readAsDataURL(file);
+    });
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Photos and files</h2>
+      <p className="ee-muted" style={{ margin: 0 }}>
+        Publish a gallery for the host and guests. Keep each file under 5 MB.
+      </p>
+      <FormField label="Title">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} />
+      </FormField>
+      <FormField label="File">
+        <input
+          type="file"
+          accept="image/*,application/pdf,video/mp4"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setError("");
+            setBusy(true);
+            try {
+              const dataUrl = await readFile(file);
+              await call("entertainment_express.api.deliverables.save_deliverable", {
+                booking: jobId,
+                title: title || file.name,
+                file_name: file.name,
+                content_b64: dataUrl,
+                kind: file.type.startsWith("video/") ? "video" : file.type === "application/pdf" ? "receipt" : "photo",
+                mime: file.type,
+              });
+              setTitle("");
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not save that file.");
+            } finally {
+              setBusy(false);
+              e.target.value = "";
+            }
+          }}
+        />
+      </FormField>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {busy ? <p className="ee-muted">Saving…</p> : null}
+      {rows.length ? (
+        <ul>
+          {rows.map((row) => (
+            <li key={row.id}>
+              {row.title}
+              {row.published ? " · published" : " · hidden"}
+              <button
+                type="button"
+                className="ee-btn"
+                style={{ marginLeft: "0.5rem" }}
+                onClick={async () => {
+                  await call("entertainment_express.api.deliverables.publish_deliverable", { name: row.id, published: row.published ? 0 : 1 });
+                  reload();
+                }}
+              >
+                {row.published ? "Hide" : "Publish"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">No files yet.</p>
+      )}
+    </section>
+  );
+}
+
 function RecordExtras({ kind, id }: { kind: string; id: string }) {
   const go = useNavigate();
   const [cloneDate, setCloneDate] = React.useState("");
@@ -615,6 +706,7 @@ function RecordExtras({ kind, id }: { kind: string; id: string }) {
       </section>
       {kind === "job" ? <JobRiskPanel jobId={id} /> : null}
       {kind === "job" ? <JobCrewPanel jobId={id} /> : null}
+      {kind === "job" ? <JobFilesPanel jobId={id} /> : null}
     </>
   );
 }

@@ -9,6 +9,7 @@ import {
   FormField,
   MoneySummary,
   call,
+  downloadBase64,
   getSessionBootstrap,
 } from "../../portal-kit/src";
 
@@ -98,11 +99,101 @@ function Events() {
         <>
           <DataTable id="client-events" columns={[{ key: "event_name", label: "Event" }, { key: "event_date", label: "Date" }, { key: "status", label: "Status" }]} rows={rows} />
           <BookingDetail booking={rows[0]} />
+          {rows[0]?.name ? <ChangeRequestForm booking={rows[0].name} /> : null}
         </>
       ) : null}
     </section>
   ) : (
     <EmptyState title="No events yet" message="When you book, your events show here." />
+  );
+}
+
+function ChangeRequestForm({ booking }: { booking: string }) {
+  const [kind, setKind] = React.useState("reschedule");
+  const [date, setDate] = React.useState("");
+  const [notes, setNotes] = React.useState("");
+  const [item, setItem] = React.useState("");
+  const [packages, setPackages] = React.useState<any[]>([]);
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.booking_changes.list_changes", { booking })
+      .then(setRows)
+      .catch(() => setRows([]));
+  };
+  React.useEffect(() => {
+    reload();
+    call("entertainment_express.api.catalog.list_service_items", {})
+      .then(setPackages)
+      .catch(() => setPackages([]));
+  }, [booking]);
+
+  return (
+    <form
+      className="ee-form"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setError("");
+        try {
+          await call("entertainment_express.api.booking_changes.request_change", {
+            booking,
+            request_type: kind,
+            requested_date: date || null,
+            notes,
+            item_code: item || null,
+          });
+          setNotes("");
+          setDate("");
+          reload();
+        } catch (err: any) {
+          setError(err.message || "Could not send that request.");
+        }
+      }}
+    >
+      <h2 style={{ margin: 0 }}>Ask for a change</h2>
+      <FormField label="What do you need?">
+        <select value={kind} onChange={(e) => setKind(e.target.value)}>
+          <option value="reschedule">New date</option>
+          <option value="add_on">Add something</option>
+          <option value="cancel">Cancel this event</option>
+        </select>
+      </FormField>
+      {kind === "reschedule" ? (
+        <FormField label="New date">
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+        </FormField>
+      ) : null}
+      {kind === "add_on" && packages.length ? (
+        <FormField label="Package">
+          <select value={item} onChange={(e) => setItem(e.target.value)}>
+            <option value="">Describe it below</option>
+            {packages.map((row) => (
+              <option key={row.name || row.id} value={row.name || row.id}>
+                {row.item_name || row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      ) : null}
+      <FormField label="Notes">
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+      </FormField>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <button type="submit" className="ee-btn">
+        Send request
+      </button>
+      {rows.length ? (
+        <ul>
+          {rows.map((row) => (
+            <li key={row.id}>
+              {row.request_type} · {row.status}
+              {row.requested_date ? ` · ${row.requested_date}` : ""}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </form>
   );
 }
 
@@ -661,8 +752,58 @@ function Appointments() {
   );
 }
 
-function Photos() {
-  return <EmptyState title="Photos" message="Galleries show here after the event." />;
+function Photos({ booking }: { booking: string }) {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState("");
+
+  React.useEffect(() => {
+    if (!booking) {
+      setRows([]);
+      return;
+    }
+    call("entertainment_express.api.deliverables.list_deliverables", { booking })
+      .then(setRows)
+      .catch((err) => {
+        setRows([]);
+        setError(err.message || "Could not load photos.");
+      });
+  }, [booking]);
+
+  const openFile = async (row: any) => {
+    setBusy(row.id);
+    setError("");
+    try {
+      const file = await call("entertainment_express.api.deliverables.get_deliverable", { name: row.id });
+      downloadBase64(file.filename || row.file_name || "file", file.content_b64, file.mime || "application/octet-stream");
+    } catch (err: any) {
+      setError(err.message || "Could not download that file.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  if (!booking) return <EmptyState title="Pick an event" message="Open an event first, then photos from that night show here." />;
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {rows.length ? (
+        rows.map((row) => (
+          <article key={row.id} className="ee-job-card" style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
+            <h3 style={{ margin: 0 }}>{row.title}</h3>
+            <p className="ee-muted" style={{ margin: "0.35rem 0" }}>
+              {row.kind}
+            </p>
+            <button type="button" className="ee-btn" disabled={busy === row.id} onClick={() => openFile(row)}>
+              {busy === row.id ? "Opening…" : "Download"}
+            </button>
+          </article>
+        ))
+      ) : (
+        <EmptyState title="No photos yet" message="When the company publishes a gallery for this event, it shows up here." />
+      )}
+    </section>
+  );
 }
 
 function EventScoped({ children }: { children: (booking: string) => React.ReactNode }) {
@@ -736,7 +877,7 @@ export function ClientApp() {
         <Route path="/planning" element={scoped(<Planning booking={booking} />)} />
         <Route path="/people" element={scoped(<People booking={booking} />)} />
         <Route path="/chat" element={scoped(<Chat booking={booking} />)} />
-        <Route path="/photos" element={<Photos />} />
+          <Route path="/photos" element={<Photos booking={booking} />} />
         <Route path="/account" element={<AccountPanel />} />
         <Route path="/events/:booking" element={<EventScoped>{(b) => <Planning booking={b} />}</EventScoped>} />
         <Route path="*" element={<EmptyState title="Not found" message="That page is not in your event portal." />} />

@@ -72,11 +72,12 @@ SMS/WhatsApp (Twilio), FCM push, templates, preferences/opt-out/quiet hours, del
 beyond the phase-1 email subset.
 **Spec:** `notifications`, `integrations` (comms). **Depends on:** phase-1.
 
-## Phase 7 — Customer Portal 📝
+## Phase 7 — Customer Portal ✅ archived 2026-09-01
 Authenticated self-service: dashboard, booking self-management, portal sign & pay, event questionnaires,
 messaging, deliverables access. Surfaces planning forms, timeline, and music planning (delivered in
 phase-15).
 **Spec:** `customer-portal`. **Depends on:** phase-1, phase-5, phase-6.
+**Folder:** [`archive/2026-09-01-phase-7-customer-portal/`](archive/2026-09-01-phase-7-customer-portal/)
 
 ## Phase 8 — Marketing & Engagement 📝
 Segmentation, email/SMS/WhatsApp campaigns, lifecycle journeys, review generation, referrals/promotions,
