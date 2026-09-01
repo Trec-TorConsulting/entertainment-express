@@ -110,6 +110,8 @@ function Today() {
         </section>
       ) : null}
       <div className="ee-metrics">
+        <StatCard label="Billed this month" value={String(stats?.revenue || "0.00")} />
+        <StatCard label="Open quotes" value={String(stats?.pipeline_value || "0.00")} />
         <StatCard label="What customers owe" value={String(stats?.outstanding_balance || "0.00")} />
         <StatCard label="Jobs on the books" value={String(stats?.new_bookings || jobs.length || 0)} />
         <StatCard label="Needs a crew" value={String(stats?.at_risk_count || 0)} />
@@ -800,25 +802,70 @@ function ProposalWorkspace() {
 }
 
 function ReportsWorkspace() {
+  const monthStart = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+  };
+  const today = () => new Date().toISOString().slice(0, 10);
+  const [fromDate, setFromDate] = React.useState(monthStart);
+  const [toDate, setToDate] = React.useState(today);
   const [pack, setPack] = React.useState<any>(null);
+  const [schedules, setSchedules] = React.useState<any[]>([]);
+  const [email, setEmail] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = React.useCallback(() => {
+    call("entertainment_express.api.portal_reports.owner_pack", { from_date: fromDate, to_date: toDate })
+      .then(setPack)
+      .catch(() => setPack(null));
+    call("entertainment_express.api.portal_reports.list_schedules", {})
+      .then((res) => setSchedules(res || []))
+      .catch(() => setSchedules([]));
+  }, [fromDate, toDate]);
+
   React.useEffect(() => {
-    call("entertainment_express.api.portal_reports.owner_pack", {}).then(setPack).catch(() => setPack(null));
-  }, []);
+    reload();
+  }, [reload]);
+
   if (!pack) return <EmptyState title="Reports" message="Company snapshots appear here." />;
   return (
     <section style={{ display: "grid", gap: "1rem" }}>
+      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+        <FormField label="From">
+          <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+        </FormField>
+        <FormField label="To">
+          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+        </FormField>
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
         <StatCard label="Jobs" value={String(pack.jobs ?? 0)} />
         <StatCard label="Billed" value={String(pack.revenue || "0.00")} />
         <StatCard label="Still owed" value={String(pack.outstanding || "0.00")} />
-        <StatCard label="Needs a crew" value={String(pack.at_risk ?? 0)} />
+        <StatCard label="Tax" value={String(pack.tax || "0.00")} />
+        <StatCard label="Deposits held" value={String(pack.deposits_held || "0.00")} />
         <StatCard label="Payouts due" value={String(pack.payouts_due || "0.00")} />
+        <StatCard label="Open quotes" value={String(pack.pipeline_value || "0.00")} />
+        <StatCard label="Average job" value={String(pack.avg_deal || "0.00")} />
+        <StatCard label="Needs a crew" value={String(pack.at_risk ?? 0)} />
+        <StatCard label="People use" value={String(pack.crew_utilization || "—")} />
+        <StatCard label="Gear use" value={String(pack.gear_utilization || "—")} />
+        <StatCard label="Pipeline" value={String(pack.pipeline_conversion || "—")} />
       </div>
+      {pack.by_service_type?.length ? (
+        <ul>
+          {pack.by_service_type.map((row: any) => (
+            <li key={row.name}>
+              {row.name} · {row.amount} · {row.jobs} jobs
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         <button
           type="button"
           onClick={async () => {
-            const csv = await call("entertainment_express.api.portal_reports.owner_pack_csv", {});
+            const csv = await call("entertainment_express.api.portal_reports.owner_pack_csv", { from_date: fromDate, to_date: toDate });
             downloadText("company-reports.csv", String(csv || ""), "text/csv");
           }}
           style={{ background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
@@ -828,7 +875,7 @@ function ReportsWorkspace() {
         <button
           type="button"
           onClick={async () => {
-            const pdf = await call("entertainment_express.api.portal_reports.owner_pack_pdf", {});
+            const pdf = await call("entertainment_express.api.portal_reports.owner_pack_pdf", { from_date: fromDate, to_date: toDate });
             if (pdf?.content_b64) downloadBase64(pdf.filename || "company-reports.pdf", pdf.content_b64, "application/pdf");
           }}
           style={{ background: "var(--ee-panel)", color: "var(--ee-text)", border: "1px solid var(--ee-border)", borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
@@ -836,6 +883,45 @@ function ReportsWorkspace() {
           Download for accountant
         </button>
       </div>
+      <section className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0 }}>Email this snapshot</h2>
+        <FormField label="Send to">
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
+        </FormField>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.portal_reports.save_schedule", {
+                title: "Weekly snapshot",
+                recipients: email,
+                pack: "owner",
+                cadence: "weekly",
+                weekday: 0,
+              });
+              setEmail("");
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not save that schedule.");
+            }
+          }}
+        >
+          Email me each Monday
+        </button>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        {schedules.map((row) => (
+          <p key={row.id} className="ee-muted">
+            {row.title} · {row.cadence} · {row.recipients}
+            {row.active ? (
+              <button type="button" className="ee-btn" style={{ marginLeft: "0.5rem" }} onClick={() => call("entertainment_express.api.portal_reports.stop_schedule", { name: row.id }).then(reload)}>
+                Stop
+              </button>
+            ) : null}
+          </p>
+        ))}
+      </section>
     </section>
   );
 }

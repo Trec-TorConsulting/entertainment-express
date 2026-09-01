@@ -91,10 +91,11 @@ tolerance, push, issue reporting.
 **Spec:** `mobile-field-app`. **Depends on:** phase-2, phase-3, phase-6.
 **Folder:** [`archive/2026-09-01-phase-9-mobile-field-app/`](archive/2026-09-01-phase-9-mobile-field-app/)
 
-## Phase 10 — Reporting & BI 📝
+## Phase 10 — Reporting & BI ✅
 Operational dashboards, financial reports, utilization/ops KPIs, custom reports/exports, scheduled delivery,
 control-plane analytics.
 **Spec:** `reporting-bi`. **Depends on:** data from phases 1–9.
+**Folder:** [`archive/2026-09-01-phase-10-reporting-bi/`](archive/2026-09-01-phase-10-reporting-bi/)
 
 ## Phase 11 — AI Assistant & Intelligence 📝
 Pluggable Ollama backend, conversational assistant, smart quoting, forecasting, dispatch/route suggestions,

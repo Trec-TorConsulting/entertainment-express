@@ -17,3 +17,4 @@ entertainment_express.patches.v0_0_3.phase18_migration
 entertainment_express.patches.v0_0_3.phase7_customer_portal
 entertainment_express.patches.v0_0_3.phase8_marketing
 entertainment_express.patches.v0_0_3.phase9_field_app
+entertainment_express.patches.v0_0_3.phase10_reporting

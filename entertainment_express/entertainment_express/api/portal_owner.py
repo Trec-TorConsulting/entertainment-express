@@ -171,10 +171,18 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
     except Exception:
         unread_chat = 0
 
+    pack = {}
+    try:
+        from entertainment_express.api.portal_reports import _owner_snapshot
+
+        pack = _owner_snapshot(from_date, to_date)
+    except Exception:
+        pack = {}
+
     return {
-        "revenue": fmt_money(0, currency=currency),
+        "revenue": pack.get("revenue") or fmt_money(0, currency=currency),
         "new_bookings": bookings,
-        "pipeline_value": fmt_money(0, currency=currency),
+        "pipeline_value": pack.get("pipeline_value") or fmt_money(0, currency=currency),
         "at_risk_count": at_risk_count,
         "pending_approvals": pending_approvals,
         "outstanding_balance": fmt_money(outstanding_total, currency=currency),

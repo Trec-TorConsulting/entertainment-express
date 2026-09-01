@@ -131,6 +131,16 @@
   },
   {
     "doctype": "Notification Template",
+    "name": "report_digest",
+    "template_key": "report_digest",
+    "subject": "{{ title }}",
+    "active": 1,
+    "channels": "email",
+    "priority": "promotional",
+    "body_html": "<p>{{ body }}</p><p><a href='{{ reports_link }}'>Open reports</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
     "name": "timesheet_approved",
     "template_key": "timesheet_approved",
     "subject": "✅ Timesheet approved for {{ period }}",
