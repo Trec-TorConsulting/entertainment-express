@@ -18,6 +18,19 @@ def _ops():
     require_roles(*OPS)
 
 
+def is_warehouse_line(item_code: str) -> bool:
+    """Stock/rental/warehouse picks only — pure service catalog rows stay off the pull sheet."""
+    if not item_code:
+        return False
+    is_stock = cint(frappe.db.get_value("Item", item_code, "is_stock_item"))
+    ee_type = ""
+    if frappe.get_meta("Item").has_field("ee_item_type"):
+        ee_type = frappe.db.get_value("Item", item_code, "ee_item_type") or ""
+    if ee_type == "service":
+        return False
+    return bool(is_stock) or ee_type == "rental"
+
+
 def _ensure_barcode(doctype: str, name: str) -> str:
     current = frappe.db.get_value(doctype, name, "barcode")
     if current:
@@ -193,6 +206,8 @@ def generate_packing_list(booking_name: str) -> dict:
             },
         )
     for row in booking.service_items or []:
+        if not is_warehouse_line(row.item):
+            continue
         doc.append(
             "items",
             {

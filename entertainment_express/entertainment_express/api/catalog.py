@@ -105,3 +105,107 @@ def _within_radius(venue_geo: str, center_geo: str, radius_km: float) -> bool:
     a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(clat)) * math.cos(math.radians(vlat)) * math.sin(dlon / 2) ** 2
     distance_km = R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return distance_km <= radius_km
+
+
+def _money(amount):
+    from frappe.utils import fmt_money
+
+    return fmt_money(flt(amount), currency=frappe.db.get_default("currency") or "USD")
+
+
+@frappe.whitelist(allow_guest=True)
+def public_catalog() -> dict:
+    packages = []
+    if frappe.db.table_exists("Service Package"):
+        for pkg in frappe.get_all(
+            "Service Package",
+            filters={"active": 1},
+            fields=["name", "package_name", "package_price", "description"],
+            limit_page_length=100,
+        ):
+            packages.append(
+                {
+                    "id": pkg.name,
+                    "kind": "package",
+                    "name": pkg.package_name or pkg.name,
+                    "rate": _money(pkg.package_price),
+                    "description": pkg.description or "",
+                }
+            )
+    items = []
+    filters = {"disabled": 0}
+    if frappe.get_meta("Item").has_field("ee_self_bookable"):
+        filters["ee_self_bookable"] = 1
+    elif frappe.get_meta("Item").has_field("ee_item_type"):
+        filters["ee_item_type"] = ["in", ["service", "package", "addon", "rental"]]
+    for item in frappe.get_all(
+        "Item",
+        filters=filters,
+        fields=["name", "item_name", "standard_rate", "description"],
+        limit_page_length=100,
+    ):
+        items.append(
+            {
+                "id": item.name,
+                "kind": "item",
+                "name": item.item_name or item.name,
+                "rate": _money(item.standard_rate),
+                "description": item.description or "",
+            }
+        )
+    return {"packages": packages, "items": items}
+
+
+def _require_customer():
+    from entertainment_express.security.access import customer_name_for_user, require_login
+
+    require_login()
+    roles = set(frappe.get_roles() or [])
+    if "EE Event Guest" in roles and "EE Customer" not in roles:
+        frappe.throw("Only the host can save a wishlist.", frappe.PermissionError)
+    customer = customer_name_for_user()
+    if not customer:
+        frappe.throw("Sign in as a client to save packages.", frappe.PermissionError)
+    return customer
+
+
+@frappe.whitelist()
+def wishlist_list() -> list[dict]:
+    customer = _require_customer()
+    if not frappe.db.table_exists("EE Wishlist Item"):
+        return []
+    return frappe.get_all(
+        "EE Wishlist Item",
+        filters={"customer": customer},
+        fields=["name", "item", "item_name", "kind"],
+        order_by="creation desc",
+    )
+
+
+@frappe.whitelist()
+def wishlist_add(item: str, item_name: str = "", kind: str = "item") -> dict:
+    customer = _require_customer()
+    existing = frappe.db.get_value("EE Wishlist Item", {"customer": customer, "item": item}, "name")
+    if existing:
+        return {"name": existing}
+    doc = frappe.get_doc(
+        {
+            "doctype": "EE Wishlist Item",
+            "customer": customer,
+            "item": item,
+            "item_name": item_name or item,
+            "kind": kind if kind in ("item", "package") else "item",
+        }
+    )
+    doc.insert(ignore_permissions=True)
+    return {"name": doc.name}
+
+
+@frappe.whitelist()
+def wishlist_remove(name: str) -> dict:
+    customer = _require_customer()
+    doc = frappe.get_doc("EE Wishlist Item", name)
+    if doc.customer != customer:
+        frappe.throw("Not allowed.", frappe.PermissionError)
+    frappe.delete_doc("EE Wishlist Item", name, ignore_permissions=True)
+    return {"ok": True}

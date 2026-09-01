@@ -164,11 +164,11 @@ def test_client_portal_pages_exist_and_reference_contract_flow():
     index_page = _read(CLIENT_INDEX_FILE)
     sign_page = _read(CLIENT_SIGN_FILE)
     portal_base = _read(PORTAL_BASE_FILE)
-    assert "Client Portal" in index_page
-    assert "/client/sign" in index_page
+    assert "data-portal=\"client\"" in index_page
+    assert "/assets/entertainment_express/client/main.js" in index_page
+    assert "portal_bootstrap" in index_page
     assert "entertainment_express.api.contract.view_contract" in sign_page
     assert "entertainment_express.api.contract.sign_contract" in sign_page
-    assert "entertainment_express/templates/portal/base.html" in index_page
     assert "entertainment_express/templates/portal/base.html" in sign_page
     assert "Client Portal" in portal_base
     assert "templates/web.html" not in portal_base
@@ -265,12 +265,12 @@ def test_tenant_home_is_branded_landing():
 
 
 def test_client_portal_flow_order_sign_pay_plan():
-    page = _read(CLIENT_INDEX_FILE)
-    sign_idx = page.find('/client/sign')
-    pay_idx = page.find('/client/pay')
-    music_idx = page.find('/client/music')
-    assert sign_idx != -1 and pay_idx != -1 and music_idx != -1
-    assert sign_idx < pay_idx < music_idx
+    app = _read(ROOT.parents[1] / "frontend" / "customer-portal" / "src" / "App.tsx")
+    pay_idx = app.find('{ to: "/pay", label: "Pay" }')
+    docs_idx = app.find('{ to: "/documents", label: "Documents" }')
+    plan_idx = app.find('{ to: "/planning", label: "Planning" }', pay_idx)
+    assert pay_idx != -1 and docs_idx != -1 and plan_idx != -1
+    assert pay_idx < docs_idx < plan_idx
 
 
 def test_portal_nav_order_sign_pay_plan():

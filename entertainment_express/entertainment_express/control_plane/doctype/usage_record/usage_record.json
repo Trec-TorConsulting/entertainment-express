@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Control Plane",
  "name": "Usage Record",
@@ -47,7 +47,7 @@
    "fieldname": "metric",
    "fieldtype": "Select",
    "label": "Metric",
-   "options": "active_users\\nbookings\\nsms_sent\\nai_calls\\nstorage_gb",
+   "options": "active_users\nbookings\nsms_sent\nai_calls\nstorage_gb",
    "reqd": 1,
    "in_list_view": 1
   },

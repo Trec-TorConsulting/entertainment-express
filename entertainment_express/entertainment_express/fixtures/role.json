@@ -73,6 +73,14 @@
   },
   {
     "doctype": "Role",
+    "name": "EE Event Guest",
+    "role_name": "EE Event Guest",
+    "desk_access": 0,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
     "name": "SaaS Operator",
     "role_name": "SaaS Operator",
     "desk_access": 1,

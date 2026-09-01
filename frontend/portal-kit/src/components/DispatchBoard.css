@@ -1,0 +1,68 @@
+.ee-dispatch {
+  display: grid;
+  gap: 1rem;
+}
+
+.ee-dispatch__bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ee-dispatch h1 {
+  margin: 0.15rem 0 0;
+  font-size: 1.45rem;
+}
+
+.ee-dispatch__job {
+  display: grid;
+  gap: 0.75rem;
+  background: var(--ee-panel);
+  padding: 1.1rem;
+  border-radius: var(--ee-radius);
+  box-shadow: var(--ee-shadow);
+  border: 1px solid var(--ee-border);
+}
+
+.ee-dispatch__job--risk {
+  border-color: #fecaca;
+}
+
+.ee-dispatch__job h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.ee-dispatch__meta {
+  margin: 0;
+  color: var(--ee-muted);
+  font-size: 0.9rem;
+}
+
+.ee-dispatch__crew {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ee-dispatch__person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ee-dispatch__assign {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(6rem, 10rem) auto;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+@media (max-width: 640px) {
+  .ee-dispatch__assign {
+    grid-template-columns: 1fr;
+  }
+}

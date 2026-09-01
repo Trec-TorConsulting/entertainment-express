@@ -14,6 +14,10 @@ required_apps = ["erpnext"]
 # on login (Frappe handles that), so this only governs the public root.
 get_website_user_home_page = "entertainment_express.security.request_guards.get_website_user_home_page"
 
+update_website_context = [
+    "entertainment_express.www.branding.update_website_context",
+]
+
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [
     "entertainment_express.security.request_guards.enforce_tenant_suspension",
@@ -112,6 +116,7 @@ website_route_rules = [
     {"from_route": "/signup", "to_route": "signup"},
     {"from_route": "/owner/<path:app_path>", "to_route": "owner"},
     {"from_route": "/employee/<path:app_path>", "to_route": "employee"},
+    {"from_route": "/client/<path:app_path>", "to_route": "client"},
     # Phase-4 React SPAs — deep links stay on the shell page
     {"from_route": "/customer", "to_route": "customer"},
     {"from_route": "/customer/<path:app_path>", "to_route": "customer"},

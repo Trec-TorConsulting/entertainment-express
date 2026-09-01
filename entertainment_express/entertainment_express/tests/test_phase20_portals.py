@@ -240,6 +240,22 @@ def test_require_owner_login_denies_employee(monkeypatch):
     assert fake.flags.redirect_location == "/employee"
 
 
+def test_require_owner_login_allows_owner_even_if_system_manager(monkeypatch):
+    fake = _FakeFrappeRG(roles=["System Manager", "SaaS Operator", "EE Tenant Admin"], path="/owner")
+    monkeypatch.setattr(request_guards, "frappe", fake)
+
+    request_guards.require_owner_login()
+    assert getattr(fake.flags, "redirect_location", None) is None
+
+
+def test_require_employee_login_allows_staff_even_if_system_manager(monkeypatch):
+    fake = _FakeFrappeRG(roles=["System Manager", "EE Dispatcher"], path="/employee")
+    monkeypatch.setattr(request_guards, "frappe", fake)
+
+    request_guards.require_employee_login()
+    assert getattr(fake.flags, "redirect_location", None) is None
+
+
 def test_owner_canonical_route_is_owner_not_admin():
     from entertainment_express import hooks
 

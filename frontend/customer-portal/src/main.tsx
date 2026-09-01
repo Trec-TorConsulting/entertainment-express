@@ -1,16 +1,18 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Dashboard } from "./Dashboard";
+import { ClientApp } from "./App";
 import "../../portal-kit/src/tokens.css";
-import "./index.css";
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Dashboard />
+      <BrowserRouter basename="/client">
+        <ClientApp />
+      </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>
 );

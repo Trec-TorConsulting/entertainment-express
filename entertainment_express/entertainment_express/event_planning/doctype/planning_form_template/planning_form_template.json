@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Event Planning",
  "name": "Planning Form Template",
@@ -66,13 +66,13 @@
    "label": "Event Type",
    "reqd": 1,
    "in_list_view": 1,
-   "description": "e.g. wedding, birthday \u2014 matches Event Booking.event_type"
+   "description": "e.g. wedding, birthday — matches Event Booking.event_type"
   },
   {
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
-   "options": "planning\\nevaluation",
+   "options": "planning\nevaluation",
    "default": "planning",
    "reqd": 1,
    "in_list_view": 1

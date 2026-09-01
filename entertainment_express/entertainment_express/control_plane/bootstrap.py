@@ -447,6 +447,14 @@ def _ensure_notification_templates() -> None:
             "subject": "Fleet: {{ title }}",
             "body_html": "<p>{{ detail }}</p>",
         },
+        "event_invite": {
+            "subject": "You're invited to help plan {{ event_name }}",
+            "body_html": "<p>Hi {{ full_name }},</p><p>You've been invited to help plan <b>{{ event_name }}</b>.</p><p><a href='{{ link }}'>Open the event</a></p><p>You can share ideas, vote, and chat. Payments stay with the host.</p>",
+        },
+        "booking_chat": {
+            "subject": "New message about {{ event_name }}",
+            "body_html": "<p>There's a new note on {{ event_name }}:</p><p>{{ preview }}</p>",
+        },
     }
 
     for template_key, payload in defaults.items():

@@ -33,4 +33,17 @@ def hide_third_party_onboarding() -> None:
     company_name = frappe.db.get_single_value("Global Defaults", "default_company")
     ensure_active_fiscal_year(company_name=company_name)
 
+    if frappe.db.table_exists("Website Settings"):
+        for field, value in (
+            ("app_name", "Entertainment Express"),
+            ("footer", ""),
+            ("copyright", ""),
+            ("footer_template", ""),
+        ):
+            try:
+                if frappe.get_meta("Website Settings").has_field(field):
+                    frappe.db.set_single_value("Website Settings", field, value)
+            except Exception:
+                pass
+
     frappe.db.commit()

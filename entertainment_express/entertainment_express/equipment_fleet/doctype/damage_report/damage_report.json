@@ -3,7 +3,7 @@
  "creation": "2026-08-14 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "modified": "2026-08-14 00:00:00.000000",
+ "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Equipment Fleet",
  "name": "Damage Report",
@@ -60,7 +60,7 @@
    "fieldname": "resource_type",
    "fieldtype": "Select",
    "label": "Resource",
-   "options": "asset\\nvehicle",
+   "options": "asset\nvehicle",
    "reqd": 1
   },
   {
@@ -98,7 +98,7 @@
    "fieldname": "severity",
    "fieldtype": "Select",
    "label": "Severity",
-   "options": "minor\\nmoderate\\nmajor",
+   "options": "minor\nmoderate\nmajor",
    "default": "minor",
    "in_list_view": 1
   },
@@ -111,7 +111,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "open\\nin_repair\\nclosed",
+   "options": "open\nin_repair\nclosed",
    "default": "open"
   }
  ]

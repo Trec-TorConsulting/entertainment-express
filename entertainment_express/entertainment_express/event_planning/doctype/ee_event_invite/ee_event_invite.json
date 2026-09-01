@@ -1,0 +1,29 @@
+{
+ "actions": [],
+ "autoname": "format:EE-INV-{#####}",
+ "creation": "2026-08-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "modified": "2026-08-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Event Planning",
+ "name": "EE Event Invite",
+ "owner": "Administrator",
+ "istable": 0,
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Customer", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Event Guest", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "field_order": ["booking", "email", "full_name", "user", "status", "invited_by"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Event", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "email", "fieldtype": "Data", "label": "Email", "options": "Email", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "full_name", "fieldtype": "Data", "label": "Name"},
+  {"fieldname": "user", "fieldtype": "Link", "label": "User", "options": "User"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "invited\naccepted\nrevoked", "default": "invited", "in_list_view": 1},
+  {"fieldname": "invited_by", "fieldtype": "Link", "label": "Invited By", "options": "User"}
+ ]
+}

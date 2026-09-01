@@ -44,6 +44,27 @@ export async function call(method: string, args: RpcArgs = {}): Promise<any> {
   return payload?.message;
 }
 
+export function downloadText(filename: string, text: string, mime = "text/plain") {
+  const blob = new Blob([text], { type: mime });
+  _clickDownload(filename, blob);
+}
+
+export function downloadBase64(filename: string, contentB64: string, mime: string) {
+  const binary = atob(contentB64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  _clickDownload(filename, new Blob([bytes], { type: mime }));
+}
+
+function _clickDownload(filename: string, blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function resource(doctype: string) {
   const base = `/api/resource/${encodeURIComponent(doctype)}`;
 

@@ -1,15 +1,27 @@
 :root {
-  --ee-bg: #f7f7f2;
+  --ee-bg: #f3f4f6;
   --ee-panel: #ffffff;
-  --ee-text: #1f2933;
-  --ee-muted: #66758a;
-  --ee-brand: #006c67;
-  --ee-danger: #a5332a;
-  --ee-success: #1f7a49;
-  --ee-border: #d9dee5;
-  --ee-radius: 14px;
-  --ee-shadow: 0 10px 30px rgba(31, 41, 51, 0.08);
-  --ee-nav-width: 14rem;
-  --ee-bottom-nav-height: 3.5rem;
+  --ee-rail: #0f172a;
+  --ee-rail-muted: #94a3b8;
+  --ee-rail-text: #e2e8f0;
+  --ee-text: #0f172a;
+  --ee-muted: #64748b;
+  --ee-brand: #0f766e;
+  --ee-brand-soft: #ccfbf1;
+  --ee-danger: #b91c1c;
+  --ee-success: #15803d;
+  --ee-border: #e2e8f0;
+  --ee-radius: 12px;
+  --ee-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
+  --ee-nav-width: 15.5rem;
+  --ee-bottom-nav-height: 3.75rem;
   --ee-ops-font-size: 0.875rem;
+  --ee-header-height: 3.75rem;
+  --ee-font: ui-sans-serif, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+html, body, #root {
+  font-family: var(--ee-font);
+  background: var(--ee-bg);
+  color: var(--ee-text);
 }

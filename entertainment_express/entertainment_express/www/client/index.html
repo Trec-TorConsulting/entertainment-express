@@ -1,29 +1,19 @@
-{% extends "entertainment_express/templates/portal/base.html" %}
-
-{% block portal_content %}
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <p class="eyebrow">Client Portal</p>
-    <h2>Work with your event team in one secure place</h2>
-    <p>Use this portal for contracts, event details, music planning, and payment support without any internal operator tools.</p>
-
-    <div class="ee-grid ee-grid-features">
-      <article>
-        <h3>Sign Contract</h3>
-        <p>Open your secure contract link and complete your e-signature.</p>
-        <a class="ee-btn ee-btn-primary" href="/client/sign">Open Contract Signing</a>
-      </article>
-        <article>
-          <h3>Payments</h3>
-          <p>Use your secure invoice link to complete deposit and final balance milestones.</p>
-          <a class="ee-btn ee-btn-secondary" href="/client/pay">Open Payment Help</a>
-        </article>
-        <article>
-          <h3>Music Planning</h3>
-          <p>Submit your playlist preferences and event timeline details before event week.</p>
-          <a class="ee-btn ee-btn-secondary" href="/client/music">Open Music Planner</a>
-        </article>
-    </div>
-  </div>
-</section>
-{% endblock %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ spa_title or "Your events" }}</title>
+  <link rel="stylesheet" href="{{ spa_css or "/assets/entertainment_express/client/assets/main.css" }}">
+  <style>
+    html, body, #root { margin: 0; min-height: 100vh; background: #f3f4f6; color: #0f172a; font-family: ui-sans-serif, "Segoe UI", Helvetica, Arial, sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root" data-portal="client">Loading your events…</div>
+  <script>
+    window.eePortalBootstrap = {{ portal_bootstrap | tojson }};
+  </script>
+  <script type="module" src="{{ spa_js or "/assets/entertainment_express/client/main.js" }}"></script>
+</body>
+</html>
