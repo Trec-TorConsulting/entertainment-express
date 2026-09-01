@@ -47,6 +47,7 @@ const OWNER_NAV = [
       { to: "/reports", label: "Reports" },
       { to: "/automations", label: "Reminders" },
       { to: "/coverage", label: "Coverage" },
+      { to: "/move", label: "Move" },
       { to: "/brand", label: "Brand" },
     ],
   },
@@ -57,6 +58,7 @@ function Today() {
   const [stats, setStats] = React.useState<any>(null);
   const [approvals, setApprovals] = React.useState<any[]>([]);
   const [workflows, setWorkflows] = React.useState<any[]>([]);
+  const [setup, setSetup] = React.useState<any>(null);
   const hour = new Date().getHours();
   const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
@@ -70,6 +72,9 @@ function Today() {
     call("entertainment_express.api.portal_proposal.today_workflows", {})
       .then((res) => setWorkflows(res || []))
       .catch(() => setWorkflows([]));
+    call("entertainment_express.api.migration.onboarding", {})
+      .then(setSetup)
+      .catch(() => setSetup(null));
   }, []);
 
   const jobs = stats?.jobs || [];
@@ -87,6 +92,22 @@ function Today() {
           </h1>
         </div>
       </div>
+      {setup && !setup.complete ? (
+        <section className="ee-form" style={{ maxWidth: "none" }}>
+          <h2 style={{ margin: 0 }}>Finish setup</h2>
+          <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.1rem" }}>
+            {(setup.steps || []).map((step: any) => (
+              <li key={step.key}>
+                {step.done ? (
+                  <>Done · {step.label}</>
+                ) : (
+                  <NavLink to={step.href}>{step.label}</NavLink>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <div className="ee-metrics">
         <StatCard label="What customers owe" value={String(stats?.outstanding_balance || "0.00")} />
         <StatCard label="Jobs on the books" value={String(stats?.new_bookings || jobs.length || 0)} />
@@ -977,6 +998,222 @@ function CoverageWorkspace() {
   );
 }
 
+const MOVE_TARGETS = [
+  { id: "customers", label: "Customers", fields: ["name", "email", "phone"] },
+  { id: "leads", label: "Inquiries", fields: ["name", "email", "phone"] },
+  { id: "bookings", label: "Jobs", fields: ["name", "email", "date", "address", "start", "end"] },
+  { id: "packages", label: "Packages", fields: ["name", "rate"] },
+  { id: "gear", label: "Gear", fields: ["name", "type"] },
+  { id: "venues", label: "Places", fields: ["name", "address", "load_in"] },
+  { id: "vendors", label: "Partners", fields: ["name", "category"] },
+  { id: "songs", label: "Songs", fields: ["title", "artist"] },
+];
+
+const MOVE_FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  email: "Email",
+  phone: "Phone",
+  date: "Date",
+  address: "Address",
+  start: "Start",
+  end: "End",
+  rate: "Price",
+  type: "Type",
+  load_in: "Load-in",
+  category: "Category",
+  title: "Title",
+  artist: "Artist",
+};
+
+const MOVE_PRESET_LABELS: Record<string, string> = {
+  honeybook: "HoneyBook",
+  djeventplanner: "DJ Event Planner",
+  checkcherry: "Check Cherry",
+  booqable: "Booqable",
+};
+
+function MoveWorkspace() {
+  const [target, setTarget] = React.useState("customers");
+  const [csv, setCsv] = React.useState("");
+  const [headers, setHeaders] = React.useState<string[]>([]);
+  const [mapping, setMapping] = React.useState<Record<string, string>>({});
+  const [presets, setPresets] = React.useState<any>({});
+  const [preset, setPreset] = React.useState("");
+  const [result, setResult] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const fields = MOVE_TARGETS.find((row) => row.id === target)?.fields || [];
+
+  React.useEffect(() => {
+    call("entertainment_express.api.migration.list_presets", {})
+      .then(setPresets)
+      .catch(() => setPresets({}));
+  }, []);
+
+  React.useEffect(() => {
+    setResult(null);
+    if (!preset) return;
+    const starter = presets?.[preset]?.[target] || {};
+    setMapping({ ...starter });
+  }, [preset, target, presets]);
+
+  const readFile = (file: File) => {
+    setError("");
+    setResult(null);
+    const name = file.name.toLowerCase();
+    if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+      setError("Save the spreadsheet as CSV and try again.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const text = String(reader.result || "");
+      setCsv(text);
+      try {
+        const cols = await call("entertainment_express.api.migration.preview_headers", { csv_text: text });
+        setHeaders(cols || []);
+      } catch (err: any) {
+        setError(err.message || "Could not read that file.");
+        setHeaders([]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const run = async (dry: boolean) => {
+    setError("");
+    setBusy(true);
+    try {
+      const job = await call("entertainment_express.api.migration.start_import", {
+        target,
+        csv_text: csv,
+        mapping,
+        dry_run: dry ? 1 : 0,
+      });
+      setResult(job);
+      if (!dry && job?.id && (job.status === "pending" || job.status === "running")) {
+        const tick = window.setInterval(async () => {
+          try {
+            const next = await call("entertainment_express.api.migration.get_job", { name: job.id });
+            if (next?.status && next.status !== "pending" && next.status !== "running") {
+              window.clearInterval(tick);
+              setResult(next);
+            }
+          } catch {
+            window.clearInterval(tick);
+          }
+        }, 1500);
+      }
+    } catch (err: any) {
+      setError(err.message || "Could not run that file.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const downloadExport = async () => {
+    setError("");
+    try {
+      const file = await call("entertainment_express.api.migration.export_csv", { target });
+      downloadText(file.filename || `${target}.csv`, file.content || "", "text/csv");
+    } catch (err: any) {
+      setError(err.message || "Could not download that list.");
+    }
+  };
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Move</h1>
+        <p className="ee-muted">Bring lists in from a spreadsheet, preview first, then commit. Download what is already here anytime.</p>
+      </header>
+      <form className="ee-form" onSubmit={(event) => event.preventDefault()}>
+        <FormField label="What to move">
+          <select value={target} onChange={(e) => setTarget(e.target.value)}>
+            {MOVE_TARGETS.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.label}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Starter map">
+          <select
+            value={preset}
+            onChange={(e) => setPreset(e.target.value)}
+          >
+            <option value="">None — map columns yourself</option>
+            {Object.keys(MOVE_PRESET_LABELS).map((key) => (
+              <option key={key} value={key}>
+                {MOVE_PRESET_LABELS[key]}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="CSV file">
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) readFile(file);
+            }}
+          />
+        </FormField>
+        {fields.map((field) => (
+          <FormField key={field} label={MOVE_FIELD_LABELS[field] || field}>
+            <select
+              value={mapping[field] || ""}
+              onChange={(e) => setMapping((current) => ({ ...current, [field]: e.target.value }))}
+            >
+              <option value="">Skip</option>
+              {headers.map((header) => (
+                <option key={header} value={header}>
+                  {header}
+                </option>
+              ))}
+            </select>
+          </FormField>
+        ))}
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button type="button" className="ee-btn" disabled={busy || !csv} onClick={() => run(true)}>
+            Preview
+          </button>
+          <button type="button" className="ee-btn" disabled={busy || !csv} onClick={() => run(false)}>
+            Commit
+          </button>
+          <button type="button" className="ee-btn" disabled={busy} onClick={downloadExport}>
+            Download current list
+          </button>
+        </div>
+      </form>
+      {result ? (
+        <div>
+          <p>
+            {result.dry_run ? "Preview" : "Commit"} · {result.rows_ok || 0} {result.dry_run ? "would land" : "landed"}
+            {result.skipped ? ` · ${result.skipped} already here` : ""}
+            {result.rows_failed ? ` · ${result.rows_failed} failed` : ""}
+          </p>
+          {(result.errors || []).length ? (
+            <ul>
+              {result.errors.map((row: any, idx: number) => (
+                <li key={`${row.row}-${idx}`}>
+                  Row {row.row}: {row.message}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : csv ? (
+        <p className="ee-muted">Preview before you commit. Nothing is written until you confirm.</p>
+      ) : (
+        <p className="ee-muted">Upload a CSV from HoneyBook, DJ Event Planner, Check Cherry, Booqable, or your own export.</p>
+      )}
+    </section>
+  );
+}
+
 function ScheduleWorkspace() {
   const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const [types, setTypes] = React.useState<any[]>([]);
@@ -1354,6 +1591,7 @@ export function OwnerApp() {
           <Route path="/places" element={<PlacesWorkspace />} />
           <Route path="/partners" element={<PartnersWorkspace />} />
           <Route path="/coverage" element={<CoverageWorkspace />} />
+          <Route path="/move" element={<MoveWorkspace />} />
           <Route path="/dispatch" element={<DispatchWorkspace />} />
           <Route path="/catalog" element={<CatalogWorkspace />} />
           <Route path="/catalog/new" element={<CrudEditor kind="package" basePath="/catalog" />} />

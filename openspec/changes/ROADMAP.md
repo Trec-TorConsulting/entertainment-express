@@ -137,11 +137,12 @@ damage deposits & pre-auth, per-event insurance, policy expiry).
 (equipment/sub-rentals), phase-5 (deposits/pre-auth).
 **Folder:** [`archive/2026-09-01-phase-17-venues-vendors-insurance/`](archive/2026-09-01-phase-17-venues-vendors-insurance/)
 
-## Phase 18 — Data Migration & Onboarding 📝
+## Phase 18 — Data Migration & Onboarding ✅ archived 2026-09-01
 Guided CSV/Excel import with mapping/validation, competitor-export mapping presets, idempotent resumable
 import jobs, data export, and a new-tenant onboarding checklist. Reduces tenant switching cost.
 **Spec:** `data-migration`. **Depends on:** phase-1 (core entities exist); can run in parallel with later
 phases as those entities become importable.
+**Folder:** [`archive/2026-09-01-phase-18-data-migration-onboarding/`](archive/2026-09-01-phase-18-data-migration-onboarding/)
 
 ## Phase 19 — SaaS Marketing Website & Lead Capture ✅
 **Goal:** The public product front door at `www.{base_domain}` (served by the control-plane site) that sells

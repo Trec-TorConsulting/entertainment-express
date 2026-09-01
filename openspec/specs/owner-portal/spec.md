@@ -187,3 +187,10 @@ The system SHALL show venue, COI status, waiver status, and damage-hold status o
 #### Scenario: Owner places a hold
 - **WHEN** an owner starts a damage hold from the job
 - **THEN** billing preauth runs and the job shows held with a money string
+
+### Requirement: Move In Without Desk
+The system SHALL offer `/owner/move` for import, dry-run, commit, and export without `/app`. Labels SHALL be business language.
+
+#### Scenario: Owner imports a customer list
+- **WHEN** an owner dry-runs then commits a customers CSV
+- **THEN** the job shows how many landed and failed, with no Desk URL

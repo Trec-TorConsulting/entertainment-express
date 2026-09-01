@@ -1,0 +1,18 @@
+{
+ "actions": [],
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["row_number", "message"],
+ "fields": [
+  {"fieldname": "row_number", "fieldtype": "Int", "label": "Row", "in_list_view": 1},
+  {"fieldname": "message", "fieldtype": "Small Text", "label": "Message", "in_list_view": 1}
+ ],
+ "istable": 1,
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Import Error",
+ "owner": "Administrator",
+ "permissions": []
+}
