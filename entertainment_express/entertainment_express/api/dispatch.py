@@ -342,19 +342,11 @@ def get_run_sheet(booking_name: str) -> dict:
         frappe.throw("No run sheet found for this booking.")
     data = frappe.get_doc("Run Sheet", rs_name).as_dict()
     try:
-        from entertainment_express.api.planning import list_forms, get_form
-        from entertainment_express.api.timeline import get_timeline
-        from entertainment_express.api.music import play_view
+        from entertainment_express.event_planning import crew_view
 
-        forms = []
-        for row in list_forms(booking_name):
-            try:
-                forms.append(get_form(booking_name, row["name"]))
-            except Exception:
-                forms.append(row)
-        data["planning"] = forms
-        data["timeline"] = get_timeline(booking_name)
-        data["music"] = play_view(booking_name)
+        data["planning"] = crew_view.planning(booking_name)
+        data["timeline"] = crew_view.timeline(booking_name)
+        data["music"] = crew_view.music(booking_name)
     except Exception:
         data["planning"] = []
         data["timeline"] = {}

@@ -12,6 +12,34 @@ STAFF = ["EE Tenant Admin", "EE Sales", "System Manager"]
 
 
 @frappe.whitelist()
+def list_form_templates() -> list:
+    require_roles(*STAFF)
+    rows = frappe.get_all(
+        "Planning Form Template",
+        fields=["name", "template_name", "event_type", "purpose", "active", "reminder_cadence_days"],
+        order_by="template_name",
+    )
+    for row in rows:
+        row["fields"] = frappe.get_all(
+            "Planning Form Field",
+            filters={"parent": row.name},
+            fields=[
+                "field_key",
+                "label",
+                "field_type",
+                "options",
+                "required",
+                "conditional_on_field",
+                "conditional_on_value",
+                "help_text",
+                "idx_order",
+            ],
+            order_by="idx",
+        )
+    return rows
+
+
+@frappe.whitelist()
 def save_template(template: dict) -> dict:
     require_roles(*STAFF)
     name = template.get("name")

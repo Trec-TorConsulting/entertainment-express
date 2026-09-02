@@ -55,6 +55,8 @@ class TestConditionals:
 
 class TestPlanningAttach:
     def setup_method(self):
+        if not frappe.db.exists("DocType", "Planning Form Template"):
+            pytest.skip("migrate required")
         if not frappe.db.exists("Customer", "TEST-PLAN-CUST"):
             frappe.get_doc({"doctype": "Customer", "customer_name": "TEST-PLAN-CUST"}).insert(ignore_permissions=True)
 
@@ -90,6 +92,8 @@ class TestPlanningAttach:
 
 class TestMusicDoNotPlay:
     def setup_method(self):
+        if not frappe.db.exists("DocType", "Music Selection"):
+            pytest.skip("migrate required")
         if not frappe.db.exists("Customer", "TEST-PLAN-CUST"):
             frappe.get_doc({"doctype": "Customer", "customer_name": "TEST-PLAN-CUST"}).insert(ignore_permissions=True)
 
@@ -120,6 +124,8 @@ class TestMusicDoNotPlay:
 
 class TestTimelineFinalize:
     def setup_method(self):
+        if not frappe.db.exists("DocType", "Event Timeline"):
+            pytest.skip("migrate required")
         if not frappe.db.exists("Customer", "TEST-PLAN-CUST"):
             frappe.get_doc({"doctype": "Customer", "customer_name": "TEST-PLAN-CUST"}).insert(ignore_permissions=True)
 

@@ -121,13 +121,14 @@ audit completeness, per-tenant custom domains, observability/alerting, documenta
 **Specs:** all. **Depends on:** everything.
 **Folder:** [`archive/2026-09-02-phase-14-hardening/`](archive/2026-09-02-phase-14-hardening/)
 
-## Phase 15 — Event Planning Suite 📝
+## Phase 15 — Event Planning Suite ✅
 The DJ/entertainment client-planning engine: configurable conditional **planning forms/questionnaires** per
 event type with reminders, collaborative **event timeline/run-of-show** builder with templates, and
 **music planning** (client + guest song requests, must-play/do-not-play, curated suggestion lists, streaming
 import/preview, music library & availability check). Surfaces to crew on run sheets and the mobile app.
 **Specs:** `event-planning-forms`, `event-timeline`, `music-planning`. **Depends on:** phase-1, phase-7
 (portal), phase-13 (streaming integrations), phase-9 (mobile crew view).
+**Folder:** [`archive/2026-09-02-phase-15-event-planning/`](archive/2026-09-02-phase-15-event-planning/)
 
 ## Phase 16 — Appointments & Consultation Scheduling ✅ archived 2026-09-01
 **Goal:** Calendly-style self-service scheduler for consultations/planning meetings: bookable meeting types,

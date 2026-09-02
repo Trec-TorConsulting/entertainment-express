@@ -501,6 +501,16 @@ def crew_run_sheet(booking_id: str = None, token: str = None) -> Dict:
                 for c in rs.get("checklist", [])
             ]
         
+        extras = {"planning": [], "timeline": {}, "music": {}}
+        try:
+            from entertainment_express.event_planning import crew_view
+
+            extras["planning"] = crew_view.planning(booking_id)
+            extras["timeline"] = crew_view.timeline(booking_id)
+            extras["music"] = crew_view.music(booking_id)
+        except Exception:
+            pass
+
         return _response({
             "booking_id": booking.name,
             "event_name": booking.event_name,
@@ -511,6 +521,7 @@ def crew_run_sheet(booking_id: str = None, token: str = None) -> Dict:
             "equipment": equipment,
             "checklist": checklist,
             "crew_count": len(frappe.get_all("Crew Assignment", filters={"booking": booking_id})),
+            **extras,
         })
     except Exception as e:
         logger.error(f"crew_run_sheet failed: {e}")

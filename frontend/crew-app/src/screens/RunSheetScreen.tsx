@@ -235,6 +235,40 @@ export default function RunSheetScreen({ route, navigation }: RunSheetScreenProp
             <Text style={styles.notesContent}>{runSheetData.notes}</Text>
           </View>
         )}
+
+        {(runSheetData as any)?.planning?.length ? (
+          <View style={styles.notesCard}>
+            <Text style={styles.notesTitle}>Event details</Text>
+            {(runSheetData as any).planning.map((form: any) => (
+              <Text key={form.name} style={styles.notesContent}>
+                {form.template_name || 'Questionnaire'} · {Math.round(Number(form.completion_percent) || 0)}%
+              </Text>
+            ))}
+          </View>
+        ) : null}
+        {(runSheetData as any)?.timeline?.items?.length ? (
+          <View style={styles.notesCard}>
+            <Text style={styles.notesTitle}>Run of show</Text>
+            {(runSheetData as any).timeline.items.map((row: any, idx: number) => (
+              <Text key={row.name || idx} style={styles.notesContent}>
+                {row.start_time || ''} {row.title}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+        {(runSheetData as any)?.music?.lists ? (
+          <View style={styles.notesCard}>
+            <Text style={styles.notesTitle}>Music</Text>
+            {['must_play', 'do_not_play', 'special_moment', 'general_request'].map((key) =>
+              ((runSheetData as any).music.lists[key] || []).map((row: any) => (
+                <Text key={row.name} style={styles.notesContent}>
+                  {key}: {row.free_text || row.song}
+                  {row.in_library ? ' · in library' : ''}
+                </Text>
+              ))
+            )}
+          </View>
+        ) : null}
       </ScrollView>
 
       {/* Submit Button */}

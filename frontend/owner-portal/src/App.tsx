@@ -28,6 +28,7 @@ const OWNER_NAV = [
       { to: "/pipeline", label: "Pipeline" },
       { to: "/schedule", label: "Consults" },
       { to: "/dispatch", label: "Dispatch" },
+      { to: "/event-details", label: "Event details" },
     ],
   },
   {
@@ -734,6 +735,7 @@ function RecordExtras({ kind, id }: { kind: string; id: string }) {
       </section>
       {kind === "job" ? <JobRiskPanel jobId={id} /> : null}
       {kind === "job" ? <JobCrewPanel jobId={id} /> : null}
+      {kind === "job" ? <JobPlanningPanel jobId={id} /> : null}
       {kind === "job" ? <JobFilesPanel jobId={id} /> : null}
     </>
   );
@@ -1845,6 +1847,319 @@ function AutomationsWorkspace() {
   );
 }
 
+function JobPlanningPanel({ jobId }: { jobId: string }) {
+  const [forms, setForms] = React.useState<any[]>([]);
+  const [timeline, setTimeline] = React.useState<any>(null);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [music, setMusic] = React.useState<any>(null);
+  const [guestUrl, setGuestUrl] = React.useState("");
+  const [pick, setPick] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.planning.list_forms", { booking_name: jobId })
+      .then((res) => setForms(res || []))
+      .catch(() => setForms([]));
+    call("entertainment_express.api.timeline.get_timeline", { booking_name: jobId })
+      .then(setTimeline)
+      .catch(() => setTimeline(null));
+    call("entertainment_express.api.timeline.list_timeline_templates", {})
+      .then((res) => setTemplates(res || []))
+      .catch(() => setTemplates([]));
+    call("entertainment_express.api.music.play_view", { booking_name: jobId })
+      .then(setMusic)
+      .catch(() => setMusic(null));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  const lists = music?.lists || {};
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Event details</h2>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {forms.length ? (
+        forms.map((row) => (
+          <p key={row.name} style={{ margin: 0 }}>
+            {row.template_name || row.template} · {Math.round(Number(row.completion_percent) || 0)}% · {row.status}
+          </p>
+        ))
+      ) : (
+        <p className="ee-muted">A questionnaire attaches after this job is confirmed and matches an event type.</p>
+      )}
+      <div className="ee-form__actions">
+        <button
+          type="button"
+          className="ee-btn ee-btn--ghost"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.planning.send_evaluation", { booking_name: jobId });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not send the follow-up form.");
+            }
+          }}
+        >
+          Send follow-up form
+        </button>
+      </div>
+      <h3 style={{ margin: "1rem 0 0.35rem", fontSize: "1.05rem" }}>Run of show</h3>
+      <FormField label="Start from a template">
+        <select value={pick} onChange={(e) => setPick(e.target.value)}>
+          <option value="">Choose a template</option>
+          {templates.map((row) => (
+            <option key={row.name} value={row.name}>
+              {row.template_name}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!pick}
+        onClick={async () => {
+          setError("");
+          try {
+            await call("entertainment_express.api.timeline.apply_template", { booking_name: jobId, template_name: pick });
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not apply that template.");
+          }
+        }}
+      >
+        Apply template
+      </button>
+      {(timeline?.items || []).map((row: any, idx: number) => (
+        <p key={row.name || idx} style={{ margin: 0 }}>
+          {row.start_time || ""} {row.title}
+        </p>
+      ))}
+      {(timeline?.pending_requests || []).map((row: any) => (
+        <p key={row.name} style={{ margin: 0 }}>
+          Suggested change · {row.requested_by}
+          <button
+            type="button"
+            className="ee-btn ee-btn--ghost"
+            style={{ marginLeft: "0.5rem" }}
+            onClick={async () => {
+              await call("entertainment_express.api.timeline.review_change", { request_name: row.name, approve: 1 });
+              reload();
+            }}
+          >
+            Approve
+          </button>
+        </p>
+      ))}
+      {timeline?.status !== "finalized" ? (
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.timeline.finalize", { booking_name: jobId, share_with_client: 1 });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not finalize the run of show.");
+            }
+          }}
+        >
+          Finalize and share
+        </button>
+      ) : (
+        <p className="ee-muted">Run of show is finalized.</p>
+      )}
+      <h3 style={{ margin: "1rem 0 0.35rem", fontSize: "1.05rem" }}>Music</h3>
+      {["must_play", "do_not_play", "special_moment", "general_request"].map((key) =>
+        (lists[key] || []).length ? (
+          <div key={key}>
+            <p style={{ margin: "0.4rem 0 0", fontWeight: 600 }}>{key.split("_").join(" ")}</p>
+            {(lists[key] || []).map((row: any) => (
+              <p key={row.name} style={{ margin: 0 }}>
+                {row.free_text || row.song} {row.in_library ? "· in library" : "· not in library"} · {row.status}
+              </p>
+            ))}
+          </div>
+        ) : null
+      )}
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          setError("");
+          try {
+            const res = await call("entertainment_express.api.music.create_guest_link", { booking_name: jobId });
+            setGuestUrl(res?.url || "");
+          } catch (err: any) {
+            setError(err.message || "Could not create a guest request link.");
+          }
+        }}
+      >
+        Guest song-request link
+      </button>
+      {guestUrl ? <p className="ee-muted">Copy now: {guestUrl}</p> : null}
+    </section>
+  );
+}
+
+function EventPlanningWorkspace() {
+  const emptyField = { field_key: "", label: "", field_type: "text", options: "", required: 0, conditional_on_field: "", conditional_on_value: "" };
+  const emptyBeat = { title: "", offset_minutes: 0, duration_minutes: 15, moment_key: "" };
+  const [forms, setForms] = React.useState<any[]>([]);
+  const [timelines, setTimelines] = React.useState<any[]>([]);
+  const [formDraft, setFormDraft] = React.useState<any>({
+    template_name: "",
+    event_type: "wedding",
+    purpose: "planning",
+    active: 1,
+    reminder_cadence_days: 3,
+    fields: [{ ...emptyField, field_key: "pronunciations", label: "Names to announce" }],
+  });
+  const [tlDraft, setTlDraft] = React.useState<any>({
+    template_name: "",
+    event_type: "wedding",
+    active: 1,
+    items: [{ ...emptyBeat, title: "Grand entrance" }],
+  });
+  const [error, setError] = React.useState("");
+
+  const load = () => {
+    call("entertainment_express.api.planning.list_form_templates", {})
+      .then((res) => setForms(res || []))
+      .catch(() => setForms([]));
+    call("entertainment_express.api.timeline.list_timeline_templates", {})
+      .then((res) => setTimelines(res || []))
+      .catch(() => setTimelines([]));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Event details</h1>
+        <p className="ee-muted">Questionnaires and run-of-show templates for each event type. Confirmed jobs pick these up automatically.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0 }}>Questionnaires</h2>
+        {forms.map((row) => (
+          <p key={row.name} style={{ margin: 0 }}>
+            {row.template_name} · {row.event_type} · {row.purpose} · {row.active ? "on" : "off"}
+          </p>
+        ))}
+        <FormField label="Template name">
+          <input value={formDraft.template_name} onChange={(e) => setFormDraft({ ...formDraft, template_name: e.target.value })} />
+        </FormField>
+        <FormField label="Event type">
+          <input value={formDraft.event_type} onChange={(e) => setFormDraft({ ...formDraft, event_type: e.target.value })} />
+        </FormField>
+        {(formDraft.fields || []).map((field: any, idx: number) => (
+          <div key={idx} style={{ display: "grid", gap: "0.35rem" }}>
+            <FormField label={`Question ${idx + 1}`}>
+              <input
+                value={field.label}
+                onChange={(e) => {
+                  const fields = [...formDraft.fields];
+                  const label = e.target.value;
+                  fields[idx] = { ...field, label, field_key: field.field_key || label.toLowerCase().replace(/[^a-z0-9]+/g, "_") };
+                  setFormDraft({ ...formDraft, fields });
+                }}
+              />
+            </FormField>
+            <FormField label="Show only if (field = value)">
+              <input
+                value={field.conditional_on_field ? `${field.conditional_on_field}=${field.conditional_on_value}` : ""}
+                placeholder="ceremony=Yes"
+                onChange={(e) => {
+                  const [k, ...rest] = e.target.value.split("=");
+                  const fields = [...formDraft.fields];
+                  fields[idx] = { ...field, conditional_on_field: (k || "").trim(), conditional_on_value: rest.join("=").trim() };
+                  setFormDraft({ ...formDraft, fields });
+                }}
+              />
+            </FormField>
+          </div>
+        ))}
+        <div className="ee-form__actions">
+          <button type="button" className="ee-btn ee-btn--ghost" onClick={() => setFormDraft({ ...formDraft, fields: [...formDraft.fields, { ...emptyField }] })}>
+            Add question
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                await call("entertainment_express.api.planning.save_template", { template: formDraft });
+                setFormDraft({ ...formDraft, template_name: "", name: undefined });
+                load();
+              } catch (err: any) {
+                setError(err.message || "Could not save that questionnaire.");
+              }
+            }}
+          >
+            Save questionnaire
+          </button>
+        </div>
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0 }}>Run of show templates</h2>
+        {timelines.map((row) => (
+          <p key={row.name} style={{ margin: 0 }}>
+            {row.template_name} · {row.event_type}
+          </p>
+        ))}
+        <FormField label="Template name">
+          <input value={tlDraft.template_name} onChange={(e) => setTlDraft({ ...tlDraft, template_name: e.target.value })} />
+        </FormField>
+        {(tlDraft.items || []).map((item: any, idx: number) => (
+          <FormField key={idx} label={`Cue ${idx + 1} (minutes from start)`}>
+            <input
+              value={`${item.offset_minutes} ${item.title}`}
+              onChange={(e) => {
+                const parts = e.target.value.trim().split(/\s+/);
+                const offset = Number(parts[0]);
+                const items = [...tlDraft.items];
+                items[idx] = { ...item, offset_minutes: Number.isFinite(offset) ? offset : 0, title: Number.isFinite(offset) ? parts.slice(1).join(" ") : e.target.value };
+                setTlDraft({ ...tlDraft, items });
+              }}
+            />
+          </FormField>
+        ))}
+        <div className="ee-form__actions">
+          <button type="button" className="ee-btn ee-btn--ghost" onClick={() => setTlDraft({ ...tlDraft, items: [...tlDraft.items, { ...emptyBeat }] })}>
+            Add cue
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                await call("entertainment_express.api.timeline.save_timeline_template", { template: tlDraft });
+                setTlDraft({ ...tlDraft, template_name: "", name: undefined });
+                load();
+              } catch (err: any) {
+                setError(err.message || "Could not save that run of show.");
+              }
+            }}
+          >
+            Save run of show
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function TalentHome() {
   const [day, setDay] = React.useState<any>(null);
   React.useEffect(() => {
@@ -2515,6 +2830,7 @@ export function OwnerApp() {
           <Route path="/coverage" element={<CoverageWorkspace />} />
           <Route path="/move" element={<MoveWorkspace />} />
           <Route path="/dispatch" element={<DispatchWorkspace />} />
+          <Route path="/event-details" element={<EventPlanningWorkspace />} />
           <Route path="/catalog" element={<CatalogWorkspace />} />
           <Route path="/catalog/new" element={<CrudEditor kind="package" basePath="/catalog" />} />
           <Route path="/catalog/:id" element={<CrudEditor kind="package" basePath="/catalog" />} />
