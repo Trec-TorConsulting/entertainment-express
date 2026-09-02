@@ -53,31 +53,31 @@ deterministic crew suggest, and call-time drive order (maps minutes when connect
 **Spec:** `scheduling-dispatch`. **Depends on:** phase-1 bookings, phase-3 workers can precede if needed.
 **Folder:** [`archive/2026-09-02-phase-2-scheduling-dispatch/`](archive/2026-09-02-phase-2-scheduling-dispatch/)
 
-## Phase 3 — HR & Workforce ✅
+## Phase 3 — HR & Workforce ✅ archived 2026-09-02
 Worker (W2/1099) onboarding, skills/roles, availability, timesheets, compliance docs. Enables real
 dispatch matching and payouts. Owner/employee without Desk.
 **Spec:** `hr-workforce`. **Depends on:** phase-1.
-**Folder:** [`phase-3-hr-workforce/`](phase-3-hr-workforce/)
+**Folder:** [`archive/2026-09-02-phase-3-hr-workforce/`](archive/2026-09-02-phase-3-hr-workforce/)
 
-## Phase 4 — Equipment, Inventory & Fleet ✅
+## Phase 4 — Equipment, Inventory & Fleet ✅ archived 2026-09-02
 Asset registry/condition/utilization, consumable stock, vehicles, maintenance, check-in/out & damage,
 barcode/QR scan check-in/out, packing lists/pull sheets, multi-location stock, sub-rentals.
 Owner/employee without Desk.
 **Spec:** `equipment-inventory-fleet`. **Depends on:** phase-1 service-catalog assets.
-**Folder:** [`phase-4-equipment-fleet/`](phase-4-equipment-fleet/)
+**Folder:** [`archive/2026-09-02-phase-4-equipment-fleet/`](archive/2026-09-02-phase-4-equipment-fleet/)
 
-## Phase 5 — Full Billing & Multi-Processor Payments ✅
+## Phase 5 — Full Billing & Multi-Processor Payments ✅ archived 2026-09-02
 Complete deposits/payment schedules, Square + PayPal + ACH + Authorize.Net, security/damage deposits & card
 pre-authorization, installment payment plans, refunds, tips, webhook reconciliation, full accounting
 integrity beyond the phase-1 Stripe subset. Owner/employee/client without Desk.
 **Spec:** `billing-payments`, `integrations` (payments). **Depends on:** phase-1.
-**Folder:** [`phase-5-full-billing/`](phase-5-full-billing/)
+**Folder:** [`archive/2026-09-02-phase-5-full-billing/`](archive/2026-09-02-phase-5-full-billing/)
 
-## Phase 6 — Notifications (Full Multi-Channel) ✅
+## Phase 6 — Notifications (Full Multi-Channel) ✅ archived 2026-09-02
 SMS/WhatsApp (Twilio), FCM push, templates, preferences/opt-out/quiet hours, delivery tracking, retries,
 beyond the phase-1 email subset. Owner/employee/client without Desk.
 **Spec:** `notifications`, `integrations` (comms). **Depends on:** phase-1.
-**Folder:** [`phase-6-notifications/`](phase-6-notifications/)
+**Folder:** [`archive/2026-09-02-phase-6-notifications/`](archive/2026-09-02-phase-6-notifications/)
 
 ## Phase 7 — Customer Portal ✅ archived 2026-09-01
 Authenticated self-service: dashboard, booking self-management, portal sign & pay, event questionnaires,
