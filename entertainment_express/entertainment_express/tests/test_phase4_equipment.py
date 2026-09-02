@@ -16,8 +16,21 @@ from entertainment_express.api.fleet_ops import (
 )
 
 
+def _need_fleet():
+    db = getattr(frappe, "db", None)
+    exists = getattr(db, "exists", None) if db is not None else None
+    if not callable(exists):
+        pytest.skip("live frappe required")
+    try:
+        if not exists("DocType", "Vehicle"):
+            pytest.skip("migrate required")
+    except Exception:
+        pytest.skip("migrate required")
+
+
 class TestAssetOutOfService:
     def setup_method(self):
+        _need_fleet()
         if not frappe.db.exists("Service Asset", {"asset_name": "OOS Bounce"}):
             self.asset = frappe.get_doc({
                 "doctype": "Service Asset",
@@ -38,6 +51,7 @@ class TestAssetOutOfService:
 
 class TestVehicleConflict:
     def setup_method(self):
+        _need_fleet()
         if not frappe.db.exists("Customer", "TEST-FLEET-CUST"):
             frappe.get_doc({"doctype": "Customer", "customer_name": "TEST-FLEET-CUST"}).insert(ignore_permissions=True)
         if not frappe.db.exists("DocType", "Vehicle"):
@@ -76,6 +90,7 @@ class TestVehicleConflict:
 
 class TestScanAndPacking:
     def setup_method(self):
+        _need_fleet()
         if not frappe.db.exists("Customer", "TEST-FLEET-CUST"):
             frappe.get_doc({"doctype": "Customer", "customer_name": "TEST-FLEET-CUST"}).insert(ignore_permissions=True)
         if not frappe.db.exists("DocType", "Packing List"):
@@ -111,6 +126,7 @@ class TestScanAndPacking:
 
 class TestStockAndSubrental:
     def test_transfer_and_subrental(self):
+        _need_fleet()
         if not frappe.db.exists("DocType", "EE Location"):
             pytest.skip("migrate required")
         frappe.set_user("Administrator")

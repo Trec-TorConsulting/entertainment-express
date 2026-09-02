@@ -1,13 +1,18 @@
 # Tasks: Phase 4 — Equipment, Inventory & Fleet
 
-- [x] 1.1 Extend Service Asset (condition, location, barcode, out_of_service).
-- [x] 1.2 EE Location, Vehicle, Vehicle Assignment.
-- [x] 1.3 Maintenance Record, Damage Report, Asset Check Log.
-- [x] 1.4 Packing List + items; Stock Balance; Stock Transfer; Sub Rental.
-- [x] 2.1 Availability excludes maintenance windows and open check-outs.
-- [x] 2.2 Scan checkout/in, packing list generate/verify, vehicle conflict, stock transfer, consume, sub-rental.
-- [x] 2.3 Utilization report; daily expiry/reorder/maintenance alerts.
-- [x] 3.1 Tests: OOS blocked, vehicle double-book blocked, scan checkout, packing missing flag, stock transfer audit, sub-rental covers shortage.
+> Backend DocTypes already exist. This pass is portals, packing lookup, and isolation tests.
+
+## 1. Packing lookup + portal API
+- [x] 1.1 Resolve Packing List by booking (then name) in `packing_status` / `mark_packed`.
+- [x] 1.2 `api/portal_fleet.py`: vehicles, stock transfer, sub-rental, utilization, wrap scan/pack/damage. Guests 403. Crew cannot transfer or sub-rent.
+
+## 2. UI
+- [x] 2.1 `/owner/gear` vehicles, stock move, sub-rental; unit utilization on the gear page.
+- [x] 2.2 `/employee` pull sheet: packed, scan, check out/in, damage. Rebuild both public SPAs.
+
+## 3. Tests + ship
+- [x] 3.1 `tests/test_phase4_surfaces.py`; skip live `test_phase4_equipment.py` without migrate.
+- [x] 3.2 Patch `phase4_equipment_fleet`; image `0.0.76-ee` → `0.0.77-ee`; ROADMAP folder linked.
 
 ## Definition of Done
-A dispatcher can pull a packing list, crew can scan gear out/in, damaged returns create a report, vehicles cannot double-book, and low stock/expiry alerts fire.
+Owner parks a truck and moves stock without Desk. Crew packs a pull sheet, scans gear out/in, and reports damage. Overlapping truck assign still blocked. Guests 403.

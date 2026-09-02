@@ -603,7 +603,345 @@ function DispatchWorkspace() {
 
 function GearWorkspace() {
   const go = useNavigate();
-  return <RecordList kind="gear" basePath="/gear" go={go} />;
+  return (
+    <section style={{ display: "grid", gap: "1.25rem" }}>
+      <RecordList kind="gear" basePath="/gear" go={go} />
+      <FleetVehicles />
+      <StockMove />
+      <SubRentalForm />
+      <MaintenanceDue />
+    </section>
+  );
+}
+
+function GearUtilization({ id }: { id: string }) {
+  const [util, setUtil] = React.useState<any>(null);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_fleet.utilization", { asset_name: id })
+      .then(setUtil)
+      .catch(() => setUtil(null));
+  }, [id]);
+  if (!util) return null;
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Use</h2>
+      <p style={{ margin: 0 }}>
+        {util.utilization_pct}% booked over {util.period_days} days · {util.events} jobs · {util.hours_booked} hours
+      </p>
+      {util.condition ? <p style={{ margin: 0 }}>Condition: {util.condition}</p> : null}
+    </section>
+  );
+}
+
+function FleetVehicles() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [jobs, setJobs] = React.useState<any[]>([]);
+  const [name, setName] = React.useState("");
+  const [plate, setPlate] = React.useState("");
+  const [kind, setKind] = React.useState("van");
+  const [status, setStatus] = React.useState("active");
+  const [reg, setReg] = React.useState("");
+  const [ins, setIns] = React.useState("");
+  const [vehicle, setVehicle] = React.useState("");
+  const [job, setJob] = React.useState("");
+  const reload = () => {
+    call("entertainment_express.api.portal_fleet.list_vehicles", {})
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+    call("entertainment_express.api.portal_fleet.list_jobs", {})
+      .then((res) => setJobs(res || []))
+      .catch(() => setJobs([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Trucks</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Name">
+          <input value={name} onChange={(e) => setName(e.target.value)} />
+        </FormField>
+        <FormField label="Plate">
+          <input value={plate} onChange={(e) => setPlate(e.target.value)} />
+        </FormField>
+        <FormField label="Type">
+          <select value={kind} onChange={(e) => setKind(e.target.value)}>
+            <option value="van">Van</option>
+            <option value="box_truck">Box truck</option>
+            <option value="trailer">Trailer</option>
+            <option value="car">Car</option>
+            <option value="other">Other</option>
+          </select>
+        </FormField>
+        <FormField label="Status">
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="active">On the road</option>
+            <option value="in_service">In the shop</option>
+            <option value="out_of_service">Parked</option>
+          </select>
+        </FormField>
+        <FormField label="Registration expires">
+          <input type="date" value={reg} onChange={(e) => setReg(e.target.value)} />
+        </FormField>
+        <FormField label="Insurance expires">
+          <input type="date" value={ins} onChange={(e) => setIns(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          await call("entertainment_express.api.portal_fleet.save_vehicle", {
+            values: { vehicle_name: name, plate, vehicle_type: kind, status, registration_expiry: reg, insurance_expiry: ins },
+          });
+          setName("");
+          setPlate("");
+          reload();
+        }}
+      >
+        Save truck
+      </button>
+      {rows.length ? (
+        <DataTable
+          id="owner-trucks"
+          columns={[
+            { key: "vehicle_name", label: "Truck" },
+            { key: "plate", label: "Plate" },
+            { key: "status", label: "Status" },
+            { key: "alert", label: "Due soon" },
+          ]}
+          rows={rows}
+          onRowClick={(row) => setVehicle(row.name)}
+        />
+      ) : (
+        <EmptyState title="No trucks" message="Add the vans and box trucks you take to jobs." />
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Park on job">
+          <select value={job} onChange={(e) => setJob(e.target.value)}>
+            <option value="">Pick a job</option>
+            {jobs.map((row: any) => (
+              <option key={row.name} value={row.name}>
+                {row.event_name || row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!vehicle || !job}
+        onClick={async () => {
+          await call("entertainment_express.api.portal_fleet.assign_vehicle", { booking_name: job, vehicle_name: vehicle });
+        }}
+      >
+        Assign truck
+      </button>
+    </div>
+  );
+}
+
+function StockMove() {
+  const [stock, setStock] = React.useState<any[]>([]);
+  const [locations, setLocations] = React.useState<any[]>([]);
+  const [from, setFrom] = React.useState("");
+  const [to, setTo] = React.useState("");
+  const [item, setItem] = React.useState("");
+  const [qty, setQty] = React.useState("1");
+  const reload = () => {
+    call("entertainment_express.api.portal_fleet.list_stock", {})
+      .then((res) => setStock(res || []))
+      .catch(() => setStock([]));
+    call("entertainment_express.api.portal_fleet.list_locations", {})
+      .then((res) => {
+        const rows = res || [];
+        setLocations(rows);
+        if (rows[0] && !from) setFrom(rows[0].name);
+        if (rows[1] && !to) setTo(rows[1].name);
+      })
+      .catch(() => setLocations([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+  const locLabel = (name: string) => locations.find((row) => row.name === name)?.location_name || name;
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Stock</h2>
+      {stock.length ? (
+        <DataTable
+          id="owner-stock"
+          columns={[
+            { key: "item_name", label: "Item" },
+            { key: "location", label: "Where" },
+            { key: "qty", label: "Qty" },
+          ]}
+          rows={stock.map((row) => ({ ...row, location: locLabel(row.location), item_name: row.item_name || row.item_code }))}
+          onRowClick={(row) => setItem(row.item_code)}
+        />
+      ) : (
+        <EmptyState title="No stock yet" message="Balances show here after you receive consumables." />
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="From">
+          <select value={from} onChange={(e) => setFrom(e.target.value)}>
+            {locations.map((row: any) => (
+              <option key={row.name} value={row.name}>
+                {row.location_name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="To">
+          <select value={to} onChange={(e) => setTo(e.target.value)}>
+            {locations.map((row: any) => (
+              <option key={row.name} value={row.name}>
+                {row.location_name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Item code">
+          <input value={item} onChange={(e) => setItem(e.target.value)} />
+        </FormField>
+        <FormField label="Qty">
+          <input type="number" min="0" step="1" value={qty} onChange={(e) => setQty(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!from || !to || !item}
+        onClick={async () => {
+          await call("entertainment_express.api.portal_fleet.transfer_stock", {
+            from_location: from,
+            to_location: to,
+            item_code: item,
+            qty: Number(qty),
+          });
+          reload();
+        }}
+      >
+        Move stock
+      </button>
+    </div>
+  );
+}
+
+function SubRentalForm() {
+  const [jobs, setJobs] = React.useState<any[]>([]);
+  const [job, setJob] = React.useState("");
+  const [item, setItem] = React.useState("");
+  const [qty, setQty] = React.useState("1");
+  const [supplier, setSupplier] = React.useState("");
+  const [cost, setCost] = React.useState("0");
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_fleet.list_jobs", {})
+      .then((res) => setJobs(res || []))
+      .catch(() => setJobs([]));
+  }, []);
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Borrow gear</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Job">
+          <select value={job} onChange={(e) => setJob(e.target.value)}>
+            <option value="">Pick a job</option>
+            {jobs.map((row: any) => (
+              <option key={row.name} value={row.name}>
+                {row.event_name || row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="What">
+          <input value={item} onChange={(e) => setItem(e.target.value)} />
+        </FormField>
+        <FormField label="Qty">
+          <input type="number" min="1" value={qty} onChange={(e) => setQty(e.target.value)} />
+        </FormField>
+        <FormField label="From">
+          <input value={supplier} onChange={(e) => setSupplier(e.target.value)} />
+        </FormField>
+        <FormField label="Cost">
+          <input type="number" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!job || !item || !supplier}
+        onClick={async () => {
+          await call("entertainment_express.api.portal_fleet.create_sub_rental", {
+            booking_name: job,
+            item_name: item,
+            qty: Number(qty),
+            supplier,
+            cost: Number(cost),
+          });
+          setItem("");
+        }}
+      >
+        Record borrow
+      </button>
+    </div>
+  );
+}
+
+function MaintenanceDue() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [asset, setAsset] = React.useState("");
+  const [due, setDue] = React.useState("");
+  const reload = () => {
+    call("entertainment_express.api.portal_fleet.list_maintenance", {})
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Shop work</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Gear id">
+          <input value={asset} onChange={(e) => setAsset(e.target.value)} />
+        </FormField>
+        <FormField label="Due">
+          <input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!asset || !due}
+        onClick={async () => {
+          await call("entertainment_express.api.portal_fleet.save_maintenance", {
+            values: { resource_type: "asset", asset, due_on: due, blocks_booking: 1 },
+          });
+          reload();
+        }}
+      >
+        Block for shop
+      </button>
+      {rows.length ? (
+        <DataTable
+          id="owner-shop"
+          columns={[
+            { key: "asset", label: "Gear" },
+            { key: "vehicle", label: "Truck" },
+            { key: "due_on", label: "Due" },
+            { key: "status", label: "Status" },
+          ]}
+          rows={rows}
+        />
+      ) : (
+        <EmptyState title="Nothing in the shop" message="Due work that blocks a booking shows here." />
+      )}
+    </div>
+  );
 }
 
 function CrudEditor({ kind, basePath }: { kind: string; basePath: string }) {
@@ -612,6 +950,7 @@ function CrudEditor({ kind, basePath }: { kind: string; basePath: string }) {
   return (
     <>
       <RecordEditor kind={kind} basePath={basePath} go={go} recordId={id} />
+      {id && id !== "new" && kind === "gear" ? <GearUtilization id={id} /> : null}
       {id && id !== "new" && (kind === "job" || kind === "inquiry") ? <RecordExtras kind={kind} id={id} /> : null}
     </>
   );

@@ -59,10 +59,12 @@ dispatch matching and payouts. Owner/employee without Desk.
 **Spec:** `hr-workforce`. **Depends on:** phase-1.
 **Folder:** [`phase-3-hr-workforce/`](phase-3-hr-workforce/)
 
-## Phase 4 — Equipment, Inventory & Fleet 📝
+## Phase 4 — Equipment, Inventory & Fleet ✅
 Asset registry/condition/utilization, consumable stock, vehicles, maintenance, check-in/out & damage,
 barcode/QR scan check-in/out, packing lists/pull sheets, multi-location stock, sub-rentals.
+Owner/employee without Desk.
 **Spec:** `equipment-inventory-fleet`. **Depends on:** phase-1 service-catalog assets.
+**Folder:** [`phase-4-equipment-fleet/`](phase-4-equipment-fleet/)
 
 ## Phase 5 — Full Billing & Multi-Processor Payments 📝
 Complete deposits/payment schedules, Square + PayPal + ACH + Authorize.Net, security/damage deposits & card
