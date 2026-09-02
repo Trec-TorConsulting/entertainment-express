@@ -73,10 +73,11 @@ integrity beyond the phase-1 Stripe subset. Owner/employee/client without Desk.
 **Spec:** `billing-payments`, `integrations` (payments). **Depends on:** phase-1.
 **Folder:** [`phase-5-full-billing/`](phase-5-full-billing/)
 
-## Phase 6 — Notifications (Full Multi-Channel) 📝
+## Phase 6 — Notifications (Full Multi-Channel) ✅
 SMS/WhatsApp (Twilio), FCM push, templates, preferences/opt-out/quiet hours, delivery tracking, retries,
-beyond the phase-1 email subset.
+beyond the phase-1 email subset. Owner/employee/client without Desk.
 **Spec:** `notifications`, `integrations` (comms). **Depends on:** phase-1.
+**Folder:** [`phase-6-notifications/`](phase-6-notifications/)
 
 ## Phase 7 — Customer Portal ✅ archived 2026-09-01
 Authenticated self-service: dashboard, booking self-management, portal sign & pay, event questionnaires,

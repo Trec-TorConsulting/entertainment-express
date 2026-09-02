@@ -154,3 +154,10 @@ The system SHALL let the paying customer apply a valid promo code on `/client`. 
 #### Scenario: Unconfigured processor
 - **WHEN** a customer picks a processor that is not connected
 - **THEN** checkout is refused and no charge is created
+
+### Requirement: Client Message Preferences
+The paying customer SHALL set channel opt-in and quiet hours from `/client/account`. Guests SHALL NOT change preferences.
+
+#### Scenario: Client opts out of SMS
+- **WHEN** a customer turns off SMS
+- **THEN** later promotional and optional SMS to that customer are not sent

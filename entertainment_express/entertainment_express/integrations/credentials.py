@@ -23,6 +23,8 @@ PROVIDERS = (
     "paypal",
     "ach",
     "authorizenet",
+    "twilio",
+    "fcm",
 )
 
 
