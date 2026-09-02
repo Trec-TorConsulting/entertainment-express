@@ -95,10 +95,25 @@ def _hours_for_day(employee: str, day) -> tuple | None:
     for row in emp.get("ee_consult_hours") or []:
         if row.weekday == weekday:
             return (_as_time(row.start_time), _as_time(row.end_time))
+    try:
+        from entertainment_express.api.hr_workforce import weekly_window
+
+        window = weekly_window(employee, day)
+        if window:
+            return window
+    except Exception:
+        pass
     return None
 
 
 def _time_off(employee: str, day) -> bool:
+    try:
+        from entertainment_express.api.hr_workforce import worker_on_time_off
+
+        if worker_on_time_off(employee, day):
+            return True
+    except Exception:
+        pass
     if not frappe.db.table_exists("Event Booking"):
         return False
     return bool(

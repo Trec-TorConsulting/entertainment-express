@@ -383,11 +383,19 @@ CUSTOM_FIELDS = {
         },
         {
             "dt": "Employee",
+            "fieldname": "ee_payout_account",
+            "fieldtype": "Data",
+            "label": "Payout Account",
+            "insert_after": "ee_default_pay_rate",
+            "description": "Stripe Connect acct_ id or manual reference",
+        },
+        {
+            "dt": "Employee",
             "fieldname": "ee_consult_hours",
             "fieldtype": "Table",
             "label": "Consult Hours",
             "options": "EE Staff Hours",
-            "insert_after": "ee_default_pay_rate",
+            "insert_after": "ee_payout_account",
         },
         {
             "dt": "Employee",

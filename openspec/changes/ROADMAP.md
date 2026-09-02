@@ -53,10 +53,11 @@ deterministic crew suggest, and call-time drive order (maps minutes when connect
 **Spec:** `scheduling-dispatch`. **Depends on:** phase-1 bookings, phase-3 workers can precede if needed.
 **Folder:** [`archive/2026-09-02-phase-2-scheduling-dispatch/`](archive/2026-09-02-phase-2-scheduling-dispatch/)
 
-## Phase 3 — HR & Workforce 📝
+## Phase 3 — HR & Workforce ✅
 Worker (W2/1099) onboarding, skills/roles, availability, timesheets, compliance docs. Enables real
-dispatch matching and payouts.
+dispatch matching and payouts. Owner/employee without Desk.
 **Spec:** `hr-workforce`. **Depends on:** phase-1.
+**Folder:** [`phase-3-hr-workforce/`](phase-3-hr-workforce/)
 
 ## Phase 4 — Equipment, Inventory & Fleet 📝
 Asset registry/condition/utilization, consumable stock, vehicles, maintenance, check-in/out & damage,

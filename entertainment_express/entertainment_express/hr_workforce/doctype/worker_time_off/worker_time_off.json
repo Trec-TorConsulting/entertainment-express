@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["employee", "start_date", "end_date", "reason"],
+ "fields": [
+  {"fieldname": "employee", "fieldtype": "Link", "label": "Employee", "options": "Employee", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "start_date", "fieldtype": "Date", "label": "From", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "end_date", "fieldtype": "Date", "label": "Through", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "reason", "fieldtype": "Small Text", "label": "Reason"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "HR Workforce",
+ "name": "Worker Time Off",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE HR", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Accounting", "read": 1},
+  {"role": "EE Dispatcher", "read": 1},
+  {"role": "EE Crew", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "start_date",
+ "sort_order": "DESC",
+ "title_field": "employee"
+}

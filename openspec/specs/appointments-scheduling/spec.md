@@ -58,6 +58,10 @@ The system SHALL offer only slots that fit staff weekly hours, date overrides, b
 - **WHEN** staff is assigned to a confirmed Event Booking overlapping Tuesday 2pm
 - **THEN** Tuesday 2pm is not offered for that staff member’s meeting types
 
+#### Scenario: Time-off hides consults
+- **WHEN** staff has Worker Time Off on a date
+- **THEN** no consult slots are offered for that person on that date
+
 #### Scenario: Two prospects one slot
 - **WHEN** two guests request the same last remaining slot
 - **THEN** one Appointment is stored and the other request is rejected as no longer open
