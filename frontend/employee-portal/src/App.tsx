@@ -395,6 +395,20 @@ function PullSheetWorkspace() {
   const [jobs, setJobs] = React.useState<any[]>([]);
   const [booking, setBooking] = React.useState("");
   const [sheet, setSheet] = React.useState<any>(null);
+  const [code, setCode] = React.useState("");
+  const [damage, setDamage] = React.useState("");
+  const [hint, setHint] = React.useState("");
+
+  const loadSheet = (job: string) => {
+    if (!job) return;
+    call("entertainment_express.api.portal_fleet.generate_packing_list", { booking_name: job })
+      .then(setSheet)
+      .catch(() =>
+        call("entertainment_express.api.portal_fleet.packing_status", { booking_name: job })
+          .then(setSheet)
+          .catch(() => setSheet({ items: [] }))
+      );
+  };
 
   React.useEffect(() => {
     call("entertainment_express.api.portal_employee.get_my_day", {})
@@ -407,15 +421,32 @@ function PullSheetWorkspace() {
   }, []);
 
   React.useEffect(() => {
-    if (!booking) return;
-    call("entertainment_express.api.fleet_ops.generate_packing_list", { booking_name: booking })
-      .then(setSheet)
-      .catch(() =>
-        call("entertainment_express.api.fleet_ops.packing_status", { booking_name: booking })
-          .then(setSheet)
-          .catch(() => setSheet({ items: [] }))
-      );
+    loadSheet(booking);
   }, [booking]);
+
+  const packed = async (idx: number, next: boolean) => {
+    const res = await call("entertainment_express.api.portal_fleet.mark_packed", {
+      booking_name: booking,
+      idx,
+      packed: next ? 1 : 0,
+    });
+    setSheet(res);
+  };
+
+  const scanPacked = async () => {
+    setHint("");
+    try {
+      const res = await call("entertainment_express.api.portal_fleet.mark_packed", {
+        booking_name: booking,
+        code,
+        packed: 1,
+      });
+      setSheet(res);
+      setCode("");
+    } catch (err: any) {
+      setHint(err.message || "Could not pack that scan.");
+    }
+  };
 
   return (
     <section style={{ display: "grid", gap: "0.75rem" }}>
@@ -431,19 +462,94 @@ function PullSheetWorkspace() {
           </select>
         </FormField>
       ) : null}
+      {sheet?.missing?.length ? (
+        <p style={{ color: "var(--ee-danger)", margin: 0 }}>Still on the list: {sheet.missing.join(", ")}</p>
+      ) : null}
       {sheet?.items?.length ? (
-        <DataTable
-          id="pull-sheet"
-          columns={[
-            { key: "item_name", label: "Item" },
-            { key: "qty", label: "Qty" },
-            { key: "kind", label: "From" },
-          ]}
-          rows={sheet.items}
-        />
+        <div className="ee-form">
+          {sheet.items.map((item: any, idx: number) => (
+            <label key={`${item.item_name}-${idx}`} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <input type="checkbox" checked={!!item.packed} onChange={(e) => packed(idx, e.target.checked)} />
+              {item.item_name} × {item.qty}
+            </label>
+          ))}
+        </div>
       ) : (
         <EmptyState title="Nothing to pull" message="Warehouse and rental gear for today’s jobs shows here." />
       )}
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Scan</h2>
+        <FormField label="Code">
+          <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Scan or type the code" />
+        </FormField>
+        {hint ? <p className="ee-form__error">{hint}</p> : null}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+          <button type="button" className="ee-btn" disabled={!booking || !code} onClick={scanPacked}>
+            Mark packed
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            disabled={!booking || !code}
+            onClick={async () => {
+              setHint("");
+              try {
+                await call("entertainment_express.api.portal_fleet.checkout", { booking_name: booking, code });
+                setHint("Checked out.");
+                setCode("");
+              } catch (err: any) {
+                setHint(err.message || "Could not check out.");
+              }
+            }}
+          >
+            Check out
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            disabled={!booking || !code}
+            onClick={async () => {
+              setHint("");
+              try {
+                await call("entertainment_express.api.portal_fleet.checkin", {
+                  booking_name: booking,
+                  code,
+                  damage_notes: damage,
+                });
+                setHint("Checked in.");
+                setCode("");
+              } catch (err: any) {
+                setHint(err.message || "Could not check in.");
+              }
+            }}
+          >
+            Check in
+          </button>
+        </div>
+        <FormField label="Damage note">
+          <textarea value={damage} onChange={(e) => setDamage(e.target.value)} />
+        </FormField>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!booking || !damage}
+          onClick={async () => {
+            setHint("");
+            try {
+              await call("entertainment_express.api.portal_fleet.report_damage", {
+                booking_name: booking,
+                description: damage,
+              });
+              setHint("Damage recorded. That unit is in the shop.");
+              setDamage("");
+            } catch (err: any) {
+              setHint(err.message || "Could not record damage.");
+            }
+          }}
+        >
+          Report damage
+        </button>
+      </div>
     </section>
   );
 }

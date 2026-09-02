@@ -153,6 +153,7 @@ def _schema(kind: str) -> dict:
                     "type": "select",
                     "options": ["excellent", "good", "fair", "poor", "damaged"],
                 },
+                {"key": "barcode", "label": "Scan code", "type": "text"},
                 {"key": "notes", "label": "Notes", "type": "textarea"},
             ],
         },
@@ -561,6 +562,7 @@ def _get_gear(name: str) -> dict:
         "asset_type": _gear_type_label(doc.asset_type),
         "status": doc.status or "available",
         "condition": doc.condition or "good",
+        "barcode": getattr(doc, "barcode", None) or "",
         "notes": doc.notes or "",
     }
 
@@ -574,6 +576,7 @@ def _save_gear(name: str | None, values: dict) -> str:
         "asset_type": _gear_type_value(values.get("asset_type") or "other"),
         "status": values.get("status") or "available",
         "condition": values.get("condition") or "good",
+        "barcode": (values.get("barcode") or "").strip() or None,
         "notes": values.get("notes") or "",
         "quantity": 1,
     }
@@ -581,9 +584,17 @@ def _save_gear(name: str | None, values: dict) -> str:
         doc = frappe.get_doc("Service Asset", name)
         doc.update(payload)
         doc.save(ignore_permissions=True)
+        if not getattr(doc, "barcode", None):
+            from entertainment_express.api.fleet_ops import _ensure_barcode
+
+            _ensure_barcode("Service Asset", doc.name)
         return doc.name
     doc = frappe.get_doc({"doctype": "Service Asset", **payload})
     doc.insert(ignore_permissions=True)
+    if not getattr(doc, "barcode", None):
+        from entertainment_express.api.fleet_ops import _ensure_barcode
+
+        _ensure_barcode("Service Asset", doc.name)
     return doc.name
 
 

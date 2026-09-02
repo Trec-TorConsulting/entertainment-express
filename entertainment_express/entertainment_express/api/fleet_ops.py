@@ -225,10 +225,23 @@ def generate_packing_list(booking_name: str) -> dict:
     return packing_status(booking_name)
 
 
+def packing_name(booking_name: str) -> str | None:
+    """Find the pull sheet for a job by booking, then by document name."""
+    name = frappe.db.get_value("Packing List", {"booking": booking_name}, "name")
+    if name:
+        return name
+    if frappe.db.exists("Packing List", booking_name):
+        return booking_name
+    return None
+
+
 @frappe.whitelist()
 def mark_packed(booking_name: str, idx: int = None, code: str = None, packed: int = 1) -> dict:
     _ops()
-    doc = frappe.get_doc("Packing List", booking_name)
+    name = packing_name(booking_name)
+    if not name:
+        frappe.throw("No pull sheet for this job yet. Generate one first.")
+    doc = frappe.get_doc("Packing List", name)
     target = None
     if code:
         resolved = resolve_code(code)
@@ -254,9 +267,10 @@ def mark_packed(booking_name: str, idx: int = None, code: str = None, packed: in
 @frappe.whitelist()
 def packing_status(booking_name: str) -> dict:
     _ops()
-    if not frappe.db.exists("Packing List", booking_name):
+    name = packing_name(booking_name)
+    if not name:
         return {"booking": booking_name, "status": "missing", "items": [], "missing": []}
-    doc = frappe.get_doc("Packing List", booking_name)
+    doc = frappe.get_doc("Packing List", name)
     items = doc.as_dict()["items"]
     missing = [i["item_name"] for i in items if not i.get("packed")]
     return {"name": doc.name, "booking": booking_name, "status": doc.status, "items": items, "missing": missing}
@@ -363,7 +377,7 @@ def create_sub_rental(booking_name: str, item_name: str, qty: int, supplier: str
     )
     doc.insert()
     frappe.db.commit()
-    if frappe.db.exists("Packing List", booking_name):
+    if packing_name(booking_name):
         generate_packing_list(booking_name)
     return {"sub_rental": doc.name}
 
