@@ -222,3 +222,50 @@ The system SHALL expose quote suggestions from the proposal workspace and a fore
 #### Scenario: Suggest a package
 - **WHEN** the owner clicks Suggest a package on a proposal
 - **THEN** packaged lines and a price range appear for accept/edit; the SPA does not add money itself
+
+### Requirement: Owner Plan Workspace
+The owner portal SHALL show this company's Entertainment Express plan status, formatted price, and period end from site_config only, with Pay (Stripe Checkout) and cancel-at-period-end actions. Guests and crew SHALL receive 403. The SPA SHALL NOT compute money.
+
+#### Scenario: Owner reads plan
+- **WHEN** an `EE Tenant Admin` opens `/owner/plan`
+- **THEN** they see plan name, status, backend-formatted price, and period end from this site's flags — never another site's data
+
+#### Scenario: Owner cancels
+- **WHEN** the owner requests cancel
+- **THEN** access continues until period end (flagged on this site); the control plane later suspends
+
+### Requirement: Owner Connections Workspace
+The owner portal SHALL list this site's external connections (calendar, maps, signing, books, music) with status and last error, and SHALL let the owner enable/disable and save credentials. The SPA SHALL never display secret values. Guests and crew SHALL receive 403.
+
+#### Scenario: Owner opens Connections
+- **WHEN** an `EE Tenant Admin` opens `/owner/connections`
+- **THEN** they see each provider's connected/error/off state from this site only
+
+#### Scenario: Missing provider keys degrade
+- **WHEN** a provider is not configured
+- **THEN** core booking/sign/pay still works and the page explains the connection is off
+
+### Requirement: Owner Security Workspace
+The owner portal SHALL provide `/owner/security` for two-step requirement, custom domains, recent audit events, and optional SSO status. The SPA SHALL never display secret values. Guests and crew SHALL receive 403.
+
+#### Scenario: Owner opens Security
+- **WHEN** an `EE Tenant Admin` opens `/owner/security`
+- **THEN** they see this site's two-step flag, domain list, and recent audit actions from this site only
+
+### Requirement: Event Detail Templates Without Desk
+The system SHALL let a tenant admin create and list planning-form and timeline templates on `/owner/event-details`, and manage a job's questionnaire status, run of show, music, and guest request link on the job page — without Desk.
+
+#### Scenario: Owner saves a wedding questionnaire
+- **WHEN** an owner saves a questionnaire for event type wedding
+- **THEN** it is stored as a Planning Form Template on this site and appears in the list
+
+### Requirement: Dispatch Without Desk
+The owner and employee portals SHALL staff jobs, offer shifts, issue run sheets, and view the day's drive order on `/owner/dispatch` and `/employee/dispatch` without Desk. Auto-suggest SHALL rank people who are free that day, with a matching role first. Drive order SHALL follow call times; drive minutes MAY be omitted when maps are not connected.
+
+#### Scenario: Owner staffs an at-risk job
+- **WHEN** an `EE Tenant Admin` opens Dispatch for a confirmed job with no confirmed crew
+- **THEN** the board lists suggested people and the owner can offer a shift and issue a run sheet without using `/app`
+
+#### Scenario: Drive order without maps
+- **WHEN** a dispatcher opens a day with two or more jobs and no maps key is configured
+- **THEN** jobs appear in call-time order and drive minutes are blank rather than blocking the board

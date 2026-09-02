@@ -66,6 +66,12 @@ def send_contract(contract_name: str) -> dict:
     })
 
     contract.db_set("status", "sent")
+    try:
+        from entertainment_express.integrations.docusign import maybe_send
+
+        maybe_send(contract_name)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "EE DocuSign send")
     return {"status": "sent", "contract": contract_name, "sign_link": sign_link}
 
 

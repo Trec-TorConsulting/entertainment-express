@@ -342,19 +342,11 @@ def get_run_sheet(booking_name: str) -> dict:
         frappe.throw("No run sheet found for this booking.")
     data = frappe.get_doc("Run Sheet", rs_name).as_dict()
     try:
-        from entertainment_express.api.planning import list_forms, get_form
-        from entertainment_express.api.timeline import get_timeline
-        from entertainment_express.api.music import play_view
+        from entertainment_express.event_planning import crew_view
 
-        forms = []
-        for row in list_forms(booking_name):
-            try:
-                forms.append(get_form(booking_name, row["name"]))
-            except Exception:
-                forms.append(row)
-        data["planning"] = forms
-        data["timeline"] = get_timeline(booking_name)
-        data["music"] = play_view(booking_name)
+        data["planning"] = crew_view.planning(booking_name)
+        data["timeline"] = crew_view.timeline(booking_name)
+        data["music"] = crew_view.music(booking_name)
     except Exception:
         data["planning"] = []
         data["timeline"] = {}
@@ -538,6 +530,124 @@ def get_dispatch_board(date: str) -> list:
             "at_risk": is_at_risk,
         })
     return result
+
+
+@frappe.whitelist()
+def suggest_crew(booking_name: str, role_name: str | None = None) -> list:
+    """Rank available crew for a job: role match first, then anyone free that day."""
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    booking = frappe.get_doc("Event Booking", booking_name)
+    wanted = (role_name or "").strip()
+    rows = list_available_crew(event_date=str(booking.event_date), role_name=None)
+    matched = [r for r in rows if wanted and wanted in (r.get("roles") or [])]
+    matched_ids = {r["employee"] for r in matched}
+    rest = [r for r in rows if r["employee"] not in matched_ids]
+    ranked = []
+    for idx, row in enumerate(matched + rest, 1):
+        reason = (
+            "Has this role and is free that day"
+            if wanted and row["employee"] in matched_ids
+            else "Free that day"
+        )
+        ranked.append(
+            {
+                "employee": row["employee"],
+                "name": row["employee_name"],
+                "roles": row.get("roles") or [],
+                "rank": idx,
+                "reason": reason,
+            }
+        )
+    return ranked[:8]
+
+
+@frappe.whitelist()
+def assign_asset(booking_name: str, asset_name: str, quantity: int = 1) -> dict:
+    """Reserve a service asset on a booking if the window is free on this site."""
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    booking = frappe.get_doc("Event Booking", booking_name)
+    from datetime import datetime
+
+    start_t = frappe.utils.get_time(booking.start_time or "12:00:00")
+    end_t = frappe.utils.get_time(booking.end_time or "18:00:00")
+    start = datetime.combine(frappe.utils.getdate(booking.event_date), start_t)
+    end = datetime.combine(frappe.utils.getdate(booking.event_date), end_t)
+    from entertainment_express.booking.availability import check
+
+    result = check(asset_name, start, end)
+    if not result.get("available"):
+        frappe.throw(result.get("reason") or "That gear is already booked for this window.")
+    existing = [row.asset for row in (booking.assigned_assets or [])]
+    if asset_name in existing:
+        return {"status": "already", "asset": asset_name}
+    booking.append(
+        "assigned_assets",
+        {"asset": asset_name, "quantity_reserved": int(quantity or 1)},
+    )
+    booking.save()
+    frappe.db.commit()
+    return {"status": "assigned", "asset": asset_name}
+
+
+def compute_day_route(date: str) -> dict:
+    """Order the day's jobs by start time and attach drive minutes when maps are on."""
+    jobs = get_dispatch_board(date)
+    stops = []
+    prev_geo = ""
+    for idx, job in enumerate(jobs, 1):
+        geo = frappe.db.get_value("Event Booking", job["name"], "venue_geo") or ""
+        travel = None
+        if prev_geo and geo:
+            try:
+                from entertainment_express.integrations.maps import travel_minutes
+
+                travel = travel_minutes(prev_geo, geo)
+            except Exception:
+                travel = None
+        stops.append(
+            {
+                "sequence": idx,
+                "booking": job["name"],
+                "title": job.get("event_name") or job["name"],
+                "when": str(job.get("start_time") or ""),
+                "place": job.get("venue_address") or "",
+                "travel_minutes": travel,
+            }
+        )
+        if geo:
+            prev_geo = geo
+    return {"day": date, "stops": stops}
+
+
+@frappe.whitelist()
+def plan_routes(date: str) -> dict:
+    """Build and save today's stop order. Missing maps keys skip drive times."""
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    payload = compute_day_route(date)
+    if not frappe.db.exists("DocType", "Route Plan"):
+        return payload
+    name = frappe.db.get_value("Route Plan", {"plan_date": date}, "name")
+    if name:
+        doc = frappe.get_doc("Route Plan", name)
+    else:
+        doc = frappe.get_doc({"doctype": "Route Plan", "plan_date": date})
+        doc.insert()
+    doc.set("stops", [])
+    for stop in payload["stops"]:
+        doc.append(
+            "stops",
+            {
+                "sequence": stop["sequence"],
+                "booking": stop["booking"],
+                "title": stop["title"],
+                "call_time": stop["when"],
+                "travel_minutes": stop["travel_minutes"],
+                "venue_address": stop["place"],
+            },
+        )
+    doc.save()
+    frappe.db.commit()
+    return payload
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

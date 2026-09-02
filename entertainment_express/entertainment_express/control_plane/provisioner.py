@@ -1,8 +1,9 @@
 """
 Tenant provisioner — runs as a background job on the control-plane site.
 
-ISOLATION RULE: This is the ONLY control-plane code that touches tenant sites.
-                It does so via `bench` subprocess calls and frappe.init(site=...).
+ISOLATION RULE: Provisioner, metering collector, and site_config flag writes
+                are the only control-plane jobs that touch tenant sites.
+                They use `bench --site` or that site's site_config.json.
                 Tenant feature code NEVER calls back into the control plane.
 
 Idempotency: Every step is safe to re-run. Already-completed steps are skipped.
@@ -154,6 +155,11 @@ def _provision_create(job) -> None:
 
     _log(job, f"Tenant {tenant.tenant_slug} provisioned successfully at {site_name}.")
 
+    from entertainment_express.api.saas_billing import ensure_subscription
+
+    ensure_subscription(tenant.name)
+    _log(job, "Subscription/trial flags pushed.")
+
     # 8. Send welcome email
     from entertainment_express.notifications import send
     send("welcome_tenant", tenant.primary_email, {
@@ -166,25 +172,27 @@ def _provision_create(job) -> None:
 def _provision_suspend(job) -> None:
     tenant = frappe.get_doc("Tenant", job.tenant)
     _log(job, f"Suspending tenant {tenant.tenant_slug}...")
+    from entertainment_express.control_plane.lifecycle import suspend_tenant
+
+    suspend_tenant(tenant.name, reason="provisioner_suspend")
     if tenant.site_name:
-        _bench_exec(job, ["bench", "--site", tenant.site_name, "set-maintenance-mode", "on"])
-    tenant.reload()
-    tenant.status = "suspended"
-    tenant.suspended_on = now_datetime()
-    tenant.save(ignore_permissions=True)
-    frappe.db.commit()
+        try:
+            _bench_exec(job, ["bench", "--site", tenant.site_name, "set-config", "ee_suspended", "1"])
+        except Exception as exc:
+            _log(job, f"set-config ee_suspended: {exc}")
 
 
 def _provision_resume(job) -> None:
     tenant = frappe.get_doc("Tenant", job.tenant)
     _log(job, f"Resuming tenant {tenant.tenant_slug}...")
+    from entertainment_express.control_plane.lifecycle import resume_tenant
+
+    resume_tenant(tenant.name)
     if tenant.site_name:
-        _bench_exec(job, ["bench", "--site", tenant.site_name, "set-maintenance-mode", "off"])
-    tenant.reload()
-    tenant.status = "active"
-    tenant.suspended_on = None
-    tenant.save(ignore_permissions=True)
-    frappe.db.commit()
+        try:
+            _bench_exec(job, ["bench", "--site", tenant.site_name, "set-config", "ee_suspended", "0"])
+        except Exception as exc:
+            _log(job, f"set-config ee_suspended: {exc}")
 
 
 def _provision_deprovision(job) -> None:
@@ -192,6 +200,14 @@ def _provision_deprovision(job) -> None:
     _log(job, f"Deprovisioning tenant {tenant.tenant_slug} — THIS IS DESTRUCTIVE.")
     site_name = tenant.site_name
     if site_name:
+        backup_ref = _backup_site(job, site_name)
+        if not backup_ref:
+            raise RuntimeError("Refusing to drop site without a backup.")
+        tenant.reload()
+        tenant.backup_ref = backup_ref
+        tenant.save(ignore_permissions=True)
+        frappe.db.commit()
+        _log(job, f"Backup stored at {backup_ref}")
         # Must pass root password non-interactively — bare `drop-site --force` prompts
         # and aborts in containerized / CI environments. Never put the password into
         # process argv that gets echoed into job logs; use an env override instead.
@@ -221,6 +237,26 @@ def _provision_deprovision(job) -> None:
     tenant.status = "deleted"
     tenant.save(ignore_permissions=True)
     frappe.db.commit()
+
+
+def _backup_site(job, site_name: str) -> str | None:
+    from datetime import datetime
+
+    stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    dest = os.path.join(_bench_root(), "sites", "archived", site_name, stamp)
+    os.makedirs(dest, exist_ok=True)
+    try:
+        _bench_exec(
+            job,
+            ["bench", "--site", site_name, "backup", "--with-files", "--backup-path", dest],
+        )
+    except Exception as exc:
+        _log(job, f"backup failed: {exc}")
+        return None
+    if not os.listdir(dest):
+        _log(job, "backup directory empty")
+        return None
+    return dest
 
 
 def _force_remove_site_dir(job, site_name: str) -> None:

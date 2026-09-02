@@ -12,6 +12,9 @@
     p { margin: 0.25rem 0 0; color: #64748b; }
     strong { font-size: 1.25rem; color: #0f172a; }
     a { color: #0f766e; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 1.5rem; border-radius: 12px; overflow: hidden; }
+    th, td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+    th { color: #64748b; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -22,6 +25,34 @@
     <article><p>Signups this month</p><strong>{{ metrics.signups_this_month }}</strong></article>
     <article><p>Churn this month</p><strong>{{ metrics.churn_this_month }}</strong></article>
   </div>
+  {% if tenants %}
+  <table>
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Status</th>
+        <th>Plan</th>
+        <th>Billing</th>
+        <th>Recurring</th>
+        <th>Failed jobs</th>
+        <th>Last activity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in tenants %}
+      <tr>
+        <td>{{ row.company_name }}</td>
+        <td>{{ row.status }}</td>
+        <td>{{ row.plan }}</td>
+        <td>{{ row.subscription_status or "—" }}</td>
+        <td>{{ row.mrr_display }}</td>
+        <td>{{ row.failed_jobs }}</td>
+        <td>{{ row.last_activity }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
   {% if metrics.usage %}
   <h2>Usage</h2>
   <ul>
@@ -31,5 +62,27 @@
   </ul>
   {% endif %}
   <p><a href="/api/method/entertainment_express.api.control_analytics.fleet_csv">Download spreadsheet</a></p>
+  <h2>Health</h2>
+  <div class="cards">
+    <article><p>This site probe</p><strong>{% if ready and ready.ok %}ok{% else %}down{% endif %}</strong></article>
+    <article><p>Last backup</p><strong>{{ (backup and backup.last_backup) or "not yet" }}</strong></article>
+  </div>
+  <p>{{ (backup and backup.restore) or "" }}</p>
+  {% if domains %}
+  <h2>Custom hostnames</h2>
+  <table>
+    <thead><tr><th>Company</th><th>Hostname</th><th>Verified</th><th>TLS</th></tr></thead>
+    <tbody>
+      {% for row in domains %}
+      <tr>
+        <td>{{ row.tenant }}</td>
+        <td>{{ row.hostname }}</td>
+        <td>{{ row.verified }}</td>
+        <td>{{ row.tls_status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
 </body>
 </html>

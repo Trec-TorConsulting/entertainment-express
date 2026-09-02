@@ -6,6 +6,7 @@
 # entertainment_express.patches.v0_0.rename_doctype
 
 [pre_model_sync]
+entertainment_express.patches.v0_0_3.restore_frappe_integrations_module
 
 [post_model_sync]
 entertainment_express.patches.v0_0_1.hide_unused_erpnext_workspaces
@@ -19,3 +20,8 @@ entertainment_express.patches.v0_0_3.phase8_marketing
 entertainment_express.patches.v0_0_3.phase9_field_app
 entertainment_express.patches.v0_0_3.phase10_reporting
 entertainment_express.patches.v0_0_3.phase11_ai_assistant
+entertainment_express.patches.v0_0_3.phase12_saas_control_plane
+entertainment_express.patches.v0_0_3.phase13_integrations
+entertainment_express.patches.v0_0_3.phase14_hardening
+entertainment_express.patches.v0_0_3.phase15_event_planning
+entertainment_express.patches.v0_0_3.phase2_scheduling

@@ -9,7 +9,7 @@
   "col1", "quotation", "booking", "col2",
   "section_signer", "signer_name", "signer_email",
   "col3", "signed_at", "signed_ip", "col4",
-  "content_hash", "signature_typed", "signature_image",
+  "content_hash", "signature_typed", "signature_image", "docusign_envelope_id",
   "section_body", "rendered_html"
  ],
  "fields": [
@@ -33,10 +33,11 @@
   {"fieldname": "content_hash", "fieldtype": "Data", "label": "Content Hash (SHA-256)", "read_only": 1, "description": "SHA-256 of rendered_html + signer + timestamp"},
   {"fieldname": "signature_typed", "fieldtype": "Data", "label": "Typed Signature"},
   {"fieldname": "signature_image", "fieldtype": "Attach Image", "label": "Drawn Signature"},
+  {"fieldname": "docusign_envelope_id", "fieldtype": "Data", "label": "DocuSign Envelope", "read_only": 1},
   {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Rendered Contract"},
   {"fieldname": "rendered_html", "fieldtype": "Text Editor", "label": "Rendered HTML", "read_only": 1}
  ],
- "modified": "2024-01-01 00:00:00.000000",
+ "modified": "2026-09-02 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Entertainment Express Core",
  "name": "EE Contract",

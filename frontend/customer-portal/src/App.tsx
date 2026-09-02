@@ -422,7 +422,11 @@ function Planning({ booking }: { booking?: string }) {
   const [timeline, setTimeline] = React.useState<any>(null);
   const [songs, setSongs] = React.useState<any[]>([]);
   const [song, setSong] = React.useState("");
+  const [songList, setSongList] = React.useState("must_play");
+  const [playlist, setPlaylist] = React.useState("");
+  const [curated, setCurated] = React.useState<any[]>([]);
   const [wish, setWish] = React.useState<any[]>([]);
+  const [hint, setHint] = React.useState("");
   const eventId = booking || "";
 
   const reload = () => {
@@ -444,6 +448,9 @@ function Planning({ booking }: { booking?: string }) {
     call("entertainment_express.api.music.list_selections", { booking_name: eventId })
       .then((res) => setSongs(res || []))
       .catch(() => setSongs([]));
+    call("entertainment_express.api.music.curated_lists", {})
+      .then((res) => setCurated(res || []))
+      .catch(() => setCurated([]));
     if (!guest) {
       call("entertainment_express.api.catalog.wishlist_list", {})
         .then((res) => setWish(res || []))
@@ -505,6 +512,25 @@ function Planning({ booking }: { booking?: string }) {
           timeline.items.map((row: any, idx: number) => (
             <p key={row.name || idx} style={{ margin: 0 }}>
               {row.start_time || row.time || ""} {row.title || row.label}
+              {!guest && timeline.status !== "finalized" ? (
+                <button
+                  type="button"
+                  className="ee-btn ee-btn--ghost"
+                  style={{ marginLeft: "0.5rem" }}
+                  onClick={async () => {
+                    const next = window.prompt("Suggested title", row.title || "");
+                    if (!next) return;
+                    await call("entertainment_express.api.timeline.suggest_change", {
+                      booking_name: eventId,
+                      item_idx: idx,
+                      payload: { title: next },
+                    });
+                    reload();
+                  }}
+                >
+                  Suggest a change
+                </button>
+              ) : null}
             </p>
           ))
         ) : (
@@ -514,23 +540,106 @@ function Planning({ booking }: { booking?: string }) {
 
       <div className="ee-form">
         <h2 style={{ margin: 0 }}>Music</h2>
-        <FormField label="Must-play or request">
+        {hint ? <p className="ee-muted">{hint}</p> : null}
+        <FormField label={guest ? "Song request" : "Song"}>
           <input value={song} onChange={(e) => setSong(e.target.value)} />
         </FormField>
+        {!guest ? (
+          <FormField label="List">
+            <select value={songList} onChange={(e) => setSongList(e.target.value)}>
+              <option value="must_play">Must play</option>
+              <option value="do_not_play">Do not play</option>
+              <option value="special_moment">Special moment</option>
+            </select>
+          </FormField>
+        ) : null}
         <button
           type="button"
           className="ee-btn"
           onClick={async () => {
-            await call("entertainment_express.api.music.add_selection", { booking_name: eventId, category: "must_play", free_text: song });
+            setHint("");
+            await call("entertainment_express.api.music.add_selection", {
+              booking_name: eventId,
+              category: guest ? "general_request" : songList,
+              free_text: song,
+            });
             setSong("");
             reload();
           }}
         >
-          Add song
+          {guest ? "Request song" : "Add song"}
         </button>
+        {!guest ? (
+          <>
+            <FormField label="Playlist link">
+              <input value={playlist} onChange={(e) => setPlaylist(e.target.value)} placeholder="Spotify, Apple Music, or YouTube" />
+            </FormField>
+            <button
+              type="button"
+              className="ee-btn ee-btn--ghost"
+              onClick={async () => {
+                setHint("");
+                try {
+                  const res = await call("entertainment_express.api.music.import_playlist", {
+                    booking_name: eventId,
+                    playlist_url: playlist,
+                    category: songList === "do_not_play" ? "must_play" : songList,
+                  });
+                  setPlaylist("");
+                  setHint(res?.imported != null ? `Imported ${res.imported} tracks.` : "Imported.");
+                  reload();
+                } catch (err: any) {
+                  setHint(err.message || "Could not import that playlist.");
+                }
+              }}
+            >
+              Import playlist
+            </button>
+          </>
+        ) : null}
+        {curated.map((list: any) => (
+          <div key={list.name}>
+            <p style={{ margin: "0.5rem 0 0", fontWeight: 600 }}>{list.list_name}</p>
+            {(list.songs || []).map((row: any) => (
+              <p key={row.song} style={{ margin: 0 }}>
+                {row.title} — {row.artist}
+                {!guest ? (
+                  <button
+                    type="button"
+                    className="ee-btn ee-btn--ghost"
+                    style={{ marginLeft: "0.5rem" }}
+                    onClick={async () => {
+                      await call("entertainment_express.api.music.choose_curated", {
+                        booking_name: eventId,
+                        song: row.song,
+                        moment: list.moment || "",
+                      });
+                      reload();
+                    }}
+                  >
+                    Choose
+                  </button>
+                ) : null}
+              </p>
+            ))}
+          </div>
+        ))}
         {songs.map((row: any) => (
           <p key={row.name} style={{ margin: 0 }}>
             {row.category}: {row.free_text || row.song}
+            {!guest && row.status !== "played" ? (
+              <button
+                type="button"
+                className="ee-btn ee-btn--ghost"
+                style={{ marginLeft: "0.5rem" }}
+                onClick={async () => {
+                  await call("entertainment_express.api.music.remove_selection", { name: row.name });
+                  reload();
+                }}
+              >
+                Remove
+              </button>
+            ) : null}
           </p>
         ))}
       </div>

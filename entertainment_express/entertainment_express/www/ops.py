@@ -1,8 +1,10 @@
 from urllib.parse import quote
 
 import frappe
+from frappe.utils import flt, fmt_money
 
 from entertainment_express.api.control_analytics import fleet
+from entertainment_express.api.fleet import fleet_dashboard
 
 no_cache = 1
 no_sitemap = 1
@@ -19,4 +21,32 @@ def get_context(context):
         frappe.throw("Fleet access denied.", frappe.PermissionError)
     context.no_cache = 1
     context.metrics = fleet()
+    dash = fleet_dashboard()
+    currency = frappe.db.get_default("currency") or "USD"
+    tenants = []
+    for row in dash.get("tenants") or []:
+        item = dict(row)
+        item["mrr_display"] = fmt_money(flt(item.get("mrr")), currency=currency)
+        tenants.append(item)
+    context.tenants = tenants
     context.title = "Fleet"
+    try:
+        from entertainment_express.api.hardening import backup_status
+
+        context.backup = backup_status()
+        context.ready = {"ok": True}
+        try:
+            frappe.db.sql("SELECT 1")
+        except Exception:
+            context.ready = {"ok": False}
+        context.domains = []
+        if frappe.db.exists("DocType", "Tenant Domain"):
+            context.domains = frappe.get_all(
+                "Tenant Domain",
+                fields=["tenant", "hostname", "verified", "tls_status"],
+                limit_page_length=100,
+            )
+    except Exception:
+        context.backup = {"last_backup": "", "restore": ""}
+        context.ready = {"ok": False}
+        context.domains = []

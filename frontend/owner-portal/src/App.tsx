@@ -28,6 +28,7 @@ const OWNER_NAV = [
       { to: "/pipeline", label: "Pipeline" },
       { to: "/schedule", label: "Consults" },
       { to: "/dispatch", label: "Dispatch" },
+      { to: "/event-details", label: "Event details" },
     ],
   },
   {
@@ -46,11 +47,14 @@ const OWNER_NAV = [
       { to: "/money", label: "Money" },
       { to: "/reports", label: "Reports" },
       { to: "/assistant", label: "Assistant" },
+      { to: "/plan", label: "Plan" },
       { to: "/automations", label: "Reminders" },
       { to: "/grow", label: "Grow" },
       { to: "/coverage", label: "Coverage" },
       { to: "/move", label: "Move" },
       { to: "/brand", label: "Brand" },
+      { to: "/connections", label: "Connections" },
+      { to: "/security", label: "Security" },
     ],
   },
 ];
@@ -731,6 +735,7 @@ function RecordExtras({ kind, id }: { kind: string; id: string }) {
       </section>
       {kind === "job" ? <JobRiskPanel jobId={id} /> : null}
       {kind === "job" ? <JobCrewPanel jobId={id} /> : null}
+      {kind === "job" ? <JobPlanningPanel jobId={id} /> : null}
       {kind === "job" ? <JobFilesPanel jobId={id} /> : null}
     </>
   );
@@ -845,6 +850,84 @@ function ProposalWorkspace() {
           </button>
         </div>
       </div>
+    </section>
+  );
+}
+
+function PlanWorkspace() {
+  const [info, setInfo] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const load = () => {
+    call("entertainment_express.api.saas_billing.my_plan", {})
+      .then((res) => setInfo(res))
+      .catch(() => setInfo(null));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const pay = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await call("entertainment_express.api.saas_billing.create_subscription_checkout", {});
+      if (res?.checkout_url) {
+        window.location.href = res.checkout_url;
+        return;
+      }
+      setError("Checkout is not available yet.");
+    } catch (err: any) {
+      setError(err.message || "Could not start checkout.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cancel = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.saas_billing.request_cancel", {});
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not request cancel.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Plan</h1>
+        <p className="ee-muted">Your Entertainment Express subscription for this company. Amounts come from billing — this page does not calculate prices.</p>
+      </header>
+      {info ? (
+        <div className="ee-form" style={{ maxWidth: "none" }}>
+          <p style={{ margin: 0 }}>
+            <strong>{info.plan}</strong> · {info.status}
+          </p>
+          {info.price ? <p className="ee-muted">Monthly {info.price}</p> : null}
+          {info.period_end ? <p className="ee-muted">Current period ends {info.period_end}</p> : null}
+          {info.cancel_at_period_end || info.cancel_requested ? (
+            <p>Access continues until the period ends, then this workspace pauses.</p>
+          ) : null}
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <button type="button" className="ee-btn" disabled={busy} onClick={pay}>
+              Pay / convert
+            </button>
+            <button type="button" className="ee-btn ee-btn--ghost" disabled={busy || info.cancel_requested || info.cancel_at_period_end} onClick={cancel}>
+              Cancel at period end
+            </button>
+          </div>
+        </div>
+      ) : (
+        <EmptyState title="Plan" message="Plan details will show here after your company is billed." />
+      )}
+      {error ? <p className="ee-form__error">{error}</p> : null}
     </section>
   );
 }
@@ -1764,6 +1847,319 @@ function AutomationsWorkspace() {
   );
 }
 
+function JobPlanningPanel({ jobId }: { jobId: string }) {
+  const [forms, setForms] = React.useState<any[]>([]);
+  const [timeline, setTimeline] = React.useState<any>(null);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [music, setMusic] = React.useState<any>(null);
+  const [guestUrl, setGuestUrl] = React.useState("");
+  const [pick, setPick] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.planning.list_forms", { booking_name: jobId })
+      .then((res) => setForms(res || []))
+      .catch(() => setForms([]));
+    call("entertainment_express.api.timeline.get_timeline", { booking_name: jobId })
+      .then(setTimeline)
+      .catch(() => setTimeline(null));
+    call("entertainment_express.api.timeline.list_timeline_templates", {})
+      .then((res) => setTemplates(res || []))
+      .catch(() => setTemplates([]));
+    call("entertainment_express.api.music.play_view", { booking_name: jobId })
+      .then(setMusic)
+      .catch(() => setMusic(null));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  const lists = music?.lists || {};
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Event details</h2>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {forms.length ? (
+        forms.map((row) => (
+          <p key={row.name} style={{ margin: 0 }}>
+            {row.template_name || row.template} · {Math.round(Number(row.completion_percent) || 0)}% · {row.status}
+          </p>
+        ))
+      ) : (
+        <p className="ee-muted">A questionnaire attaches after this job is confirmed and matches an event type.</p>
+      )}
+      <div className="ee-form__actions">
+        <button
+          type="button"
+          className="ee-btn ee-btn--ghost"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.planning.send_evaluation", { booking_name: jobId });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not send the follow-up form.");
+            }
+          }}
+        >
+          Send follow-up form
+        </button>
+      </div>
+      <h3 style={{ margin: "1rem 0 0.35rem", fontSize: "1.05rem" }}>Run of show</h3>
+      <FormField label="Start from a template">
+        <select value={pick} onChange={(e) => setPick(e.target.value)}>
+          <option value="">Choose a template</option>
+          {templates.map((row) => (
+            <option key={row.name} value={row.name}>
+              {row.template_name}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!pick}
+        onClick={async () => {
+          setError("");
+          try {
+            await call("entertainment_express.api.timeline.apply_template", { booking_name: jobId, template_name: pick });
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not apply that template.");
+          }
+        }}
+      >
+        Apply template
+      </button>
+      {(timeline?.items || []).map((row: any, idx: number) => (
+        <p key={row.name || idx} style={{ margin: 0 }}>
+          {row.start_time || ""} {row.title}
+        </p>
+      ))}
+      {(timeline?.pending_requests || []).map((row: any) => (
+        <p key={row.name} style={{ margin: 0 }}>
+          Suggested change · {row.requested_by}
+          <button
+            type="button"
+            className="ee-btn ee-btn--ghost"
+            style={{ marginLeft: "0.5rem" }}
+            onClick={async () => {
+              await call("entertainment_express.api.timeline.review_change", { request_name: row.name, approve: 1 });
+              reload();
+            }}
+          >
+            Approve
+          </button>
+        </p>
+      ))}
+      {timeline?.status !== "finalized" ? (
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.timeline.finalize", { booking_name: jobId, share_with_client: 1 });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not finalize the run of show.");
+            }
+          }}
+        >
+          Finalize and share
+        </button>
+      ) : (
+        <p className="ee-muted">Run of show is finalized.</p>
+      )}
+      <h3 style={{ margin: "1rem 0 0.35rem", fontSize: "1.05rem" }}>Music</h3>
+      {["must_play", "do_not_play", "special_moment", "general_request"].map((key) =>
+        (lists[key] || []).length ? (
+          <div key={key}>
+            <p style={{ margin: "0.4rem 0 0", fontWeight: 600 }}>{key.split("_").join(" ")}</p>
+            {(lists[key] || []).map((row: any) => (
+              <p key={row.name} style={{ margin: 0 }}>
+                {row.free_text || row.song} {row.in_library ? "· in library" : "· not in library"} · {row.status}
+              </p>
+            ))}
+          </div>
+        ) : null
+      )}
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          setError("");
+          try {
+            const res = await call("entertainment_express.api.music.create_guest_link", { booking_name: jobId });
+            setGuestUrl(res?.url || "");
+          } catch (err: any) {
+            setError(err.message || "Could not create a guest request link.");
+          }
+        }}
+      >
+        Guest song-request link
+      </button>
+      {guestUrl ? <p className="ee-muted">Copy now: {guestUrl}</p> : null}
+    </section>
+  );
+}
+
+function EventPlanningWorkspace() {
+  const emptyField = { field_key: "", label: "", field_type: "text", options: "", required: 0, conditional_on_field: "", conditional_on_value: "" };
+  const emptyBeat = { title: "", offset_minutes: 0, duration_minutes: 15, moment_key: "" };
+  const [forms, setForms] = React.useState<any[]>([]);
+  const [timelines, setTimelines] = React.useState<any[]>([]);
+  const [formDraft, setFormDraft] = React.useState<any>({
+    template_name: "",
+    event_type: "wedding",
+    purpose: "planning",
+    active: 1,
+    reminder_cadence_days: 3,
+    fields: [{ ...emptyField, field_key: "pronunciations", label: "Names to announce" }],
+  });
+  const [tlDraft, setTlDraft] = React.useState<any>({
+    template_name: "",
+    event_type: "wedding",
+    active: 1,
+    items: [{ ...emptyBeat, title: "Grand entrance" }],
+  });
+  const [error, setError] = React.useState("");
+
+  const load = () => {
+    call("entertainment_express.api.planning.list_form_templates", {})
+      .then((res) => setForms(res || []))
+      .catch(() => setForms([]));
+    call("entertainment_express.api.timeline.list_timeline_templates", {})
+      .then((res) => setTimelines(res || []))
+      .catch(() => setTimelines([]));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Event details</h1>
+        <p className="ee-muted">Questionnaires and run-of-show templates for each event type. Confirmed jobs pick these up automatically.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0 }}>Questionnaires</h2>
+        {forms.map((row) => (
+          <p key={row.name} style={{ margin: 0 }}>
+            {row.template_name} · {row.event_type} · {row.purpose} · {row.active ? "on" : "off"}
+          </p>
+        ))}
+        <FormField label="Template name">
+          <input value={formDraft.template_name} onChange={(e) => setFormDraft({ ...formDraft, template_name: e.target.value })} />
+        </FormField>
+        <FormField label="Event type">
+          <input value={formDraft.event_type} onChange={(e) => setFormDraft({ ...formDraft, event_type: e.target.value })} />
+        </FormField>
+        {(formDraft.fields || []).map((field: any, idx: number) => (
+          <div key={idx} style={{ display: "grid", gap: "0.35rem" }}>
+            <FormField label={`Question ${idx + 1}`}>
+              <input
+                value={field.label}
+                onChange={(e) => {
+                  const fields = [...formDraft.fields];
+                  const label = e.target.value;
+                  fields[idx] = { ...field, label, field_key: field.field_key || label.toLowerCase().replace(/[^a-z0-9]+/g, "_") };
+                  setFormDraft({ ...formDraft, fields });
+                }}
+              />
+            </FormField>
+            <FormField label="Show only if (field = value)">
+              <input
+                value={field.conditional_on_field ? `${field.conditional_on_field}=${field.conditional_on_value}` : ""}
+                placeholder="ceremony=Yes"
+                onChange={(e) => {
+                  const [k, ...rest] = e.target.value.split("=");
+                  const fields = [...formDraft.fields];
+                  fields[idx] = { ...field, conditional_on_field: (k || "").trim(), conditional_on_value: rest.join("=").trim() };
+                  setFormDraft({ ...formDraft, fields });
+                }}
+              />
+            </FormField>
+          </div>
+        ))}
+        <div className="ee-form__actions">
+          <button type="button" className="ee-btn ee-btn--ghost" onClick={() => setFormDraft({ ...formDraft, fields: [...formDraft.fields, { ...emptyField }] })}>
+            Add question
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                await call("entertainment_express.api.planning.save_template", { template: formDraft });
+                setFormDraft({ ...formDraft, template_name: "", name: undefined });
+                load();
+              } catch (err: any) {
+                setError(err.message || "Could not save that questionnaire.");
+              }
+            }}
+          >
+            Save questionnaire
+          </button>
+        </div>
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0 }}>Run of show templates</h2>
+        {timelines.map((row) => (
+          <p key={row.name} style={{ margin: 0 }}>
+            {row.template_name} · {row.event_type}
+          </p>
+        ))}
+        <FormField label="Template name">
+          <input value={tlDraft.template_name} onChange={(e) => setTlDraft({ ...tlDraft, template_name: e.target.value })} />
+        </FormField>
+        {(tlDraft.items || []).map((item: any, idx: number) => (
+          <FormField key={idx} label={`Cue ${idx + 1} (minutes from start)`}>
+            <input
+              value={`${item.offset_minutes} ${item.title}`}
+              onChange={(e) => {
+                const parts = e.target.value.trim().split(/\s+/);
+                const offset = Number(parts[0]);
+                const items = [...tlDraft.items];
+                items[idx] = { ...item, offset_minutes: Number.isFinite(offset) ? offset : 0, title: Number.isFinite(offset) ? parts.slice(1).join(" ") : e.target.value };
+                setTlDraft({ ...tlDraft, items });
+              }}
+            />
+          </FormField>
+        ))}
+        <div className="ee-form__actions">
+          <button type="button" className="ee-btn ee-btn--ghost" onClick={() => setTlDraft({ ...tlDraft, items: [...tlDraft.items, { ...emptyBeat }] })}>
+            Add cue
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                await call("entertainment_express.api.timeline.save_timeline_template", { template: tlDraft });
+                setTlDraft({ ...tlDraft, template_name: "", name: undefined });
+                load();
+              } catch (err: any) {
+                setError(err.message || "Could not save that run of show.");
+              }
+            }}
+          >
+            Save run of show
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function TalentHome() {
   const [day, setDay] = React.useState<any>(null);
   React.useEffect(() => {
@@ -2046,6 +2442,292 @@ function GrowWorkspace() {
   );
 }
 
+function ConnectionsWorkspace() {
+  const GROUPS = [
+    { title: "Calendar", ids: ["google_calendar", "microsoft_365", "ical"] },
+    { title: "Maps", ids: ["mapbox", "google_maps"] },
+    { title: "Signing", ids: ["docusign"] },
+    { title: "Books", ids: ["quickbooks", "xero"] },
+    { title: "Music", ids: ["spotify", "apple_music", "youtube"] },
+  ];
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState("");
+  const [draft, setDraft] = React.useState<Record<string, string>>({});
+  const [icalUrl, setIcalUrl] = React.useState("");
+
+  const load = () => {
+    call("entertainment_express.api.integrations.list_connections", {})
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (provider: string, enabled: number) => {
+    setBusy(provider);
+    setError("");
+    try {
+      const raw = (draft[provider] || "").trim();
+      const credentials = raw ? { token: raw, api_key: raw, access_token: raw, key: raw } : {};
+      await call("entertainment_express.api.integrations.save_connection", { provider, enabled, credentials });
+      setDraft({ ...draft, [provider]: "" });
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not save that connection.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const rotateIcal = async () => {
+    setBusy("ical");
+    setError("");
+    try {
+      const res = await call("entertainment_express.api.integrations.rotate_ical_token", {});
+      setIcalUrl(res?.url || "");
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not create a calendar feed.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const renderRow = (row: any) => (
+    <div key={row.provider} className="ee-form" style={{ maxWidth: "none" }}>
+      <p style={{ margin: 0 }}>
+        <strong>{row.label}</strong> · {row.status}
+        {row.enabled ? " · on" : " · off"}
+      </p>
+      {row.last_error ? <p className="ee-muted">{row.last_error}</p> : null}
+      {row.provider === "ical" ? (
+        <button type="button" className="ee-btn" disabled={busy === "ical"} onClick={rotateIcal}>
+          New calendar feed link
+        </button>
+      ) : (
+        <>
+          <FormField label="Key or token">
+            <input
+              type="password"
+              value={draft[row.provider] || ""}
+              onChange={(e) => setDraft({ ...draft, [row.provider]: e.target.value })}
+              autoComplete="off"
+            />
+          </FormField>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button type="button" className="ee-btn" disabled={!!busy} onClick={() => save(row.provider, 1)}>
+              Save and turn on
+            </button>
+            <button type="button" className="ee-btn ee-btn--ghost" disabled={!!busy} onClick={() => save(row.provider, 0)}>
+              Turn off
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Connections</h1>
+        <p className="ee-muted">Link calendars, maps, signing, books, and music for this company. Keys stay on the server and are never shown again.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {rows.length ? (
+        GROUPS.map((group) => {
+          const items = rows.filter((row) => group.ids.includes(row.provider));
+          if (!items.length) return null;
+          return (
+            <div key={group.title} style={{ display: "grid", gap: "0.75rem" }}>
+              <h2 style={{ margin: 0, fontSize: "1.1rem" }}>{group.title}</h2>
+              {items.map(renderRow)}
+            </div>
+          );
+        })
+      ) : (
+        <EmptyState title="Connections" message="Connections for this company will show here." />
+      )}
+      {icalUrl ? <p className="ee-muted">Feed URL (copy now): {icalUrl}</p> : null}
+    </section>
+  );
+}
+
+function SecurityWorkspace() {
+  const [info, setInfo] = React.useState<any>(null);
+  const [domains, setDomains] = React.useState<any[]>([]);
+  const [auditRows, setAuditRows] = React.useState<any[]>([]);
+  const [host, setHost] = React.useState("");
+  const [issuer, setIssuer] = React.useState("");
+  const [clientId, setClientId] = React.useState("");
+  const [clientSecret, setClientSecret] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const load = () => {
+    call("entertainment_express.api.hardening.security_status", {})
+      .then((res) => setInfo(res || {}))
+      .catch(() => setInfo(null));
+    call("entertainment_express.api.hardening.list_custom_domains", {})
+      .then((res) => setDomains(res || []))
+      .catch(() => setDomains([]));
+    call("entertainment_express.api.hardening.list_audit", { limit: 20 })
+      .then((res) => setAuditRows(res || []))
+      .catch(() => setAuditRows([]));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const toggle2fa = async (enabled: number) => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.set_require_2fa", { enabled });
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not update two-step setting.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addDomain = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.request_custom_domain", { hostname: host });
+      setHost("");
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not save that hostname.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const verify = async (hostname: string) => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.verify_custom_domain", { hostname });
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not verify that hostname.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveSso = async (enabled: number) => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.save_sso", {
+        issuer,
+        client_id: clientId,
+        client_secret: clientSecret,
+        enabled,
+      });
+      setClientSecret("");
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not save sign-in provider.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Security</h1>
+        <p className="ee-muted">Two-step codes, custom hostnames, and sign-in for this company. Keys stay on the server.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Two-step codes</h2>
+        <p className="ee-muted">Require a phone code for company admins on this site. Enroll at sign-in after you turn this on.</p>
+        <p>{info?.require_2fa ? "On" : "Off"}</p>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="button" className="ee-btn" disabled={busy} onClick={() => toggle2fa(1)}>
+            Turn on
+          </button>
+          <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => toggle2fa(0)}>
+            Turn off
+          </button>
+        </div>
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Custom hostname</h2>
+        <p className="ee-muted">Point a CNAME at {info?.default_host || "this company's default address"}, then verify. TLS is issued by the operator after verify.</p>
+        <FormField label="Hostname">
+          <input value={host} onChange={(e) => setHost(e.target.value)} autoComplete="off" />
+        </FormField>
+        <button type="button" className="ee-btn" disabled={busy || !host.trim()} onClick={addDomain}>
+          Save hostname
+        </button>
+        {domains.length ? (
+          <ul>
+            {domains.map((row) => (
+              <li key={row.hostname}>
+                {row.hostname} · {row.verified ? "verified" : "not verified"}
+                {!row.verified ? (
+                  <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => verify(row.hostname)}>
+                    Check DNS
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState title="Hostnames" message="Custom hostnames for this company will show here." />
+        )}
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Sign-in provider</h2>
+        <p className="ee-muted">{info?.sso_status === "connected" ? "Connected. Password sign-in still works." : "Off. Password sign-in is the path until you connect a provider."}</p>
+        <FormField label="Issuer URL">
+          <input value={issuer} onChange={(e) => setIssuer(e.target.value)} autoComplete="off" />
+        </FormField>
+        <FormField label="Client id">
+          <input value={clientId} onChange={(e) => setClientId(e.target.value)} autoComplete="off" />
+        </FormField>
+        <FormField label="Client secret">
+          <input type="password" value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} autoComplete="off" />
+        </FormField>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="button" className="ee-btn" disabled={busy} onClick={() => saveSso(1)}>
+            Save and turn on
+          </button>
+          <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => saveSso(0)}>
+            Turn off
+          </button>
+        </div>
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Recent activity</h2>
+        {auditRows.length ? (
+          <ul>
+            {auditRows.map((row, idx) => (
+              <li key={idx}>
+                {row.action} · {row.actor} · {row.when}
+                {row.related ? ` · ${row.related}` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState title="Activity" message="Security events for this company will show here." />
+        )}
+      </div>
+    </section>
+  );
+}
+
 function SettingsWorkspace() {
   const [row, setRow] = React.useState<any>(null);
   const [brandName, setBrandName] = React.useState("");
@@ -2148,6 +2830,7 @@ export function OwnerApp() {
           <Route path="/coverage" element={<CoverageWorkspace />} />
           <Route path="/move" element={<MoveWorkspace />} />
           <Route path="/dispatch" element={<DispatchWorkspace />} />
+          <Route path="/event-details" element={<EventPlanningWorkspace />} />
           <Route path="/catalog" element={<CatalogWorkspace />} />
           <Route path="/catalog/new" element={<CrudEditor kind="package" basePath="/catalog" />} />
           <Route path="/catalog/:id" element={<CrudEditor kind="package" basePath="/catalog" />} />
@@ -2160,9 +2843,12 @@ export function OwnerApp() {
           <Route path="/money/:id" element={<CrudEditor kind="invoice" basePath="/money" />} />
           <Route path="/reports" element={<ReportsWorkspace />} />
           <Route path="/assistant" element={<AssistantWorkspace />} />
+          <Route path="/plan" element={<PlanWorkspace />} />
           <Route path="/automations" element={<AutomationsWorkspace />} />
           <Route path="/grow" element={<GrowWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
+          <Route path="/connections" element={<ConnectionsWorkspace />} />
+          <Route path="/security" element={<SecurityWorkspace />} />
           <Route path="/account" element={<AccountPanel />} />
           <Route path="/settings" element={<Navigate to="/brand" replace />} />
           <Route path="/approvals" element={<ApprovalsWorkspace />} />

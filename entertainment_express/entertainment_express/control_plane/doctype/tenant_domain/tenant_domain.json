@@ -1,0 +1,26 @@
+{
+ "actions": [],
+ "autoname": "format:EE-DOM-{#####}",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["tenant", "hostname", "type", "verified", "tls_status"],
+ "fields": [
+  {"fieldname": "tenant", "fieldtype": "Link", "label": "Tenant", "options": "Tenant", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "hostname", "fieldtype": "Data", "label": "Hostname", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "type", "fieldtype": "Select", "label": "Type", "options": "default\ncustom", "default": "custom"},
+  {"fieldname": "verified", "fieldtype": "Check", "label": "Verified", "default": "0", "in_list_view": 1},
+  {"fieldname": "tls_status", "fieldtype": "Select", "label": "TLS", "options": "pending\nissued\nerror", "default": "pending"}
+ ],
+ "modified": "2026-09-02 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Control Plane",
+ "name": "Tenant Domain",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "SaaS Operator", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

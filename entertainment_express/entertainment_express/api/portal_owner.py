@@ -91,15 +91,9 @@ def _require_owner() -> None:
 
 
 def _audit(action: str, details: dict) -> None:
-    frappe.get_doc(
-        {
-            "doctype": "Comment",
-            "comment_type": "Info",
-            "reference_doctype": "User",
-            "reference_name": frappe.session.user,
-            "content": f"[PORTAL_AUDIT] {action}: {frappe.as_json(details)}",
-        }
-    ).insert(ignore_permissions=True)
+    from entertainment_express.security import audit
+
+    audit.write(action, extra=details)
 
 
 def _planning_percent(booking: str | None) -> float | None:
@@ -361,6 +355,15 @@ def list_staff() -> list[dict]:
 @frappe.whitelist()
 def invite_staff(email: str, full_name: str, roles: list[str]) -> dict:
     _require_owner()
+
+    from entertainment_express.control_plane.entitlements import enforce_numeric_limit
+
+    staff_count = frappe.db.count("User", {"enabled": 1, "user_type": "System User"})
+    enforce_numeric_limit(
+        "max_staff_users",
+        staff_count,
+        "Staff limit reached. Upgrade your plan.",
+    )
 
     roles = _as_role_list(roles)
     disallowed = set(roles or []).intersection(DISALLOWED_ESCALATION_ROLES)

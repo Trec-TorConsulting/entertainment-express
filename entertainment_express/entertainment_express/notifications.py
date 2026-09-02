@@ -28,6 +28,10 @@ def send(
     related_doctype: str | None = None,
     related_name: str | None = None,
 ) -> None:
+    from entertainment_express.control_plane.lifecycle import automations_paused
+
+    if automations_paused() and template_key != "saas_dunning":
+        return
     frappe.enqueue(
         "entertainment_express.notifications._send_now",
         template_key=template_key,

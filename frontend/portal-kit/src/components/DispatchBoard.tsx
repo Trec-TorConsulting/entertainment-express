@@ -20,6 +20,7 @@ type JobRow = {
   place: string;
   at_risk: boolean;
   crew: CrewRow[];
+  assets?: string[];
 };
 
 type Person = { id: string; name: string; roles?: string[] };
@@ -177,6 +178,7 @@ export function JobCrewPanel({ jobId }: { jobId: string }) {
         <p className="ee-muted">Nobody is assigned yet.</p>
       )}
       <AssignForm jobId={jobId} people={people} roles={roles} onOffered={reload} />
+      <SuggestCrew jobId={jobId} atRisk={!crew.length} onOffered={reload} />
     </section>
   );
 }
@@ -190,53 +192,53 @@ function SuggestCrew({
   atRisk: boolean;
   onOffered: () => void;
 }) {
-  const [rows, setRows] = React.useState<any[] | null>(null);
-  const [note, setNote] = React.useState("");
+  const [rows, setRows] = React.useState<any[]>([]);
   const [error, setError] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-  if (!atRisk && !rows) {
-    return null;
-  }
+  const [busy, setBusy] = React.useState("");
+
+  const load = React.useCallback(() => {
+    if (!atRisk) {
+      setRows([]);
+      return;
+    }
+    call("entertainment_express.api.portal_dispatch.suggest", { job: jobId })
+      .then((res) => setRows(res || []))
+      .catch((err) => setError(err.message || "Could not suggest crew."));
+  }, [jobId, atRisk]);
+
+  React.useEffect(() => {
+    load();
+  }, [load]);
+
+  if (!atRisk && !rows.length) return null;
+
   return (
     <div className="ee-dispatch__assign">
-      <button
-        type="button"
-        className="ee-btn"
-        disabled={busy}
-        onClick={async () => {
-          setBusy(true);
-          setError("");
-          try {
-            const res = await call("entertainment_express.api.ai.suggest_dispatch", { job: jobId });
-            setRows(res.crew || []);
-            setNote(res.available === false ? "AI suggestion unavailable" : res.message || "");
-          } catch (err: any) {
-            setError(err.message || "Could not suggest crew.");
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        Suggest crew
-      </button>
-      {note ? <p className="ee-muted">{note}</p> : null}
+      <p className="ee-muted" style={{ margin: 0 }}>
+        Suggested people
+      </p>
       {error ? <p className="ee-form__error">{error}</p> : null}
-      {(rows || []).map((row) => (
+      {rows.map((row) => (
         <p key={row.employee} style={{ margin: 0 }}>
           {row.rank}. {row.name} · {row.reason}{" "}
           <button
             type="button"
             className="ee-btn"
+            disabled={!!busy}
             onClick={async () => {
+              setBusy(row.employee);
               setError("");
               try {
-                await call("entertainment_express.api.ai.confirm", {
-                  kind: "offer_crew",
-                  payload: { job: jobId, person: row.employee, role: (row.roles || [])[0] || "" },
+                await call("entertainment_express.api.portal_dispatch.offer", {
+                  job: jobId,
+                  person: row.employee,
+                  role: (row.roles || [])[0] || "",
                 });
                 onOffered();
               } catch (err: any) {
                 setError(err.message || "Could not offer that shift.");
+              } finally {
+                setBusy("");
               }
             }}
           >
@@ -251,15 +253,20 @@ function SuggestCrew({
 export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
   const [day, setDay] = React.useState(today);
   const [jobs, setJobs] = React.useState<JobRow[]>([]);
+  const [route, setRoute] = React.useState<any[]>([]);
   const [people, setPeople] = React.useState<Person[]>([]);
   const [roles, setRoles] = React.useState<Role[]>([]);
   const [error, setError] = React.useState("");
 
   const reload = React.useCallback(() => {
     call("entertainment_express.api.portal_dispatch.board", { day })
-      .then((res) => setJobs(res?.jobs || []))
+      .then((res) => {
+        setJobs(res?.jobs || []);
+        setRoute(res?.route || []);
+      })
       .catch((err) => {
         setJobs([]);
+        setRoute([]);
         setError(err.message || "Could not load dispatch.");
       });
     if (canAssign) {
@@ -291,6 +298,35 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
         </FormField>
       </div>
       {error ? <p className="ee-form__error">{error}</p> : null}
+      {route.length > 1 ? (
+        <section className="ee-form" style={{ maxWidth: "none" }}>
+          <h2 style={{ margin: 0 }}>Drive order</h2>
+          <p className="ee-muted">Stops follow call times. Drive minutes appear when maps are connected.</p>
+          {route.map((stop) => (
+            <p key={stop.booking} style={{ margin: 0 }}>
+              {stop.sequence}. {stop.when} {stop.title}
+              {stop.travel_minutes != null ? ` · ${stop.travel_minutes} min from last` : ""}
+              {stop.place ? ` · ${stop.place}` : ""}
+            </p>
+          ))}
+          {canAssign ? (
+            <button
+              type="button"
+              className="ee-btn ee-btn--ghost"
+              onClick={async () => {
+                setError("");
+                try {
+                  await call("entertainment_express.api.portal_dispatch.save_route", { day });
+                } catch (err: any) {
+                  setError(err.message || "Could not save the drive order.");
+                }
+              }}
+            >
+              Save drive order
+            </button>
+          ) : null}
+        </section>
+      ) : null}
       {jobs.length ? (
         jobs.map((job) => (
           <article key={job.id} className={job.at_risk ? "ee-dispatch__job ee-dispatch__job--risk" : "ee-dispatch__job"}>
@@ -301,6 +337,7 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
                 {job.place ? ` · ${job.place}` : ""}
               </p>
               {job.at_risk ? <p className="ee-form__error">Needs a confirmed crew</p> : null}
+              {(job.assets || []).length ? <p className="ee-muted">Gear: {job.assets?.join(", ")}</p> : null}
             </div>
             {job.crew.length ? (
               <div className="ee-dispatch__crew">
@@ -318,6 +355,23 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
             )}
             {canAssign ? <AssignForm jobId={job.id} people={people} roles={roles} onOffered={reload} /> : null}
             {canAssign ? <SuggestCrew jobId={job.id} atRisk={job.at_risk || !job.crew.length} onOffered={reload} /> : null}
+            {canAssign ? (
+              <button
+                type="button"
+                className="ee-btn ee-btn--ghost"
+                onClick={async () => {
+                  setError("");
+                  try {
+                    await call("entertainment_express.api.portal_dispatch.publish_packet", { job: job.id });
+                    reload();
+                  } catch (err: any) {
+                    setError(err.message || "Could not issue the run sheet.");
+                  }
+                }}
+              >
+                Issue run sheet
+              </button>
+            ) : null}
           </article>
         ))
       ) : (

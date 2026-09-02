@@ -16,6 +16,41 @@ STAFF = ["EE Tenant Admin", "EE Sales", "EE Dispatcher", "System Manager"]
 
 
 @frappe.whitelist()
+def list_timeline_templates() -> list:
+    require_roles(*STAFF)
+    rows = frappe.get_all(
+        "Timeline Template",
+        fields=["name", "template_name", "event_type", "active"],
+        order_by="template_name",
+    )
+    for row in rows:
+        row["items"] = frappe.get_all(
+            "Timeline Template Item",
+            filters={"parent": row.name},
+            fields=["offset_minutes", "duration_minutes", "title", "description", "moment_key"],
+            order_by="idx",
+        )
+    return rows
+
+
+@frappe.whitelist()
+def save_timeline_template(template: dict) -> dict:
+    require_roles(*STAFF)
+    name = template.get("name")
+    if name and frappe.db.exists("Timeline Template", name):
+        doc = frappe.get_doc("Timeline Template", name)
+        doc.update({k: v for k, v in template.items() if k != "items"})
+        doc.set("items", [])
+        for item in template.get("items") or []:
+            doc.append("items", item)
+        doc.save()
+    else:
+        doc = frappe.get_doc({"doctype": "Timeline Template", **template})
+        doc.insert()
+    return {"name": doc.name}
+
+
+@frappe.whitelist()
 def get_timeline(booking_name: str) -> dict:
     assert_booking_access(booking_name)
     name = frappe.db.get_value("Event Timeline", {"booking": booking_name}, "name")

@@ -36,6 +36,8 @@ BACKEND_PREFIXES = (
 
 HEALTH_ENDPOINTS = {
     "/api/method/ping",
+    "/api/method/entertainment_express.api.health.ping",
+    "/api/method/entertainment_express.api.health.ready",
     "/api/method/frappe.utils.health.ping",
     "/api/method/frappe.health.get_health_status",
 }

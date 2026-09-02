@@ -72,3 +72,10 @@ The system SHALL let the paying customer manage must-play, do-not-play, and spec
 #### Scenario: Customer adds a must-play in the SPA
 - **WHEN** a customer adds a must-play song on `/client/planning`
 - **THEN** the Music Selection is stored on that booking and appears for assigned crew
+
+### Requirement: Apple And YouTube Playlist Import
+The system SHALL import Apple Music and YouTube playlist links as music selections with preview URLs where the provider allows, in addition to Spotify. Missing keys SHALL not fail the music page.
+
+#### Scenario: Import YouTube without a key
+- **WHEN** a client pastes a YouTube playlist URL and no YouTube key is configured
+- **THEN** the API returns a clear setup message and no selections are created

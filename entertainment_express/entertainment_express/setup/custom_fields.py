@@ -268,6 +268,14 @@ CUSTOM_FIELDS = {
             "insert_after": "ee_stripe_session_id",
             "read_only": 1,
         },
+        {
+            "dt": "Sales Invoice",
+            "fieldname": "ee_accounting_id",
+            "fieldtype": "Data",
+            "label": "Books Id",
+            "insert_after": "ee_payment_intent_id",
+            "read_only": 1,
+        },
     ],
 
     "Payment Entry": [

@@ -234,6 +234,9 @@ def save_campaign(values: dict | str | None = None, name: str | None = None) -> 
 @frappe.whitelist()
 def send_campaign(name: str) -> dict:
     _require_staff()
+    from entertainment_express.control_plane.entitlements import require_entitlement
+
+    require_entitlement("enable_marketing")
     _ensure_templates()
     doc = frappe.get_doc("EE Campaign", name)
     if not doc.segment:

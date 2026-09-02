@@ -47,9 +47,11 @@ availability, and quote-to-invoice with a Stripe deposit payment.
 `notifications` (transactional email subset).
 **Folder:** [`phase-1-revenue-loop/`](phase-1-revenue-loop/)
 
-## Phase 2 — Scheduling & Dispatch 📝
-Crew/asset assignment, offer/accept for gig crew, dispatch board, run sheets, field status states.
+## Phase 2 — Scheduling & Dispatch ✅ archived 2026-09-02
+Crew/asset assignment, offer/accept for gig crew, dispatch board, run sheets, field status states,
+deterministic crew suggest, and call-time drive order (maps minutes when connected).
 **Spec:** `scheduling-dispatch`. **Depends on:** phase-1 bookings, phase-3 workers can precede if needed.
+**Folder:** [`archive/2026-09-02-phase-2-scheduling-dispatch/`](archive/2026-09-02-phase-2-scheduling-dispatch/)
 
 ## Phase 3 — HR & Workforce 📝
 Worker (W2/1099) onboarding, skills/roles, availability, timesheets, compliance docs. Enables real
@@ -103,28 +105,32 @@ content drafting, lead scoring, guardrails.
 **Spec:** `ai-assistant`. **Depends on:** phases 1–10 data; Ollama on node05.
 **Folder:** [`archive/2026-09-02-phase-11-ai-assistant/`](archive/2026-09-02-phase-11-ai-assistant/)
 
-## Phase 12 — SaaS Control Plane (Full) 📝
+## Phase 12 — SaaS Control Plane (Full) ✅
 Complete self-service signup, plans/entitlements, usage metering, Stripe subscription billing + dunning,
 fleet health dashboard, lifecycle (suspend/resume/deprovision) beyond phase-1 provisioning subset.
 **Spec:** `saas-control-plane`, `platform-multitenancy` (lifecycle). **Depends on:** phase-1.
+**Folder:** [`archive/2026-09-02-phase-12-saas-control-plane/`](archive/2026-09-02-phase-12-saas-control-plane/)
 
-## Phase 13 — Integrations Expansion 📝
+## Phase 13 — Integrations Expansion ✅
 Calendar two-way sync (Google/M365/iCal), maps/routing provider, DocuSign, accounting sync (QuickBooks/Xero),
 music streaming (Spotify/Apple/YouTube), integration observability framework hardening.
 **Spec:** `integrations`. **Depends on:** phases that consume each integration.
+**Folder:** [`archive/2026-09-02-phase-13-integrations/`](archive/2026-09-02-phase-13-integrations/)
 
-## Phase 14 — Hardening & Enterprise Readiness 📝
+## Phase 14 — Hardening & Enterprise Readiness ✅
 Performance/scale testing per-site and multi-site, security review (OWASP), backup/restore drills, 2FA/SSO,
 audit completeness, per-tenant custom domains, observability/alerting, documentation.
 **Specs:** all. **Depends on:** everything.
+**Folder:** [`archive/2026-09-02-phase-14-hardening/`](archive/2026-09-02-phase-14-hardening/)
 
-## Phase 15 — Event Planning Suite 📝
+## Phase 15 — Event Planning Suite ✅
 The DJ/entertainment client-planning engine: configurable conditional **planning forms/questionnaires** per
 event type with reminders, collaborative **event timeline/run-of-show** builder with templates, and
 **music planning** (client + guest song requests, must-play/do-not-play, curated suggestion lists, streaming
 import/preview, music library & availability check). Surfaces to crew on run sheets and the mobile app.
 **Specs:** `event-planning-forms`, `event-timeline`, `music-planning`. **Depends on:** phase-1, phase-7
 (portal), phase-13 (streaming integrations), phase-9 (mobile crew view).
+**Folder:** [`archive/2026-09-02-phase-15-event-planning/`](archive/2026-09-02-phase-15-event-planning/)
 
 ## Phase 16 — Appointments & Consultation Scheduling ✅ archived 2026-09-01
 **Goal:** Calendly-style self-service scheduler for consultations/planning meetings: bookable meeting types,

@@ -26,7 +26,7 @@ availability, with full CRUD on assignments.
 
 #### Scenario: Auto-suggest assignments
 - **WHEN** a dispatcher opens an unassigned confirmed booking
-- **THEN** the system suggests available, qualified crew and assets ranked by proximity/availability/cost
+- **THEN** the system suggests available, qualified crew ranked by role match then availability that day; an AI provider is not required
 
 ### Requirement: Crew Offer & Acceptance
 The system SHALL support offering shifts to crew (especially 1099/gig) and tracking accept/decline.
@@ -44,11 +44,11 @@ The system SHALL provide a daily dispatch board showing all events, their assign
 - **THEN** it is flagged on the board as at-risk so dispatchers can act
 
 ### Requirement: Route Optimization
-The system SHALL sequence a day's deliveries/events and compute travel times/routes for crew and vehicles.
+The system SHALL sequence a day's events by call time and attach travel times when maps are connected. Event windows stay fixed; the planner SHALL NOT move a job's start to shorten drive time.
 
 #### Scenario: Optimized route
-- **WHEN** a dispatcher generates routes for the day's multi-stop deliveries
-- **THEN** stops are ordered to reduce total travel time within time-window constraints, with per-stop ETAs
+- **WHEN** a dispatcher generates routes for the day's multi-stop jobs
+- **THEN** stops are ordered by start time, travel minutes appear when a maps key is present, and a Route Plan can be saved for that day
 
 ### Requirement: Run Sheets
 The system SHALL generate a run sheet for each event containing everything the crew needs on site.

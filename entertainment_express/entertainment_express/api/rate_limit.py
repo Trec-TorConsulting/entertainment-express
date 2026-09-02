@@ -32,7 +32,8 @@ def _client_ip() -> str:
 
 def rate_limit_key(identity: str | None = None) -> str:
     identity = identity or frappe.session.user or _client_ip()
-    return f"ee:rl:{identity}:{int(time.time() // DEFAULT_WINDOW)}"
+    site = getattr(getattr(frappe, "local", None), "site", None) or "site"
+    return f"ee:rl:{site}:{identity}:{int(time.time() // DEFAULT_WINDOW)}"
 
 
 def check_rate_limit(identity: str | None = None, limit: int = DEFAULT_LIMIT) -> None:
