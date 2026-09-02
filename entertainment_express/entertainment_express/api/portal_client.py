@@ -69,11 +69,11 @@ def list_invoices() -> list[dict]:
 
 
 @frappe.whitelist()
-def start_checkout(invoice_name: str, tip_amount: float = 0) -> dict:
+def start_checkout(invoice_name: str, tip_amount: float = 0, processor: str = "stripe") -> dict:
     _require_payer()
-    from entertainment_express.api.payments_stripe import create_checkout
+    from entertainment_express.api.portal_billing import start_checkout as _start
 
-    return create_checkout(invoice_name, tip_amount)
+    return _start(invoice_name, tip_amount=tip_amount, processor=processor)
 
 
 @frappe.whitelist()

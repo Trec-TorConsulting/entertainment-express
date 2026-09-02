@@ -55,3 +55,15 @@ class StripeProcessor(Processor):
             metadata=kwargs.get("metadata") or {},
         )
         return ChargeResult(processor_txn_id=pi.id, status=pi.status, raw=pi.to_dict())
+
+    def charge(self, amount_cents: int, currency: str, **kwargs) -> ChargeResult:
+        stripe = self._client()
+        pi = stripe.PaymentIntent.create(
+            amount=int(amount_cents),
+            currency=(currency or "usd").lower(),
+            payment_method=kwargs.get("payment_method"),
+            customer=kwargs.get("customer"),
+            confirm=bool(kwargs.get("payment_method")),
+            metadata=kwargs.get("metadata") or {},
+        )
+        return ChargeResult(processor_txn_id=pi.id, status=pi.status, raw=pi.to_dict())

@@ -1,32 +1,19 @@
-# Design: Phase 5 — Full Billing
+# Design: Phase 5 — Full Billing & Multi-Processor Payments (portals)
 
-## A. Data model
+## Context
 
-| DocType | Key fields |
-|---|---|
-| Payment Schedule | booking, policy_name, status, milestones (child) |
-| Payment Schedule Milestone | kind (`deposit`/`balance`/`installment`/`damage_hold`), due_date, amount, invoice, status |
-| EE Refund | payment_entry, invoice, amount, reason, processor, processor_refund_id, status |
-| Stored Payment Method | customer, processor, processor_customer_id, processor_payment_method_id, brand, last4, exp_month, exp_year, is_default |
-| Processor Settings | Single: enabled processors, credentials via env (`EE_STRIPE_*`, `EE_SQUARE_*`, `EE_PAYPAL_*`, `EE_ACH_*`, `EE_AUTHORIZENET_*`) — never stored in DocType |
+Schedules, refunds, holds, installments, and processor stubs already exist. UI is Stripe-only checkout plus an invoice list. Non-Stripe `charge`/`refund` raise “not implemented” even when keys are set.
 
-Sales Invoice: `ee_tip_amount`, `ee_is_balance`, `ee_is_damage_hold`, `ee_payment_intent_id`.
-Payment Entry: `ee_processor`, `ee_processor_txn_id`, `ee_tip_amount`.
+## Decisions
 
-## B. Processor interface
+1. **Reuse `billing.py`.** `portal_billing.py` wraps it with owner/accounting vs payer splits. Crew 403 on refund/hold.
+2. **Hosted checkout per processor.** Each plugin returns a `checkout_url` when configured. ACH uses Stripe Checkout `us_bank_account`. Unconfigured → `ProcessorNotConfigured` (never a silent success).
+3. **Webhook.** `api/billing_webhooks.py` verifies HMAC (`EE_{PROC}_WEBHOOK_SECRET`), dedupes on `Stripe Processed Event` name `{processor}:{id}`, then the existing Payment Entry reconcile path. Stripe’s existing endpoint stays.
+4. **UI.** Owner Money + employee Money: refund, hold, installments, schedule. Client Pay: processor + optional tip. Connections group “Payments”.
+5. **Installments.** Daily job charges due installment rows that have a stored token; otherwise the existing reminder fires.
+6. **Image** `0.0.77-ee` → `0.0.78-ee`.
 
-`billing_payments.processors.base.Processor`: `charge`, `refund`, `save_method`, `preauth`, `capture`, `release`.
-Stripe implements all. Square/PayPal/ACH/Authorize.Net implement the interface and `raise ProcessorNotConfigured` unless env keys exist; when keys exist they call the real HTTP APIs.
+## Risks
 
-## C. Flows
-
-1. On booking confirm: existing deposit invoice **and** Payment Schedule (deposit + balance due `balance_days_before_event`, default 7).
-2. Daily: unpaid milestones due in 3 days → `balance_reminder` with checkout link.
-3. `create_checkout` accepts `tip_amount`, `save_card`, `milestone`.
-4. Refunds: Stripe Refund API + EE Refund + Payment Entry reverse / GL via ERPNext.
-5. Pre-auth: PaymentIntent `capture_method=manual`; capture/release APIs.
-6. Installments: split remaining balance into N milestones; charge saved method on due date; retry once next day then flag.
-
-## D. Security
-
-No PAN. Webhooks stay signature-verified. Isolation: invoices scoped to site DB.
+- [Processor sandbox quirks] → fail closed; staff can still record a manual Payment Entry later.
+- [Webhook spoof] → unsigned events rejected; duplicates no-op.

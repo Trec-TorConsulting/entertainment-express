@@ -9,6 +9,18 @@ from entertainment_express.billing_payments.processors import ProcessorNotConfig
 from entertainment_express.billing_payments.schedules import ensure_schedule
 
 
+def _need_bill():
+    db = getattr(frappe, "db", None)
+    exists = getattr(db, "exists", None) if db is not None else None
+    if not callable(exists):
+        pytest.skip("live frappe required")
+    try:
+        if not exists("DocType", "Payment Schedule"):
+            pytest.skip("migrate required")
+    except Exception:
+        pytest.skip("migrate required")
+
+
 class TestProcessors:
     def test_square_unconfigured(self):
         proc = get_processor("square")
@@ -22,6 +34,7 @@ class TestProcessors:
 
 class TestSchedule:
     def setup_method(self):
+        _need_bill()
         if not frappe.db.exists("Customer", "TEST-BILL-CUST"):
             frappe.get_doc({"doctype": "Customer", "customer_name": "TEST-BILL-CUST"}).insert(ignore_permissions=True)
 
@@ -52,6 +65,7 @@ class TestSchedule:
 
 class TestStoredMethodNoPan:
     def test_fields_are_token_only(self):
+        _need_bill()
         if not frappe.db.exists("DocType", "Stored Payment Method"):
             pytest.skip("migrate required")
         meta = frappe.get_meta("Stored Payment Method")
