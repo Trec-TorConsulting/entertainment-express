@@ -1,0 +1,11 @@
+{
+  "name": "decode-uri-component",
+  "version": "0.5.0",
+  "description": "Vendored decode-uri-component 0.5.0 as CommonJS so query-string 7 (React Navigation 6) can require() it. Upstream 0.5.0 is ESM-only.",
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "engines": {
+    "node": ">=0.10"
+  }
+}
