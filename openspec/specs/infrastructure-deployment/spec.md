@@ -2,9 +2,9 @@
 
 ## Purpose
 Defines the K3S deployment of the EE Frappe bench (ERPNext + `entertainment_express`) in the
-`entertainment-express` namespace of the HomeLab-Redo cluster, including data services, ingress, storage,
-provisioning tooling, and backups. Kubernetes manifests live in `HomeLab-Redo/entertainment-express/`;
-the multi-arch bench **Dockerfile** lives in this product repo root.
+`entertainment-express` namespace, including data services, ingress, storage, provisioning tooling, and
+backups. Kubernetes manifests live in this repo (`k8s-deployment.yaml`, applied with `scripts/deploy.sh`);
+the bench **Dockerfile** lives at the product repo root.
 
 ### Components
 - **Frappe bench image**: ERPNext + `entertainment_express`, multi-arch, built from repo-root `Dockerfile`, pushed to `192.168.4.10:30500`.
@@ -101,3 +101,31 @@ The system SHALL expose a guest-allowed ready probe that checks this site's data
 #### Scenario: Ready checks this database
 - **WHEN** the probe runs
 - **THEN** it queries the current site connection and does not call `frappe.init` or `frappe.connect` for another site
+
+### Requirement: Manifests In This Repo
+Kubernetes for Entertainment Express SHALL live in this product repo as `k8s-deployment.yaml` (plus `scripts/deploy.sh` / `scripts/k8s_apply.py`). Docs SHALL NOT tell operators the live manifests are only in HomeLab-Redo.
+
+#### Scenario: Operator finds the apply path
+- **WHEN** they open the root README
+- **THEN** deploy steps point at `k8s-deployment.yaml` and `scripts/deploy.sh` in this repository
+
+### Requirement: Existing Cluster Apply Is Safe
+On a cluster that already has MariaDB and completed site-init Jobs, applying SHALL update Frappe Deployments and related mutable objects without requiring a successful patch of those Jobs or of MariaDB `volumeClaimTemplates`.
+
+#### Scenario: Redeploy after an image or command change
+- **WHEN** an operator runs `scripts/deploy.sh`
+- **THEN** the command exits 0 and `frappe-python` rolls; Job and MariaDB STS errors are not a failed deploy
+
+### Requirement: Website Cache Flush On Python Start
+Each `frappe-python` start SHALL flush this bench’s website cache so `website_route_rules` from the running app are visible without a manual `bench --site all clear-cache`.
+
+#### Scenario: /book after a roll
+- **WHEN** python pods start after a route-rule change
+- **THEN** `GET https://{tenant}/book` is not a stale 404 from the previous missing `book` page
+
+### Requirement: MariaDB Only From This Namespace Frappe
+MariaDB in `entertainment-express` SHALL accept TCP 3306 only from pods labeled `app.kubernetes.io/name=entertainment-express` in that namespace.
+
+#### Scenario: Unrelated pod cannot speak SQL
+- **WHEN** a NetworkPolicy is applied
+- **THEN** non-matching pods cannot connect to MariaDB:3306; Frappe python/workers/scheduler still can

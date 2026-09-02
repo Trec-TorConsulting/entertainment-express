@@ -9,8 +9,9 @@
 #   see secrets.example.yaml, then:
 #   kubectl -n entertainment-express apply -f secrets.example.yaml   # after editing
 #
-# DEPLOY:
-#   kubectl apply -f k8s-deployment.yaml
+# DEPLOY (existing cluster):
+#   TENANT_HOST=e2esmoke.entx.app ./scripts/deploy.sh
+# Fresh bootstrap only: kubectl apply -f k8s-deployment.yaml after deleting completed Jobs.
 #
 # NOTE: the site-init and admin-site-init Jobs are one-shot bootstrappers. They
 # wait for MariaDB and are idempotent. To re-run them (e.g. after an image bump),
@@ -356,6 +357,7 @@ spec:
           # the WSGI app with SharedDataMiddleware. Plain frappe.app:application 404s all
           # assets. After bumping the frappe/erpnext base image, flush redis-cache and
           # roll this deployment so the cached asset manifest matches the new bundles.
+          bench --site all clear-cache || true
           exec /home/frappe/frappe-bench/env/bin/gunicorn \
             --chdir /home/frappe/frappe-bench/sites \
             --bind 0.0.0.0:8000 \
@@ -1387,6 +1389,36 @@ spec:
       resources:
         requests:
           storage: 30Gi
+
+---
+# MariaDB accepts TCP 3306 only from pods labeled app.kubernetes.io/name=entertainment-express
+# (Frappe python/workers/scheduler and the backup CronJob template). Do not default-deny the
+# whole namespace — Traefik lives outside it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mariadb-from-ee-only
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/instance: ee-prod
+    app.kubernetes.io/managed-by: kubectl
+    app.kubernetes.io/component: mariadb
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: entertainment-express
+      app.kubernetes.io/component: mariadb
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: entertainment-express
+      ports:
+        - protocol: TCP
+          port: 3306
 
 ---
 # Source: entertainment-express/templates/backup-cronjob.yaml

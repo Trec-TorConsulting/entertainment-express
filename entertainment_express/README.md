@@ -11,14 +11,16 @@ performers).
 - MariaDB 10.6+
 - Redis
 
-## Development Setup
+## Development setup
 
 ```bash
-bench get-app entertainment_express https://github.com/your-org/entertainment_express
+bench get-app entertainment_express https://github.com/Trec-TorConsulting/entertainment-express
 bench --site <site> install-app entertainment_express
 ```
 
+Tenant UI (not Desk): `/owner`, `/employee`, `/client`. Public catalog: `/book` and `/catalog`.
+
 ## Spec
 
-See `openspec/` at the workspace root for the full product spec (26 capabilities, 18 implementation phases).
-Start with `openspec/project.md`.
+See `openspec/` at the workspace root. Start with `openspec/project.md`. There are **31** baseline
+capability specs; implementation phases **0–26** are archived under `openspec/changes/archive/`.

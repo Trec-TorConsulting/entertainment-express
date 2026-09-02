@@ -95,7 +95,7 @@ A single tenant will typically offer **several** of these at once. The domain mo
 - **E-signature:** native in-app e-sign (audit trail) with optional DocuSign.
 
 ### Infrastructure
-- **Kubernetes:** K3S homelab cluster (see §8). Deployed via YAML manifests in the HomeLab-Redo repo.
+- **Kubernetes:** K3S homelab cluster (see §8). Deployed via `k8s-deployment.yaml` in this repo (`scripts/deploy.sh` on an existing cluster).
 - **Ingress:** Traefik (built into K3S) with **LetsEncrypt** wildcard TLS.
 - **Storage class:** **Longhorn** (distributed) for all PersistentVolumeClaims.
 - **Registry:** private registry `192.168.4.10:30500`.
@@ -131,9 +131,9 @@ A single tenant will typically offer **several** of these at once. The domain mo
 
 ## 5. Repository & Code Layout
 
-This workspace (`EntertainmentExpress/`) holds the **custom Frappe app source** and the **OpenSpec specs**.
-Kubernetes manifests live in the **HomeLab-Redo** repo under a new `entertainment-express/` folder
-(mirroring how `frappe/`, `tendril/`, etc. are organized there).
+This workspace (`EntertainmentExpress/`) holds the **custom Frappe app source**, the **OpenSpec specs**,
+the bench **Dockerfile**, and the **Kubernetes manifests** (`k8s-deployment.yaml`, applied with
+`scripts/deploy.sh`).
 
 ```
 EntertainmentExpress/
@@ -141,30 +141,19 @@ EntertainmentExpress/
 │  ├─ project.md                  # you are here
 │  ├─ specs/                      # baseline capability specs (target state, authoritative WHAT)
 │  └─ changes/                    # phased change proposals (ROADMAP + phase-N/)
-└─ entertainment_express/         # the custom Frappe app (created in phase-0)
-   ├─ entertainment_express/
-   │  ├─ hooks.py
-   │  ├─ modules.txt
-   │  ├─ <module>/doctype/<doctype>/   # DocType JSON + .py controller + .js
-   │  ├─ api/                     # whitelisted REST endpoints (@frappe.whitelist)
-   │  ├─ www/                     # public web pages (booking site)
-   │  ├─ templates/               # portal pages, includes
-   │  ├─ public/                  # JS/CSS/PWA assets
-   │  ├─ patches/                 # data migrations
-   │  ├─ fixtures/                # exported roles, custom fields, defaults
-   │  └─ tests/                   # unit/integration tests
-   └─ ...
-
-HomeLab-Redo/entertainment-express/   # K8s manifests (created in phase-0)
-├─ namespace.yaml
-├─ mariadb-statefulset.yaml
-├─ redis-*.yaml
-├─ frappe-*.yaml (python/socketio/workers/scheduler)
-├─ pvc-*.yaml
-├─ ingress.yaml (wildcard)
-├─ configmap.yaml / secret.yaml (templates)
-├─ provisioner-*.yaml (tenant provisioning job/cronjob)
-└─ README.md
+├─ entertainment_express/         # the custom Frappe app (created in phase-0)
+│  └─ entertainment_express/
+│     ├─ hooks.py
+│     ├─ modules.txt
+│     ├─ <module>/doctype/<doctype>/
+│     ├─ api/
+│     ├─ www/
+│     ├─ public/
+│     ├─ patches/
+│     └─ tests/
+├─ k8s-deployment.yaml            # namespace, data services, Frappe, ingress, Jobs
+├─ scripts/deploy.sh              # existing-cluster apply (skips Jobs / MariaDB STS)
+└─ secrets.example.yaml           # placeholders only
 ```
 
 ---
@@ -234,9 +223,11 @@ HomeLab-Redo/entertainment-express/   # K8s manifests (created in phase-0)
 
 ---
 
-## 8. Infrastructure & Deployment Conventions (K3S / HomeLab-Redo)
+## 8. Infrastructure & Deployment Conventions (K3S)
 
-These mirror the existing HomeLab-Redo conventions. Manifests live in `HomeLab-Redo/entertainment-express/`.
+Manifests live in this repo: `k8s-deployment.yaml`, applied with `scripts/deploy.sh` on an existing
+cluster (skips one-shot Jobs and the live MariaDB StatefulSet). Fresh bootstrap can still apply the
+full file after deleting completed Jobs.
 
 - **YAML:** 2-space indent; order `apiVersion → kind → metadata → spec`; filenames `lowercase-hyphen.yaml`.
 - **Namespace:** everything in `entertainment-express`. Dedicated namespace, isolated.
