@@ -1,0 +1,16 @@
+[
+  {
+    "doctype": "EE Weather Policy",
+    "name": "EE Weather Policy",
+    "enabled": 1,
+    "wind_mph_max": 25,
+    "precip_inch_hours": 0.25,
+    "threshold_action": "warn",
+    "lightning_policy": "warn",
+    "lead_hours": 48,
+    "auto_offer_rain_date": 0,
+    "client_can_accept_rain_date": 1,
+    "refund_mode": "manual",
+    "provider": "open_meteo"
+  }
+]

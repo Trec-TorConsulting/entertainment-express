@@ -1,0 +1,16 @@
+{% extends "templates/web.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_content %}
+<style>
+  .ee-site { max-width: 48rem; margin: 2rem auto; padding: 0 1rem; font-family: Georgia, "Times New Roman", serif; color: #1c1917; }
+  .ee-site__brand { font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; color: {{ brand.color or "#0f766e" }}; margin-bottom: 0.5rem; }
+  .ee-site h1 { font-size: 2.25rem; margin: 0 0 1rem; line-height: 1.15; }
+  .ee-site__body { line-height: 1.65; }
+  .ee-site__body a { color: {{ brand.color or "#0f766e" }}; }
+</style>
+<article class="ee-site">
+  {% if brand.name %}<p class="ee-site__brand">{{ brand.name }}</p>{% endif %}
+  <h1>{{ page_doc.title }}</h1>
+  <div class="ee-site__body">{{ body_html|safe }}</div>
+</article>
+{% endblock %}

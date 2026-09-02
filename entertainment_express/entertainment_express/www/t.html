@@ -1,0 +1,36 @@
+{% extends "templates/web.html" %}
+{% block page_content %}
+<div id="ee-track" style="max-width:28rem;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif">
+  <h1 style="margin-top:0">Live ETA</h1>
+  <p id="ee-event" style="color:#555"></p>
+  <p id="ee-eta" style="font-size:2rem;font-weight:700;margin:0.5rem 0"></p>
+  <p id="ee-status" style="color:#57534e"></p>
+  <p id="ee-error" style="color:#b91c1c"></p>
+</div>
+<script>
+(function(){
+  var token = {{ token|tojson }};
+  if (!token) {
+    var m = location.pathname.match(/\/t\/([^\/?#]+)/);
+    token = m ? decodeURIComponent(m[1]) : "";
+  }
+  fetch("/api/method/entertainment_express.api.tracking.public_tracking", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({token: token}),
+    credentials: "same-origin"
+  }).then(function(r){return r.json()}).then(function(p){
+    var d = p.message || {};
+    document.getElementById("ee-event").textContent = d.event_name || "";
+    if (d.status === "ended") {
+      document.getElementById("ee-status").textContent = d.message || "Tracking ended.";
+      return;
+    }
+    document.getElementById("ee-eta").textContent = (d.eta_minutes != null ? d.eta_minutes + " min" : "—");
+    document.getElementById("ee-status").textContent = d.status === "arriving" ? "Arriving soon" : "En route";
+  }).catch(function(){
+    document.getElementById("ee-error").textContent = "Could not load tracking.";
+  });
+})();
+</script>
+{% endblock %}

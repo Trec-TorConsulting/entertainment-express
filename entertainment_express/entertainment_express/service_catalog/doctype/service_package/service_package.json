@@ -9,6 +9,7 @@
   "col1", "package_price", "currency", "col2",
   "image",
   "section_items", "items",
+  "section_site", "site_fit_requirements",
   "section_meta", "description", "vertical_tag", "event_types"
  ],
  "fields": [
@@ -23,6 +24,8 @@
   {"fieldname": "col2", "fieldtype": "Column Break"},
   {"fieldname": "section_items", "fieldtype": "Section Break", "label": "Included Items"},
   {"fieldname": "items", "fieldtype": "Table", "label": "Items", "options": "Service Package Item", "reqd": 1},
+  {"fieldname": "section_site", "fieldtype": "Section Break", "label": "Site Fit"},
+  {"fieldname": "site_fit_requirements", "fieldtype": "Table", "label": "Site Fit Requirements", "options": "EE Site Fit Requirement"},
   {"fieldname": "section_meta", "fieldtype": "Section Break", "label": "Classification"},
   {"fieldname": "description", "fieldtype": "Small Text", "label": "Description"},
   {"fieldname": "vertical_tag", "fieldtype": "Data", "label": "Vertical Tag", "description": "e.g. dj, inflatable, booth, game_truck"},

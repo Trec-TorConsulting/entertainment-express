@@ -1,0 +1,21 @@
+{
+  "customers": {
+    "name": "Company / Contact",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "bookings": {
+    "name": "Project",
+    "email": "Contact Email",
+    "date": "Event Date",
+    "address": "Venue"
+  },
+  "gear": {
+    "name": "Inventory Item",
+    "type": "Category"
+  },
+  "packages": {
+    "name": "Package",
+    "rate": "Sell Price"
+  }
+}

@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "autoname": "field:code",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["code", "customer", "original_amount", "balance", "currency", "expires_on", "status", "notes"],
+ "fields": [
+  {"fieldname": "code", "fieldtype": "Data", "label": "Code", "reqd": 1, "unique": 1, "in_list_view": 1},
+  {"fieldname": "customer", "fieldtype": "Link", "label": "Customer", "options": "Customer"},
+  {"fieldname": "original_amount", "fieldtype": "Currency", "label": "Original Amount", "reqd": 1},
+  {"fieldname": "balance", "fieldtype": "Currency", "label": "Balance", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "currency", "fieldtype": "Link", "label": "Currency", "options": "Currency", "default": "USD"},
+  {"fieldname": "expires_on", "fieldtype": "Date", "label": "Expires On"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "active\nredeemed\nexpired\nvoid", "default": "active", "in_list_view": 1},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing Payments",
+ "name": "EE Gift Card",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Accounting", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

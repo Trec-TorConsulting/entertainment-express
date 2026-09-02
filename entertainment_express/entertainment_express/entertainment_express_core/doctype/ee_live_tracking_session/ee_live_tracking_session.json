@@ -1,0 +1,37 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "assignment", "status", "share_token", "allow_guest", "last_lat", "last_lng", "eta_minutes", "started_at", "ended_at", "last_ping_at"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Booking", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "assignment", "fieldtype": "Link", "label": "Assignment", "options": "Crew Assignment", "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "active\narriving\nended", "default": "active", "in_list_view": 1},
+  {"fieldname": "share_token", "fieldtype": "Data", "label": "Share Token", "unique": 1},
+  {"fieldname": "allow_guest", "fieldtype": "Check", "label": "Allow Guest View", "default": "0"},
+  {"fieldname": "last_lat", "fieldtype": "Float", "label": "Last Lat"},
+  {"fieldname": "last_lng", "fieldtype": "Float", "label": "Last Lng"},
+  {"fieldname": "eta_minutes", "fieldtype": "Int", "label": "ETA Minutes"},
+  {"fieldname": "started_at", "fieldtype": "Datetime", "label": "Started At"},
+  {"fieldname": "ended_at", "fieldtype": "Datetime", "label": "Ended At"},
+  {"fieldname": "last_ping_at", "fieldtype": "Datetime", "label": "Last Ping"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Live Tracking Session",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Crew", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Customer", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

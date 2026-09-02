@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "title", "published", "public_token", "show_timeline", "show_votes", "show_gallery", "safety_rules"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Booking", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "title", "fieldtype": "Data", "label": "Title", "in_list_view": 1},
+  {"fieldname": "published", "fieldtype": "Check", "label": "Published", "default": "0"},
+  {"fieldname": "public_token", "fieldtype": "Data", "label": "Public Token", "unique": 1},
+  {"fieldname": "show_timeline", "fieldtype": "Check", "label": "Show Timeline", "default": "1"},
+  {"fieldname": "show_votes", "fieldtype": "Check", "label": "Show Song Votes", "default": "1"},
+  {"fieldname": "show_gallery", "fieldtype": "Check", "label": "Show Gallery", "default": "1"},
+  {"fieldname": "safety_rules", "fieldtype": "Small Text", "label": "Safety Rules"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Live Event Page",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

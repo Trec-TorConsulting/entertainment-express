@@ -1,0 +1,61 @@
+{% extends "templates/web.html" %}
+{% block page_content %}
+<div id="ee-attendee-waiver" style="max-width:32rem;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif">
+  <h1 style="margin-top:0">Attendee waiver</h1>
+  <p id="ee-event" style="color:#555"></p>
+  <div id="ee-body" style="white-space:pre-wrap;margin:1rem 0"></div>
+  <p id="ee-status" style="color:#555"></p>
+  <form id="ee-sign" style="display:grid;gap:0.75rem">
+    <label>Your name<br/><input name="signer_name" required style="width:100%;padding:0.5rem"/></label>
+    <label>Email (optional)<br/><input name="signer_email" type="email" style="width:100%;padding:0.5rem"/></label>
+    <button type="submit" style="padding:0.75rem;background:#0f766e;color:#fff;border:0;cursor:pointer">I agree — sign</button>
+  </form>
+  <p id="ee-error" style="color:#b91c1c"></p>
+</div>
+<script>
+(function () {
+  var token = {{ token|tojson }};
+  if (!token) {
+    var m = location.pathname.match(/\\/w\\/([^\\/?#]+)/);
+    token = m ? decodeURIComponent(m[1]) : new URLSearchParams(location.search).get("token");
+  }
+  var form = document.getElementById("ee-sign");
+  var err = document.getElementById("ee-error");
+  function call(method, args) {
+    return fetch("/api/method/" + method, {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "X-Frappe-CSRF-Token": (window.csrf_token || "")},
+      body: JSON.stringify(args || {}),
+      credentials: "same-origin",
+    }).then(function (r) { return r.json(); }).then(function (payload) {
+      if (payload.exc || payload._server_messages) throw new Error((payload._error_message) || "Request failed");
+      return payload.message;
+    });
+  }
+  call("entertainment_express.api.safety.get_attendee_waiver", {token: token}).then(function (doc) {
+    document.getElementById("ee-event").textContent = doc.event || "";
+    document.getElementById("ee-body").textContent = doc.body || doc.title || "";
+    document.getElementById("ee-status").textContent = doc.status === "signed" ? "Already signed." : "";
+    if (!doc.can_sign) form.style.display = "none";
+  }).catch(function (e) {
+    err.textContent = e.message || "Could not load waiver.";
+    form.style.display = "none";
+  });
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    err.textContent = "";
+    var fd = new FormData(form);
+    call("entertainment_express.api.safety.sign_attendee_waiver", {
+      token: token,
+      signer_name: fd.get("signer_name"),
+      signer_email: fd.get("signer_email") || "",
+    }).then(function () {
+      document.getElementById("ee-status").textContent = "Signed — thank you.";
+      form.style.display = "none";
+    }).catch(function (e) {
+      err.textContent = e.message || "Could not sign.";
+    });
+  });
+})();
+</script>
+{% endblock %}

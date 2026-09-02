@@ -73,6 +73,16 @@ def _job_title(booking: str, fallback: str = "") -> str:
     return frappe.db.get_value("Event Booking", booking, "event_name") or fallback or booking
 
 
+def _fmt_window(start, end) -> str:
+    start_s = str(start or "").strip()
+    end_s = str(end or "").strip()
+    if not start_s and not end_s:
+        return ""
+    if start_s and end_s:
+        return f"{start_s} – {end_s}"
+    return start_s or end_s
+
+
 @frappe.whitelist()
 def board(day: str | None = None) -> dict:
     _require_dispatch()
@@ -98,6 +108,12 @@ def board(day: str | None = None) -> dict:
                 "when": str(job.get("start_time") or job.get("event_date") or ""),
                 "place": job.get("venue_address") or "",
                 "at_risk": bool(job.get("at_risk")),
+                "weather_status": job.get("weather_status") or "",
+                "weather_blocked": bool(job.get("weather_blocked")),
+                "delivery_window": _fmt_window(job.get("delivery_window_start"), job.get("delivery_window_end")),
+                "pickup_window": _fmt_window(job.get("pickup_window_start"), job.get("pickup_window_end")),
+                "overweight": bool(job.get("overweight")),
+                "site_fit_status": job.get("site_fit_status") or "",
                 "crew": crew,
                 "assets": [a.get("asset_name") or a.get("asset") for a in (job.get("assets") or [])],
             }

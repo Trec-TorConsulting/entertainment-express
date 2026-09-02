@@ -10,7 +10,9 @@
   "col1", "status", "condition", "quantity", "home_location", "current_location", "barcode", "col2",
   "section_items", "linked_items",
   "section_images", "images",
-  "section_meta", "vertical_tag", "notes"
+  "section_meta", "vertical_tag", "notes",
+  "section_weather", "weather_sensitive", "wind_mph_max", "precip_inch_hours",
+  "shipping_weight_lb", "require_sanitization_before_book"
  ],
  "fields": [
   {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-ASSET-.####"},
@@ -36,7 +38,20 @@
   {"fieldname": "images", "fieldtype": "Attach Image", "label": "Primary Image"},
   {"fieldname": "section_meta", "fieldtype": "Section Break", "label": "Meta"},
   {"fieldname": "vertical_tag", "fieldtype": "Data", "label": "Vertical Tag"},
-  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"},
+  {"fieldname": "section_weather", "fieldtype": "Section Break", "label": "Weather"},
+  {"fieldname": "weather_sensitive", "fieldtype": "Check", "label": "Weather Sensitive", "default": "0",
+   "description": "Outdoor asset — forecast checks apply when assigned to a booking"},
+  {"fieldname": "wind_mph_max", "fieldtype": "Float", "label": "Wind Override (mph)",
+   "depends_on": "eval:doc.weather_sensitive",
+   "description": "Optional override of tenant Weather Policy max wind"},
+  {"fieldname": "precip_inch_hours", "fieldtype": "Float", "label": "Precip Override (in)",
+   "depends_on": "eval:doc.weather_sensitive",
+   "description": "Optional override of tenant Weather Policy max precip"},
+  {"fieldname": "shipping_weight_lb", "fieldtype": "Float", "label": "Shipping Weight (lb)",
+   "description": "Used for vehicle load planning"},
+  {"fieldname": "require_sanitization_before_book", "fieldtype": "Check", "label": "Require Sanitization Before Book",
+   "default": "0", "description": "Block availability until a sanitization log exists after last booking"}
  ],
  "modified": "2024-01-01 00:00:00.000000",
  "modified_by": "Administrator",

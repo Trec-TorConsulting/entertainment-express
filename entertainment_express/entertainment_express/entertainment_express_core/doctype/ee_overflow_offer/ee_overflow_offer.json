@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["source_booking", "status", "event_date", "service_area", "vertical_tag", "notes_public", "claimed_by_tenant", "claimed_at"],
+ "fields": [
+  {"fieldname": "source_booking", "fieldtype": "Data", "label": "Source Booking Ref", "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "open\nclaimed\ncancelled", "default": "open", "in_list_view": 1},
+  {"fieldname": "event_date", "fieldtype": "Date", "label": "Event Date", "in_list_view": 1},
+  {"fieldname": "service_area", "fieldtype": "Data", "label": "Service Area"},
+  {"fieldname": "vertical_tag", "fieldtype": "Data", "label": "Vertical"},
+  {"fieldname": "notes_public", "fieldtype": "Small Text", "label": "Public Notes (no PII)"},
+  {"fieldname": "claimed_by_tenant", "fieldtype": "Data", "label": "Claimed By Tenant"},
+  {"fieldname": "claimed_at", "fieldtype": "Datetime", "label": "Claimed At"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Overflow Offer",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "SaaS Operator", "read": 1, "write": 1, "create": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

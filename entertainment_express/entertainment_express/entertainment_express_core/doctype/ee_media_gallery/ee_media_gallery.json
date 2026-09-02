@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "title", "published", "share_token", "share_expires_on", "template_name", "print_count", "session_count", "notes"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Booking", "options": "Event Booking", "reqd": 1, "in_list_view": 1, "search_index": 1},
+  {"fieldname": "title", "fieldtype": "Data", "label": "Title", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "published", "fieldtype": "Check", "label": "Published", "default": "0", "in_list_view": 1},
+  {"fieldname": "share_token", "fieldtype": "Data", "label": "Share Token", "unique": 1, "read_only": 1},
+  {"fieldname": "share_expires_on", "fieldtype": "Datetime", "label": "Share Expires"},
+  {"fieldname": "template_name", "fieldtype": "Data", "label": "Template"},
+  {"fieldname": "print_count", "fieldtype": "Int", "label": "Print Count", "default": "0"},
+  {"fieldname": "session_count", "fieldtype": "Int", "label": "Session Count", "default": "0"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Media Gallery",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Crew", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Customer", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

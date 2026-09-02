@@ -121,13 +121,39 @@ def set_stage(assignment: str, stage: str) -> dict:
         frappe.throw("Unknown stage.")
     if key == "on-site" and ca.status == "accepted":
         _dispatch.crew_check_in(assignment)
+        try:
+            from entertainment_express.api import tracking
+
+            tracking.on_stage_change(assignment, "on-site")
+        except Exception:
+            pass
         return {"stage": "on-site"}
     if key == "complete" and ca.status == "checked_in":
         _dispatch.crew_check_out(assignment)
+        try:
+            from entertainment_express.api import tracking
+
+            tracking.on_stage_change(assignment, "complete")
+        except Exception:
+            pass
         return {"stage": "complete"}
     ca.db_set("stage", key)
     frappe.db.commit()
+    try:
+        from entertainment_express.api import tracking
+
+        tracking.on_stage_change(assignment, key)
+    except Exception:
+        pass
     return {"stage": key}
+
+
+@frappe.whitelist()
+def tracking_ping(assignment: str, latitude: float = 0, longitude: float = 0) -> dict:
+    _assignment(assignment)
+    from entertainment_express.api import tracking
+
+    return tracking.ping(assignment=assignment, latitude=latitude, longitude=longitude)
 
 
 @frappe.whitelist()
@@ -303,3 +329,37 @@ def _ensure_templates() -> None:
 
 # flt imported so tests can assert money is not computed in this module
 _ = flt
+
+
+@frappe.whitelist()
+def log_sanitization(values: dict | str | None = None) -> dict:
+    """Crew records post-use cleaning."""
+    _require_field()
+    from entertainment_express.api import safety
+
+    return safety.log_sanitization(values)
+
+
+@frappe.whitelist()
+def attendee_waiver_qr(booking: str) -> dict:
+    """QR URL for on-site attendee waivers."""
+    _require_field()
+    from entertainment_express.api import safety
+
+    return safety.attendee_waiver_qr(booking)
+
+
+@frappe.whitelist()
+def media_gallery(booking: str) -> dict:
+    _require_field()
+    from entertainment_express.api import media_gallery as mg
+
+    return mg.ensure_gallery(booking)
+
+
+@frappe.whitelist()
+def media_upload(gallery: str, title: str, content_b64: str, file_name: str = "") -> dict:
+    _require_field()
+    from entertainment_express.api import media_gallery as mg
+
+    return mg.upload_item(gallery, title, content_b64, file_name=file_name)

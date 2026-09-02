@@ -9,10 +9,9 @@
 > 4. Each `phase-N-*/` folder contains `proposal.md` (why + scope + which spec requirements),
 >    `design.md` (concrete how: DocTypes, fields, APIs, manifests, file paths), and `tasks.md`
 >    (ordered, checkable steps with acceptance criteria). Do one task at a time and check it off.
-> 5. Fully-detailed proposals exist for **phase-0**, **phase-1**, and **phase-19**. Phases 2–18 are
->    scoped here as summaries; before starting one, generate its `proposal.md`/`design.md`/`tasks.md`
->    following the same pattern as phase-0/phase-1/phase-19, using the matching baseline spec as the
->    source of truth. You can also ask Cursor to propose a change (openspec-propose skill) to scaffold them.
+> 5. Fully-detailed proposals exist for archived phases **0–26** and active competitive-gap phases
+>    **27–37** (proposal + design + specs + tasks). Research notes:
+>    [`COMPETITIVE_GAP_NOTES.md`](COMPETITIVE_GAP_NOTES.md).
 
 > **Commands & workflow (spec-first model — important):**
 > - The **source of truth is the baseline specs** in [`openspec/specs/`](../specs). Changes
@@ -230,6 +229,97 @@ DB, service, or namespace.
 phase-2 dispatch and the phase-4/9 mobile API. Enhanced later by phase-10 (BI feeds the cockpit) and phase-12
 (full control plane).
 **Folder:** [`archive/2026-09-02-phase-20-role-based-portals/`](archive/2026-09-02-phase-20-role-based-portals/)
+
+---
+
+## Competitive gap track (post phase-26) — parity + differentiators
+
+Research: top mobile-entertainment operators + SaaS/PaaS rivals (IO, ERS, BCN, Goodshuffle, HoneyBook,
+Rentman, TapGoods, DJ Intelligence, DJEP). Mapping in [`COMPETITIVE_GAP_NOTES.md`](COMPETITIVE_GAP_NOTES.md).
+
+## Phase 27 — Weather & Outdoor Risk ✅
+**Goal:** Forecast checks, wind/precip/lightning thresholds, booking weather status, rain-date offers,
+portal + notification surfaces for outdoor/weather-sensitive jobs.
+**Specs:** `weather-outdoor-risk` (new), `booking-availability`, `service-catalog`, `notifications`,
+`owner-portal`, `customer-portal`, `scheduling-dispatch`.
+**Depends on:** phase-1 bookings, phase-6 notifications, phase-17 venues (geo), phase-25 portals.
+**Folder:** [`phase-27-weather-outdoor-risk/`](phase-27-weather-outdoor-risk/)
+
+## Phase 28 — Site Fit, Delivery Windows & Load Planning ✅
+**Goal:** Fulfillment modes (attended/drop-off/self-serve), structured site-fit gates, delivery/pickup
+windows on dispatch, weight-aware vehicle loads.
+**Specs:** `site-fit-logistics` (new), `service-catalog`, `venue-management`, `booking-availability`,
+`scheduling-dispatch`, `equipment-inventory-fleet`, portals.
+**Depends on:** phase-2 dispatch, phase-4 fleet, phase-17 venues.
+**Folder:** [`phase-28-site-fit-delivery-windows/`](phase-28-site-fit-delivery-windows/)
+
+## Phase 29 — Safety Compliance Ops ✅
+**Goal:** Asset inspection certificates with booking gates, sanitization logs, attendee waiver QR
+(distinct from payer waivers).
+**Specs:** `safety-compliance-ops` (new), `insurance-compliance`, `equipment-inventory-fleet`,
+`mobile-field-app`, `customer-portal`, `identity-access`, `owner-portal`, `notifications`.
+**Depends on:** phase-4, phase-9, phase-17 insurance/waivers.
+**Folder:** [`phase-29-safety-compliance-ops/`](phase-29-safety-compliance-ops/)
+
+## Phase 30 — Tenant Website & Embed Widgets ✅
+**Goal:** Tenant marketing page CMS plus embeddable availability/catalog/wishlist/book widgets with
+public embed keys and rate limits (beat IO/BCN/ERS/DJI website tools).
+**Specs:** `tenant-website` (new), `booking-availability`, `service-catalog`, `marketing-engagement`,
+`owner-portal`, `identity-access`, `platform-multitenancy`.
+**Depends on:** phase-1 booking site, phase-26 catalog/wishlist.
+**Folder:** [`phase-30-tenant-website-widgets/`](phase-30-tenant-website-widgets/)
+
+## Phase 31 — Media Delivery Pipeline ✅
+**Goal:** Booking media galleries for booths/events — upload, publish, share links, templates, print
+counts; client + field + guest (when published).
+**Specs:** `media-delivery` (new), `customer-portal`, `mobile-field-app`, `owner-portal`,
+`notifications`, `event-collaboration`, `service-catalog`.
+**Depends on:** phase-7/9 deliverables + object storage.
+**Folder:** [`phase-31-media-delivery-pipeline/`](phase-31-media-delivery-pipeline/)
+
+## Phase 32 — Live Client ETA Tracking ✅
+**Goal:** Live tracking sessions from en-route status with client ETA view and privacy stop on complete.
+**Specs:** `live-tracking` (new), `scheduling-dispatch`, `mobile-field-app`, `customer-portal`,
+`notifications`, `identity-access`, `integrations`.
+**Depends on:** phase-2, phase-9, phase-13 maps.
+**Folder:** [`archive/2026-09-02-phase-32-live-eta-tracking/`](archive/2026-09-02-phase-32-live-eta-tracking/)
+
+## Phase 33 — Commerce Extensions ✅
+**Goal:** Gift cards, store credit, late fees, net-15/30 terms and PO numbers on quotes/invoices.
+**Specs:** `commerce-extensions` (new), `billing-payments`, `crm`, portals, `reporting-bi`,
+`identity-access`.
+**Depends on:** phase-5 billing.
+**Folder:** [`archive/2026-09-02-phase-33-commerce-extensions/`](archive/2026-09-02-phase-33-commerce-extensions/)
+
+## Phase 34 — Multi-Brand Tenants ✅
+**Goal:** Multiple brands/DBAs under one site/DB with brand-scoped storefronts and notification identity
+(Fun Group–style).
+**Specs:** `multi-brand` (new), `service-catalog`, `booking-availability`, portals, `notifications`,
+`platform-multitenancy`, `ui-design-system`.
+**Depends on:** phase-26 storefront, phase-30 optional for pages per brand.
+**Folder:** [`archive/2026-09-02-phase-34-multi-brand-tenants/`](archive/2026-09-02-phase-34-multi-brand-tenants/)
+
+## Phase 35 — DJ Software Playlist Export ✅
+**Goal:** Export music lists as Serato CSV / Rekordbox XML subset / M3U metadata (no audio binaries).
+**Specs:** `music-planning`, `integrations`, `mobile-field-app`, `employee-portal`, `owner-portal`.
+**Depends on:** phase-15 music-planning, phase-13 integrations.
+**Folder:** [`archive/2026-09-02-phase-35-dj-software-export/`](archive/2026-09-02-phase-35-dj-software-export/)
+
+## Phase 36 — Competitor Migration Presets ✅
+**Goal:** Named import presets for Inflatable Office, ERS, BCN, Goodshuffle, DJEP, DJ Intelligence plus
+dry-run validation reports.
+**Specs:** `data-migration`, `owner-portal`, `service-catalog`, `crm`, `booking-availability`.
+**Depends on:** phase-18 data-migration framework.
+**Folder:** [`archive/2026-09-02-phase-36-competitor-migration-presets/`](archive/2026-09-02-phase-36-competitor-migration-presets/)
+
+## Phase 37 — Category-Defining Differentiators ✅
+**Goal:** Event Day Copilot, demand heatmap nudges, partner overflow exchange, Live Event Page, ops
+reliability badge, PaaS developer surface, vertical starter kits, after-action revenue loop.
+**Specs:** `category-differentiators` (new), `ai-assistant`, `service-catalog`, `vendor-network`,
+`event-collaboration`, `marketing-engagement`, `reporting-bi`, `booking-availability`,
+`saas-control-plane`, `owner-portal`, `media-delivery`.
+**Depends on:** phases 11, 27–36 as applicable; control plane for overflow mediation.
+**Folder:** [`archive/2026-09-02-phase-37-category-defining-differentiators/`](archive/2026-09-02-phase-37-category-defining-differentiators/)
 
 ---
 

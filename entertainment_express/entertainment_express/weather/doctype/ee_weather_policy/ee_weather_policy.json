@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "section_thresholds",
+  "wind_mph_max",
+  "precip_inch_hours",
+  "threshold_action",
+  "lightning_policy",
+  "col_lead",
+  "lead_hours",
+  "auto_offer_rain_date",
+  "client_can_accept_rain_date",
+  "refund_mode",
+  "section_provider",
+  "provider"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "description": "When off, forecasts are not refreshed and weather status stays clear/unknown.",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "section_thresholds",
+   "fieldtype": "Section Break",
+   "label": "Thresholds"
+  },
+  {
+   "default": "25",
+   "description": "Sustained wind (mph). Watch fires at 80% of this value.",
+   "fieldname": "wind_mph_max",
+   "fieldtype": "Float",
+   "label": "Max Wind (mph)"
+  },
+  {
+   "default": "0.25",
+   "description": "Precipitation inches over the event window. Watch fires at 80% of this value.",
+   "fieldname": "precip_inch_hours",
+   "fieldtype": "Float",
+   "label": "Max Precip (in)"
+  },
+  {
+   "default": "warn",
+   "description": "When wind/precip exceeds max: warn (status warning) or block (status block).",
+   "fieldname": "threshold_action",
+   "fieldtype": "Select",
+   "label": "Exceed Action",
+   "options": "warn\nblock"
+  },
+  {
+   "default": "warn",
+   "fieldname": "lightning_policy",
+   "fieldtype": "Select",
+   "label": "Lightning Policy",
+   "options": "warn\nblock"
+  },
+  {
+   "fieldname": "col_lead",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "48",
+   "description": "Hours before event start to begin refreshing forecasts.",
+   "fieldname": "lead_hours",
+   "fieldtype": "Int",
+   "label": "Lead Hours"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_offer_rain_date",
+   "fieldtype": "Check",
+   "label": "Auto-Offer Rain Date"
+  },
+  {
+   "default": "1",
+   "fieldname": "client_can_accept_rain_date",
+   "fieldtype": "Check",
+   "label": "Client Can Accept Rain Date"
+  },
+  {
+   "default": "manual",
+   "fieldname": "refund_mode",
+   "fieldtype": "Select",
+   "label": "Refund Mode",
+   "options": "manual\npolicy_link"
+  },
+  {
+   "fieldname": "section_provider",
+   "fieldtype": "Section Break",
+   "label": "Provider"
+  },
+  {
+   "default": "open_meteo",
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "label": "Weather Provider",
+   "options": "open_meteo"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Weather",
+ "name": "EE Weather Policy",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Office",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 0
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

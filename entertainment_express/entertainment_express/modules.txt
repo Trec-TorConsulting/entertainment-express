@@ -8,3 +8,4 @@ Control Plane
 Event Planning
 Equipment Fleet
 EE Integrations
+Weather

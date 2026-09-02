@@ -45,6 +45,18 @@ def check(asset_name: str, event_start: datetime, event_end: datetime) -> dict:
     except Exception:
         pass
 
+    try:
+        from entertainment_express.api.safety import inspection_block_reason, sanitization_block_reason
+
+        insp = inspection_block_reason(asset_name, on_date=event_start.date() if hasattr(event_start, "date") else None)
+        if insp:
+            return {"available": False, "reason": insp, "conflicts": []}
+        sanitize = sanitization_block_reason(asset_name)
+        if sanitize:
+            return {"available": False, "reason": sanitize, "conflicts": []}
+    except Exception:
+        pass
+
     if asset.quantity <= 1:
         return _check_unique(asset, window_start, window_end)
     else:

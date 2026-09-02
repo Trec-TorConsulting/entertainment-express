@@ -1,0 +1,17 @@
+{
+  "customers": {
+    "name": "Client",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "bookings": {
+    "name": "Event",
+    "email": "Email",
+    "date": "Date",
+    "address": "Location"
+  },
+  "songs": {
+    "title": "Song",
+    "artist": "Artist"
+  }
+}

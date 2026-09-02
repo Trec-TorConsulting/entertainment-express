@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["asset", "booking", "cleaned_by", "cleaned_at", "method", "photos", "notes"],
+ "fields": [
+  {"fieldname": "asset", "fieldtype": "Link", "label": "Asset", "options": "Service Asset", "reqd": 1, "in_list_view": 1, "search_index": 1},
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Booking", "options": "Event Booking", "in_list_view": 1},
+  {"fieldname": "cleaned_by", "fieldtype": "Link", "label": "Cleaned By", "options": "User"},
+  {"fieldname": "cleaned_at", "fieldtype": "Datetime", "label": "Cleaned At", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "method", "fieldtype": "Data", "label": "Method", "in_list_view": 1},
+  {"fieldname": "photos", "fieldtype": "Attach Image", "label": "Photos"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Sanitization Log",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Crew", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "cleaned_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
