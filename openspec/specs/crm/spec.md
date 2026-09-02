@@ -145,3 +145,10 @@ The system SHALL create or match a Lead on the current tenant when a public appo
 #### Scenario: New prospect
 - **WHEN** a new email books a consult
 - **THEN** a Lead is created on this site with that email and the appointment is linked
+
+### Requirement: Lead Conversion Score
+The system SHALL store a 0–100 `ee_lead_score` on Lead for this site and update it when a lead is created.
+
+#### Scenario: New inquiry scored
+- **WHEN** a new Lead is inserted
+- **THEN** `ee_lead_score` is set from this site’s heuristic (and optional LLM nudge) without reading another site

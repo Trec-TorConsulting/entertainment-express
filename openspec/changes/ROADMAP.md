@@ -97,10 +97,11 @@ control-plane analytics.
 **Spec:** `reporting-bi`. **Depends on:** data from phases 1–9.
 **Folder:** [`archive/2026-09-01-phase-10-reporting-bi/`](archive/2026-09-01-phase-10-reporting-bi/)
 
-## Phase 11 — AI Assistant & Intelligence 📝
+## Phase 11 — AI Assistant & Intelligence ✅
 Pluggable Ollama backend, conversational assistant, smart quoting, forecasting, dispatch/route suggestions,
 content drafting, lead scoring, guardrails.
 **Spec:** `ai-assistant`. **Depends on:** phases 1–10 data; Ollama on node05.
+**Folder:** [`archive/2026-09-02-phase-11-ai-assistant/`](archive/2026-09-02-phase-11-ai-assistant/)
 
 ## Phase 12 — SaaS Control Plane (Full) 📝
 Complete self-service signup, plans/entitlements, usage metering, Stripe subscription billing + dunning,

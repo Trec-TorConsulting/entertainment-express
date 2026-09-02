@@ -54,6 +54,7 @@ fixtures = [
                     "Lead-ee_consent_marketing",
                     "Lead-ee_consent_at",
                     "Lead-ee_spam_score",
+                    "Lead-ee_lead_score",
                     "Signup Application-ee_utm_source",
                     "Signup Application-ee_utm_medium",
                     "Signup Application-ee_utm_campaign",
@@ -145,7 +146,10 @@ website_route_rules = [
 doc_events = {
     "Event Booking": {
         "on_update": "entertainment_express.event_planning.attach.on_booking_update",
-    }
+    },
+    "Lead": {
+        "after_insert": "entertainment_express.api.ai.on_lead_insert",
+    },
 }
 
 # Permanent redirects for renamed public routes.

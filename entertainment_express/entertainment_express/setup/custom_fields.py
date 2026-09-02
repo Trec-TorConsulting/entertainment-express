@@ -314,6 +314,16 @@ CUSTOM_FIELDS = {
             "insert_after": "ee_source",
         },
     ],
+    "Lead": [
+        {
+            "dt": "Lead",
+            "fieldname": "ee_lead_score",
+            "fieldtype": "Int",
+            "label": "Follow-up score",
+            "insert_after": "status",
+            "description": "0-100 conversion likelihood for this company only",
+        },
+    ],
     # ─── Employee → EE Crew fields (phase-2) ────────────────────────────────────
     "Employee": [
         {

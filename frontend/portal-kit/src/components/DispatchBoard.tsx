@@ -181,6 +181,73 @@ export function JobCrewPanel({ jobId }: { jobId: string }) {
   );
 }
 
+function SuggestCrew({
+  jobId,
+  atRisk,
+  onOffered,
+}: {
+  jobId: string;
+  atRisk: boolean;
+  onOffered: () => void;
+}) {
+  const [rows, setRows] = React.useState<any[] | null>(null);
+  const [note, setNote] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  if (!atRisk && !rows) {
+    return null;
+  }
+  return (
+    <div className="ee-dispatch__assign">
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          setError("");
+          try {
+            const res = await call("entertainment_express.api.ai.suggest_dispatch", { job: jobId });
+            setRows(res.crew || []);
+            setNote(res.available === false ? "AI suggestion unavailable" : res.message || "");
+          } catch (err: any) {
+            setError(err.message || "Could not suggest crew.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        Suggest crew
+      </button>
+      {note ? <p className="ee-muted">{note}</p> : null}
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {(rows || []).map((row) => (
+        <p key={row.employee} style={{ margin: 0 }}>
+          {row.rank}. {row.name} · {row.reason}{" "}
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                await call("entertainment_express.api.ai.confirm", {
+                  kind: "offer_crew",
+                  payload: { job: jobId, person: row.employee, role: (row.roles || [])[0] || "" },
+                });
+                onOffered();
+              } catch (err: any) {
+                setError(err.message || "Could not offer that shift.");
+              }
+            }}
+          >
+            Offer this person
+          </button>
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
   const [day, setDay] = React.useState(today);
   const [jobs, setJobs] = React.useState<JobRow[]>([]);
@@ -250,6 +317,7 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
               <p className="ee-muted">No crew yet.</p>
             )}
             {canAssign ? <AssignForm jobId={job.id} people={people} roles={roles} onOffered={reload} /> : null}
+            {canAssign ? <SuggestCrew jobId={job.id} atRisk={job.at_risk || !job.crew.length} onOffered={reload} /> : null}
           </article>
         ))
       ) : (

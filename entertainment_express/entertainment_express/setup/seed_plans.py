@@ -20,6 +20,7 @@ def run():
                 {"feature_key": "max_bookings_per_month", "limit_value": "50"},
                 {"feature_key": "enable_marketing", "limit_value": "0"},
                 {"feature_key": "max_staff_users", "limit_value": "3"},
+                {"feature_key": "ai_assistant", "limit_value": "0"},
             ],
         },
         {
@@ -33,6 +34,7 @@ def run():
                 {"feature_key": "max_bookings_per_month", "limit_value": "unlimited"},
                 {"feature_key": "enable_marketing", "limit_value": "1"},
                 {"feature_key": "max_staff_users", "limit_value": "10"},
+                {"feature_key": "ai_assistant", "limit_value": "1"},
             ],
         },
         {
@@ -48,6 +50,7 @@ def run():
                 {"feature_key": "max_staff_users", "limit_value": "unlimited"},
                 {"feature_key": "white_label", "limit_value": "1"},
                 {"feature_key": "api_access", "limit_value": "1"},
+                {"feature_key": "ai_assistant", "limit_value": "1"},
             ],
         },
     ]
@@ -61,5 +64,19 @@ def run():
             plan.append("entitlements", ent)
         plan.insert(ignore_permissions=True)
 
+    _ensure_ai_entitlements()
     frappe.db.commit()
     print(f"[EE] Seeded {len(plans)} plan(s).")
+
+
+def _ensure_ai_entitlements():
+    mapping = {"starter": "0", "pro": "1", "enterprise": "1"}
+    for code, value in mapping.items():
+        name = frappe.db.get_value("Plan", {"plan_code": code}, "name")
+        if not name:
+            continue
+        if frappe.db.exists("Plan Entitlement", {"parent": name, "feature_key": "ai_assistant"}):
+            continue
+        plan = frappe.get_doc("Plan", name)
+        plan.append("entitlements", {"feature_key": "ai_assistant", "limit_value": value})
+        plan.save(ignore_permissions=True)

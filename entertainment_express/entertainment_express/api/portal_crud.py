@@ -53,6 +53,7 @@ def _schema(kind: str) -> dict:
                 {"key": "contact_name", "label": "Name"},
                 {"key": "email", "label": "Email"},
                 {"key": "status", "label": "Status"},
+                {"key": "score", "label": "Follow-up"},
                 {"key": "updated", "label": "Updated"},
             ],
             "fields": [
@@ -248,12 +249,19 @@ def delete_record(kind: str, name: str) -> dict:
 
 def _list_inquiries() -> list[dict]:
     rows = []
+    fields = ["name", "lead_name", "email_id", "mobile_no", "status", "modified"]
+    try:
+        if frappe.get_meta("Lead").has_field("ee_lead_score"):
+            fields.append("ee_lead_score")
+    except Exception:
+        pass
     for row in frappe.get_all(
         "Lead",
-        fields=["name", "lead_name", "email_id", "mobile_no", "status", "modified"],
+        fields=fields,
         order_by="modified desc",
         limit_page_length=200,
     ):
+        score = row.get("ee_lead_score")
         rows.append(
             {
                 "id": row.name,
@@ -261,6 +269,7 @@ def _list_inquiries() -> list[dict]:
                 "email": row.email_id or "",
                 "phone": row.mobile_no or "",
                 "status": INQUIRY_OUT.get(row.status, row.status or "New"),
+                "score": "" if score in (None, "") else str(score),
                 "updated": str(row.modified or "")[:16],
             }
         )

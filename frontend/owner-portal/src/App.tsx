@@ -45,6 +45,7 @@ const OWNER_NAV = [
     items: [
       { to: "/money", label: "Money" },
       { to: "/reports", label: "Reports" },
+      { to: "/assistant", label: "Assistant" },
       { to: "/automations", label: "Reminders" },
       { to: "/grow", label: "Grow" },
       { to: "/coverage", label: "Coverage" },
@@ -63,6 +64,8 @@ function Today() {
   const hour = new Date().getHours();
   const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
+  const [forecast, setForecast] = React.useState<any>(null);
+
   React.useEffect(() => {
     call("entertainment_express.api.portal_owner.get_owner_dashboard", {})
       .then(setStats)
@@ -76,6 +79,9 @@ function Today() {
     call("entertainment_express.api.migration.onboarding", {})
       .then(setSetup)
       .catch(() => setSetup(null));
+    call("entertainment_express.api.ai.forecast", { months: 3 })
+      .then(setForecast)
+      .catch(() => setForecast(null));
   }, []);
 
   const jobs = stats?.jobs || [];
@@ -117,6 +123,22 @@ function Today() {
         <StatCard label="Needs a crew" value={String(stats?.at_risk_count || 0)} />
         <StatCard label="Open tasks" value={String((approvals.length || 0) + (stats?.unread_chat || 0))} />
       </div>
+      {forecast?.periods?.length ? (
+        <section className="ee-form" style={{ maxWidth: "none" }}>
+          <h2 style={{ margin: 0 }}>Next few months</h2>
+          {forecast.available === false ? <p className="ee-muted">AI suggestion unavailable</p> : null}
+          <p className="ee-muted" style={{ margin: 0 }}>
+            {forecast.message}
+          </p>
+          <ul>
+            {forecast.periods.map((row: any) => (
+              <li key={row.month}>
+                {row.month} · {row.jobs} jobs · billed {row.revenue} · still quoting {row.pipeline} · people needed {row.crew_need}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <div className="ee-split">
         <div className="ee-job-grid">
           {jobs.length ? (
@@ -724,6 +746,7 @@ function ProposalWorkspace() {
   const [picked, setPicked] = React.useState<Record<string, boolean>>({});
   const [error, setError] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const [hint, setHint] = React.useState("");
 
   const reload = () => {
     if (!id) return;
@@ -788,15 +811,99 @@ function ProposalWorkspace() {
           Total {doc.total} · Deposit {doc.deposit}
         </p>
         {error ? <p className="ee-form__error">{error}</p> : null}
+        {hint ? <p className="ee-muted">{hint}</p> : null}
         <div className="ee-form__actions">
           <button type="button" className="ee-btn" disabled={busy} onClick={() => save(false)}>
             Save
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              setHint("");
+              try {
+                const res = await call("entertainment_express.api.ai.suggest_quote", { source, name: id });
+                if (res.available === false) setHint("AI suggestion unavailable");
+                else setHint(res.why || res.message || "");
+                const next = { ...picked };
+                for (const row of res.items || []) next[row.id] = true;
+                setPicked(next);
+              } catch (err: any) {
+                setError(err.message || "Could not suggest a package.");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Suggest a package
           </button>
           <button type="button" className="ee-btn" disabled={busy} onClick={() => save(true)}>
             Send to client
           </button>
         </div>
       </div>
+    </section>
+  );
+}
+
+function AssistantWorkspace() {
+  const [question, setQuestion] = React.useState("");
+  const [reply, setReply] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Assistant</h1>
+        <p className="ee-muted">Ask about this company&apos;s jobs. Drafts wait for you to confirm before anything is sent or saved.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setBusy(true);
+          setError("");
+          try {
+            const res = await call("entertainment_express.api.ai.ask", { message: question });
+            setReply(res);
+          } catch (err: any) {
+            setError(err.message || "Could not ask that.");
+            setReply(null);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <FormField label="Question">
+          <textarea value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} required />
+        </FormField>
+        <button type="submit" className="ee-btn" disabled={busy}>
+          Ask
+        </button>
+      </form>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {reply ? (
+        <div className="ee-form" style={{ maxWidth: "none" }}>
+          {reply.available === false ? <p className="ee-muted">AI suggestion unavailable</p> : null}
+          <p style={{ margin: 0 }}>{reply.message}</p>
+          {(reply.jobs || []).length ? (
+            <ul>
+              {reply.jobs.map((job: any) => (
+                <li key={job.id}>
+                  {job.title} · {job.when}
+                  {job.unassigned ? " · needs a crew" : ""}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState title="Nothing this week" message="Jobs on the calendar for the next seven days show up here." />
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -1798,9 +1905,28 @@ function GrowWorkspace() {
         <FormField label="Message">
           <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
         </FormField>
-        <button type="submit" className="ee-btn">
-          Send
-        </button>
+        <div className="ee-form__actions">
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                const res = await call("entertainment_express.api.ai.draft_campaign", { segment, offer: subject || campName });
+                if (res.available === false) setNote("AI suggestion unavailable");
+                if (res.subject) setSubject(res.subject);
+                if (res.body) setBody(res.body);
+              } catch (err: any) {
+                setError(err.message || "Could not draft that campaign.");
+              }
+            }}
+          >
+            Draft this campaign
+          </button>
+          <button type="submit" className="ee-btn">
+            Send
+          </button>
+        </div>
         {(data.campaigns || []).length ? (
           <ul>
             {data.campaigns.map((row: any) => (
@@ -2033,6 +2159,7 @@ export function OwnerApp() {
           <Route path="/money" element={<MoneyWorkspace />} />
           <Route path="/money/:id" element={<CrudEditor kind="invoice" basePath="/money" />} />
           <Route path="/reports" element={<ReportsWorkspace />} />
+          <Route path="/assistant" element={<AssistantWorkspace />} />
           <Route path="/automations" element={<AutomationsWorkspace />} />
           <Route path="/grow" element={<GrowWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
