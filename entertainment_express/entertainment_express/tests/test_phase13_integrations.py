@@ -10,7 +10,7 @@ import pytest
 
 from entertainment_express.api import integrations, music
 from entertainment_express.integrations import accounting, calendar, http, maps, observe
-from entertainment_express.integrations.doctype.integration_sync_log.integration_sync_log import (
+from entertainment_express.ee_integrations.doctype.integration_sync_log.integration_sync_log import (
     IntegrationSyncLog,
 )
 

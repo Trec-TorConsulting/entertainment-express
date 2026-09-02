@@ -15,9 +15,9 @@
   {"fieldname": "error", "fieldtype": "Small Text", "label": "Error"},
   {"fieldname": "latency_ms", "fieldtype": "Int", "label": "Latency ms"}
  ],
- "modified": "2026-09-02 12:00:00.000000",
+ "modified": "2026-09-02 15:00:00.000000",
  "modified_by": "Administrator",
- "module": "Integrations",
+ "module": "EE Integrations",
  "name": "Integration Sync Log",
  "owner": "Administrator",
  "permissions": [

@@ -115,10 +115,11 @@ music streaming (Spotify/Apple/YouTube), integration observability framework har
 **Spec:** `integrations`. **Depends on:** phases that consume each integration.
 **Folder:** [`archive/2026-09-02-phase-13-integrations/`](archive/2026-09-02-phase-13-integrations/)
 
-## Phase 14 — Hardening & Enterprise Readiness 📝
+## Phase 14 — Hardening & Enterprise Readiness ✅
 Performance/scale testing per-site and multi-site, security review (OWASP), backup/restore drills, 2FA/SSO,
 audit completeness, per-tenant custom domains, observability/alerting, documentation.
 **Specs:** all. **Depends on:** everything.
+**Folder:** [`archive/2026-09-02-phase-14-hardening/`](archive/2026-09-02-phase-14-hardening/)
 
 ## Phase 15 — Event Planning Suite 📝
 The DJ/entertainment client-planning engine: configurable conditional **planning forms/questionnaires** per

@@ -7,4 +7,4 @@ Billing Payments
 Control Plane
 Event Planning
 Equipment Fleet
-Integrations
+EE Integrations

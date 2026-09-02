@@ -53,6 +53,7 @@ const OWNER_NAV = [
       { to: "/move", label: "Move" },
       { to: "/brand", label: "Brand" },
       { to: "/connections", label: "Connections" },
+      { to: "/security", label: "Security" },
     ],
   },
 ];
@@ -2240,6 +2241,178 @@ function ConnectionsWorkspace() {
   );
 }
 
+function SecurityWorkspace() {
+  const [info, setInfo] = React.useState<any>(null);
+  const [domains, setDomains] = React.useState<any[]>([]);
+  const [auditRows, setAuditRows] = React.useState<any[]>([]);
+  const [host, setHost] = React.useState("");
+  const [issuer, setIssuer] = React.useState("");
+  const [clientId, setClientId] = React.useState("");
+  const [clientSecret, setClientSecret] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const load = () => {
+    call("entertainment_express.api.hardening.security_status", {})
+      .then((res) => setInfo(res || {}))
+      .catch(() => setInfo(null));
+    call("entertainment_express.api.hardening.list_custom_domains", {})
+      .then((res) => setDomains(res || []))
+      .catch(() => setDomains([]));
+    call("entertainment_express.api.hardening.list_audit", { limit: 20 })
+      .then((res) => setAuditRows(res || []))
+      .catch(() => setAuditRows([]));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const toggle2fa = async (enabled: number) => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.set_require_2fa", { enabled });
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not update two-step setting.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addDomain = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.request_custom_domain", { hostname: host });
+      setHost("");
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not save that hostname.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const verify = async (hostname: string) => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.verify_custom_domain", { hostname });
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not verify that hostname.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveSso = async (enabled: number) => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.hardening.save_sso", {
+        issuer,
+        client_id: clientId,
+        client_secret: clientSecret,
+        enabled,
+      });
+      setClientSecret("");
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not save sign-in provider.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Security</h1>
+        <p className="ee-muted">Two-step codes, custom hostnames, and sign-in for this company. Keys stay on the server.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Two-step codes</h2>
+        <p className="ee-muted">Require a phone code for company admins on this site. Enroll at sign-in after you turn this on.</p>
+        <p>{info?.require_2fa ? "On" : "Off"}</p>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="button" className="ee-btn" disabled={busy} onClick={() => toggle2fa(1)}>
+            Turn on
+          </button>
+          <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => toggle2fa(0)}>
+            Turn off
+          </button>
+        </div>
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Custom hostname</h2>
+        <p className="ee-muted">Point a CNAME at {info?.default_host || "this company's default address"}, then verify. TLS is issued by the operator after verify.</p>
+        <FormField label="Hostname">
+          <input value={host} onChange={(e) => setHost(e.target.value)} autoComplete="off" />
+        </FormField>
+        <button type="button" className="ee-btn" disabled={busy || !host.trim()} onClick={addDomain}>
+          Save hostname
+        </button>
+        {domains.length ? (
+          <ul>
+            {domains.map((row) => (
+              <li key={row.hostname}>
+                {row.hostname} · {row.verified ? "verified" : "not verified"}
+                {!row.verified ? (
+                  <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => verify(row.hostname)}>
+                    Check DNS
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState title="Hostnames" message="Custom hostnames for this company will show here." />
+        )}
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Sign-in provider</h2>
+        <p className="ee-muted">{info?.sso_status === "connected" ? "Connected. Password sign-in still works." : "Off. Password sign-in is the path until you connect a provider."}</p>
+        <FormField label="Issuer URL">
+          <input value={issuer} onChange={(e) => setIssuer(e.target.value)} autoComplete="off" />
+        </FormField>
+        <FormField label="Client id">
+          <input value={clientId} onChange={(e) => setClientId(e.target.value)} autoComplete="off" />
+        </FormField>
+        <FormField label="Client secret">
+          <input type="password" value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} autoComplete="off" />
+        </FormField>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="button" className="ee-btn" disabled={busy} onClick={() => saveSso(1)}>
+            Save and turn on
+          </button>
+          <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => saveSso(0)}>
+            Turn off
+          </button>
+        </div>
+      </div>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Recent activity</h2>
+        {auditRows.length ? (
+          <ul>
+            {auditRows.map((row, idx) => (
+              <li key={idx}>
+                {row.action} · {row.actor} · {row.when}
+                {row.related ? ` · ${row.related}` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState title="Activity" message="Security events for this company will show here." />
+        )}
+      </div>
+    </section>
+  );
+}
+
 function SettingsWorkspace() {
   const [row, setRow] = React.useState<any>(null);
   const [brandName, setBrandName] = React.useState("");
@@ -2359,6 +2532,7 @@ export function OwnerApp() {
           <Route path="/grow" element={<GrowWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
           <Route path="/connections" element={<ConnectionsWorkspace />} />
+          <Route path="/security" element={<SecurityWorkspace />} />
           <Route path="/account" element={<AccountPanel />} />
           <Route path="/settings" element={<Navigate to="/brand" replace />} />
           <Route path="/approvals" element={<ApprovalsWorkspace />} />

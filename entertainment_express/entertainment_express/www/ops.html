@@ -62,5 +62,27 @@
   </ul>
   {% endif %}
   <p><a href="/api/method/entertainment_express.api.control_analytics.fleet_csv">Download spreadsheet</a></p>
+  <h2>Health</h2>
+  <div class="cards">
+    <article><p>This site probe</p><strong>{% if ready and ready.ok %}ok{% else %}down{% endif %}</strong></article>
+    <article><p>Last backup</p><strong>{{ (backup and backup.last_backup) or "not yet" }}</strong></article>
+  </div>
+  <p>{{ (backup and backup.restore) or "" }}</p>
+  {% if domains %}
+  <h2>Custom hostnames</h2>
+  <table>
+    <thead><tr><th>Company</th><th>Hostname</th><th>Verified</th><th>TLS</th></tr></thead>
+    <tbody>
+      {% for row in domains %}
+      <tr>
+        <td>{{ row.tenant }}</td>
+        <td>{{ row.hostname }}</td>
+        <td>{{ row.verified }}</td>
+        <td>{{ row.tls_status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
 </body>
 </html>

@@ -20,6 +20,8 @@ update_website_context = [
 
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [
+    "entertainment_express.security.auth_hardening.check_login_lockout",
+    "entertainment_express.security.auth_hardening.enforce_privileged_2fa",
     "entertainment_express.security.request_guards.enforce_tenant_suspension",
     "entertainment_express.security.request_guards.sanitize_backend_urls",
     "entertainment_express.security.request_guards.enforce_backend_boundary",
@@ -30,6 +32,8 @@ override_whitelisted_methods = {
     "ping": "entertainment_express.api.health.ping",
     "frappe.desk.desktop.get_workspace_sidebar_items": "entertainment_express.security.workspace_ui.get_workspace_sidebar_items",
 }
+
+on_login = "entertainment_express.security.auth_hardening.clear_login_failures"
 
 # Fixtures — export/import EE roles via bench migrate
 fixtures = [
@@ -151,14 +155,21 @@ doc_events = {
         "on_update": [
             "entertainment_express.event_planning.attach.on_booking_update",
             "entertainment_express.integrations.calendar.on_booking_update",
+            "entertainment_express.security.auth_hardening.on_booking_update",
         ],
     },
     "Lead": {
         "after_insert": "entertainment_express.api.ai.on_lead_insert",
     },
     "Sales Invoice": {
-        "on_submit": "entertainment_express.integrations.accounting.on_invoice_submit",
+        "on_submit": [
+            "entertainment_express.integrations.accounting.on_invoice_submit",
+            "entertainment_express.security.auth_hardening.on_invoice_submit",
+        ],
         "on_update": "entertainment_express.integrations.accounting.on_invoice_update",
+    },
+    "EE Contract": {
+        "on_update": "entertainment_express.security.auth_hardening.on_contract_update",
     },
 }
 

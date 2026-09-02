@@ -91,15 +91,9 @@ def _require_owner() -> None:
 
 
 def _audit(action: str, details: dict) -> None:
-    frappe.get_doc(
-        {
-            "doctype": "Comment",
-            "comment_type": "Info",
-            "reference_doctype": "User",
-            "reference_name": frappe.session.user,
-            "content": f"[PORTAL_AUDIT] {action}: {frappe.as_json(details)}",
-        }
-    ).insert(ignore_permissions=True)
+    from entertainment_express.security import audit
+
+    audit.write(action, extra=details)
 
 
 def _planning_percent(booking: str | None) -> float | None:

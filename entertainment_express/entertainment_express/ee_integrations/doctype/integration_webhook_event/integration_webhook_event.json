@@ -13,9 +13,9 @@
   {"fieldname": "processed", "fieldtype": "Check", "label": "Processed", "default": "0"},
   {"fieldname": "received_at", "fieldtype": "Datetime", "label": "Received At"}
  ],
- "modified": "2026-09-02 12:00:00.000000",
+ "modified": "2026-09-02 15:00:00.000000",
  "modified_by": "Administrator",
- "module": "Integrations",
+ "module": "EE Integrations",
  "name": "Integration Webhook Event",
  "owner": "Administrator",
  "permissions": [
