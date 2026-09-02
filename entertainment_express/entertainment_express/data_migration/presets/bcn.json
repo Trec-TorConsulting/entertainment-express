@@ -1,0 +1,17 @@
+{
+  "customers": {
+    "name": "Contact",
+    "email": "Email",
+    "phone": "Mobile"
+  },
+  "bookings": {
+    "name": "Booking",
+    "email": "Email",
+    "date": "Date",
+    "address": "Venue"
+  },
+  "packages": {
+    "name": "Service",
+    "rate": "Amount"
+  }
+}

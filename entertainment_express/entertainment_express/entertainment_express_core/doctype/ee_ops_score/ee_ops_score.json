@@ -1,0 +1,28 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["period_start", "period_end", "score", "on_time_pct", "fill_rate_pct", "notes"],
+ "fields": [
+  {"fieldname": "period_start", "fieldtype": "Date", "label": "Period Start", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "period_end", "fieldtype": "Date", "label": "Period End", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "score", "fieldtype": "Float", "label": "Ops Score", "in_list_view": 1},
+  {"fieldname": "on_time_pct", "fieldtype": "Percent", "label": "On-Time %"},
+  {"fieldname": "fill_rate_pct", "fieldtype": "Percent", "label": "Crew Fill %"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Ops Score",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "period_end",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

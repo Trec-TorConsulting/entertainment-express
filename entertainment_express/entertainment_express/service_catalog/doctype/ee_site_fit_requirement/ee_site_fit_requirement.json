@@ -1,0 +1,24 @@
+{
+ "actions": [],
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["min_sq_ft", "surfaces", "power_amps", "clearance_ft", "water_required"],
+ "fields": [
+  {"fieldname": "min_sq_ft", "fieldtype": "Float", "label": "Min Area (sq ft)", "in_list_view": 1},
+  {"fieldname": "surfaces", "fieldtype": "Small Text", "label": "Surfaces", "in_list_view": 1,
+   "description": "Comma-separated: lawn, concrete, asphalt, indoor"},
+  {"fieldname": "power_amps", "fieldtype": "Float", "label": "Power (amps)", "in_list_view": 1},
+  {"fieldname": "clearance_ft", "fieldtype": "Float", "label": "Clearance (ft)", "in_list_view": 1},
+  {"fieldname": "water_required", "fieldtype": "Check", "label": "Water Required", "default": "0", "in_list_view": 1}
+ ],
+ "istable": 1,
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Service Catalog",
+ "name": "EE Site Fit Requirement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

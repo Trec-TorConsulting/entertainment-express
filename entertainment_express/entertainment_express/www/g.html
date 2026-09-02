@@ -1,0 +1,21 @@
+{% extends "templates/web.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_content %}
+<div style="max-width:56rem;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif">
+  <h1 style="margin:0 0 1rem">{{ gallery.title }}</h1>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(10rem,1fr));gap:0.75rem">
+    {% for item in gallery.items or [] %}
+      <figure style="margin:0;background:#f5f5f4;border-radius:8px;overflow:hidden">
+        {% if item.content_b64 and (item.mime or '').startswith('image/') %}
+          <img src="data:{{ item.mime }};base64,{{ item.content_b64 }}" alt="{{ item.title }}" style="width:100%;display:block"/>
+        {% else %}
+          <figcaption style="padding:0.75rem">{{ item.title }}</figcaption>
+        {% endif %}
+      </figure>
+    {% endfor %}
+  </div>
+  {% if not gallery.items %}
+    <p style="color:#78716c">No photos yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -68,13 +68,23 @@ function Home({ booking, events }: { booking: string; events: any[] }) {
 function Events() {
   const [rows, setRows] = React.useState<any[]>([]);
   const [proposal, setProposal] = React.useState<any>(null);
+  const [weather, setWeather] = React.useState<any>(null);
+  const [wxMsg, setWxMsg] = React.useState("");
   React.useEffect(() => {
     call("frappe.client.get_list", {
       doctype: "Event Booking",
-      fields: ["name", "event_name", "event_date", "status", "venue_address", "grand_total", "balance_due", "deposit_status"],
+      fields: ["name", "event_name", "event_date", "status", "venue_address", "grand_total", "balance_due", "deposit_status", "weather_status", "weather_sensitive"],
       limit_page_length: 20,
     })
-      .then((res) => setRows(res || []))
+      .then((res) => {
+        setRows(res || []);
+        const first = (res || [])[0];
+        if (first?.name) {
+          call("entertainment_express.api.weather.booking_weather", { booking: first.name })
+            .then(setWeather)
+            .catch(() => setWeather(null));
+        }
+      })
       .catch(() => setRows([]));
     call("entertainment_express.api.portal_proposal.client_proposal", {})
       .then(setProposal)
@@ -98,7 +108,37 @@ function Events() {
       {rows.length ? (
         <>
           <DataTable id="client-events" columns={[{ key: "event_name", label: "Event" }, { key: "event_date", label: "Date" }, { key: "status", label: "Status" }]} rows={rows} />
-          <BookingDetail booking={rows[0]} />
+          <BookingDetail
+            booking={rows[0]}
+            weather={weather}
+            onAcceptRainDate={
+              weather?.rain_date_offer?.can_accept
+                ? async () => {
+                    try {
+                      await call("entertainment_express.api.weather.accept_rain_date", {
+                        offer: weather.rain_date_offer.id,
+                      });
+                      setWxMsg("Rain date accepted");
+                      const res = await call("frappe.client.get_list", {
+                        doctype: "Event Booking",
+                        fields: ["name", "event_name", "event_date", "status", "venue_address", "grand_total", "balance_due", "deposit_status", "weather_status", "weather_sensitive"],
+                        limit_page_length: 20,
+                      });
+                      setRows(res || []);
+                      if (rows[0]?.name) {
+                        setWeather(await call("entertainment_express.api.weather.booking_weather", { booking: rows[0].name }));
+                      }
+                    } catch {
+                      setWxMsg("Could not accept rain date");
+                    }
+                  }
+                : undefined
+            }
+          />
+          {wxMsg ? <p style={{ margin: 0 }}>{wxMsg}</p> : null}
+          {rows[0]?.name ? <SiteFitForm booking={rows[0].name} /> : null}
+          {rows[0]?.name ? <ClientGallery booking={rows[0].name} /> : null}
+          {rows[0]?.name ? <LiveEta booking={rows[0].name} /> : null}
           {rows[0]?.name ? <ChangeRequestForm booking={rows[0].name} /> : null}
           {rows[0]?.name ? <PromoForm booking={rows[0].name} /> : null}
         </>
@@ -106,6 +146,151 @@ function Events() {
     </section>
   ) : (
     <EmptyState title="No events yet" message="When you book, your events show here." />
+  );
+}
+
+function LiveEta({ booking }: { booking: string }) {
+  const [track, setTrack] = React.useState<any>(null);
+  React.useEffect(() => {
+    call("entertainment_express.api.tracking.client_tracking", { booking })
+      .then(setTrack)
+      .catch(() => setTrack(null));
+    const id = window.setInterval(() => {
+      call("entertainment_express.api.tracking.client_tracking", { booking })
+        .then(setTrack)
+        .catch(() => setTrack(null));
+    }, 60000);
+    return () => window.clearInterval(id);
+  }, [booking]);
+  if (!track || track.status === "ended") return null;
+  return (
+    <section className="ee-form">
+      <h2 style={{ margin: 0 }}>Live ETA</h2>
+      <p style={{ margin: 0, fontSize: "1.5rem", fontWeight: 700 }}>
+        {track.eta_minutes != null ? `${track.eta_minutes} min` : "On the way"}
+      </p>
+      <p style={{ margin: 0, color: "var(--ee-muted)" }}>{track.status === "arriving" ? "Arriving soon" : "En route"}</p>
+      {track.track_url ? (
+        <p style={{ margin: 0 }}>
+          <a href={track.track_url}>Open tracking link</a>
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+function ClientGallery({ booking }: { booking: string }) {
+  const [rows, setRows] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    call("entertainment_express.api.media_gallery.list_galleries", { booking })
+      .then(setRows)
+      .catch(() => setRows([]));
+  }, [booking]);
+  if (!rows.length) return null;
+  return (
+    <section className="ee-form">
+      <h2 style={{ margin: 0 }}>Your photos</h2>
+      {rows.map((g) => (
+        <p key={g.id} style={{ margin: 0 }}>
+          {g.title}
+          {g.share_url ? (
+            <>
+              {" "}
+              · <a href={g.share_url}>Open gallery</a>
+            </>
+          ) : null}
+        </p>
+      ))}
+    </section>
+  );
+}
+
+function SiteFitForm({ booking }: { booking: string }) {
+  const [form, setForm] = React.useState<any>(null);
+  const [sqFt, setSqFt] = React.useState("");
+  const [surface, setSurface] = React.useState("");
+  const [power, setPower] = React.useState("");
+  const [clearance, setClearance] = React.useState("");
+  const [water, setWater] = React.useState(false);
+  const [msg, setMsg] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    call("entertainment_express.api.site_fit.client_site_form", { booking })
+      .then((res) => {
+        setForm(res);
+        setSqFt(String(res.answers?.site_sq_ft || ""));
+        setSurface(res.answers?.site_surface || "");
+        setPower(String(res.answers?.site_power_amps || ""));
+        setClearance(String(res.answers?.site_clearance_ft || ""));
+        setWater(!!res.answers?.site_water_available);
+      })
+      .catch(() => setForm(null));
+  }, [booking]);
+
+  if (!form?.required) return null;
+
+  return (
+    <form
+      className="ee-form"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setError("");
+        try {
+          const res = await call("entertainment_express.api.site_fit.save_site_answers", {
+            booking,
+            values: {
+              site_sq_ft: sqFt ? Number(sqFt) : 0,
+              site_surface: surface,
+              site_power_amps: power ? Number(power) : 0,
+              site_clearance_ft: clearance ? Number(clearance) : 0,
+              site_water_available: water ? 1 : 0,
+            },
+          });
+          setForm({ ...form, site_fit: res.site_fit, answers: {
+            site_sq_ft: sqFt,
+            site_surface: surface,
+            site_power_amps: power,
+            site_clearance_ft: clearance,
+            site_water_available: water ? 1 : 0,
+          }});
+          setMsg(res.site_fit?.status === "ok" ? "Site details saved" : `Saved — site fit: ${res.site_fit?.status}`);
+        } catch (err: any) {
+          setError(err.message || "Could not save site details.");
+        }
+      }}
+    >
+      <h2 style={{ margin: 0 }}>Site details</h2>
+      <p style={{ margin: 0, color: "var(--ee-muted)" }}>Tell us about the setup space so we can confirm the gear fits.</p>
+      <FormField label="Usable area (sq ft)">
+        <input type="number" value={sqFt} onChange={(e) => setSqFt(e.target.value)} />
+      </FormField>
+      <FormField label="Surface">
+        <select value={surface} onChange={(e) => setSurface(e.target.value)}>
+          <option value="">Select</option>
+          {(form.surfaces || ["lawn", "concrete", "asphalt", "indoor"]).map((s: string) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      <FormField label="Power (amps)">
+        <input type="number" value={power} onChange={(e) => setPower(e.target.value)} />
+      </FormField>
+      <FormField label="Clearance height (ft)">
+        <input type="number" value={clearance} onChange={(e) => setClearance(e.target.value)} />
+      </FormField>
+      <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+        <input type="checkbox" checked={water} onChange={(e) => setWater(e.target.checked)} />
+        Water available on site
+      </label>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {msg ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{msg}</p> : null}
+      <button type="submit" className="ee-btn" style={{ width: "fit-content" }}>
+        Save site details
+      </button>
+    </form>
   );
 }
 

@@ -71,6 +71,8 @@ fixtures = [
     {"dt": "Email Group", "filters": [["name", "=", "EE Newsletter"]]},
     {"dt": "Marketing Settings", "filters": [["name", "=", "Marketing Settings"]]},
     {"dt": "EE Portal Settings", "filters": [["name", "=", "EE Portal Settings"]]},
+    {"dt": "EE Weather Policy", "filters": [["name", "=", "EE Weather Policy"]]},
+    {"dt": "EE Booking Site Config", "filters": [["name", "=", "EE Booking Site Config"]]},
 ]
 
 # After install: create custom fields on ERPNext DocTypes
@@ -98,6 +100,7 @@ scheduler_events = {
         "entertainment_express.api.saas_billing.apply_dunning",
         "entertainment_express.api.saas_billing.apply_cancellations",
         "entertainment_express.integrations.calendar.pull",
+        "entertainment_express.weather.jobs.refresh_booking_weather",
     ],
     "daily": [
         # Check compliance expiry (phase-3)
@@ -105,6 +108,7 @@ scheduler_events = {
         "entertainment_express.event_planning.scheduler.send_form_reminders",
         "entertainment_express.api.billing.send_balance_reminders",
         "entertainment_express.api.billing.charge_due_installments",
+        "entertainment_express.api.commerce.apply_late_fees_daily",
         "entertainment_express.api.workflow.run_daily",
         "entertainment_express.api.appointments.run_daily",
         "entertainment_express.api.compliance.run_daily",
@@ -149,6 +153,11 @@ website_route_rules = [
     {"from_route": "/start-trial", "to_route": "start_trial"},
     {"from_route": "/resources", "to_route": "resources"},
     {"from_route": "/guest-requests", "to_route": "guest_requests"},
+    {"from_route": "/w/<token>", "to_route": "w"},
+    {"from_route": "/p/<route>", "to_route": "p"},
+    {"from_route": "/g/<token>", "to_route": "g"},
+    {"from_route": "/t/<token>", "to_route": "t"},
+    {"from_route": "/live/<token>", "to_route": "live"},
 ]
 
 doc_events = {

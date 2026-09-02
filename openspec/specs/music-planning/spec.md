@@ -79,3 +79,14 @@ The system SHALL import Apple Music and YouTube playlist links as music selectio
 #### Scenario: Import YouTube without a key
 - **WHEN** a client pastes a YouTube playlist URL and no YouTube key is configured
 - **THEN** the API returns a clear setup message and no selections are created
+
+### Requirement: DJ Software Playlist Export
+The system SHALL export client/crew music lists as metadata playlists in Serato CSV, Rekordbox XML (supported subset), and M3U formats without including audio file binaries.
+
+#### Scenario: Export must-play for Serato
+- **WHEN** a DJ exports the must-play list as Serato CSV
+- **THEN** a file downloads with title/artist rows for that booking only
+
+#### Scenario: Guest denied export
+- **WHEN** an event guest calls the export API
+- **THEN** the request is denied (403)

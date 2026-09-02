@@ -219,17 +219,31 @@ def list_waiver_templates() -> list[dict]:
 
 
 @frappe.whitelist()
-def issue_waiver(booking: str, template: str) -> dict:
+def issue_waiver(booking: str, template: str, waiver_kind: str = "payer") -> dict:
     _require_staff()
-    if frappe.db.exists("EE Waiver", {"booking": booking, "template": template, "status": "pending"}):
-        name = frappe.db.get_value("EE Waiver", {"booking": booking, "template": template, "status": "pending"}, "name")
+    kind = waiver_kind if waiver_kind in ("payer", "attendee") else "payer"
+    if frappe.db.exists("EE Waiver", {"booking": booking, "template": template, "status": "pending", "waiver_kind": kind}):
+        name = frappe.db.get_value(
+            "EE Waiver",
+            {"booking": booking, "template": template, "status": "pending", "waiver_kind": kind},
+            "name",
+        )
         return {"id": name}
-    doc = frappe.get_doc({"doctype": "EE Waiver", "booking": booking, "template": template, "status": "pending"})
+    payload = {"doctype": "EE Waiver", "booking": booking, "template": template, "status": "pending", "waiver_kind": kind}
+    if kind == "attendee":
+        import secrets
+
+        payload["public_token"] = secrets.token_urlsafe(24)
+    doc = frappe.get_doc(payload)
     doc.insert()
-    customer = frappe.db.get_value("Event Booking", booking, "customer")
-    email = frappe.db.get_value("Customer", customer, "email_id") if customer else ""
-    _notify("waiver_needed", email or "", {"event_name": frappe.db.get_value("Event Booking", booking, "event_name") or ""})
-    return {"id": doc.name}
+    if kind == "payer":
+        customer = frappe.db.get_value("Event Booking", booking, "customer")
+        email = frappe.db.get_value("Customer", customer, "email_id") if customer else ""
+        _notify("waiver_needed", email or "", {"event_name": frappe.db.get_value("Event Booking", booking, "event_name") or ""})
+    out = {"id": doc.name, "waiver_kind": kind}
+    if kind == "attendee" and getattr(doc, "public_token", None):
+        out["url"] = f"{frappe.utils.get_url()}/w/{doc.public_token}"
+    return out
 
 
 @frappe.whitelist()
@@ -242,9 +256,13 @@ def list_my_waivers() -> list[dict]:
     if not bookings:
         return []
     rows = []
+    filters = {"booking": ["in", bookings]}
+    # Payer portal only shows payer waivers (attendee is QR/guest)
+    if frappe.get_meta("EE Waiver").has_field("waiver_kind"):
+        filters["waiver_kind"] = "payer"
     for row in frappe.get_all(
         "EE Waiver",
-        filters={"booking": ["in", bookings]},
+        filters=filters,
         fields=["name", "booking", "template", "status", "signer_name", "signed_at"],
         order_by="modified desc",
         limit_page_length=40,
@@ -271,6 +289,8 @@ def list_my_waivers() -> list[dict]:
 def sign_waiver(name: str, signer_name: str) -> dict:
     _require_payer()
     doc = frappe.get_doc("EE Waiver", name)
+    if getattr(doc, "waiver_kind", "payer") == "attendee":
+        frappe.throw("Use the attendee QR link to sign this waiver.", frappe.PermissionError)
     customer = frappe.db.get_value("Customer", {"email_id": frappe.session.user}, "name")
     booking_customer = frappe.db.get_value("Event Booking", doc.booking, "customer")
     if customer and booking_customer and customer != booking_customer:

@@ -290,5 +290,45 @@
     "active": 1,
     "priority": "promotional",
     "body_html": "<p>Someone you referred booked with us. Use code <b>{{ code }}</b> on a future quote.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "weather_watch",
+    "template_key": "weather_watch",
+    "subject": "Weather watch — {{ event_name }} on {{ event_date }}",
+    "active": 1,
+    "body_html": "<p>Forecast conditions for <b>{{ event_name }}</b> ({{ event_date }}) are approaching outdoor thresholds (status: {{ weather_status }}).</p><p>Review the job and prepare a rain-date option if needed.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "weather_warning",
+    "template_key": "weather_warning",
+    "subject": "Weather warning — {{ event_name }} on {{ event_date }}",
+    "active": 1,
+    "body_html": "<p>Forecast for <b>{{ event_name }}</b> ({{ event_date }}) exceeds outdoor thresholds (status: {{ weather_status }}).</p><p>Staff should confirm whether to proceed, warn the client, or offer a rain date.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "weather_block",
+    "template_key": "weather_block",
+    "subject": "Weather block — {{ event_name }} on {{ event_date }}",
+    "active": 1,
+    "body_html": "<p>Outdoor policy is blocking <b>{{ event_name }}</b> ({{ event_date }}) based on forecast (status: block).</p><p>Resolve weather or offer a rain date before confirm/dispatch.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "weather_unknown",
+    "template_key": "weather_unknown",
+    "subject": "Weather forecast unavailable — {{ event_name }}",
+    "active": 1,
+    "body_html": "<p>Could not refresh the outdoor forecast for <b>{{ event_name }}</b> ({{ event_date }}). Status set to unknown — no automatic cancel.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "weather_rain_date_offer",
+    "template_key": "weather_rain_date_offer",
+    "subject": "Rain date offer for {{ event_name }}",
+    "active": 1,
+    "body_html": "<p>Hi,</p><p>Due to weather risk for <b>{{ event_name }}</b> (originally {{ event_date }}), we can move you to <b>{{ candidate_start }}</b>.</p><p><a href='{{ accept_link }}'>Review and accept in your portal</a></p>"
   }
 ]

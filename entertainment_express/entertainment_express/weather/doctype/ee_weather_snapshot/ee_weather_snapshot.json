@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "booking",
+  "fetched_at",
+  "status",
+  "col1",
+  "wind_mph",
+  "precip_inch",
+  "lightning_risk",
+  "source",
+  "section_raw",
+  "raw_json"
+ ],
+ "fields": [
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Booking",
+   "options": "Event Booking",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "fetched_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Fetched At",
+   "reqd": 1
+  },
+  {
+   "default": "unknown",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "clear\nwatch\nwarning\nblock\nunknown",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wind_mph",
+   "fieldtype": "Float",
+   "label": "Wind (mph)"
+  },
+  {
+   "fieldname": "precip_inch",
+   "fieldtype": "Float",
+   "label": "Precip (in)"
+  },
+  {
+   "default": "0",
+   "fieldname": "lightning_risk",
+   "fieldtype": "Check",
+   "label": "Lightning Risk"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Data",
+   "label": "Source"
+  },
+  {
+   "fieldname": "section_raw",
+   "fieldtype": "Section Break",
+   "label": "Raw"
+  },
+  {
+   "description": "Truncated provider payload for audit.",
+   "fieldname": "raw_json",
+   "fieldtype": "Small Text",
+   "label": "Raw JSON"
+  }
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Weather",
+ "name": "EE Weather Snapshot",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Sales"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "fetched_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

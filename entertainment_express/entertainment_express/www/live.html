@@ -1,0 +1,29 @@
+{% extends "templates/web.html" %}
+{% block page_content %}
+<div id="ee-live" style="max-width:36rem;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif">
+  <h1 id="ee-title" style="margin-top:0">Live event</h1>
+  <p id="ee-rules" style="white-space:pre-wrap;color:#444"></p>
+  <p id="ee-error" style="color:#b91c1c"></p>
+</div>
+<script>
+(function(){
+  var token = {{ token|tojson }};
+  if (!token) {
+    var m = location.pathname.match(/\/live\/([^\/?#]+)/);
+    token = m ? decodeURIComponent(m[1]) : "";
+  }
+  fetch("/api/method/entertainment_express.api.differentiators.public_live_event", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({token: token}),
+    credentials: "same-origin"
+  }).then(function(r){return r.json()}).then(function(p){
+    var d = p.message || {};
+    document.getElementById("ee-title").textContent = d.title || d.event_name || "Live event";
+    document.getElementById("ee-rules").textContent = d.safety_rules || "";
+  }).catch(function(){
+    document.getElementById("ee-error").textContent = "Could not load this event page.";
+  });
+})();
+</script>
+{% endblock %}

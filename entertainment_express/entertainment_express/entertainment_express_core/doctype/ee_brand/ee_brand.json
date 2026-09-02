@@ -1,0 +1,34 @@
+{
+ "actions": [],
+ "autoname": "field:slug",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["brand_name", "slug", "is_default", "logo", "primary_color", "custom_host", "path_prefix", "email_from", "active"],
+ "fields": [
+  {"fieldname": "brand_name", "fieldtype": "Data", "label": "Brand Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "slug", "fieldtype": "Data", "label": "Slug", "reqd": 1, "unique": 1, "in_list_view": 1},
+  {"fieldname": "is_default", "fieldtype": "Check", "label": "Default Brand", "default": "0"},
+  {"fieldname": "logo", "fieldtype": "Attach Image", "label": "Logo"},
+  {"fieldname": "primary_color", "fieldtype": "Data", "label": "Primary Color"},
+  {"fieldname": "custom_host", "fieldtype": "Data", "label": "Custom Host"},
+  {"fieldname": "path_prefix", "fieldtype": "Data", "label": "Path Prefix"},
+  {"fieldname": "email_from", "fieldtype": "Data", "label": "Email From"},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Brand",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Marketing", "read": 1, "write": 1},
+  {"role": "EE Office", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "brand_name",
+ "sort_order": "ASC",
+ "title_field": "brand_name",
+ "track_changes": 1
+}

@@ -11,6 +11,8 @@
   "brand_logo",
   "brand_color",
   "review_url",
+  "section_embed",
+  "public_embed_key",
   "section_flags",
   "feature_flags"
  ],
@@ -47,6 +49,17 @@
    "fieldname": "review_url",
    "fieldtype": "Data",
    "label": "Review link"
+  },
+  {
+   "fieldname": "section_embed",
+   "fieldtype": "Section Break",
+   "label": "Embeds"
+  },
+  {
+   "description": "Public key for embed.js widgets on external sites. Rotate anytime.",
+   "fieldname": "public_embed_key",
+   "fieldtype": "Data",
+   "label": "Public Embed Key"
   },
   {
    "fieldname": "section_flags",

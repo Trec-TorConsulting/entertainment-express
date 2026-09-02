@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["asset", "authority", "certificate_no", "expires_on", "required_to_book", "file", "notes"],
+ "fields": [
+  {"fieldname": "asset", "fieldtype": "Link", "label": "Asset", "options": "Service Asset", "reqd": 1, "in_list_view": 1, "search_index": 1},
+  {"fieldname": "authority", "fieldtype": "Data", "label": "Authority", "in_list_view": 1},
+  {"fieldname": "certificate_no", "fieldtype": "Data", "label": "Certificate No", "in_list_view": 1},
+  {"fieldname": "expires_on", "fieldtype": "Date", "label": "Expires On", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "required_to_book", "fieldtype": "Check", "label": "Required To Book", "default": "1"},
+  {"fieldname": "file", "fieldtype": "Attach", "label": "Certificate File"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Asset Inspection Certificate",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Sales", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "expires_on",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

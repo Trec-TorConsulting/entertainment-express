@@ -1,0 +1,10 @@
+[
+  {
+    "doctype": "EE Booking Site Config",
+    "name": "EE Booking Site Config",
+    "enabled": 1,
+    "unfit_action": "warn",
+    "overweight_action": "warn",
+    "require_client_site_answers": 1
+  }
+]

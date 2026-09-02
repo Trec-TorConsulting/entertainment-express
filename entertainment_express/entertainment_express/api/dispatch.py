@@ -10,7 +10,7 @@ import hashlib
 import secrets
 
 import frappe
-from frappe.utils import flt, now_datetime, get_datetime
+from frappe.utils import cint, flt, now_datetime, get_datetime
 
 
 # ── Crew assignment ──────────────────────────────────────────────────────────
@@ -267,6 +267,14 @@ def _build_run_sheet(booking_name: str):
     if notes:
         extra = "\n".join(notes)
         rs.access_notes = f"{rs.access_notes or ''}\n{extra}".strip() if rs.access_notes else extra
+    # Outdoor weather risk note for crew
+    if cint(getattr(booking, "weather_sensitive", 0)) or getattr(booking, "weather_status", None):
+        wx = getattr(booking, "weather_status", None) or "unknown"
+        wx_note = f"Outdoor weather risk: {wx}"
+        if rs.access_notes and "Outdoor weather risk:" not in (rs.access_notes or ""):
+            rs.access_notes = f"{rs.access_notes}\n{wx_note}".strip()
+        elif not rs.access_notes:
+            rs.access_notes = wx_note
     rs.client_name = booking.customer
     rs.client_phone = frappe.db.get_value("Contact", {"link_name": booking.customer}, "mobile_no") or ""
     rs.generated_at = now_datetime()
@@ -515,7 +523,9 @@ def get_dispatch_board(date: str) -> list:
         "Event Booking",
         filters={"event_date": event_date, "status": ["in", ["tentative", "confirmed", "in_progress"]]},
         fields=["name", "customer", "event_name", "status", "ee_dispatch_status", "event_date",
-                "start_time", "end_time", "venue_address", "grand_total"],
+                "start_time", "end_time", "venue_address", "grand_total", "weather_status", "weather_sensitive",
+                "delivery_window_start", "delivery_window_end", "pickup_window_start", "pickup_window_end",
+                "site_fit_status"],
         order_by="start_time asc",
     )
 
@@ -539,11 +549,33 @@ def get_dispatch_board(date: str) -> list:
             accepted = [a for a in assignments if a["status"] in ("accepted", "checked_in")]
             is_at_risk = len(accepted) == 0
 
+        # Load weight check (best-effort)
+        overweight = False
+        load_status = ""
+        try:
+            from entertainment_express.api.load_plan import check_load
+
+            load = check_load(bk["name"])
+            overweight = bool(load.get("overweight"))
+            load_status = load.get("status") or ""
+        except Exception:
+            pass
+
         result.append({
             **bk,
             "crew_assignments": assignments,
             "assets": assets,
             "at_risk": is_at_risk,
+            "weather_status": bk.get("weather_status") or "",
+            "weather_sensitive": bool(bk.get("weather_sensitive")),
+            "weather_blocked": (bk.get("weather_status") or "") == "block",
+            "delivery_window_start": str(bk.get("delivery_window_start") or ""),
+            "delivery_window_end": str(bk.get("delivery_window_end") or ""),
+            "pickup_window_start": str(bk.get("pickup_window_start") or ""),
+            "pickup_window_end": str(bk.get("pickup_window_end") or ""),
+            "site_fit_status": bk.get("site_fit_status") or "",
+            "overweight": overweight,
+            "load_status": load_status,
         })
     return result
 

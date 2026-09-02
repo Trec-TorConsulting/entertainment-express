@@ -1,0 +1,22 @@
+{
+  "customers": {
+    "name": "Client Name",
+    "email": "Email Address",
+    "phone": "Phone"
+  },
+  "bookings": {
+    "name": "Event Name",
+    "email": "Client Email",
+    "date": "Event Date",
+    "address": "Venue Name"
+  },
+  "packages": {
+    "name": "Package Name",
+    "rate": "Price"
+  },
+  "leads": {
+    "name": "Lead Name",
+    "email": "Email",
+    "phone": "Phone"
+  }
+}

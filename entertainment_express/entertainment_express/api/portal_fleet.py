@@ -162,6 +162,7 @@ def save_vehicle(name: str = None, values: dict | None = None) -> dict:
         "vehicle_type": values.get("vehicle_type") or "van",
         "status": values.get("status") or "active",
         "capacity": values.get("capacity"),
+        "max_payload_lb": values.get("max_payload_lb"),
         "odometer": values.get("odometer"),
         "fuel_level": values.get("fuel_level"),
         "home_location": values.get("home_location"),

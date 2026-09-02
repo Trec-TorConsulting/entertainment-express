@@ -50,6 +50,7 @@ const OWNER_NAV = [
       { to: "/plan", label: "Plan" },
       { to: "/automations", label: "Reminders" },
       { to: "/grow", label: "Grow" },
+      { to: "/website", label: "Website" },
       { to: "/coverage", label: "Coverage" },
       { to: "/move", label: "Move" },
       { to: "/brand", label: "Brand" },
@@ -367,6 +368,78 @@ function BillingTools() {
   );
 }
 
+function GiftCardTools() {
+  const [amount, setAmount] = React.useState("50");
+  const [code, setCode] = React.useState("");
+  const [issued, setIssued] = React.useState("");
+  const [liability, setLiability] = React.useState<any>(null);
+  const [hint, setHint] = React.useState("");
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Gift cards &amp; credit</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Issue amount">
+          <input type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        </FormField>
+        <FormField label="Redeem code">
+          <input value={code} onChange={(e) => setCode(e.target.value)} />
+        </FormField>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            const res = await call("entertainment_express.api.commerce.issue_gift_card", { amount: Number(amount) });
+            setIssued(res?.code || "");
+            setHint(`Issued ${res?.code}`);
+          }}
+        >
+          Issue gift card
+        </button>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!code}
+          onClick={async () => {
+            const res = await call("entertainment_express.api.commerce.redeem_gift_card", { code });
+            setHint(`Redeemed; balance ${res?.balance}`);
+          }}
+        >
+          Redeem
+        </button>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            const res = await call("entertainment_express.api.commerce.liability_report", {});
+            setLiability(res);
+          }}
+        >
+          Liability
+        </button>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            const res = await call("entertainment_express.api.commerce.run_late_fees", {});
+            setHint(`Late fees created: ${res?.created ?? 0}`);
+          }}
+        >
+          Run late fees
+        </button>
+      </div>
+      {issued ? <p style={{ margin: 0 }}>Last code: <strong>{issued}</strong></p> : null}
+      {hint ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{hint}</p> : null}
+      {liability ? (
+        <p style={{ margin: 0, color: "var(--ee-muted)" }}>
+          Gift cards ${liability.gift_card_liability} · Store credit ${liability.store_credit_liability}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function MoneyWorkspace() {
   const go = useNavigate();
   const [runs, setRuns] = React.useState<any[]>([]);
@@ -384,6 +457,7 @@ function MoneyWorkspace() {
     <section style={{ display: "grid", gap: "1.25rem" }}>
       <RecordList kind="invoice" basePath="/money" go={go} />
       <BillingTools />
+      <GiftCardTools />
       <div className="ee-form">
         <h2 style={{ margin: 0 }}>Pay crew</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
@@ -1092,6 +1166,298 @@ function CrudEditor({ kind, basePath }: { kind: string; basePath: string }) {
   );
 }
 
+function JobLogisticsStrip({ jobId }: { jobId: string }) {
+  const [logistics, setLogistics] = React.useState<any>(null);
+  const [load, setLoad] = React.useState<any>(null);
+  const [deliveryStart, setDeliveryStart] = React.useState("");
+  const [deliveryEnd, setDeliveryEnd] = React.useState("");
+  const [pickupStart, setPickupStart] = React.useState("");
+  const [pickupEnd, setPickupEnd] = React.useState("");
+  const [msg, setMsg] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.site_fit.booking_logistics", { booking: jobId })
+      .then((res) => {
+        setLogistics(res);
+        setDeliveryStart((res.delivery_window_start || "").replace(" ", "T").slice(0, 16));
+        setDeliveryEnd((res.delivery_window_end || "").replace(" ", "T").slice(0, 16));
+        setPickupStart((res.pickup_window_start || "").replace(" ", "T").slice(0, 16));
+        setPickupEnd((res.pickup_window_end || "").replace(" ", "T").slice(0, 16));
+      })
+      .catch(() => setLogistics(null));
+    call("entertainment_express.api.load_plan.evaluate", { booking: jobId })
+      .then(setLoad)
+      .catch(() => setLoad(null));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  if (!logistics) return null;
+
+  const fit = logistics.site_fit?.status || "ok";
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Delivery & site</h2>
+      <p style={{ margin: 0, color: fit === "block" ? "var(--ee-danger)" : "var(--ee-muted)" }}>
+        Site fit: <strong>{fit}</strong>
+        {logistics.fulfillment?.requires_crew ? " · Crew required (attended)" : " · Drop-off / self-serve friendly"}
+      </p>
+      {load ? (
+        <p style={{ margin: 0, color: load.overweight ? "var(--ee-danger)" : "var(--ee-muted)" }}>
+          Load: {load.total_weight_lb || 0} lb
+          {load.max_payload_lb != null ? ` / ${load.max_payload_lb} lb` : ""}
+          {load.overweight ? " · Overweight" : ""}
+        </p>
+      ) : null}
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {msg ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{msg}</p> : null}
+      <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "1fr 1fr" }}>
+        <FormField label="Delivery start">
+          <input type="datetime-local" value={deliveryStart} onChange={(e) => setDeliveryStart(e.target.value)} />
+        </FormField>
+        <FormField label="Delivery end">
+          <input type="datetime-local" value={deliveryEnd} onChange={(e) => setDeliveryEnd(e.target.value)} />
+        </FormField>
+        <FormField label="Pickup start">
+          <input type="datetime-local" value={pickupStart} onChange={(e) => setPickupStart(e.target.value)} />
+        </FormField>
+        <FormField label="Pickup end">
+          <input type="datetime-local" value={pickupEnd} onChange={(e) => setPickupEnd(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        style={{ width: "fit-content" }}
+        onClick={async () => {
+          setError("");
+          try {
+            await call("entertainment_express.api.site_fit.save_windows", {
+              booking: jobId,
+              values: {
+                delivery_window_start: deliveryStart ? deliveryStart.replace("T", " ") : null,
+                delivery_window_end: deliveryEnd ? deliveryEnd.replace("T", " ") : null,
+                pickup_window_start: pickupStart ? pickupStart.replace("T", " ") : null,
+                pickup_window_end: pickupEnd ? pickupEnd.replace("T", " ") : null,
+              },
+            });
+            setMsg("Windows saved");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save windows.");
+          }
+        }}
+      >
+        Save windows
+      </button>
+    </section>
+  );
+}
+
+function JobMediaPanel({ jobId }: { jobId: string }) {
+  const [gallery, setGallery] = React.useState<any>(null);
+  const [msg, setMsg] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.media_gallery.ensure_gallery", { booking: jobId })
+      .then(setGallery)
+      .catch(() => setGallery(null));
+  };
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  if (!gallery) return null;
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Media gallery</h2>
+      <p style={{ margin: 0, color: "var(--ee-muted)" }}>
+        {gallery.items?.length || 0} items · prints {gallery.print_count || 0}
+        {gallery.published ? " · published" : " · draft"}
+      </p>
+      {gallery.share_url ? (
+        <p style={{ margin: 0 }}>
+          Share: <a href={gallery.share_url}>{gallery.share_url}</a>
+        </p>
+      ) : null}
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {msg ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{msg}</p> : null}
+      <button
+        type="button"
+        className="ee-btn"
+        style={{ width: "fit-content" }}
+        onClick={async () => {
+          setError("");
+          try {
+            const next = await call("entertainment_express.api.media_gallery.publish", {
+              gallery: gallery.id,
+              published: gallery.published ? 0 : 1,
+            });
+            setGallery(next);
+            setMsg(next.published ? "Gallery published" : "Gallery unpublished");
+          } catch (err: any) {
+            setError(err.message || "Could not update gallery.");
+          }
+        }}
+      >
+        {gallery.published ? "Unpublish" : "Publish"}
+      </button>
+    </section>
+  );
+}
+
+function DjExportPanel({ jobId }: { jobId: string }) {
+  const [hint, setHint] = React.useState("");
+  const download = async (fmt: string) => {
+    const res = await call("entertainment_express.api.music_export.export_playlist", { booking: jobId, fmt });
+    const blob = new Blob([res.content || ""], { type: res.content_type || "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = res.filename || `${jobId}.${fmt}`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setHint(`Exported ${res.track_count || 0} tracks`);
+  };
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>DJ playlist export</h2>
+      <p style={{ margin: 0, color: "var(--ee-muted)" }}>Metadata only — Serato CSV, Rekordbox XML, or M3U.</p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+        <button type="button" className="ee-btn" onClick={() => download("serato_csv")}>
+          Serato CSV
+        </button>
+        <button type="button" className="ee-btn" onClick={() => download("rekordbox_xml")}>
+          Rekordbox XML
+        </button>
+        <button type="button" className="ee-btn" onClick={() => download("m3u")}>
+          M3U
+        </button>
+      </div>
+      {hint ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{hint}</p> : null}
+    </section>
+  );
+}
+
+function LivePagePanel({ jobId }: { jobId: string }) {
+  const [url, setUrl] = React.useState("");
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Live event page</h2>
+      <button
+        type="button"
+        className="ee-btn"
+        style={{ width: "fit-content" }}
+        onClick={async () => {
+          const res = await call("entertainment_express.api.differentiators.publish_live_event_page", { booking: jobId });
+          setUrl(res?.url || "");
+        }}
+      >
+        Publish guest page
+      </button>
+      {url ? (
+        <p style={{ margin: 0 }}>
+          <a href={url}>{url}</a>
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+function JobWeatherStrip({ jobId }: { jobId: string }) {
+  const [wx, setWx] = React.useState<any>(null);
+  const [candidate, setCandidate] = React.useState("");
+  const [msg, setMsg] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.weather.booking_weather", { booking: jobId })
+      .then(setWx)
+      .catch(() => setWx(null));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  if (!wx || !wx.weather_sensitive) return null;
+
+  const status = wx.weather_status || "unknown";
+  const tone =
+    status === "block" || status === "warning"
+      ? "var(--ee-danger)"
+      : status === "watch" || status === "unknown"
+        ? "var(--ee-warning, #b45309)"
+        : "var(--ee-success)";
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Weather</h2>
+      <p style={{ margin: 0, color: tone }}>
+        Status: <strong>{status}</strong>
+        {wx.wind_mph != null ? ` · Wind ${wx.wind_mph} mph` : ""}
+        {wx.precip_inch != null ? ` · Precip ${wx.precip_inch} in` : ""}
+        {wx.lightning_risk ? " · Lightning risk" : ""}
+      </p>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {msg ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{msg}</p> : null}
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "end" }}>
+        <button
+          type="button"
+          className="ee-btn ee-btn--ghost"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.weather.refresh_booking", { booking: jobId });
+              setMsg("Forecast refreshed");
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not refresh forecast.");
+            }
+          }}
+        >
+          Refresh forecast
+        </button>
+        <FormField label="Rain-date start">
+          <input type="datetime-local" value={candidate} onChange={(e) => setCandidate(e.target.value)} />
+        </FormField>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!candidate}
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.weather.offer_rain_date", {
+                booking: jobId,
+                candidate_start: candidate.replace("T", " "),
+              });
+              setMsg("Rain date offered");
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not offer rain date.");
+            }
+          }}
+        >
+          Offer rain date
+        </button>
+      </div>
+      {wx.rain_date_offer ? (
+        <p style={{ margin: 0, color: "var(--ee-muted)" }}>
+          Open offer: {wx.rain_date_offer.candidate_start}
+          {wx.rain_date_offer.expires_at ? ` · expires ${wx.rain_date_offer.expires_at}` : ""}
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function JobRiskPanel({ jobId }: { jobId: string }) {
   const [risk, setRisk] = React.useState<any>(null);
   const [venues, setVenues] = React.useState<any[]>([]);
@@ -1425,6 +1791,11 @@ function RecordExtras({ kind, id }: { kind: string; id: string }) {
           </>
         ) : null}
       </section>
+      {kind === "job" ? <JobWeatherStrip jobId={id} /> : null}
+      {kind === "job" ? <JobLogisticsStrip jobId={id} /> : null}
+      {kind === "job" ? <JobMediaPanel jobId={id} /> : null}
+      {kind === "job" ? <DjExportPanel jobId={id} /> : null}
+      {kind === "job" ? <LivePagePanel jobId={id} /> : null}
       {kind === "job" ? <JobRiskPanel jobId={id} /> : null}
       {kind === "job" ? <JobCrewPanel jobId={id} /> : null}
       {kind === "job" ? <JobPlanningPanel jobId={id} /> : null}
@@ -1963,6 +2334,7 @@ function PartnersWorkspace() {
 function CoverageWorkspace() {
   const [policies, setPolicies] = React.useState<any[]>([]);
   const [templates, setTemplates] = React.useState<any[]>([]);
+  const [safety, setSafety] = React.useState<any>(null);
   const [provider, setProvider] = React.useState("");
   const [expires, setExpires] = React.useState("");
   const [title, setTitle] = React.useState("Liability waiver");
@@ -1976,6 +2348,9 @@ function CoverageWorkspace() {
     call("entertainment_express.api.compliance.list_waiver_templates", {})
       .then(setTemplates)
       .catch(() => setTemplates([]));
+    call("entertainment_express.api.safety.safety_overview", {})
+      .then(setSafety)
+      .catch(() => setSafety(null));
   };
   React.useEffect(() => {
     reload();
@@ -1985,8 +2360,45 @@ function CoverageWorkspace() {
     <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
       <header>
         <h1 style={{ margin: 0 }}>Coverage</h1>
-        <p className="ee-muted">Your policies, certificates on jobs, and waivers clients sign.</p>
+        <p className="ee-muted">Your policies, inspection certificates, sanitization, and waivers clients sign.</p>
       </header>
+      {safety?.expired_or_due?.length ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>Inspection alerts</h2>
+          {safety.expired_or_due.map((row: any) => (
+            <p key={row.id} className="ee-form__error" style={{ margin: 0 }}>
+              {row.asset_name}: cert {row.certificate_no || row.id} expires {row.expires_on}
+            </p>
+          ))}
+        </div>
+      ) : null}
+      {safety?.certificates?.length ? (
+        <div>
+          <h2 style={{ margin: "0 0 0.5rem" }}>Inspection certificates</h2>
+          <ul>
+            {safety.certificates.map((row: any) => (
+              <li key={row.id}>
+                {row.asset_name} · {row.authority || "Authority"} · {row.expires_on}
+                {row.expired ? " · expired" : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="ee-muted">Add state or third-party inspection certificates on gear to gate booking.</p>
+      )}
+      {safety?.sanitization?.length ? (
+        <div>
+          <h2 style={{ margin: "0 0 0.5rem" }}>Recent sanitization</h2>
+          <ul>
+            {safety.sanitization.map((row: any) => (
+              <li key={row.id}>
+                {row.asset} · {row.cleaned_at} · {row.method}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <form
         className="ee-form"
         onSubmit={async (event) => {
@@ -2958,6 +3370,124 @@ function TalentHome() {
   );
 }
 
+function WebsiteWorkspace() {
+  const [pages, setPages] = React.useState<any[]>([]);
+  const [embed, setEmbed] = React.useState<any>(null);
+  const [title, setTitle] = React.useState("");
+  const [route, setRoute] = React.useState("");
+  const [body, setBody] = React.useState("");
+  const [published, setPublished] = React.useState(true);
+  const [copied, setCopied] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.embed.list_pages", {})
+      .then(setPages)
+      .catch(() => setPages([]));
+    call("entertainment_express.api.embed.get_embed_settings", {})
+      .then(setEmbed)
+      .catch(() => setEmbed(null));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section style={{ display: "grid", gap: "1.25rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Website</h1>
+        <p className="ee-muted">Publish marketing pages on your host and drop booking widgets on any site.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.embed.save_page", {
+              values: { title, route, body, published: published ? 1 : 0 },
+            });
+            setTitle("");
+            setRoute("");
+            setBody("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save page.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>New page</h2>
+        <FormField label="Title">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+        </FormField>
+        <FormField label="Route">
+          <input value={route} onChange={(e) => setRoute(e.target.value)} placeholder="about" required />
+        </FormField>
+        <FormField label="Body">
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={6} placeholder="Tell your story…" />
+        </FormField>
+        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+          Published
+        </label>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn" style={{ width: "fit-content" }}>
+          Save page
+        </button>
+      </form>
+      {pages.length ? (
+        <ul>
+          {pages.map((row) => (
+            <li key={row.id}>
+              {row.title} · /p/{row.route} {row.published ? "" : "(draft)"}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">No pages yet. Start with About or Services.</p>
+      )}
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Embed snippet</h2>
+        <p className="ee-muted" style={{ margin: 0 }}>
+          Paste on WordPress, Squarespace, or any HTML page. Widgets only see this tenant.
+        </p>
+        <FormField label="Public embed key">
+          <input readOnly value={embed?.public_embed_key || ""} />
+        </FormField>
+        <textarea readOnly value={embed?.snippet || ""} rows={4} />
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(embed?.snippet || "");
+                setCopied("Snippet copied");
+              } catch {
+                setCopied("Copy manually from the box");
+              }
+            }}
+          >
+            Copy snippet
+          </button>
+          <button
+            type="button"
+            className="ee-btn ee-btn--ghost"
+            onClick={async () => {
+              const next = await call("entertainment_express.api.embed.rotate_embed_key", {});
+              setEmbed(next);
+              setCopied("New key generated");
+            }}
+          >
+            Rotate key
+          </button>
+        </div>
+        {copied ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{copied}</p> : null}
+      </div>
+    </section>
+  );
+}
+
 function GrowWorkspace() {
   const [data, setData] = React.useState<any>(null);
   const [segName, setSegName] = React.useState("");
@@ -3515,11 +4045,73 @@ function SecurityWorkspace() {
   );
 }
 
+function MultiBrandPanel() {
+  const [brands, setBrands] = React.useState<any[]>([]);
+  const [name, setName] = React.useState("");
+  const [slug, setSlug] = React.useState("");
+  const [hint, setHint] = React.useState("");
+  const reload = () => {
+    call("entertainment_express.api.brand.list_brands", {})
+      .then((res) => setBrands(res || []))
+      .catch(() => setBrands([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Storefront brands</h2>
+      <p style={{ margin: 0, color: "var(--ee-muted)" }}>Host or path prefix selects which catalog face customers see.</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Name">
+          <input value={name} onChange={(e) => setName(e.target.value)} />
+        </FormField>
+        <FormField label="Slug">
+          <input value={slug} onChange={(e) => setSlug(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        style={{ width: "fit-content" }}
+        onClick={async () => {
+          await call("entertainment_express.api.brand.save_brand", { data: { brand_name: name, slug } });
+          setName("");
+          setSlug("");
+          setHint("Brand saved");
+          reload();
+        }}
+      >
+        Add brand
+      </button>
+      {hint ? <p style={{ margin: 0, color: "var(--ee-success)" }}>{hint}</p> : null}
+      {brands.length ? (
+        <DataTable
+          id="ee-brands"
+          columns={[
+            { key: "brand_name", label: "Name" },
+            { key: "slug", label: "Slug" },
+            { key: "custom_host", label: "Host" },
+            { key: "is_default", label: "Default" },
+          ]}
+          rows={brands}
+        />
+      ) : (
+        <EmptyState title="One brand" message="Add another face when you run multiple storefronts on this site." />
+      )}
+    </div>
+  );
+}
+
 function SettingsWorkspace() {
   const [row, setRow] = React.useState<any>(null);
   const [brandName, setBrandName] = React.useState("");
   const [brandColor, setBrandColor] = React.useState("#0f766e");
   const [saved, setSaved] = React.useState("");
+  const [weather, setWeather] = React.useState<any>(null);
+  const [wxSaved, setWxSaved] = React.useState("");
+  const [siteCfg, setSiteCfg] = React.useState<any>(null);
+  const [siteSaved, setSiteSaved] = React.useState("");
 
   React.useEffect(() => {
     call("entertainment_express.api.portal_owner.get_brand", {})
@@ -3529,6 +4121,12 @@ function SettingsWorkspace() {
         if (doc?.brand_color) setBrandColor(doc.brand_color);
       })
       .catch(() => setRow({}));
+    call("entertainment_express.api.weather.get_policy", {})
+      .then(setWeather)
+      .catch(() => setWeather(null));
+    call("entertainment_express.api.site_fit.get_config", {})
+      .then(setSiteCfg)
+      .catch(() => setSiteCfg(null));
   }, []);
 
   const save = async () => {
@@ -3540,19 +4138,138 @@ function SettingsWorkspace() {
     setSaved("Saved");
   };
 
+  const saveWeather = async () => {
+    if (!weather) return;
+    const next = await call("entertainment_express.api.weather.save_policy", { values: weather });
+    setWeather(next);
+    setWxSaved("Weather policy saved");
+  };
+
   return row ? (
-    <div className="ee-form">
-      <h1 style={{ margin: 0 }}>Brand</h1>
-      <FormField label="Company name">
-        <input value={brandName} onChange={(e) => setBrandName(e.target.value)} />
-      </FormField>
-      <FormField label="Brand color">
-        <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} />
-      </FormField>
-      <button type="button" className="ee-btn" onClick={save} style={{ width: "fit-content" }}>
-        Save
-      </button>
-      {saved ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{saved}</p> : null}
+    <div style={{ display: "grid", gap: "1.5rem" }}>
+      <div className="ee-form">
+        <h1 style={{ margin: 0 }}>Brand</h1>
+        <FormField label="Company name">
+          <input value={brandName} onChange={(e) => setBrandName(e.target.value)} />
+        </FormField>
+        <FormField label="Brand color">
+          <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} />
+        </FormField>
+        <button type="button" className="ee-btn" onClick={save} style={{ width: "fit-content" }}>
+          Save
+        </button>
+        {saved ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{saved}</p> : null}
+      </div>
+      <MultiBrandPanel />
+      {weather ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>Outdoor weather</h2>
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input
+              type="checkbox"
+              checked={!!weather.enabled}
+              onChange={(e) => setWeather({ ...weather, enabled: e.target.checked ? 1 : 0 })}
+            />
+            Enable forecast checks
+          </label>
+          <FormField label="Max wind (mph)">
+            <input
+              type="number"
+              value={weather.wind_mph_max ?? 25}
+              onChange={(e) => setWeather({ ...weather, wind_mph_max: Number(e.target.value) })}
+            />
+          </FormField>
+          <FormField label="Max precip (in)">
+            <input
+              type="number"
+              step="0.01"
+              value={weather.precip_inch_hours ?? 0.25}
+              onChange={(e) => setWeather({ ...weather, precip_inch_hours: Number(e.target.value) })}
+            />
+          </FormField>
+          <FormField label="When threshold exceeded">
+            <select
+              value={weather.threshold_action || "warn"}
+              onChange={(e) => setWeather({ ...weather, threshold_action: e.target.value })}
+            >
+              <option value="warn">Warn (do not block)</option>
+              <option value="block">Block confirm/dispatch</option>
+            </select>
+          </FormField>
+          <FormField label="Lightning">
+            <select
+              value={weather.lightning_policy || "warn"}
+              onChange={(e) => setWeather({ ...weather, lightning_policy: e.target.value })}
+            >
+              <option value="warn">Warn</option>
+              <option value="block">Block</option>
+            </select>
+          </FormField>
+          <FormField label="Lead hours">
+            <input
+              type="number"
+              value={weather.lead_hours ?? 48}
+              onChange={(e) => setWeather({ ...weather, lead_hours: Number(e.target.value) })}
+            />
+          </FormField>
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input
+              type="checkbox"
+              checked={!!weather.client_can_accept_rain_date}
+              onChange={(e) => setWeather({ ...weather, client_can_accept_rain_date: e.target.checked ? 1 : 0 })}
+            />
+            Client can accept rain date
+          </label>
+          <button type="button" className="ee-btn" onClick={saveWeather} style={{ width: "fit-content" }}>
+            Save weather policy
+          </button>
+          {wxSaved ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{wxSaved}</p> : null}
+        </div>
+      ) : null}
+      {siteCfg ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>Site fit & loads</h2>
+          <FormField label="Unfit site">
+            <select
+              value={siteCfg.unfit_action || "warn"}
+              onChange={(e) => setSiteCfg({ ...siteCfg, unfit_action: e.target.value })}
+            >
+              <option value="warn">Warn</option>
+              <option value="block">Block booking confirm</option>
+            </select>
+          </FormField>
+          <FormField label="Overweight load">
+            <select
+              value={siteCfg.overweight_action || "warn"}
+              onChange={(e) => setSiteCfg({ ...siteCfg, overweight_action: e.target.value })}
+            >
+              <option value="warn">Warn</option>
+              <option value="block">Block finalize</option>
+            </select>
+          </FormField>
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input
+              type="checkbox"
+              checked={!!siteCfg.require_client_site_answers}
+              onChange={(e) => setSiteCfg({ ...siteCfg, require_client_site_answers: e.target.checked ? 1 : 0 })}
+            />
+            Ask clients for site details
+          </label>
+          <button
+            type="button"
+            className="ee-btn"
+            style={{ width: "fit-content" }}
+            onClick={async () => {
+              const next = await call("entertainment_express.api.site_fit.save_config", { values: siteCfg });
+              setSiteCfg(next);
+              setSiteSaved("Site fit policy saved");
+            }}
+          >
+            Save site fit policy
+          </button>
+          {siteSaved ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{siteSaved}</p> : null}
+        </div>
+      ) : null}
     </div>
   ) : (
     <EmptyState title="Brand" message="Your public name and color show here." />
@@ -3633,6 +4350,7 @@ export function OwnerApp() {
           <Route path="/plan" element={<PlanWorkspace />} />
           <Route path="/automations" element={<AutomationsWorkspace />} />
           <Route path="/grow" element={<GrowWorkspace />} />
+          <Route path="/website" element={<WebsiteWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
           <Route path="/connections" element={<ConnectionsWorkspace />} />
           <Route path="/security" element={<SecurityWorkspace />} />

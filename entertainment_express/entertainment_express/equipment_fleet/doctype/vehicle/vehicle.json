@@ -52,6 +52,7 @@
   "vehicle_type",
   "status",
   "capacity",
+  "max_payload_lb",
   "assigned_crew",
   "odometer",
   "fuel_level",
@@ -99,6 +100,12 @@
    "fieldname": "capacity",
    "fieldtype": "Data",
    "label": "Capacity"
+  },
+  {
+   "fieldname": "max_payload_lb",
+   "fieldtype": "Float",
+   "label": "Max Payload (lb)",
+   "description": "Shipping weight limit for load planning"
   },
   {
    "fieldname": "assigned_crew",

@@ -1,0 +1,17 @@
+{
+  "customers": {
+    "name": "Customer",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "bookings": {
+    "name": "Job Name",
+    "email": "Email",
+    "date": "Start Date",
+    "address": "Location"
+  },
+  "gear": {
+    "name": "Item",
+    "type": "Category"
+  }
+}

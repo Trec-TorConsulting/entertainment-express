@@ -1,0 +1,53 @@
+{
+ "actions": [],
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["unfit_action", "overweight_action", "require_client_site_answers", "enabled"],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "default": "warn",
+   "description": "When site answers fail item requirements.",
+   "fieldname": "unfit_action",
+   "fieldtype": "Select",
+   "label": "Unfit Site Action",
+   "options": "warn\nblock"
+  },
+  {
+   "default": "warn",
+   "description": "When assigned asset weight exceeds vehicle payload.",
+   "fieldname": "overweight_action",
+   "fieldtype": "Select",
+   "label": "Overweight Action",
+   "options": "warn\nblock"
+  },
+  {
+   "default": "1",
+   "fieldname": "require_client_site_answers",
+   "fieldtype": "Check",
+   "label": "Require Client Site Answers"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Booking Site Config",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Office", "read": 1, "write": 1},
+  {"role": "EE Dispatcher", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

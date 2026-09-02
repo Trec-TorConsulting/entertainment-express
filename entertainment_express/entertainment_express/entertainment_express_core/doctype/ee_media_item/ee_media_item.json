@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["gallery", "title", "file_name", "mime", "content_b64", "file_url", "print_count", "template_name", "uploaded_by", "uploaded_at"],
+ "fields": [
+  {"fieldname": "gallery", "fieldtype": "Link", "label": "Gallery", "options": "EE Media Gallery", "reqd": 1, "in_list_view": 1, "search_index": 1},
+  {"fieldname": "title", "fieldtype": "Data", "label": "Title", "in_list_view": 1},
+  {"fieldname": "file_name", "fieldtype": "Data", "label": "File Name"},
+  {"fieldname": "mime", "fieldtype": "Data", "label": "MIME"},
+  {"fieldname": "content_b64", "fieldtype": "Long Text", "label": "Content (base64)"},
+  {"fieldname": "file_url", "fieldtype": "Attach", "label": "File URL"},
+  {"fieldname": "print_count", "fieldtype": "Int", "label": "Prints", "default": "0", "in_list_view": 1},
+  {"fieldname": "template_name", "fieldtype": "Data", "label": "Template"},
+  {"fieldname": "uploaded_by", "fieldtype": "Link", "label": "Uploaded By", "options": "User"},
+  {"fieldname": "uploaded_at", "fieldtype": "Datetime", "label": "Uploaded At"}
+ ],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Media Item",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Crew", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Customer", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "uploaded_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

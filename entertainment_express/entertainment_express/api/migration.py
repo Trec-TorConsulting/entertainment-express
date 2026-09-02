@@ -9,7 +9,7 @@ import json
 import frappe
 from frappe.utils import cint, flt, nowdate
 
-from entertainment_express.api.migration_presets import PRESETS
+from entertainment_express.api.migration_presets import PRESETS, load_json_presets
 
 TARGETS = ("customers", "leads", "bookings", "packages", "gear", "venues", "vendors", "songs")
 ROW_CAP = 5000
@@ -274,7 +274,7 @@ def _job_payload(job, skipped: int = 0) -> dict:
 @frappe.whitelist()
 def list_presets() -> dict:
     _require()
-    return PRESETS
+    return load_json_presets() or PRESETS
 
 
 @frappe.whitelist()

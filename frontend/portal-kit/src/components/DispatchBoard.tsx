@@ -19,6 +19,12 @@ type JobRow = {
   when: string;
   place: string;
   at_risk: boolean;
+  weather_status?: string;
+  weather_blocked?: boolean;
+  delivery_window?: string;
+  pickup_window?: string;
+  overweight?: boolean;
+  site_fit_status?: string;
   crew: CrewRow[];
   assets?: string[];
 };
@@ -337,6 +343,19 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
                 {job.place ? ` · ${job.place}` : ""}
               </p>
               {job.at_risk ? <p className="ee-form__error">Needs a confirmed crew</p> : null}
+              {job.weather_blocked || job.weather_status === "block" ? (
+                <p className="ee-form__error">Weather block</p>
+              ) : job.weather_status && job.weather_status !== "clear" ? (
+                <p className="ee-muted">Weather: {job.weather_status}</p>
+              ) : null}
+              {job.delivery_window ? <p className="ee-muted">Delivery: {job.delivery_window}</p> : null}
+              {job.pickup_window ? <p className="ee-muted">Pickup: {job.pickup_window}</p> : null}
+              {job.overweight ? <p className="ee-form__error">Overweight load</p> : null}
+              {job.site_fit_status && job.site_fit_status !== "ok" ? (
+                <p className={job.site_fit_status === "block" ? "ee-form__error" : "ee-muted"}>
+                  Site fit: {job.site_fit_status}
+                </p>
+              ) : null}
               {(job.assets || []).length ? <p className="ee-muted">Gear: {job.assets?.join(", ")}</p> : null}
             </div>
             {job.crew.length ? (
