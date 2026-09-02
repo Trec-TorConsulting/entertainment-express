@@ -26,6 +26,7 @@
     "@react-navigation/native-stack": "^6.9.0",
     "@tanstack/react-query": "^5.0.0",
     "axios": "^1.6.2",
+    "decode-uri-component": "file:vendor/decode-uri-component",
     "expo": "^50.0.0",
     "expo-build-properties": "^0.11.1",
     "expo-constants": "~15.4.0",
@@ -61,6 +62,7 @@
     "tar": "7.5.22",
     "uuid": "11.1.1",
     "fast-xml-parser": "5.7.0",
-    "image-size": "file:vendor/image-size"
+    "image-size": "file:vendor/image-size",
+    "decode-uri-component": "file:vendor/decode-uri-component"
   }
 }
