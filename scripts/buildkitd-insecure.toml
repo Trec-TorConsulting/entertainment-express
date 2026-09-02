@@ -1,0 +1,4 @@
+# Homelab registry serves plain HTTP on NodePort 30500.
+[registry."192.168.4.10:30500"]
+  http = true
+  insecure = true

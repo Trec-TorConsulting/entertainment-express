@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-02  
 **Status:** Pilot on K3s — **not** a SaaS-SLA / SOC2 production claim  
-**Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.80-ee`  
+**Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.81-ee`  
 **Namespace:** `entertainment-express`
 
 Phases 0–26 are on `main`. Live tenant smoke (`e2esmoke.entx.app`) includes catalog/booking data
