@@ -1,6 +1,7 @@
 import React from "react";
 import { call } from "../api/client";
 import { getSessionBootstrap } from "../api/session";
+import { FormField } from "./FormField";
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -138,6 +139,13 @@ export function AccountPanel() {
   const boot = getSessionBootstrap();
   const person = boot.person || { full_name: boot.user, email: boot.user, name: boot.user };
   const roles = (boot.roles || []).filter((role) => role.startsWith("EE ") || role === "SaaS Operator");
+  const [prefs, setPrefs] = React.useState<any>(null);
+  const [hint, setHint] = React.useState("");
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_notifications.get_my_preferences", {})
+      .then(setPrefs)
+      .catch(() => setPrefs(null));
+  }, []);
   return (
     <section className="ee-account-panel">
       <h1>Your profile</h1>
@@ -156,6 +164,46 @@ export function AccountPanel() {
           <dd>{roles.join(" · ") || "Workspace member"}</dd>
         </div>
       </dl>
+      {prefs ? (
+        <div className="ee-form" style={{ marginTop: "1rem" }}>
+          <h2 style={{ margin: 0 }}>How we reach you</h2>
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input type="checkbox" checked={!!prefs.email} onChange={() => setPrefs({ ...prefs, email: prefs.email ? 0 : 1 })} />
+            Email
+          </label>
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input type="checkbox" checked={!!prefs.sms} onChange={() => setPrefs({ ...prefs, sms: prefs.sms ? 0 : 1 })} />
+            Text
+          </label>
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input type="checkbox" checked={!!prefs.whatsapp} onChange={() => setPrefs({ ...prefs, whatsapp: prefs.whatsapp ? 0 : 1 })} />
+            WhatsApp
+          </label>
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input type="checkbox" checked={!!prefs.push} onChange={() => setPrefs({ ...prefs, push: prefs.push ? 0 : 1 })} />
+            Phone alerts
+          </label>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.75rem" }}>
+            <FormField label="Quiet from">
+              <input type="time" value={prefs.quiet_from || ""} onChange={(e) => setPrefs({ ...prefs, quiet_from: e.target.value })} />
+            </FormField>
+            <FormField label="Quiet until">
+              <input type="time" value={prefs.quiet_to || ""} onChange={(e) => setPrefs({ ...prefs, quiet_to: e.target.value })} />
+            </FormField>
+          </div>
+          {hint ? <p>{hint}</p> : null}
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              await call("entertainment_express.api.portal_notifications.save_my_preferences", { values: prefs });
+              setHint("Saved.");
+            }}
+          >
+            Save message settings
+          </button>
+        </div>
+      ) : null}
       <button type="button" className="ee-btn ee-btn--ghost" onClick={() => signOut()}>
         Sign out
       </button>

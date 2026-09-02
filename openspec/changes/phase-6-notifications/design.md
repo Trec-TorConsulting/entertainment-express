@@ -1,30 +1,18 @@
-# Design: Phase 6 — Notifications
+# Design: Phase 6 — Notifications (portals)
 
-## A. Data model
+## Context
 
-Notification Template adds: `channels` (Small Text: comma list `email,sms,whatsapp,push`), `fallback_channel`, `priority` (`transactional`/`promotional`).
+`send()` already fans out email/SMS/WhatsApp/push, honors opt-out, defers promo in quiet hours, and logs. `/owner/automations` only toggles workflow reminders. Preference lookup requires party_type+party, so a client saving “no SMS” never matches a send to their email.
 
-| DocType | Key fields |
-|---|---|
-| Notification Log | recipient, channel, template_key, status, provider, provider_message_id, error, related_doctype, related_name, scheduled_for |
-| Notification Preference | party_type, party, email_opt_in, sms_opt_in, whatsapp_opt_in, push_opt_in, quiet_hours_start, quiet_hours_end, timezone, locale |
+## Decisions
 
-## B. Send pipeline
+1. **Reuse `notifications.py`.** `portal_notifications.py` wraps prefs, templates, and recent log.
+2. **Prefs by email.** `_prefs` also finds Preference by Customer email, User email, or Employee user_id.
+3. **UI.** AccountPanel: how we reach you. Owner Reminders: templates + last deliveries + channel ready flags. Connections: Twilio, FCM.
+4. **Webhooks.** Twilio optional `EE_TWILIO_WEBHOOK_TOKEN`. FCM already token-gated. Guests may hit webhooks; they cannot hit portal APIs.
+5. **Image** `0.0.78-ee` → `0.0.79-ee`.
 
-`send(key, recipient, context, channels=None, party=None)` enqueues `_deliver`.
-For each channel: honor preferences (transactional email always allowed; SMS/WhatsApp require opt-in unless transactional-and-legally-required flag on template); defer if quiet hours and priority!=transactional; adapter send; write Log.
+## Risks
 
-Adapters:
-- email: existing `frappe.sendmail`
-- sms/whatsapp: Twilio REST if `EE_TWILIO_ACCOUNT_SID/AUTH_TOKEN/FROM`
-- push: FCM HTTP v1 if `EE_FCM_SERVICE_ACCOUNT` JSON path/env
-
-Unconfigured adapter → log `failed` reason=`not_configured` and try fallback.
-
-## C. Webhooks
-
-`notifications_webhook_twilio`, `notifications_webhook_fcm` — guest, signature/token verified, update Log by provider_message_id.
-
-## D. Retries
-
-Hourly: Logs in `failed` with transient error, attempts < 5, enqueue with exponential backoff.
+- [Twilio down] → log `not_configured`, email fallback, request does not raise.
+- [Quiet hours wrap midnight] → existing `_in_quiet_hours` range logic; deferred daily job skips if still quiet.

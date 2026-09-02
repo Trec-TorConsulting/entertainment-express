@@ -10,6 +10,12 @@ import frappe
 
 @frappe.whitelist(allow_guest=True)
 def twilio_status() -> dict:
+    token = os.environ.get("EE_TWILIO_WEBHOOK_TOKEN", "")
+    if token:
+        got = frappe.get_request_header("X-EE-Webhook-Token") or (frappe.form_dict.get("token") if hasattr(frappe, "form_dict") else "") or ""
+        if len(str(got)) != len(token) or not hmac.compare_digest(token, str(got)):
+            frappe.local.response.http_status_code = 401
+            return {"error": "unauthorized"}
     form = frappe.local.form_dict
     sid = form.get("MessageSid") or form.get("SmsSid")
     status = (form.get("MessageStatus") or form.get("SmsStatus") or "").lower()
@@ -34,7 +40,7 @@ def twilio_status() -> dict:
 def fcm_status() -> dict:
     token = os.environ.get("EE_FCM_WEBHOOK_TOKEN", "")
     got = frappe.get_request_header("X-EE-Webhook-Token") or ""
-    if not token or not hmac.compare_digest(token, got):
+    if not token or len(got) != len(token) or not hmac.compare_digest(token, got):
         frappe.local.response.http_status_code = 401
         return {"error": "unauthorized"}
     data = frappe.request.json or frappe.local.form_dict

@@ -149,6 +149,9 @@ def retry_failed():
 def send_deferred():
     rows = frappe.get_all("Notification Log", filters={"status": "deferred"}, fields=["name", "recipient", "channel", "template_key"])
     for row in rows:
+        prefs = _prefs(None, None, row.recipient)
+        if _in_quiet_hours(prefs):
+            continue
         tmpl = frappe.get_doc("Notification Template", {"template_key": row.template_key})
         subject = tmpl.subject
         body = tmpl.body_html
@@ -167,13 +170,18 @@ def _channels_of(tmpl) -> list[str]:
 
 
 def _prefs(party_type, party, recipient) -> dict:
+    row = None
     if party_type and party and frappe.db.exists("Notification Preference", {"party_type": party_type, "party": party}):
-        return frappe.db.get_value(
+        row = frappe.db.get_value(
             "Notification Preference",
             {"party_type": party_type, "party": party},
             ["email_opt_in", "sms_opt_in", "whatsapp_opt_in", "push_opt_in", "quiet_hours_start", "quiet_hours_end", "timezone"],
             as_dict=True,
         )
+    if not row and recipient:
+        row = _prefs_for_recipient(recipient)
+    if row:
+        return row
     return {
         "email_opt_in": 1,
         "sms_opt_in": 0,
@@ -182,6 +190,36 @@ def _prefs(party_type, party, recipient) -> dict:
         "quiet_hours_start": None,
         "quiet_hours_end": None,
     }
+
+
+def _prefs_for_recipient(recipient: str) -> dict | None:
+    user = frappe.db.get_value("User", {"email": recipient}, "name") or (
+        recipient if frappe.db.exists("User", recipient) else None
+    )
+    if user and frappe.db.exists("Notification Preference", {"party_type": "User", "party": user}):
+        return frappe.db.get_value(
+            "Notification Preference",
+            {"party_type": "User", "party": user},
+            ["email_opt_in", "sms_opt_in", "whatsapp_opt_in", "push_opt_in", "quiet_hours_start", "quiet_hours_end", "timezone"],
+            as_dict=True,
+        )
+    customer = frappe.db.get_value("Customer", {"email_id": recipient}, "name")
+    if customer and frappe.db.exists("Notification Preference", {"party_type": "Customer", "party": customer}):
+        return frappe.db.get_value(
+            "Notification Preference",
+            {"party_type": "Customer", "party": customer},
+            ["email_opt_in", "sms_opt_in", "whatsapp_opt_in", "push_opt_in", "quiet_hours_start", "quiet_hours_end", "timezone"],
+            as_dict=True,
+        )
+    employee = frappe.db.get_value("Employee", {"user_id": user or recipient}, "name")
+    if employee and frappe.db.exists("Notification Preference", {"party_type": "Employee", "party": employee}):
+        return frappe.db.get_value(
+            "Notification Preference",
+            {"party_type": "Employee", "party": employee},
+            ["email_opt_in", "sms_opt_in", "whatsapp_opt_in", "push_opt_in", "quiet_hours_start", "quiet_hours_end", "timezone"],
+            as_dict=True,
+        )
+    return None
 
 
 def _allowed(channel: str, prefs: dict, priority: str) -> bool:

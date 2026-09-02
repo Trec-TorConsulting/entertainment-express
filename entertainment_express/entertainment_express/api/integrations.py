@@ -34,6 +34,8 @@ LABELS = {
     "paypal": "PayPal",
     "ach": "Bank (ACH)",
     "authorizenet": "Authorize.Net",
+    "twilio": "Twilio",
+    "fcm": "Phone alerts",
 }
 
 

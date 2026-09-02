@@ -2535,7 +2535,100 @@ function AutomationsWorkspace() {
       ) : (
         <p className="ee-muted">No checklists yet. Add one in settings when you are ready.</p>
       )}
+      <MessageTemplates />
     </section>
+  );
+}
+
+function MessageTemplates() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [log, setLog] = React.useState<any[]>([]);
+  const [status, setStatus] = React.useState<any>(null);
+  const [picked, setPicked] = React.useState<any>(null);
+  const [hint, setHint] = React.useState("");
+  const reload = () => {
+    call("entertainment_express.api.portal_notifications.list_templates", {})
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+    call("entertainment_express.api.portal_notifications.list_recent", {})
+      .then((res) => setLog(res || []))
+      .catch(() => setLog([]));
+    call("entertainment_express.api.portal_notifications.channel_status", {})
+      .then(setStatus)
+      .catch(() => setStatus(null));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+  return (
+    <>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0 }}>Messages</h2>
+        {status ? (
+          <p className="ee-muted">
+            Email {status.email ? "ready" : "off"} · Text {status.sms ? "ready" : "not connected"} · WhatsApp{" "}
+            {status.whatsapp ? "ready" : "not connected"} · Phone alerts {status.push ? "ready" : "not connected"}
+          </p>
+        ) : null}
+        {rows.length ? (
+          <DataTable
+            id="owner-messages"
+            columns={[
+              { key: "title", label: "Message" },
+              { key: "channels", label: "Send on" },
+              { key: "active", label: "On" },
+            ]}
+            rows={rows.map((row) => ({ ...row, active: row.active ? "yes" : "no", name: row.id }))}
+            onRowClick={setPicked}
+          />
+        ) : (
+          <EmptyState title="No messages yet" message="Default booking and pay messages appear here after migrate." />
+        )}
+        {picked ? (
+          <>
+            <FormField label="Subject">
+              <input value={picked.subject || ""} onChange={(e) => setPicked({ ...picked, subject: e.target.value })} />
+            </FormField>
+            <FormField label="Send on (email, sms, whatsapp, push)">
+              <input value={picked.channels || ""} onChange={(e) => setPicked({ ...picked, channels: e.target.value })} />
+            </FormField>
+            <FormField label="Body">
+              <textarea value={picked.body || ""} onChange={(e) => setPicked({ ...picked, body: e.target.value })} rows={6} />
+            </FormField>
+            {hint ? <p>{hint}</p> : null}
+            <button
+              type="button"
+              className="ee-btn"
+              onClick={async () => {
+                await call("entertainment_express.api.portal_notifications.save_template", {
+                  name: picked.id,
+                  values: picked,
+                });
+                setHint("Saved.");
+                reload();
+              }}
+            >
+              Save message
+            </button>
+          </>
+        ) : null}
+      </div>
+      {log.length ? (
+        <div>
+          <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.05rem" }}>Recent deliveries</h2>
+          <DataTable
+            id="owner-message-log"
+            columns={[
+              { key: "title", label: "Message" },
+              { key: "to", label: "To" },
+              { key: "channel", label: "Channel" },
+              { key: "status", label: "Status" },
+            ]}
+            rows={log}
+          />
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -3142,6 +3235,7 @@ function ConnectionsWorkspace() {
     { title: "Books", ids: ["quickbooks", "xero"] },
     { title: "Music", ids: ["spotify", "apple_music", "youtube"] },
     { title: "Payments", ids: ["stripe", "square", "paypal", "ach", "authorizenet"] },
+    { title: "Messages", ids: ["twilio", "fcm"] },
   ];
   const [rows, setRows] = React.useState<any[]>([]);
   const [error, setError] = React.useState("");
