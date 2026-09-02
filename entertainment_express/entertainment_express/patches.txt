@@ -24,3 +24,4 @@ entertainment_express.patches.v0_0_3.phase12_saas_control_plane
 entertainment_express.patches.v0_0_3.phase13_integrations
 entertainment_express.patches.v0_0_3.phase14_hardening
 entertainment_express.patches.v0_0_3.phase15_event_planning
+entertainment_express.patches.v0_0_3.phase2_scheduling

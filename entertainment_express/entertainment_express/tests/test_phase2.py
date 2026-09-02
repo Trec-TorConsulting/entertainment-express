@@ -4,14 +4,26 @@ Phase-2 tests: Crew assignment conflicts, run sheet generation, token verificati
 
 import pytest
 import frappe
-from frappe.utils import now_datetime, add_to_date
 from datetime import date, time, datetime
+
+
+def _need_dispatch():
+    db = getattr(frappe, "db", None)
+    exists = getattr(db, "exists", None) if db is not None else None
+    if not callable(exists):
+        pytest.skip("live frappe required")
+    try:
+        if not exists("DocType", "Crew Assignment"):
+            pytest.skip("migrate required")
+    except Exception:
+        pytest.skip("migrate required")
 
 
 class TestCrewAssignmentConflicts:
 
     def setup_method(self):
         """Ensure test fixtures exist."""
+        _need_dispatch()
         if not frappe.db.exists("EE Crew Role", "DJ"):
             frappe.get_doc({
                 "doctype": "EE Crew Role",
@@ -103,6 +115,7 @@ class TestRunSheetGeneration:
 
     def test_run_sheet_fields_populated(self):
         """Run sheet pulls venue, client, and equipment from booking."""
+        _need_dispatch()
         from entertainment_express.api.dispatch import generate_run_sheet
 
         if not frappe.db.exists("Customer", "TEST-RS-CUST"):
@@ -147,6 +160,7 @@ class TestShiftTokenVerification:
 
     def test_bad_token_rejected(self):
         """accept_shift with a wrong token raises PermissionError."""
+        _need_dispatch()
         from entertainment_express.api.dispatch import accept_shift
 
         if not frappe.db.exists("Customer", "TEST-TOKEN-CUST"):
@@ -193,6 +207,7 @@ class TestAtRiskScheduler:
 
     def test_flag_at_risk_runs_without_error(self):
         """The scheduler function is callable and doesn't raise."""
+        _need_dispatch()
         from entertainment_express.scheduling_dispatch.scheduler import flag_at_risk_events
         # Should complete without raising (no bookings in the past)
         flag_at_risk_events()

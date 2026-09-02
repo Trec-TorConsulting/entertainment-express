@@ -1,0 +1,22 @@
+{
+ "actions": [],
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["sequence", "booking", "title", "call_time", "travel_minutes", "venue_address"],
+ "fields": [
+  {"fieldname": "sequence", "fieldtype": "Int", "label": "Stop", "in_list_view": 1},
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Job", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "title", "fieldtype": "Data", "label": "Event"},
+  {"fieldname": "call_time", "fieldtype": "Data", "label": "Time", "in_list_view": 1},
+  {"fieldname": "travel_minutes", "fieldtype": "Int", "label": "Drive (min)"},
+  {"fieldname": "venue_address", "fieldtype": "Small Text", "label": "Place"}
+ ],
+ "istable": 1,
+ "modified": "2026-09-02 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Scheduling Dispatch",
+ "name": "Route Plan Stop",
+ "owner": "Administrator",
+ "permissions": []
+}

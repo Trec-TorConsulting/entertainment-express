@@ -99,9 +99,40 @@ def board(day: str | None = None) -> dict:
                 "place": job.get("venue_address") or "",
                 "at_risk": bool(job.get("at_risk")),
                 "crew": crew,
+                "assets": [a.get("asset_name") or a.get("asset") for a in (job.get("assets") or [])],
             }
         )
-    return {"day": day, "jobs": rows}
+    route = []
+    try:
+        route = (_dispatch.compute_day_route(day).get("stops") or [])
+    except Exception:
+        route = []
+    return {"day": day, "jobs": rows, "route": route}
+
+
+@frappe.whitelist()
+def suggest(job: str, role: str | None = None) -> list:
+    _require_dispatch()
+    return _dispatch.suggest_crew(job, role_name=role or None)
+
+
+@frappe.whitelist()
+def publish_packet(job: str) -> dict:
+    _require_dispatch()
+    _dispatch.generate_run_sheet(job)
+    return _dispatch.publish_run_sheet(job)
+
+
+@frappe.whitelist()
+def save_route(day: str) -> dict:
+    _require_dispatch()
+    return _dispatch.plan_routes(day)
+
+
+@frappe.whitelist()
+def assign_gear(job: str, asset: str, quantity: int = 1) -> dict:
+    _require_dispatch()
+    return _dispatch.assign_asset(job, asset, quantity=quantity)
 
 
 @frappe.whitelist()

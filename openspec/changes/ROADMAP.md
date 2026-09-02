@@ -47,9 +47,11 @@ availability, and quote-to-invoice with a Stripe deposit payment.
 `notifications` (transactional email subset).
 **Folder:** [`phase-1-revenue-loop/`](phase-1-revenue-loop/)
 
-## Phase 2 — Scheduling & Dispatch 📝
-Crew/asset assignment, offer/accept for gig crew, dispatch board, run sheets, field status states.
+## Phase 2 — Scheduling & Dispatch ✅ archived 2026-09-02
+Crew/asset assignment, offer/accept for gig crew, dispatch board, run sheets, field status states,
+deterministic crew suggest, and call-time drive order (maps minutes when connected).
 **Spec:** `scheduling-dispatch`. **Depends on:** phase-1 bookings, phase-3 workers can precede if needed.
+**Folder:** [`archive/2026-09-02-phase-2-scheduling-dispatch/`](archive/2026-09-02-phase-2-scheduling-dispatch/)
 
 ## Phase 3 — HR & Workforce 📝
 Worker (W2/1099) onboarding, skills/roles, availability, timesheets, compliance docs. Enables real

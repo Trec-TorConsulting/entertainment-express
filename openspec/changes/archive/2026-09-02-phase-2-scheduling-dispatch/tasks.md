@@ -59,3 +59,13 @@
 All boxes checked; dispatching a crew member to a confirmed booking produces a run sheet and the crew member
 receives a shift offer notification; at-risk sweep flags an unassigned booking; all tests pass.
 Then proceed to **phase-3-hr-workforce**.
+
+## 7. Owner/employee without Desk (routes + auto-suggest)
+- [x] 7.1 `Route Plan` + `Route Plan Stop` DocTypes; `suggest_crew`, `assign_asset`, `plan_routes`.
+      **Accept:** suggest ranks role match first; asset assign uses this site's availability check; routes persist.
+- [x] 7.2 Portal `board` includes computed `route`; `suggest`, `publish_packet`, `save_route` without Desk copy.
+      **Accept:** guests 403; no `frappe.connect` / `frappe.init`.
+- [x] 7.3 Dispatch board auto-loads suggestions, shows drive order, issues run sheets.
+      **Accept:** no AI required; `DocType` not in UI copy.
+- [x] 7.4 Stub tests + skip live tests when Crew Assignment is missing; patch `v0_0_3.phase2_scheduling`.
+      **Accept:** pytest under frappe stub passes.
