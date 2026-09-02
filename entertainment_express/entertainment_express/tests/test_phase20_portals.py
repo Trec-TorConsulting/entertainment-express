@@ -263,3 +263,5 @@ def test_owner_canonical_route_is_owner_not_admin():
     assert ("/owner/<path:app_path>", "owner") in rules
     assert ("/admin", "owner") not in rules
     assert ("/admin/<path:app_path>", "owner") not in rules
+    assert ("/book", "catalog") in rules
+    assert ("/book", "book") not in rules
