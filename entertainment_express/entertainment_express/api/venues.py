@@ -92,6 +92,14 @@ def save_venue(values: dict | str | None = None, name: str | None = None) -> dic
     }
     if not payload["venue_name"]:
         frappe.throw("Name is required.")
+    if not payload["geo"] and payload["address"]:
+        try:
+            from entertainment_express.integrations.maps import geocode
+
+            geo = geocode(payload["address"]) or {}
+            payload["geo"] = geo.get("geo") or ""
+        except Exception:
+            pass
     if name:
         doc = frappe.get_doc("EE Venue", name)
         doc.update(payload)

@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "autoname": "field:provider",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["provider", "enabled", "status", "last_error", "settings", "credentials"],
+ "fields": [
+  {"fieldname": "provider", "fieldtype": "Select", "label": "Provider", "reqd": 1, "unique": 1, "in_list_view": 1,
+   "options": "google_calendar\nmicrosoft_365\nical\nmapbox\ngoogle_maps\ndocusign\nquickbooks\nxero\nspotify\napple_music\nyoutube\nstripe\ntwilio"},
+  {"fieldname": "enabled", "fieldtype": "Check", "label": "Enabled", "default": "0", "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "disconnected\nconnected\nerror", "default": "disconnected", "in_list_view": 1},
+  {"fieldname": "last_error", "fieldtype": "Small Text", "label": "Last Error", "read_only": 1},
+  {"fieldname": "settings", "fieldtype": "Small Text", "label": "Settings JSON"},
+  {"fieldname": "credentials", "fieldtype": "Password", "label": "Credentials"}
+ ],
+ "modified": "2026-09-02 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Integrations",
+ "name": "Integration Config",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "provider",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

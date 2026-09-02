@@ -109,10 +109,11 @@ fleet health dashboard, lifecycle (suspend/resume/deprovision) beyond phase-1 pr
 **Spec:** `saas-control-plane`, `platform-multitenancy` (lifecycle). **Depends on:** phase-1.
 **Folder:** [`archive/2026-09-02-phase-12-saas-control-plane/`](archive/2026-09-02-phase-12-saas-control-plane/)
 
-## Phase 13 — Integrations Expansion 📝
+## Phase 13 — Integrations Expansion ✅
 Calendar two-way sync (Google/M365/iCal), maps/routing provider, DocuSign, accounting sync (QuickBooks/Xero),
 music streaming (Spotify/Apple/YouTube), integration observability framework hardening.
 **Spec:** `integrations`. **Depends on:** phases that consume each integration.
+**Folder:** [`archive/2026-09-02-phase-13-integrations/`](archive/2026-09-02-phase-13-integrations/)
 
 ## Phase 14 — Hardening & Enterprise Readiness 📝
 Performance/scale testing per-site and multi-site, security review (OWASP), backup/restore drills, 2FA/SSO,

@@ -16,7 +16,7 @@
   "section_billing", "grand_total", "deposit_percent", "deposit_amount",
   "col5", "deposit_status", "balance_due", "col6",
   "ee_damage_hold_invoice", "ee_damage_hold_status", "ee_event_insurance", "ee_event_insurance_amount",
-  "section_refs", "quotation", "contract",
+  "section_refs", "quotation", "contract", "calendar_sync_id",
   "section_notes", "notes"
  ],
  "fields": [
@@ -71,10 +71,11 @@
   {"fieldname": "section_refs", "fieldtype": "Section Break", "label": "References"},
   {"fieldname": "quotation", "fieldtype": "Link", "label": "Quotation", "options": "Quotation"},
   {"fieldname": "contract", "fieldtype": "Link", "label": "Contract", "options": "EE Contract"},
+  {"fieldname": "calendar_sync_id", "fieldtype": "Data", "label": "Calendar Sync Id", "read_only": 1},
   {"fieldname": "section_notes", "fieldtype": "Section Break", "label": "Notes"},
   {"fieldname": "notes", "fieldtype": "Text Editor", "label": "Notes"}
  ],
- "modified": "2024-01-01 00:00:00.000000",
+ "modified": "2026-09-02 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Booking",
  "name": "Event Booking",

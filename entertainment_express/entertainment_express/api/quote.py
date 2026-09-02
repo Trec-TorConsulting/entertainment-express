@@ -30,6 +30,16 @@ def build_quote(
         quote.ee_venue_address = venue_address
     quote.ee_deposit_percent = flt(deposit_percent)
 
+    if quote.ee_venue_address and not quote.ee_venue_geo:
+        try:
+            from entertainment_express.integrations.maps import geocode
+
+            geo = geocode(quote.ee_venue_address) or {}
+            if geo.get("geo"):
+                quote.ee_venue_geo = geo["geo"]
+        except Exception:
+            pass
+
     # Compute travel fee from Service Area
     if quote.ee_service_area:
         area = frappe.get_doc("Service Area", quote.ee_service_area)

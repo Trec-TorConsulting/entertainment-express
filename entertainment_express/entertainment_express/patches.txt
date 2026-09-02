@@ -20,3 +20,4 @@ entertainment_express.patches.v0_0_3.phase9_field_app
 entertainment_express.patches.v0_0_3.phase10_reporting
 entertainment_express.patches.v0_0_3.phase11_ai_assistant
 entertainment_express.patches.v0_0_3.phase12_saas_control_plane
+entertainment_express.patches.v0_0_3.phase13_integrations

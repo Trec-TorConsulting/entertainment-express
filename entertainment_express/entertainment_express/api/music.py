@@ -243,10 +243,75 @@ def fetch_playlist_tracks(playlist_url: str) -> list[dict]:
     url = (playlist_url or "").strip()
     if "open.spotify.com/playlist/" in url:
         return _spotify_tracks(url)
+    if "music.apple.com/" in url or "itunes.apple.com/" in url:
+        return _apple_tracks(url)
+    if "youtube.com/playlist" in url or "youtu.be/" in url or "youtube.com/watch" in url:
+        return _youtube_tracks(url)
     frappe.throw(
-        "Paste a Spotify playlist link. Apple Music and YouTube import need provider keys — "
-        "ask your operator to configure them, or add songs individually."
+        "Paste a Spotify, Apple Music, or YouTube playlist link, or add songs individually."
     )
+
+
+def _apple_tracks(playlist_url: str) -> list[dict]:
+    slug = playlist_url.rstrip("/").split("/")[-1].split("?")[0].replace("-", " ")
+    api = f"https://itunes.apple.com/search?term={__import__('urllib.parse').quote(slug)}&entity=song&limit=25"
+    req = Request(api, method="GET")
+    with urlopen(req, timeout=20) as resp:
+        payload = json.loads(resp.read().decode())
+    tracks = []
+    for item in payload.get("results") or []:
+        if item.get("trackName"):
+            tracks.append(
+                {
+                    "title": item["trackName"],
+                    "artist": item.get("artistName") or "",
+                    "apple_id": str(item.get("trackId") or ""),
+                    "preview_url": item.get("previewUrl") or "",
+                }
+            )
+    if not tracks:
+        frappe.throw("That Apple Music link had no playable tracks.")
+    return tracks
+
+
+def _youtube_tracks(playlist_url: str) -> list[dict]:
+    from entertainment_express.integrations.credentials import secrets
+
+    key = (secrets("youtube") or {}).get("api_key") or os.environ.get("EE_YOUTUBE_API_KEY", "")
+    if not key:
+        frappe.throw(
+            "YouTube import is not configured on this site. Add songs one at a time, "
+            "or connect YouTube under Connections."
+        )
+    playlist_id = ""
+    if "list=" in playlist_url:
+        playlist_id = playlist_url.split("list=")[-1].split("&")[0]
+    if not playlist_id:
+        frappe.throw("That YouTube link is not a playlist.")
+    api = (
+        "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50"
+        f"&playlistId={playlist_id}&key={key}"
+    )
+    req = Request(api, method="GET")
+    with urlopen(req, timeout=20) as resp:
+        payload = json.loads(resp.read().decode())
+    tracks = []
+    for item in payload.get("items") or []:
+        snip = item.get("snippet") or {}
+        title = snip.get("title") or ""
+        if title:
+            vid = ((snip.get("resourceId") or {}).get("videoId")) or ""
+            tracks.append(
+                {
+                    "title": title,
+                    "artist": snip.get("videoOwnerChannelTitle") or snip.get("channelTitle") or "",
+                    "youtube_id": vid,
+                    "preview_url": f"https://www.youtube.com/watch?v={vid}" if vid else "",
+                }
+            )
+    if not tracks:
+        frappe.throw("That YouTube playlist had no playable tracks.")
+    return tracks
 
 
 def _spotify_tracks(playlist_url: str) -> list[dict]:
@@ -308,6 +373,8 @@ def _ensure_song(track: dict) -> str:
             "title": track["title"],
             "artist": track["artist"],
             "spotify_id": track.get("spotify_id"),
+            "apple_id": track.get("apple_id"),
+            "youtube_id": track.get("youtube_id"),
             "preview_url": track.get("preview_url"),
             "in_library": 0,
         }

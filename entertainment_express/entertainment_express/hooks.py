@@ -93,6 +93,7 @@ scheduler_events = {
         "entertainment_express.notifications.retry_failed",
         "entertainment_express.api.saas_billing.apply_dunning",
         "entertainment_express.api.saas_billing.apply_cancellations",
+        "entertainment_express.integrations.calendar.pull",
     ],
     "daily": [
         # Check compliance expiry (phase-3)
@@ -147,10 +148,17 @@ website_route_rules = [
 
 doc_events = {
     "Event Booking": {
-        "on_update": "entertainment_express.event_planning.attach.on_booking_update",
+        "on_update": [
+            "entertainment_express.event_planning.attach.on_booking_update",
+            "entertainment_express.integrations.calendar.on_booking_update",
+        ],
     },
     "Lead": {
         "after_insert": "entertainment_express.api.ai.on_lead_insert",
+    },
+    "Sales Invoice": {
+        "on_submit": "entertainment_express.integrations.accounting.on_invoice_submit",
+        "on_update": "entertainment_express.integrations.accounting.on_invoice_update",
     },
 }
 

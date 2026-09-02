@@ -1,0 +1,27 @@
+{
+ "actions": [],
+ "autoname": "format:EE-IWH-{#####}",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["provider", "event_id", "dedupe_key", "event_type", "processed", "received_at"],
+ "fields": [
+  {"fieldname": "provider", "fieldtype": "Data", "label": "Provider", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "event_id", "fieldtype": "Data", "label": "Event Id", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "dedupe_key", "fieldtype": "Data", "label": "Dedupe Key", "unique": 1, "hidden": 1, "read_only": 1},
+  {"fieldname": "event_type", "fieldtype": "Data", "label": "Event Type"},
+  {"fieldname": "processed", "fieldtype": "Check", "label": "Processed", "default": "0"},
+  {"fieldname": "received_at", "fieldtype": "Datetime", "label": "Received At"}
+ ],
+ "modified": "2026-09-02 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Integrations",
+ "name": "Integration Webhook Event",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 0, "create": 0, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

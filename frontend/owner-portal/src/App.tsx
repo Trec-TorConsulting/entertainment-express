@@ -52,6 +52,7 @@ const OWNER_NAV = [
       { to: "/coverage", label: "Coverage" },
       { to: "/move", label: "Move" },
       { to: "/brand", label: "Brand" },
+      { to: "/connections", label: "Connections" },
     ],
   },
 ];
@@ -2125,6 +2126,120 @@ function GrowWorkspace() {
   );
 }
 
+function ConnectionsWorkspace() {
+  const GROUPS = [
+    { title: "Calendar", ids: ["google_calendar", "microsoft_365", "ical"] },
+    { title: "Maps", ids: ["mapbox", "google_maps"] },
+    { title: "Signing", ids: ["docusign"] },
+    { title: "Books", ids: ["quickbooks", "xero"] },
+    { title: "Music", ids: ["spotify", "apple_music", "youtube"] },
+  ];
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState("");
+  const [draft, setDraft] = React.useState<Record<string, string>>({});
+  const [icalUrl, setIcalUrl] = React.useState("");
+
+  const load = () => {
+    call("entertainment_express.api.integrations.list_connections", {})
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (provider: string, enabled: number) => {
+    setBusy(provider);
+    setError("");
+    try {
+      const raw = (draft[provider] || "").trim();
+      const credentials = raw ? { token: raw, api_key: raw, access_token: raw, key: raw } : {};
+      await call("entertainment_express.api.integrations.save_connection", { provider, enabled, credentials });
+      setDraft({ ...draft, [provider]: "" });
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not save that connection.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const rotateIcal = async () => {
+    setBusy("ical");
+    setError("");
+    try {
+      const res = await call("entertainment_express.api.integrations.rotate_ical_token", {});
+      setIcalUrl(res?.url || "");
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not create a calendar feed.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const renderRow = (row: any) => (
+    <div key={row.provider} className="ee-form" style={{ maxWidth: "none" }}>
+      <p style={{ margin: 0 }}>
+        <strong>{row.label}</strong> · {row.status}
+        {row.enabled ? " · on" : " · off"}
+      </p>
+      {row.last_error ? <p className="ee-muted">{row.last_error}</p> : null}
+      {row.provider === "ical" ? (
+        <button type="button" className="ee-btn" disabled={busy === "ical"} onClick={rotateIcal}>
+          New calendar feed link
+        </button>
+      ) : (
+        <>
+          <FormField label="Key or token">
+            <input
+              type="password"
+              value={draft[row.provider] || ""}
+              onChange={(e) => setDraft({ ...draft, [row.provider]: e.target.value })}
+              autoComplete="off"
+            />
+          </FormField>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button type="button" className="ee-btn" disabled={!!busy} onClick={() => save(row.provider, 1)}>
+              Save and turn on
+            </button>
+            <button type="button" className="ee-btn ee-btn--ghost" disabled={!!busy} onClick={() => save(row.provider, 0)}>
+              Turn off
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Connections</h1>
+        <p className="ee-muted">Link calendars, maps, signing, books, and music for this company. Keys stay on the server and are never shown again.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {rows.length ? (
+        GROUPS.map((group) => {
+          const items = rows.filter((row) => group.ids.includes(row.provider));
+          if (!items.length) return null;
+          return (
+            <div key={group.title} style={{ display: "grid", gap: "0.75rem" }}>
+              <h2 style={{ margin: 0, fontSize: "1.1rem" }}>{group.title}</h2>
+              {items.map(renderRow)}
+            </div>
+          );
+        })
+      ) : (
+        <EmptyState title="Connections" message="Connections for this company will show here." />
+      )}
+      {icalUrl ? <p className="ee-muted">Feed URL (copy now): {icalUrl}</p> : null}
+    </section>
+  );
+}
+
 function SettingsWorkspace() {
   const [row, setRow] = React.useState<any>(null);
   const [brandName, setBrandName] = React.useState("");
@@ -2243,6 +2358,7 @@ export function OwnerApp() {
           <Route path="/automations" element={<AutomationsWorkspace />} />
           <Route path="/grow" element={<GrowWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
+          <Route path="/connections" element={<ConnectionsWorkspace />} />
           <Route path="/account" element={<AccountPanel />} />
           <Route path="/settings" element={<Navigate to="/brand" replace />} />
           <Route path="/approvals" element={<ApprovalsWorkspace />} />
