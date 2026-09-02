@@ -233,6 +233,12 @@ phase-2 dispatch and the phase-4/9 mobile API. Enhanced later by phase-10 (BI fe
 
 ---
 
+## After the roadmap — Production operator readiness
+Operator docs, safe re-apply on the existing cluster, website cache flush on python start, and MariaDB
+NetworkPolicy. Not a numbered product phase.
+**Specs:** `infrastructure-deployment`.
+**Folder:** [`production-operator-readiness/`](production-operator-readiness/)
+
 ## Traceability
 Every phase proposal MUST list the exact baseline spec **Requirement** names it delivers, and every
 `tasks.md` MUST map tasks back to those requirements so coverage is verifiable at phase close.

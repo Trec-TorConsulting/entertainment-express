@@ -8,7 +8,7 @@ context: |
   casino/karaoke/trivia, performers). One generic configurable engine, no vertical hard-coded.
   Stack: custom Frappe app `entertainment_express` on top of ERPNext (Python 3.11, MariaDB, Redis).
   Multi-tenancy: SITE-PER-TENANT (Frappe multi-site bench); tenant URL {tenant}.app.{base_domain};
-  control plane at admin.{base_domain}. Deploy: K3S (HomeLab-Redo repo), namespace
+  control plane at admin.{base_domain}. Deploy: K3S (k8s-deployment.yaml in this repo), namespace
   entertainment-express, Traefik+LetsEncrypt wildcard TLS, Longhorn storage, registry
   192.168.4.10:30500, node05 is GPU-only (exclude via affinity).
   Payments: Stripe(primary)+Square+PayPal+ACH. Comms: email+Twilio SMS/WhatsApp+FCM push. AI: Ollama.

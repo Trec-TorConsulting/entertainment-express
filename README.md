@@ -4,16 +4,17 @@
 
 ![Platform](https://img.shields.io/badge/platform-Frappe%20v15%20%2F%20ERPNext-0089FF)
 ![Python](https://img.shields.io/badge/python-3.11%2B-3776AB)
-![Delivery](https://img.shields.io/badge/delivery-Kubernetes%20(K3s)%20%2B%20Helm-326CE5)
+![Delivery](https://img.shields.io/badge/delivery-Kubernetes%20(K3s)%20%2B%20kubectl-326CE5)
 ![Tenancy](https://img.shields.io/badge/tenancy-database--per--company-6E4AFF)
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 
-Entertainment Express is a production-grade, **multi-tenant Platform-as-a-Service** built on
-[Frappe](https://frappeframework.com/)/[ERPNext](https://erpnext.com/). Every company ("tenant")
-runs as a **fully isolated Frappe site with its own database**, provisioned and governed by a
-dedicated **control plane**. The platform includes purpose-built client apps for crew, customers,
-and dispatch, and is delivered to a **Kubernetes (K3s)** cluster via Helm with automated,
-idempotent site bootstrapping.
+Entertainment Express is a **site-per-tenant** Frappe/[ERPNext](https://erpnext.com/) product: each
+company is one Frappe site with its own MariaDB database. A shared gunicorn/RQ/scheduler tier serves
+every site; the request host selects the tenant (`dns_multitenant`).
+
+This repo is a **homelab pilot**, not a SaaS-SLA production claim. Phases 0–26 are on `main`. Live
+image tag in [`k8s-deployment.yaml`](k8s-deployment.yaml) is **`0.0.80-ee`**. Honest operator
+checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 
@@ -21,122 +22,114 @@ idempotent site bootstrapping.
 
 | Domain | What it does |
 |---|---|
-| **Control plane** | Self-service tenant onboarding — Signup → approval → `Provisioning Job` → a brand-new isolated site. Plans, entitlements, and tenant lifecycle management. |
-| **Booking** | Event bookings, holds/reservations with resource locking, line items, and asset assignment. |
-| **Scheduling & dispatch** | Crew assignment, run sheets, equipment checklists, and at-risk-event flagging. |
-| **Workforce** | Crew roster, availability, compliance documents, pay runs, and payout tracking. |
-| **Service catalog** | Service packages, assets, and service-area coverage with travel-fee logic. |
-| **Billing & payments** | Quotes, contracts (e-sign flow), deposits, and **Stripe** payment/webhook processing. |
-| **Client apps** | Native crew app, customer portal, and dispatcher console. |
+| **Control plane** | Operator site at `admin.<domain>` — signup, plans, provisioning jobs, tenant lifecycle. |
+| **Booking** | Event bookings, holds, catalog at `/book` and `/catalog`, quotes and contracts. |
+| **Scheduling & dispatch** | Crew assignment, run sheets, equipment checklists, at-risk flags. |
+| **Workforce** | Roster, availability, compliance docs, pay runs (W2 payroll and Stripe Connect still stubs). |
+| **Service catalog** | Packages, assets, service areas, travel fees. |
+| **Billing & payments** | Quotes, e-sign, deposits; **Stripe**, Square, PayPal, ACH — processor tokens only. |
+| **Tenant UI** | Logged-in portals: **`/owner`**, **`/employee`**, **`/client`**. Field PWA for crew. Operator Desk (`/app`) is for SaaS Operator / System Manager. |
 
 ---
 
 ## Architecture
 
-**Tenancy model — one Frappe *site* per company.** Each tenant's data (employees, clients,
-equipment, bookings, billing) lives in a separate MariaDB database. A shared, stateless compute
-tier serves every tenant; the requested host name selects the site (`dns_multitenant`).
+**Tenancy — one Frappe site per company.** Shared compute; per-tenant MariaDB; Redis for cache/queue.
 
 ```
                          ┌──────────────────────────────┐
    admin.<domain>  ─────▶│  Control plane (operator site)│  provisions tenants
                          └───────────────┬───────────────┘
                                          │ bench new-site + install + migrate
-        <slug>.app.<domain> ─────────────▼──────────────────────────────┐
+        <slug>.<domain> ─────────────────▼──────────────────────────────┐
    ┌───────────┐   ┌───────────────┐   ┌───────────────┐   ┌────────────┐│
-   │  Traefik  │──▶│ Frappe (web)  │──▶│   MariaDB     │   │   Redis    ││
+   │  Traefik  │──▶│ Frappe python │──▶│   MariaDB     │   │   Redis    ││
    │  ingress  │   │ gunicorn+RQ   │   │ 1 DB / tenant │   │ cache/queue││
    └───────────┘   └───────────────┘   └───────────────┘   └────────────┘│
                          Shared, stateless compute • per-tenant isolation ┘
 ```
 
-- **Compute (shared, stateless):** gunicorn web, Socket.IO realtime, RQ workers
-  (default/short/long), and a singleton scheduler.
-- **Data (per tenant):** one MariaDB database per site; Redis for cache/queue/realtime.
-- **Provisioning:** an approved signup enqueues a long-running `Provisioning Job` that creates and
-  bootstraps the tenant site — no infrastructure change required (wildcard ingress + wildcard TLS).
+Live tenant example: `e2esmoke.entx.app`. Marketing: `www.entx.app`.
 
 ---
 
 ## Repository layout
 
 ```
-entertainment_express/     # Frappe/ERPNext application (the core platform)
-  control_plane/           #   tenant, plan, signup, provisioning-job doctypes + provisioner
-  booking/ scheduling_dispatch/ hr_workforce/ billing_payments/ service_catalog/
-  api/                     #   whitelisted API layer (booking, dispatch, payments, mobile v2, …)
-  setup/                   #   install hooks, custom fields, plan seeds
+entertainment_express/     # Frappe app (DocTypes, APIs, www, patches)
 frontend/
-  crew-app/                # Crew mobile app
-  customer-portal/         # Customer-facing portal
-  dispatch-portal/         # Dispatcher operations console
-openspec/                  # Spec-driven change management (specs + changes)
-Dockerfile                 # Multi-arch bench image (linux/amd64 + linux/arm64)
-k8s-deployment.yaml        # Reference Kubernetes manifest
-smoke_test.py              # Post-deploy smoke checks
+  owner-portal/            #   /owner SPA
+  employee-portal/         #   /employee SPA
+  customer-portal/         #   /client SPA
+  dispatch-portal/         #   dispatch board assets
+  crew-app/                #   field PWA
+openspec/                  # Spec-first (31 baseline specs; phases 0–26 archived)
+Dockerfile                 # Bench image (live builds are linux/amd64)
+k8s-deployment.yaml        # Namespace, data services, Frappe, ingress, Jobs
+scripts/deploy.sh          # Existing-cluster apply (skips Jobs / MariaDB STS)
+secrets.example.yaml       # Placeholders only
+smoke_test.py              # Post-change smoke checks
 ```
 
 ---
 
 ## Tech stack
 
-- **Backend:** Frappe Framework v15, ERPNext, Python 3.11+, MariaDB 10.11, Redis
-- **Frontend:** TypeScript / React Native client apps
-- **Payments:** Stripe
-- **Delivery:** Docker (multi-arch amd64 + arm64), Kubernetes (K3s), Helm, Traefik ingress,
-  Longhorn storage, Let's Encrypt via Cloudflare DNS-01
+- **Backend:** Frappe v15, ERPNext, Python 3.11+, MariaDB 10.11, Redis
+- **Frontend:** React + Vite portals served from Frappe `www`; Field PWA for crew
+- **Payments:** Stripe (primary), Square, PayPal, ACH
+- **Delivery:** Docker **linux/amd64** bench image, Kubernetes (K3s), Traefik ingress, Longhorn, Let's Encrypt. **kubectl YAML in this repo** — not Helm as the live apply path.
 
 ---
 
 ## Deployment
 
-Everything needed to run in production lives in this repo: the multi-arch
-[`Dockerfile`](Dockerfile), the full Kubernetes manifest
-[`k8s-deployment.yaml`](k8s-deployment.yaml) (namespace `entertainment-express`),
-and a [`secrets.example.yaml`](secrets.example.yaml) template. Bootstrapping of the
-base and control-plane sites runs via the idempotent `site-init` / `admin-site-init`
-Jobs; per-tenant sites are then created on demand by the control plane.
+Use [`scripts/deploy.sh`](scripts/deploy.sh) on a cluster that already has MariaDB and completed
+site-init Jobs. A raw `kubectl apply -f k8s-deployment.yaml` is expected to fail on those Jobs and
+on the Helm-era MariaDB StatefulSet `volumeClaimTemplates`; that is not a failed Frappe roll.
 
 ```bash
-# 1) Build & push the multi-arch bench image (from the repo root)
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -t <registry>/entertainment-express/bench:<tag> --push -f Dockerfile .
+# 1) Build linux/amd64 and load (homelab registry is HTTP — see Dockerfile comments)
+docker buildx build --builder ee-insecure-http --platform linux/amd64 \
+  -t 192.168.4.10:30500/entertainment-express/bench:0.0.80-ee --load -f Dockerfile .
 
-# 2) Namespace + secrets (edit secrets.example.yaml first — never commit real values)
-kubectl create namespace entertainment-express --dry-run=client -o yaml | kubectl apply -f -
+# 2) Secrets (edit a local copy — never commit real values)
 kubectl -n entertainment-express apply -f secrets.example.yaml
 
-# 3) Deploy
-kubectl apply -f k8s-deployment.yaml
+# 3) Existing cluster: Deployments / Ingress / NetworkPolicy, wait python, curl tenant
+TENANT_HOST=e2esmoke.entx.app ./scripts/deploy.sh
 ```
 
-> Secrets are **never** committed — supply them at deploy time via Kubernetes Secrets
-> (see [`secrets.example.yaml`](secrets.example.yaml)). The `base-domain` secret value must
-> match the ingress hosts in `k8s-deployment.yaml`.
+Fresh bootstrap only: delete the one-shot Jobs, then apply the full manifest (MariaDB STS is
+created once). After that, always prefer `scripts/deploy.sh`.
+
+Secrets stay out of git. `base-domain` in cluster config must match ingress hosts.
 
 ---
 
 ## Development
 
-- Standard Frappe **bench** workflow (`bench get-app`, `bench --site <site> migrate`, …).
-- Changes are proposed and tracked spec-first via **OpenSpec** (`openspec/`).
-- **Trunk-based:** all changes land on `main` through a pull request with linear history.
+- Frappe **bench** (`bench --site <site> migrate`, …).
+- Spec-first via **OpenSpec** (`openspec/`). `openspec validate --specs` (not per-change — “no deltas” is expected).
+- **Trunk-based:** changes land on `main` through a pull request.
+
+```bash
+python3 smoke_test.py
+```
 
 ---
 
-## Security & production readiness
+## Security
 
-- **Isolation:** database-per-tenant; namespace-scoped deployment; wildcard TLS per environment.
-- **Secrets:** provided as Kubernetes Secrets; nothing sensitive is committed to the repo.
-- **Branch protection on `main`:** pull-request required, linear history enforced, force-push and
-  deletion blocked, conversation resolution required, and secret-scanning push protection enabled.
+- **Isolation:** database-per-tenant; no cross-site queries from tenant code.
+- **Secrets:** Kubernetes Secrets only; placeholders in git.
+- MariaDB TCP 3306 is limited by NetworkPolicy to pods labeled `app.kubernetes.io/name=entertainment-express`.
 
 ---
 
 ## Contributing
 
-This is a **single-maintainer, proprietary** project. The repository is public for transparency
-and reference; **external pull requests and reviews are not accepted at this time.**
+Single-maintainer, proprietary. The repository is public for transparency; **external pull requests are not accepted.**
 
 ---
 
