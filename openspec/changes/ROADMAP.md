@@ -31,21 +31,21 @@
 
 ---
 
-## Phase 0 — Foundation & Deployment ✅
+## Phase 0 — Foundation & Deployment ✅ archived 2026-09-02
 **Goal:** A running, empty EE platform: the `entertainment_express` Frappe app scaffolded, ERPNext + EE
 bench containerized, deployed to K3S namespace `entertainment-express`, MariaDB/Redis/ingress/TLS working,
 one base tenant site reachable over its subdomain, backups scheduled.
 **Specs:** `infrastructure-deployment`, `platform-multitenancy` (runtime pieces only).
-**Folder:** [`phase-0-foundation/`](phase-0-foundation/)
+**Folder:** [`archive/2026-09-02-phase-0-foundation/`](archive/2026-09-02-phase-0-foundation/)
 
-## Phase 1 — Revenue Loop (MVP) ✅
+## Phase 1 — Revenue Loop (MVP) ✅ archived 2026-09-02
 **Goal:** The first end-to-end money-making slice: automated tenant provisioning + auth/roles, CRM
 (lead→opportunity→quote→e-sign contract), configurable service catalog + assets, online booking +
 availability, and quote-to-invoice with a Stripe deposit payment.
 **Specs:** `platform-multitenancy`, `identity-access`, `saas-control-plane` (provisioning + minimal plans),
 `crm`, `service-catalog`, `booking-availability`, `billing-payments` (deposit/invoice/Stripe subset),
 `notifications` (transactional email subset).
-**Folder:** [`phase-1-revenue-loop/`](phase-1-revenue-loop/)
+**Folder:** [`archive/2026-09-02-phase-1-revenue-loop/`](archive/2026-09-02-phase-1-revenue-loop/)
 
 ## Phase 2 — Scheduling & Dispatch ✅ archived 2026-09-02
 Crew/asset assignment, offer/accept for gig crew, dispatch board, run sheets, field status states,
@@ -92,11 +92,13 @@ campaign analytics.
 **Spec:** `marketing-engagement`. **Depends on:** phase-6.
 **Folder:** [`archive/2026-09-01-phase-8-marketing-engagement/`](archive/2026-09-01-phase-8-marketing-engagement/)
 
-## Phase 9 — Mobile Field App (PWA) ✅
+## Phase 9 — Mobile Field App (PWA) ✅ archived 2026-09-01
 Crew PWA: job list/details, navigation, check-in/out, on-site workflows, media/signature capture, offline
 tolerance, push, issue reporting.
 **Spec:** `mobile-field-app`. **Depends on:** phase-2, phase-3, phase-6.
 **Folder:** [`archive/2026-09-01-phase-9-mobile-field-app/`](archive/2026-09-01-phase-9-mobile-field-app/)
+The earlier Expo/customer/dispatch scaffold lives at
+[`archive/2026-09-02-phase-4-mobile-app/`](archive/2026-09-02-phase-4-mobile-app/).
 
 ## Phase 10 — Reporting & BI ✅
 Operational dashboards, financial reports, utilization/ops KPIs, custom reports/exports, scheduled delivery,
@@ -160,7 +162,7 @@ import jobs, data export, and a new-tenant onboarding checklist. Reduces tenant 
 phases as those entities become importable.
 **Folder:** [`archive/2026-09-01-phase-18-data-migration-onboarding/`](archive/2026-09-01-phase-18-data-migration-onboarding/)
 
-## Phase 19 — SaaS Marketing Website & Lead Capture ✅
+## Phase 19 — SaaS Marketing Website & Lead Capture ✅ archived 2026-09-02
 **Goal:** The public product front door at `www.{base_domain}` (served by the control-plane site) that sells
 EE to prospective tenants: CMS-editable marketing pages + blog, a pricing page synced to control-plane
 `Plan` records, public demo/contact/newsletter lead capture with spam protection, a "start free trial" CTA
@@ -170,37 +172,37 @@ Frappe-native (no new frontend stack); strictly isolated from tenant sites.
 **Spec:** `marketing-website`. **Depends on:** phase-1 (control-plane site, `Plan`, `Signup Application`,
 provisioning, email notifications). Enhanced later by phase-8 (marketing-engagement) and phase-12 (full
 control plane).
-**Folder:** [`phase-19-marketing-website/`](phase-19-marketing-website/)
+**Folder:** [`archive/2026-09-02-phase-19-marketing-website/`](archive/2026-09-02-phase-19-marketing-website/)
 
-## Phase 21 — Front Page UI ✅
+## Phase 21 — Front Page UI ✅ archived 2026-09-02
 **Goal:** Shared visual system (portal-kit tokens + marketing CSS) and a designed SaaS home + tenant
 public home. Frappe-native public pages; no new backend.
 **Specs:** `ui-design-system` (new), `marketing-website` (UX). **Depends on:** phase-19, phase-20.
-**Folder:** [`phase-21-front-page-ui/`](phase-21-front-page-ui/)
+**Folder:** [`archive/2026-09-02-phase-21-front-page-ui/`](archive/2026-09-02-phase-21-front-page-ui/)
 
-## Phase 22 — /client UI ✅
+## Phase 22 — /client UI ✅ archived 2026-09-02
 **Goal:** Designed customer portal IA and consumer-density UI over existing `/client` APIs.
 **Specs:** `customer-portal`. **Depends on:** phase-21.
-**Folder:** [`phase-22-client-ui/`](phase-22-client-ui/)
+**Folder:** [`archive/2026-09-02-phase-22-client-ui/`](archive/2026-09-02-phase-22-client-ui/)
 
-## Phase 23 — /employee UI ✅
+## Phase 23 — /employee UI ✅ archived 2026-09-02
 **Goal:** Designed ops-density employee shell (My Day, workspaces, field bottom nav).
 **Specs:** `employee-portal`. **Depends on:** phase-21, phase-20, phase-2.
-**Folder:** [`phase-23-employee-ui/`](phase-23-employee-ui/)
+**Folder:** [`archive/2026-09-02-phase-23-employee-ui/`](archive/2026-09-02-phase-23-employee-ui/)
 
-## Phase 24 — Owner UI (`/owner`) ✅
+## Phase 24 — Owner UI (`/owner`) ✅ archived 2026-09-02
 **Goal:** Designed tenant-owner cockpit at `/owner`. Operator Desk stays `/app`.
 **Specs:** `owner-portal`. **Depends on:** phase-21, phase-20.
-**Folder:** [`phase-24-owner-ui/`](phase-24-owner-ui/)
+**Folder:** [`archive/2026-09-02-phase-24-owner-ui/`](archive/2026-09-02-phase-24-owner-ui/)
 
-## Phase 25 — Experience OS (owner / employee / client) ✅
+## Phase 25 — Experience OS (owner / employee / client) ✅ archived 2026-09-02
 **Goal:** Replace portal chrome with one product family, three skins: `/owner` company OS (optional Talent
 tab), `/employee` role-sliced ops, `/client` complete client OS plus event guests (planning, votes, chat;
 payer-only money). Canned reports per URL. New `event-collaboration` backend.
 **Specs:** `owner-portal`, `employee-portal`, `customer-portal`, `event-collaboration` (new),
 `identity-access`, `reporting-bi`, `notifications`.
 **Depends on:** phase-20 shells, phase-1/2/5/15 APIs.
-**Folder:** [`phase-25-experience-os/`](phase-25-experience-os/)
+**Folder:** [`archive/2026-09-02-phase-25-experience-os/`](archive/2026-09-02-phase-25-experience-os/)
 
 ## Phase 26 — Core Completeness (usable revenue + planning loops) ✅ archived 2026-09-01
 **Goal:** Make the shells usable without Desk: interactive Proposal (packages + contract + deposit) in
@@ -214,7 +216,7 @@ EventPlanner.ai decks.
 **Depends on:** phase-1 quotes/contracts, phase-5 payments, phase-15 planning, phase-25 OS.
 **Folder:** [`archive/2026-09-01-phase-26-core-completeness/`](archive/2026-09-01-phase-26-core-completeness/)
 
-## Phase 20 — Role-Based Portals ✅
+## Phase 20 — Role-Based Portals ✅ archived 2026-09-02
 **Goal:** Modernize the experience layer by giving each audience its own purpose-built portal over the **one**
 existing backend, and reserve the operator Desk for the platform operator: `/app` → `System Manager`/
 `SaaS Operator` only; `/owner` → `EE Tenant Admin` business cockpit; `/employee` → role-adaptive staff/field
@@ -227,7 +229,7 @@ DB, service, or namespace.
 `customer-portal` (alignment only). **Depends on:** phase-1 (identity/roles, provisioning, `/client`); reuses
 phase-2 dispatch and the phase-4/9 mobile API. Enhanced later by phase-10 (BI feeds the cockpit) and phase-12
 (full control plane).
-**Folder:** [`phase-20-role-based-portals/`](phase-20-role-based-portals/)
+**Folder:** [`archive/2026-09-02-phase-20-role-based-portals/`](archive/2026-09-02-phase-20-role-based-portals/)
 
 ---
 

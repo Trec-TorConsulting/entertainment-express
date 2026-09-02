@@ -99,6 +99,19 @@ reachable on small screens.
 - **THEN** the cockpit, approvals, and navigation are fully usable without horizontal scrolling or clipped
   controls
 
+### Requirement: Owner Cockpit Layout
+The owner UI at `/owner` SHALL show Overview, Approvals, Money, Team, Catalog, and Settings in
+persistent nav, using shared tokens. Later company-OS routes (Today, Pipeline, Dispatch, and so on)
+extend this cockpit; they do not replace the access boundary or money-as-API-strings rule.
+
+#### Scenario: Owner finds approvals
+- **WHEN** an owner has pending exceptions
+- **THEN** Overview (Today) surfaces the count and Approvals is one click from nav
+
+#### Scenario: Employee denied /owner
+- **WHEN** an `EE Sales` user requests `/owner`
+- **THEN** access is denied and they are sent to `/employee`
+
 ### Requirement: Company Operating System
 The system SHALL present `/owner` as the tenant owner’s full company OS (not a metric-only cockpit): Today, Calendar, Pipeline, Dispatch, Catalog, Gear, People, Money, Reports, Automations, and Brand — in plain language, using existing backend documents. The owner SHALL be able to perform every tenant-admin action these modules expose without using `/app`.
 

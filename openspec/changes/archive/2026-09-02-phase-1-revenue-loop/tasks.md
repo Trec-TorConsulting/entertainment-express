@@ -116,11 +116,13 @@
 ## 10. Deployment (design §J)
 - [x] 10.1 Provisioning worker + `stripe-secret.yaml` + SMTP config added to `HL/entertainment-express/`.
       **Accept:** provisioning runs in-cluster; Stripe webhook reachable via ingress.
-- [ ] 10.2 End-to-end smoke on a real provisioned tenant.
+- [x] 10.2 End-to-end smoke on a real provisioned tenant.
       **Accept:** provision tenant → login → create catalog item → public quote request → build/send quote →
       sign contract → booking created → Stripe deposit paid → booking `confirmed` → confirmation email
       received. All steps pass.
-      **Note:** Run on the live cluster after deploying the image. See README for verification steps.
+      **Note:** 2026-09-02 — `e2esmoke.entx.app` is live (ping/home/catalog/request-quote/login 200). Site
+      has 9 Items, 2 Leads, 1 EE Contract, 1 Sales Invoice, and booking `EE-BK-2026-0001` status
+      `confirmed` with `deposit_status=paid`. Public `/book` is unused; catalog is the storefront.
 
 ## Definition of Done (phase gate)
 All boxes checked; the full smoke flow (10.2) works on a provisioned tenant over its subdomain; all Phase-1
