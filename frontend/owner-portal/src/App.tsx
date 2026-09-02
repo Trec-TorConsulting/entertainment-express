@@ -235,7 +235,63 @@ function ApprovalsWorkspace() {
 
 function MoneyWorkspace() {
   const go = useNavigate();
-  return <RecordList kind="invoice" basePath="/money" go={go} />;
+  const [runs, setRuns] = React.useState<any[]>([]);
+  const [from, setFrom] = React.useState("");
+  const [to, setTo] = React.useState("");
+  const reload = () => {
+    call("entertainment_express.api.portal_hr.list_pay_runs", {})
+      .then((res) => setRuns(res || []))
+      .catch(() => setRuns([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+  return (
+    <section style={{ display: "grid", gap: "1.25rem" }}>
+      <RecordList kind="invoice" basePath="/money" go={go} />
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Pay crew</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+          <FormField label="From">
+            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </FormField>
+          <FormField label="Through">
+            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </FormField>
+        </div>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            await call("entertainment_express.api.portal_hr.create_pay_run", { period_from: from, period_to: to });
+            reload();
+          }}
+        >
+          Build pay run
+        </button>
+        {runs.length ? (
+          <DataTable
+            id="owner-pay-runs"
+            columns={[
+              { key: "name", label: "Run" },
+              { key: "period_from", label: "From" },
+              { key: "period_to", label: "Through" },
+              { key: "status", label: "Status" },
+              { key: "total_amount", label: "Total" },
+            ]}
+            rows={runs}
+            onRowClick={async (row) => {
+              if (row.status === "draft") await call("entertainment_express.api.portal_hr.finalize_pay_run", { name: row.name });
+              else if (row.status === "finalized") await call("entertainment_express.api.portal_hr.process_payout", { name: row.name });
+              reload();
+            }}
+          />
+        ) : (
+          <EmptyState title="No pay runs" message="Pick a date range after hours are approved." />
+        )}
+      </div>
+    </section>
+  );
 }
 
 function TeamWorkspace() {
@@ -254,11 +310,27 @@ function TeamWorkspace() {
   const [inviteRoles, setInviteRoles] = React.useState<string[]>(["EE Office"]);
   const [selected, setSelected] = React.useState<any>(null);
   const [selectedRoles, setSelectedRoles] = React.useState<string[]>([]);
+  const [workerType, setWorkerType] = React.useState("1099");
+  const [skills, setSkills] = React.useState("");
+  const [payBasis, setPayBasis] = React.useState("per_event");
+  const [payRate, setPayRate] = React.useState("");
+  const [hours, setHours] = React.useState({ start: "10:00", end: "22:00" });
+  const [offFrom, setOffFrom] = React.useState("");
+  const [offTo, setOffTo] = React.useState("");
+  const [docType, setDocType] = React.useState("w9");
+  const [docFile, setDocFile] = React.useState("");
+  const [timesheets, setTimesheets] = React.useState<any[]>([]);
+
+  const userId = (row: any) => row.user || row.name;
 
   const reload = () => {
-    call("entertainment_express.api.portal_owner.list_staff", {})
+    call("entertainment_express.api.portal_hr.list_people", {})
       .then((res) => setRows(res || []))
-      .catch(() => setRows([]));
+      .catch(() =>
+        call("entertainment_express.api.portal_owner.list_staff", {})
+          .then((res) => setRows(res || []))
+          .catch(() => setRows([]))
+      );
   };
 
   React.useEffect(() => {
@@ -282,15 +354,31 @@ function TeamWorkspace() {
 
   const saveRoles = async () => {
     if (!selected) return;
-    await call("entertainment_express.api.portal_owner.set_staff_roles", { user: selected.name, roles: selectedRoles });
+    await call("entertainment_express.api.portal_owner.set_staff_roles", { user: userId(selected), roles: selectedRoles });
     reload();
   };
 
   const deactivate = async () => {
     if (!selected) return;
-    await call("entertainment_express.api.portal_owner.deactivate_staff", { user: selected.name });
+    await call("entertainment_express.api.portal_owner.deactivate_staff", { user: userId(selected) });
     setSelected(null);
     reload();
+  };
+
+  const pick = (row: any) => {
+    setSelected(row);
+    setSelectedRoles((row.roles || []).filter((role: string) => ACCESS.some((item) => item.id === role)));
+    setWorkerType(row.worker_type || "1099");
+    setSkills(row.skills || "");
+    setPayBasis(row.pay_basis || "per_event");
+    setPayRate(String(row.pay_rate || ""));
+    if (row.employee) {
+      call("entertainment_express.api.portal_hr.list_timesheets", { employee: row.employee })
+        .then((res) => setTimesheets(res || []))
+        .catch(() => setTimesheets([]));
+    } else {
+      setTimesheets([]);
+    }
   };
 
   return (
@@ -327,19 +415,18 @@ function TeamWorkspace() {
             { key: "full_name", label: "Name" },
             { key: "email", label: "Email" },
             { key: "access", label: "Access" },
+            { key: "worker_type", label: "Type" },
           ]}
           rows={rows}
-          onRowClick={(row) => {
-            setSelected(row);
-            setSelectedRoles((row.roles || []).filter((role: string) => ACCESS.some((item) => item.id === role)));
-          }}
+          onRowClick={pick}
         />
       ) : (
         <EmptyState title="Team" message="Invite the first person who helps run jobs." />
       )}
       {selected ? (
         <div className="ee-form">
-          <h2 style={{ margin: 0 }}>{selected.full_name || selected.name}</h2>
+          <h2 style={{ margin: 0 }}>{selected.full_name || userId(selected)}</h2>
+          {selected.block_reason ? <p>{selected.block_reason}</p> : null}
           <fieldset>
             <legend>Access</legend>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
@@ -351,6 +438,136 @@ function TeamWorkspace() {
               ))}
             </div>
           </fieldset>
+          {selected.employee ? (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+                <FormField label="Worker type">
+                  <select value={workerType} onChange={(e) => setWorkerType(e.target.value)}>
+                    <option value="1099">1099</option>
+                    <option value="w2">W2</option>
+                    <option value="volunteer">Volunteer</option>
+                  </select>
+                </FormField>
+                <FormField label="Skills">
+                  <input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="DJ, Driver" />
+                </FormField>
+                <FormField label="Pay">
+                  <select value={payBasis} onChange={(e) => setPayBasis(e.target.value)}>
+                    <option value="per_event">Per event</option>
+                    <option value="hourly">Hourly</option>
+                    <option value="salary">Salary</option>
+                  </select>
+                </FormField>
+                <FormField label="Rate">
+                  <input value={payRate} onChange={(e) => setPayRate(e.target.value)} />
+                </FormField>
+              </div>
+              <button
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.portal_hr.save_profile", {
+                    employee: selected.employee,
+                    values: { worker_type: workerType, skills, pay_basis: payBasis, pay_rate: payRate },
+                  });
+                  reload();
+                }}
+              >
+                Save worker
+              </button>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+                <FormField label="Typical start">
+                  <input type="time" value={hours.start} onChange={(e) => setHours({ ...hours, start: e.target.value })} />
+                </FormField>
+                <FormField label="Typical end">
+                  <input type="time" value={hours.end} onChange={(e) => setHours({ ...hours, end: e.target.value })} />
+                </FormField>
+              </div>
+              <button
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  const days: Record<string, { start: string; end: string }> = {};
+                  ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].forEach((day) => {
+                    days[day] = { start: hours.start, end: hours.end };
+                  });
+                  await call("entertainment_express.api.portal_hr.save_hours", { employee: selected.employee, days });
+                }}
+              >
+                Save hours
+              </button>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+                <FormField label="Time-off from">
+                  <input type="date" value={offFrom} onChange={(e) => setOffFrom(e.target.value)} />
+                </FormField>
+                <FormField label="Through">
+                  <input type="date" value={offTo} onChange={(e) => setOffTo(e.target.value)} />
+                </FormField>
+              </div>
+              <button
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.portal_hr.save_time_off", {
+                    employee: selected.employee,
+                    start_date: offFrom,
+                    end_date: offTo || offFrom,
+                  });
+                }}
+              >
+                Save time-off
+              </button>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+                <FormField label="Document">
+                  <select value={docType} onChange={(e) => setDocType(e.target.value)}>
+                    <option value="w9">W9</option>
+                    <option value="contract">Contract</option>
+                    <option value="background_check">Background check</option>
+                    <option value="driver_license">License</option>
+                  </select>
+                </FormField>
+                <FormField label="File path">
+                  <input value={docFile} onChange={(e) => setDocFile(e.target.value)} />
+                </FormField>
+              </div>
+              <button
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.portal_hr.upload_document", {
+                    employee: selected.employee,
+                    doc_type: docType,
+                    file_path: docFile,
+                  });
+                  reload();
+                }}
+              >
+                Save document
+              </button>
+              {timesheets.filter((row) => row.pending).length ? (
+                <div>
+                  <h3>Hours to approve</h3>
+                  {timesheets
+                    .filter((row) => row.pending)
+                    .map((row) => (
+                      <button
+                        key={row.name}
+                        type="button"
+                        className="ee-btn"
+                        onClick={async () => {
+                          await call("entertainment_express.api.portal_hr.approve_hours", { timesheet: row.name });
+                          pick(selected);
+                        }}
+                      >
+                        Approve {row.hours}h
+                      </button>
+                    ))}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <p>Give this person field access so they can be paid and dispatched.</p>
+          )}
           <div className="ee-form__actions">
             <button type="button" className="ee-btn" onClick={saveRoles}>
               Save access

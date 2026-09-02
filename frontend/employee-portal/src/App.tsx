@@ -286,8 +286,12 @@ function ProposalWorkspace() {
 
 function AccountingWorkspace() {
   const [rows, setRows] = React.useState<any[]>([]);
+  const [sheets, setSheets] = React.useState<any[]>([]);
+  const [runs, setRuns] = React.useState<any[]>([]);
+  const [from, setFrom] = React.useState("");
+  const [to, setTo] = React.useState("");
 
-  React.useEffect(() => {
+  const reload = () => {
     call("frappe.client.get_list", {
       doctype: "Sales Invoice",
       fields: ["name", "customer", "outstanding_amount", "currency"],
@@ -296,21 +300,94 @@ function AccountingWorkspace() {
     })
       .then((res) => setRows(res || []))
       .catch(() => setRows([]));
+    call("entertainment_express.api.portal_hr.list_timesheets", {})
+      .then((res) => setSheets(res || []))
+      .catch(() => setSheets([]));
+    call("entertainment_express.api.portal_hr.list_pay_runs", {})
+      .then((res) => setRuns(res || []))
+      .catch(() => setRuns([]));
+  };
+
+  React.useEffect(() => {
+    reload();
   }, []);
 
-  return rows.length ? (
-    <DataTable
-      id="employee-accounting-invoices"
-      columns={[
-        { key: "name", label: "Invoice" },
-        { key: "customer", label: "Client" },
-        { key: "outstanding_amount", label: "Outstanding" },
-        { key: "currency", label: "Currency" },
-      ]}
-      rows={rows}
-    />
-  ) : (
-    <EmptyState title="Accounting Workspace" message="Open invoices will appear here." />
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <h1 style={{ margin: 0 }}>Money</h1>
+      {sheets.filter((row) => row.pending).length ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>Hours to approve</h2>
+          {sheets
+            .filter((row) => row.pending)
+            .map((row) => (
+              <button
+                key={row.name}
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.portal_hr.approve_hours", { timesheet: row.name });
+                  reload();
+                }}
+              >
+                Approve {row.person} {row.hours}h
+              </button>
+            ))}
+        </div>
+      ) : null}
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Pay crew</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+          <FormField label="From">
+            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </FormField>
+          <FormField label="Through">
+            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </FormField>
+        </div>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            await call("entertainment_express.api.portal_hr.create_pay_run", { period_from: from, period_to: to });
+            reload();
+          }}
+        >
+          Build pay run
+        </button>
+        {runs.length ? (
+          <DataTable
+            id="employee-pay-runs"
+            columns={[
+              { key: "name", label: "Run" },
+              { key: "period_from", label: "From" },
+              { key: "status", label: "Status" },
+              { key: "total_amount", label: "Total" },
+            ]}
+            rows={runs}
+            onRowClick={async (row) => {
+              if (row.status === "draft") await call("entertainment_express.api.portal_hr.finalize_pay_run", { name: row.name });
+              else if (row.status === "finalized") await call("entertainment_express.api.portal_hr.process_payout", { name: row.name });
+              reload();
+            }}
+          />
+        ) : null}
+      </div>
+      {rows.length ? (
+        <DataTable
+          id="employee-accounting-invoices"
+          columns={[
+            { key: "name", label: "Invoice" },
+            { key: "customer", label: "Client" },
+            { key: "outstanding_amount", label: "Outstanding" },
+            { key: "currency", label: "Currency" },
+          ]}
+          rows={rows}
+        />
+      ) : (
+        <EmptyState title="Invoices" message="Open invoices will appear here." />
+      )}
+    </section>
   );
 }
 
@@ -377,7 +454,75 @@ function DispatchWorkspace() {
 }
 
 function MeWorkspace() {
-  return <AccountPanel />;
+  const [hours, setHours] = React.useState({ start: "10:00", end: "22:00" });
+  const [offFrom, setOffFrom] = React.useState("");
+  const [offTo, setOffTo] = React.useState("");
+  const [offs, setOffs] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_hr.my_time_off", {})
+      .then((res) => setOffs(res || []))
+      .catch(() => setOffs([]));
+  }, []);
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <h1 style={{ margin: 0 }}>Me</h1>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Typical start">
+          <input type="time" value={hours.start} onChange={(e) => setHours({ ...hours, start: e.target.value })} />
+        </FormField>
+        <FormField label="Typical end">
+          <input type="time" value={hours.end} onChange={(e) => setHours({ ...hours, end: e.target.value })} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          const days: Record<string, { start: string; end: string }> = {};
+          ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].forEach((day) => {
+            days[day] = { start: hours.start, end: hours.end };
+          });
+          await call("entertainment_express.api.portal_hr.save_my_hours", { days });
+        }}
+      >
+        Save my hours
+      </button>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Time-off from">
+          <input type="date" value={offFrom} onChange={(e) => setOffFrom(e.target.value)} />
+        </FormField>
+        <FormField label="Through">
+          <input type="date" value={offTo} onChange={(e) => setOffTo(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          await call("entertainment_express.api.portal_hr.save_my_time_off", {
+            start_date: offFrom,
+            end_date: offTo || offFrom,
+          });
+          const res = await call("entertainment_express.api.portal_hr.my_time_off", {});
+          setOffs(res || []);
+        }}
+      >
+        Save time-off
+      </button>
+      {offs.length ? (
+        <DataTable
+          id="my-time-off"
+          columns={[
+            { key: "start_date", label: "From" },
+            { key: "end_date", label: "Through" },
+            { key: "reason", label: "Reason" },
+          ]}
+          rows={offs}
+        />
+      ) : null}
+      <AccountPanel />
+    </section>
+  );
 }
 
 function ReportsWorkspace() {

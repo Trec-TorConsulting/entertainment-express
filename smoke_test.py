@@ -129,6 +129,7 @@ def test_api_imports():
         "api.payments_stripe",
         "api.dispatch",
         "api.hr_workforce",
+        "api.portal_hr",
     ]
     
     for mod in modules:

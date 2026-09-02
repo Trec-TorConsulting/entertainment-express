@@ -56,22 +56,21 @@ def assign_crew(booking_name: str, employee_name: str, role_name: str,
             frappe.ValidationError,
         )
 
-    # Check worker availability (phase-3 integration)
     try:
-        from entertainment_express.api.hr_workforce import check_worker_availability
-        avail_result = check_worker_availability(
-            employee_name,
-            str(booking.start_time),
-            str(booking.end_time),
-        )
-        if not avail_result.get("available"):
-            frappe.throw(
-                f"Worker not available: {avail_result.get('reason', 'Unknown reason')}",
-                frappe.ValidationError,
-            )
+        from datetime import datetime
+        from entertainment_express.api.hr_workforce import assignment_block_reason
+
+        start_t = frappe.utils.get_time(booking.start_time or "12:00:00")
+        end_t = frappe.utils.get_time(booking.end_time or "18:00:00")
+        start = datetime.combine(frappe.utils.getdate(booking.event_date), start_t)
+        end = datetime.combine(frappe.utils.getdate(booking.event_date), end_t)
+        blocked = assignment_block_reason(employee_name, event_start=start, event_end=end)
+        if blocked:
+            frappe.throw(blocked, frappe.ValidationError)
     except ImportError:
-        # hr_workforce module not yet available; skip check
         pass
+    except frappe.ValidationError:
+        raise
 
     token = _assignment_token(f"OFFER:{employee_name}")
     ca = frappe.get_doc({
@@ -217,7 +216,16 @@ def crew_check_out(assignment_name: str) -> dict:
     ca = frappe.get_doc("Crew Assignment", assignment_name)
     if ca.status != "checked_in":
         frappe.throw(f"Cannot check out from status '{ca.status}'.")
-    ca.db_set({"status": "completed", "check_out": now_datetime(), "stage": "complete"})
+    now = now_datetime()
+    ca.db_set({"status": "completed", "check_out": now, "stage": "complete"})
+    ca.status = "completed"
+    ca.check_out = now
+    try:
+        from entertainment_express.api.hr_workforce import record_checkout_hours
+
+        record_checkout_hours(ca)
+    except Exception:
+        pass
 
     # If all crew for the booking are completed, mark booking completed
     open_assignments = frappe.db.count(
@@ -393,6 +401,14 @@ def list_available_crew(event_date: str = None, role_name: str = None) -> list:
         roles = [r.strip() for r in (emp.get("ee_crew_roles") or "").split(",") if r.strip()]
         if role_name and role_name not in roles:
             continue
+        try:
+            from entertainment_express.api.hr_workforce import assignment_block_reason
+
+            blocked = assignment_block_reason(emp["name"], event_start=event_date)
+            if blocked:
+                continue
+        except Exception:
+            pass
         result.append({
             "employee": emp["name"],
             "employee_name": emp["employee_name"],
@@ -539,6 +555,21 @@ def suggest_crew(booking_name: str, role_name: str | None = None) -> list:
     booking = frappe.get_doc("Event Booking", booking_name)
     wanted = (role_name or "").strip()
     rows = list_available_crew(event_date=str(booking.event_date), role_name=None)
+    try:
+        from datetime import datetime
+        from entertainment_express.api.hr_workforce import assignment_block_reason
+
+        start_t = frappe.utils.get_time(booking.start_time or "12:00:00")
+        end_t = frappe.utils.get_time(booking.end_time or "18:00:00")
+        start = datetime.combine(frappe.utils.getdate(booking.event_date), start_t)
+        end = datetime.combine(frappe.utils.getdate(booking.event_date), end_t)
+        rows = [
+            r
+            for r in rows
+            if not assignment_block_reason(r["employee"], event_start=start, event_end=end)
+        ]
+    except Exception:
+        pass
     matched = [r for r in rows if wanted and wanted in (r.get("roles") or [])]
     matched_ids = {r["employee"] for r in matched}
     rest = [r for r in rows if r["employee"] not in matched_ids]
