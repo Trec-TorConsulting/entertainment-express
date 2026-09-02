@@ -8,7 +8,7 @@
  "field_order": [
   "tenant_slug", "company_name", "status", "site_name", "plan",
   "col1", "primary_contact", "primary_email", "col2",
-  "activated_on", "suspended_on", "notes"
+  "activated_on", "suspended_on", "backup_ref", "notes"
  ],
  "fields": [
   {"fieldname": "tenant_slug", "fieldtype": "Data", "label": "Tenant Slug", "reqd": 1, "unique": 1, "in_list_view": 1, "description": "DNS-safe slug, e.g. acme-dj — becomes acme-dj.app.{base_domain}"},
@@ -24,9 +24,10 @@
   {"fieldname": "col2", "fieldtype": "Column Break"},
   {"fieldname": "activated_on", "fieldtype": "Datetime", "label": "Activated On", "read_only": 1},
   {"fieldname": "suspended_on", "fieldtype": "Datetime", "label": "Suspended On", "read_only": 1},
+  {"fieldname": "backup_ref", "fieldtype": "Data", "label": "Deprovision Backup", "read_only": 1},
   {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
  ],
- "modified": "2024-01-01 00:00:00.000000",
+ "modified": "2026-09-02 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Control Plane",
  "name": "Tenant",

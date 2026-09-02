@@ -13,7 +13,7 @@ def fleet_dashboard() -> dict:
     require_roles("SaaS Operator", "System Manager")
     tenants = frappe.get_all(
         "Tenant",
-        fields=["name", "company_name", "status", "plan", "site_name", "primary_email", "activated_on"],
+        fields=["name", "company_name", "status", "plan", "site_name", "primary_email", "activated_on", "modified"],
     )
     rows = []
     mrr = 0.0
@@ -31,6 +31,7 @@ def fleet_dashboard() -> dict:
             "mrr": flt(sub.get("mrr")),
             "period_end": sub.get("current_period_end"),
             "failed_jobs": failed_jobs,
+            "last_activity": str(t.get("modified") or t.get("activated_on") or ""),
         }
         mrr += row["mrr"]
         rows.append(row)

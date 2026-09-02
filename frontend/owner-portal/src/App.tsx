@@ -46,6 +46,7 @@ const OWNER_NAV = [
       { to: "/money", label: "Money" },
       { to: "/reports", label: "Reports" },
       { to: "/assistant", label: "Assistant" },
+      { to: "/plan", label: "Plan" },
       { to: "/automations", label: "Reminders" },
       { to: "/grow", label: "Grow" },
       { to: "/coverage", label: "Coverage" },
@@ -845,6 +846,84 @@ function ProposalWorkspace() {
           </button>
         </div>
       </div>
+    </section>
+  );
+}
+
+function PlanWorkspace() {
+  const [info, setInfo] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const load = () => {
+    call("entertainment_express.api.saas_billing.my_plan", {})
+      .then((res) => setInfo(res))
+      .catch(() => setInfo(null));
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const pay = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await call("entertainment_express.api.saas_billing.create_subscription_checkout", {});
+      if (res?.checkout_url) {
+        window.location.href = res.checkout_url;
+        return;
+      }
+      setError("Checkout is not available yet.");
+    } catch (err: any) {
+      setError(err.message || "Could not start checkout.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cancel = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.saas_billing.request_cancel", {});
+      load();
+    } catch (err: any) {
+      setError(err.message || "Could not request cancel.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Plan</h1>
+        <p className="ee-muted">Your Entertainment Express subscription for this company. Amounts come from billing — this page does not calculate prices.</p>
+      </header>
+      {info ? (
+        <div className="ee-form" style={{ maxWidth: "none" }}>
+          <p style={{ margin: 0 }}>
+            <strong>{info.plan}</strong> · {info.status}
+          </p>
+          {info.price ? <p className="ee-muted">Monthly {info.price}</p> : null}
+          {info.period_end ? <p className="ee-muted">Current period ends {info.period_end}</p> : null}
+          {info.cancel_at_period_end || info.cancel_requested ? (
+            <p>Access continues until the period ends, then this workspace pauses.</p>
+          ) : null}
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <button type="button" className="ee-btn" disabled={busy} onClick={pay}>
+              Pay / convert
+            </button>
+            <button type="button" className="ee-btn ee-btn--ghost" disabled={busy || info.cancel_requested || info.cancel_at_period_end} onClick={cancel}>
+              Cancel at period end
+            </button>
+          </div>
+        </div>
+      ) : (
+        <EmptyState title="Plan" message="Plan details will show here after your company is billed." />
+      )}
+      {error ? <p className="ee-form__error">{error}</p> : null}
     </section>
   );
 }
@@ -2160,6 +2239,7 @@ export function OwnerApp() {
           <Route path="/money/:id" element={<CrudEditor kind="invoice" basePath="/money" />} />
           <Route path="/reports" element={<ReportsWorkspace />} />
           <Route path="/assistant" element={<AssistantWorkspace />} />
+          <Route path="/plan" element={<PlanWorkspace />} />
           <Route path="/automations" element={<AutomationsWorkspace />} />
           <Route path="/grow" element={<GrowWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />

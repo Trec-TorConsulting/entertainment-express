@@ -4,6 +4,7 @@ Run once: bench --site admin.{base_domain} execute entertainment_express.setup.s
 """
 
 import frappe
+from frappe.utils import flt
 
 
 def run():
@@ -13,8 +14,10 @@ def run():
             "plan_name": "Starter",
             "plan_code": "starter",
             "price_monthly": 49.0,
+            "price_annual": 490.0,
             "currency": "USD",
             "trial_days": 14,
+            "allow_overages": 0,
             "status": "Active",
             "entitlements": [
                 {"feature_key": "max_bookings_per_month", "limit_value": "50"},
@@ -27,8 +30,10 @@ def run():
             "plan_name": "Professional",
             "plan_code": "pro",
             "price_monthly": 149.0,
+            "price_annual": 1490.0,
             "currency": "USD",
             "trial_days": 14,
+            "allow_overages": 1,
             "status": "Active",
             "entitlements": [
                 {"feature_key": "max_bookings_per_month", "limit_value": "unlimited"},
@@ -41,8 +46,10 @@ def run():
             "plan_name": "Enterprise",
             "plan_code": "enterprise",
             "price_monthly": 399.0,
+            "price_annual": 3990.0,
             "currency": "USD",
             "trial_days": 0,
+            "allow_overages": 1,
             "status": "Active",
             "entitlements": [
                 {"feature_key": "max_bookings_per_month", "limit_value": "unlimited"},
@@ -65,6 +72,7 @@ def run():
         plan.insert(ignore_permissions=True)
 
     _ensure_ai_entitlements()
+    _ensure_billing_fields()
     frappe.db.commit()
     print(f"[EE] Seeded {len(plans)} plan(s).")
 
@@ -80,3 +88,25 @@ def _ensure_ai_entitlements():
         plan = frappe.get_doc("Plan", name)
         plan.append("entitlements", {"feature_key": "ai_assistant", "limit_value": value})
         plan.save(ignore_permissions=True)
+
+
+def _ensure_billing_fields():
+    mapping = {
+        "starter": {"price_annual": 490, "allow_overages": 0},
+        "pro": {"price_annual": 1490, "allow_overages": 1},
+        "enterprise": {"price_annual": 3990, "allow_overages": 1},
+    }
+    for code, values in mapping.items():
+        name = frappe.db.get_value("Plan", {"plan_code": code}, "name")
+        if not name:
+            continue
+        plan = frappe.get_doc("Plan", name)
+        dirty = False
+        if not flt(plan.price_annual):
+            plan.price_annual = values["price_annual"]
+            dirty = True
+        if not plan.allow_overages and values["allow_overages"]:
+            plan.allow_overages = 1
+            dirty = True
+        if dirty:
+            plan.save(ignore_permissions=True)

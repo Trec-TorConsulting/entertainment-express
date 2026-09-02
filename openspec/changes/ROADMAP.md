@@ -103,10 +103,11 @@ content drafting, lead scoring, guardrails.
 **Spec:** `ai-assistant`. **Depends on:** phases 1–10 data; Ollama on node05.
 **Folder:** [`archive/2026-09-02-phase-11-ai-assistant/`](archive/2026-09-02-phase-11-ai-assistant/)
 
-## Phase 12 — SaaS Control Plane (Full) 📝
+## Phase 12 — SaaS Control Plane (Full) ✅
 Complete self-service signup, plans/entitlements, usage metering, Stripe subscription billing + dunning,
 fleet health dashboard, lifecycle (suspend/resume/deprovision) beyond phase-1 provisioning subset.
 **Spec:** `saas-control-plane`, `platform-multitenancy` (lifecycle). **Depends on:** phase-1.
+**Folder:** [`archive/2026-09-02-phase-12-saas-control-plane/`](archive/2026-09-02-phase-12-saas-control-plane/)
 
 ## Phase 13 — Integrations Expansion 📝
 Calendar two-way sync (Google/M365/iCal), maps/routing provider, DocuSign, accounting sync (QuickBooks/Xero),

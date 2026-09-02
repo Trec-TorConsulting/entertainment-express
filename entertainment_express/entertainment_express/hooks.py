@@ -92,6 +92,7 @@ scheduler_events = {
         "entertainment_express.scheduling_dispatch.scheduler.flag_at_risk_events",
         "entertainment_express.notifications.retry_failed",
         "entertainment_express.api.saas_billing.apply_dunning",
+        "entertainment_express.api.saas_billing.apply_cancellations",
     ],
     "daily": [
         # Check compliance expiry (phase-3)
@@ -105,6 +106,7 @@ scheduler_events = {
         "entertainment_express.api.portal_reports.run_schedules",
         "entertainment_express.notifications.send_deferred",
         "entertainment_express.equipment_fleet.scheduler.daily_fleet_alerts",
+        "entertainment_express.control_plane.metering.collect_all_tenants",
     ],
     "cron": {
         "0 9 * * *": [

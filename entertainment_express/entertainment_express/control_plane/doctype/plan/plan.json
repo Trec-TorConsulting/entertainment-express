@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "plan_name", "plan_code", "price_monthly", "price_annual", "currency", "trial_days", "grace_days",
-  "stripe_price_monthly", "stripe_price_annual",
+  "stripe_price_monthly", "stripe_price_annual", "allow_overages", "stripe_usage_price",
   "status", "section_entitlements", "entitlements"
  ],
  "fields": [
@@ -20,11 +20,13 @@
   {"fieldname": "grace_days", "fieldtype": "Int", "label": "Dunning Grace Days", "default": "7"},
   {"fieldname": "stripe_price_monthly", "fieldtype": "Data", "label": "Stripe Price (monthly)"},
   {"fieldname": "stripe_price_annual", "fieldtype": "Data", "label": "Stripe Price (annual)"},
+  {"fieldname": "allow_overages", "fieldtype": "Check", "label": "Allow Metered Overages", "default": "0"},
+  {"fieldname": "stripe_usage_price", "fieldtype": "Data", "label": "Stripe Usage Price"},
   {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Active\nArchived", "default": "Active", "in_list_view": 1},
   {"fieldname": "section_entitlements", "fieldtype": "Section Break", "label": "Entitlements"},
   {"fieldname": "entitlements", "fieldtype": "Table", "label": "Entitlements", "options": "Plan Entitlement"}
  ],
- "modified": "2024-01-01 00:00:00.000000",
+ "modified": "2026-09-02 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Control Plane",
  "name": "Plan",
