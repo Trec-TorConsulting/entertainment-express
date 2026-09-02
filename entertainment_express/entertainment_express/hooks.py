@@ -128,7 +128,7 @@ scheduler_events = {
 
 # Website route rules (added in phase-1 www pages)
 website_route_rules = [
-    {"from_route": "/book", "to_route": "book"},
+    {"from_route": "/book", "to_route": "catalog"},
     {"from_route": "/schedule", "to_route": "schedule"},
     {"from_route": "/request-quote", "to_route": "request-quote"},
     {"from_route": "/signup", "to_route": "signup"},
