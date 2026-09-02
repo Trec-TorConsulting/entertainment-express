@@ -5,8 +5,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series", "package_name", "active",
+  "naming_series", "package_name", "active", "published",
   "col1", "package_price", "currency", "col2",
+  "image",
   "section_items", "items",
   "section_meta", "description", "vertical_tag", "event_types"
  ],
@@ -14,6 +15,8 @@
   {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-PKG-.####"},
   {"fieldname": "package_name", "fieldtype": "Data", "label": "Package Name", "reqd": 1, "in_list_view": 1},
   {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1", "in_list_view": 1},
+  {"fieldname": "published", "fieldtype": "Check", "label": "Published", "default": "0", "in_list_view": 1, "description": "Show on the public catalog"},
+  {"fieldname": "image", "fieldtype": "Attach Image", "label": "Image"},
   {"fieldname": "col1", "fieldtype": "Column Break"},
   {"fieldname": "package_price", "fieldtype": "Currency", "label": "Package Price", "reqd": 1, "in_list_view": 1},
   {"fieldname": "currency", "fieldtype": "Link", "label": "Currency", "options": "Currency", "default": "USD"},

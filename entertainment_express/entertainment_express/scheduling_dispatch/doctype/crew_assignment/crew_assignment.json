@@ -8,6 +8,7 @@
   "naming_series", "booking", "status",
   "col1", "crew_member", "role", "col2",
   "call_time", "check_in", "check_out",
+  "check_in_lat", "check_in_lng", "stage",
   "col3", "pay_basis", "pay_rate", "col4",
   "shift_token", "notes"
  ],
@@ -24,6 +25,10 @@
   {"fieldname": "call_time", "fieldtype": "Datetime", "label": "Call Time", "description": "When crew should arrive (setup)"},
   {"fieldname": "check_in", "fieldtype": "Datetime", "label": "Checked In At", "read_only": 1},
   {"fieldname": "check_out", "fieldtype": "Datetime", "label": "Checked Out At", "read_only": 1},
+  {"fieldname": "check_in_lat", "fieldtype": "Float", "label": "Check-in Latitude", "precision": "6", "read_only": 1},
+  {"fieldname": "check_in_lng", "fieldtype": "Float", "label": "Check-in Longitude", "precision": "6", "read_only": 1},
+  {"fieldname": "stage", "fieldtype": "Select", "label": "Stage",
+   "options": "\nen-route\non-site\nsetup-complete\ncomplete", "in_list_view": 1},
   {"fieldname": "col3", "fieldtype": "Column Break"},
   {"fieldname": "pay_basis", "fieldtype": "Select", "label": "Pay Basis", "options": "\nper_event\nhourly"},
   {"fieldname": "pay_rate", "fieldtype": "Currency", "label": "Pay Rate"},
@@ -39,7 +44,8 @@
  "permissions": [
   {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0, "export": 1},
   {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
-  {"role": "EE Crew", "read": 1},
+  {"role": "EE Crew", "read": 1, "write": 1},
+  {"role": "EE Entertainer", "read": 1, "write": 1},
   {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
  ],
  "sort_field": "modified",

@@ -1,0 +1,28 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["referrer", "referred_email", "status", "reward_code"],
+ "fields": [
+  {"fieldname": "referrer", "fieldtype": "Link", "label": "Referrer", "options": "Customer", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "referred_email", "fieldtype": "Data", "label": "Referred email", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "invited\nbooked\nrewarded", "default": "invited", "in_list_view": 1},
+  {"fieldname": "reward_code", "fieldtype": "Link", "label": "Reward", "options": "EE Promo Code"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Client Referral",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Marketing", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

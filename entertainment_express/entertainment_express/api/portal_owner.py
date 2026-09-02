@@ -102,11 +102,26 @@ def _audit(action: str, details: dict) -> None:
     ).insert(ignore_permissions=True)
 
 
+def _planning_percent(booking: str | None) -> float | None:
+    if not booking or not getattr(frappe.db, "table_exists", lambda *_: False)("Planning Form Instance"):
+        return None
+    row = frappe.db.get_value(
+        "Planning Form Instance",
+        {"booking": booking},
+        "completion_percent",
+    )
+    if row is None:
+        return None
+    return flt(row)
+
+
 @frappe.whitelist()
 def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None) -> dict:
     _require_owner()
 
-    bookings = frappe.db.count("Event Booking", {"status": ["in", ["confirmed", "in_progress"]]})
+    from entertainment_express.api.portal_crud import _not_template_filters
+
+    bookings = frappe.db.count("Event Booking", _not_template_filters({"status": ["in", ["confirmed", "in_progress"]]}))
     open_invoices = frappe.get_all(
         "Sales Invoice",
         filters={"docstatus": 1, "outstanding_amount": [">", 0]},
@@ -133,7 +148,7 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
     try:
         jobs = frappe.get_all(
             "Event Booking",
-            filters={"status": ["in", ["confirmed", "in_progress", "tentative"]]},
+            filters=_not_template_filters({"status": ["in", ["confirmed", "in_progress", "tentative"]]}),
             fields=["name", "event_name", "event_date", "start_time", "status", "venue_address", "grand_total", "balance_due", "deposit_status"],
             order_by="event_date asc",
             limit_page_length=20,
@@ -143,6 +158,8 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
                 row["grand_total"] = fmt_money(flt(row.get("grand_total")), currency=currency)
             if row.get("balance_due") is not None:
                 row["balance_due"] = fmt_money(flt(row.get("balance_due")), currency=currency)
+            row["planning_percent"] = _planning_percent(row.get("name"))
+            row["planning_incomplete"] = row["planning_percent"] is not None and flt(row["planning_percent"]) < 100
     except Exception:
         jobs = []
 
@@ -154,10 +171,18 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
     except Exception:
         unread_chat = 0
 
+    pack = {}
+    try:
+        from entertainment_express.api.portal_reports import _owner_snapshot
+
+        pack = _owner_snapshot(from_date, to_date)
+    except Exception:
+        pack = {}
+
     return {
-        "revenue": fmt_money(0, currency=currency),
+        "revenue": pack.get("revenue") or fmt_money(0, currency=currency),
         "new_bookings": bookings,
-        "pipeline_value": fmt_money(0, currency=currency),
+        "pipeline_value": pack.get("pipeline_value") or fmt_money(0, currency=currency),
         "at_risk_count": at_risk_count,
         "pending_approvals": pending_approvals,
         "outstanding_balance": fmt_money(outstanding_total, currency=currency),
@@ -194,6 +219,58 @@ def get_approvals() -> list[dict]:
             )
     except Exception:
         rows = []
+    try:
+        from entertainment_express.api.workflow import list_open_tasks
+
+        rows.extend(list_open_tasks())
+    except Exception:
+        pass
+    try:
+        if frappe.db.table_exists("EE Booking Change"):
+            for row in frappe.get_all(
+                "EE Booking Change",
+                filters={"status": "pending"},
+                fields=["name", "booking", "request_type", "requested_date"],
+                order_by="modified desc",
+                limit_page_length=20,
+            ):
+                event = frappe.db.get_value("Event Booking", row.booking, "event_name") if row.booking else row.booking
+                label = {"reschedule": "Date change", "add_on": "Add-on", "cancel": "Cancel"}.get(row.request_type, "Change")
+                rows.append(
+                    {
+                        "type": "booking_change",
+                        "id": row.name,
+                        "name": row.name,
+                        "doctype": "EE Booking Change",
+                        "summary": f"{label} · {event or row.booking}",
+                        "date": str(row.requested_date or ""),
+                    }
+                )
+    except Exception:
+        pass
+    try:
+        if frappe.db.table_exists("EE Field Issue"):
+            for row in frappe.get_all(
+                "EE Field Issue",
+                filters={"status": "open"},
+                fields=["name", "booking", "kind", "detail"],
+                order_by="modified desc",
+                limit_page_length=20,
+            ):
+                event = frappe.db.get_value("Event Booking", row.booking, "event_name") if row.booking else row.booking
+                labels = {"damage": "Damage", "no_show": "No-show", "access": "Access", "other": "On-site issue"}
+                rows.append(
+                    {
+                        "type": "field_issue",
+                        "id": row.name,
+                        "name": row.name,
+                        "doctype": "EE Field Issue",
+                        "summary": f"{labels.get(row.kind, 'Issue')} · {event or row.booking}",
+                        "date": "",
+                    }
+                )
+    except Exception:
+        pass
     return rows
 
 
@@ -204,6 +281,18 @@ def act_on_approval(approval_type: str, doctype: str, name: str, decision: str, 
     if doctype == "ToDo":
         doc = frappe.get_doc("ToDo", name)
         doc.status = "Closed" if decision == "approved" else "Cancelled"
+        doc.save(ignore_permissions=True)
+    elif doctype == "EE Workflow Task":
+        from entertainment_express.api.workflow import complete_task
+
+        complete_task(name, decision)
+    elif doctype == "EE Booking Change":
+        from entertainment_express.api.booking_changes import decide_change
+
+        decide_change(name, decision)
+    elif doctype == "EE Field Issue":
+        doc = frappe.get_doc("EE Field Issue", name)
+        doc.status = "acked"
         doc.save(ignore_permissions=True)
 
     _audit(

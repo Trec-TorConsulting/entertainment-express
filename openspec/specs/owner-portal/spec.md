@@ -131,3 +131,94 @@ The system SHALL offer canned company reports on `/owner/reports` with CSV/PDF e
 #### Scenario: Owner exports outstanding
 - **WHEN** the owner runs Outstanding balances for a date range and exports CSV
 - **THEN** the file contains only that tenant’s invoices and money strings from the backend
+
+### Requirement: Send Proposal Without Desk
+The system SHALL let the owner create, preview, and send a Proposal from Pipeline or a job on `/owner`.
+
+#### Scenario: Send from pipeline
+- **WHEN** an owner opens an inquiry and sends a Proposal
+- **THEN** the customer can open it on `/client` and the owner sees sent/viewed/accepted status without `/app`
+
+### Requirement: Clone Job
+The system SHALL let the owner duplicate a job or save it as a reusable template from `/owner` Calendar. Clone SHALL NOT copy payments, signatures, chat, or guests.
+
+#### Scenario: Duplicate last weekend’s setup
+- **WHEN** an owner clones a completed job to a new date
+- **THEN** packages, hidden warehouse lines, and timeline structure copy; invoices and signatures do not
+
+### Requirement: Conflict Banner On Quotes
+The system SHALL show potential and actual resource conflicts when the owner builds or sends a Proposal.
+
+#### Scenario: Two quotes one booth
+- **WHEN** two sent proposals need the same unique asset on the same slot
+- **THEN** each shows a potential-conflict warning and sending is still allowed
+
+### Requirement: Reminders Are Live
+The system SHALL make `/owner/automations` list workflow templates and notification toggles (deposit chase, planning-form reminder, proposal follow-up) backed by existing notification settings — not an empty state.
+
+#### Scenario: Owner turns off deposit chase
+- **WHEN** an owner disables deposit chase
+- **THEN** the scheduler does not send that reminder for this tenant
+
+### Requirement: Meeting Types On Company OS
+The system SHALL let the owner create, edit, activate, and deactivate meeting types on `/owner` without `/app`. Labels SHALL be business language, not DocType names.
+
+#### Scenario: Owner adds a consult type
+- **WHEN** an owner creates a 30-minute video consultation type with weekday hours
+- **THEN** it becomes self-bookable on the tenant public schedule page
+
+### Requirement: Appointment Inbox
+The system SHALL list upcoming appointments on `/owner` Today / Calendar. The owner SHALL confirm, complete, cancel, or mark no-show.
+
+#### Scenario: Owner cancels a consult
+- **WHEN** an owner cancels an appointment
+- **THEN** the slot is released, the invitee is notified, and the Lead remains
+
+### Requirement: Places Partners And Coverage
+The system SHALL offer `/owner/places`, `/owner/partners`, and `/owner/coverage` for venues, vendors, policies, COIs, and waiver templates without `/app`.
+
+#### Scenario: Owner adds a hall
+- **WHEN** an owner saves a venue with load-in notes
+- **THEN** it can be picked on a job and the public/client UI never shows DocType names
+
+### Requirement: Job Risk Strip
+The system SHALL show venue, COI status, waiver status, and damage-hold status on the owner job view. Hold amounts SHALL be backend strings.
+
+#### Scenario: Owner places a hold
+- **WHEN** an owner starts a damage hold from the job
+- **THEN** billing preauth runs and the job shows held with a money string
+
+### Requirement: Move In Without Desk
+The system SHALL offer `/owner/move` for import, dry-run, commit, and export without `/app`. Labels SHALL be business language.
+
+#### Scenario: Owner imports a customer list
+- **WHEN** an owner dry-runs then commits a customers CSV
+- **THEN** the job shows how many landed and failed, with no Desk URL
+
+### Requirement: Change Requests On Company OS
+The system SHALL show pending booking change requests on `/owner` Today and let the owner approve or decline without `/app`. Approve SHALL apply through existing booking APIs.
+
+#### Scenario: Owner approves a reschedule
+- **WHEN** an owner approves a pending date change
+- **THEN** `reschedule_booking` runs and the request is marked applied
+
+### Requirement: Grow Without Desk
+The system SHALL offer `/owner/grow` for lists, campaigns, promo codes, referrals, and review URL without `/app`. Labels SHALL be business language.
+
+#### Scenario: Owner sends a campaign
+- **WHEN** an owner sends a list from Grow
+- **THEN** the campaign shows how many were sent and skipped, with no Desk URL
+
+### Requirement: Assistant On Company OS
+The system SHALL provide `/owner/assistant` as a chat workspace that calls the AI APIs, with no Desk URL and no DocType names in copy.
+
+#### Scenario: Owner asks
+- **WHEN** an `EE Tenant Admin` opens Assistant and sends a question
+- **THEN** the reply is shown in the shell; if the backend is degraded the page still loads and shows `AI suggestion unavailable`
+
+### Requirement: Suggest On Proposal And Today Forecast
+The system SHALL expose quote suggestions from the proposal workspace and a forecast strip on Today, using backend-formatted money only.
+
+#### Scenario: Suggest a package
+- **WHEN** the owner clicks Suggest a package on a proposal
+- **THEN** packaged lines and a price range appear for accept/edit; the SPA does not add money itself

@@ -9,6 +9,12 @@ def on_booking_update(doc, method=None):
     if doc.status in ("confirmed", "in_progress"):
         attach_forms(doc.name, purpose="planning")
         try:
+            from entertainment_express.api.workflow import apply_for_booking
+
+            apply_for_booking(doc.name)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "EE workflow template")
+        try:
             from entertainment_express.billing_payments.schedules import ensure_schedule
 
             ensure_schedule(doc.name)

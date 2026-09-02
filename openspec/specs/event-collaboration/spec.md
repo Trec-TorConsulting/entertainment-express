@@ -52,3 +52,10 @@ The system SHALL provide a message thread per booking whose members are the payi
 #### Scenario: Non-member cannot read chat
 - **WHEN** a user who is not a member of `EB-0001` lists messages for that booking
 - **THEN** the list is empty or 403 — no message bodies are returned
+
+### Requirement: Planning Hub Includes Forms Timeline Music
+The system SHALL treat `/client/planning` as one hub: phase-15 forms, timeline, music, plus existing suggest/vote plan items and chat nearby. Guests SHALL NOT receive payer screens from this hub.
+
+#### Scenario: Guest uses the hub
+- **WHEN** an accepted guest opens Planning
+- **THEN** they see that booking’s collaborative items (and allowed music/form fields) and no Pay or Documents money

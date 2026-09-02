@@ -1,0 +1,17 @@
+{
+  "name": "Field",
+  "short_name": "Field",
+  "start_url": "/employee/field",
+  "scope": "/employee/",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/assets/entertainment_express/employee/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

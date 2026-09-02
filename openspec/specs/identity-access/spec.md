@@ -81,3 +81,52 @@ The system SHALL seed an `EE Event Guest` role on tenant sites. Event invites SH
 #### Scenario: Guest blocked from staff APIs
 - **WHEN** an `EE Event Guest` calls owner or employee portal methods
 - **THEN** access is denied
+
+### Requirement: Proposal Money Is Payer-Only
+The system SHALL allow Proposal accept, contract sign, and deposit pay only for the booking’s `EE Customer` (or a valid signing token bound to that contract). `EE Event Guest` SHALL NOT gain `EE Customer` via proposal links.
+
+#### Scenario: Guest token cannot pay
+- **WHEN** a guest uses an invite link and calls sign-and-pay
+- **THEN** the request is denied and the Quotation is unchanged
+
+### Requirement: Public Book Is Site-Scoped
+The system SHALL allow guest POST to book an appointment only on the current tenant site, with rate limits. Guests SHALL NOT receive `EE Customer` from booking a consult.
+
+#### Scenario: Consult book does not mint a payer
+- **WHEN** a guest books a consult
+- **THEN** a Lead is created and the user is not granted `EE Customer` or `System Manager`
+
+### Requirement: Guest Is Not The Risk Payer
+The system SHALL deny `EE Event Guest` (without `EE Customer`) on waiver sign, damage hold, and vendor commission APIs.
+
+#### Scenario: Guest denied waiver
+- **WHEN** a guest signs a waiver
+- **THEN** the request is denied (403) and the waiver is unchanged
+
+### Requirement: Import Is Owner And Site Scoped
+The system SHALL deny guests and non-owners on import/export APIs. Import SHALL NOT accept a site or tenant argument.
+
+#### Scenario: Guest denied import
+- **WHEN** an `EE Event Guest` starts an import
+- **THEN** the request is denied (403) and no job is created
+
+### Requirement: Guest Cannot Change The Job
+The system SHALL deny `EE Event Guest` (without `EE Customer`) on booking change-request APIs. Import-style `tenant`/`site` arguments SHALL NOT exist.
+
+#### Scenario: Guest denied change request
+- **WHEN** an `EE Event Guest` requests a reschedule
+- **THEN** the request is denied (403) and no change record is created
+
+### Requirement: Guest Cannot Market
+The system SHALL deny `EE Event Guest` (without `EE Customer`) on campaign send, promo create, and referral APIs. Those APIs SHALL NOT accept a site or tenant argument.
+
+#### Scenario: Guest denied campaign
+- **WHEN** an `EE Event Guest` sends a campaign
+- **THEN** the request is denied (403) and no campaign is sent
+
+### Requirement: Guest Cannot Use AI
+The system SHALL deny `EE Event Guest` (without `EE Customer`) and unauthenticated Guest on all AI APIs. Those APIs SHALL NOT accept a site or tenant argument.
+
+#### Scenario: Guest denied ask
+- **WHEN** an `EE Event Guest` calls `ask` or `suggest_quote`
+- **THEN** the request is denied (403) and no LLM call is made

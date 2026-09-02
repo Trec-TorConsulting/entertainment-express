@@ -107,6 +107,21 @@ pricing, contract, and deposit into a single interactive flow, with view trackin
 - **WHEN** a client opens or interacts with a sent proposal
 - **THEN** the view/interaction is logged and the sales owner can be notified
 
+#### Scenario: Allowed add-ons only
+- **WHEN** the proposal marks some catalog add-ons as client-adjustable
+- **THEN** the client may toggle only those add-ons; other lines stay fixed; totals recompute with `flt`
+
+### Requirement: Proposal Send From Company OS
+The system SHALL let `EE Tenant Admin` and `EE Sales` create and send an interactive Proposal from `/owner` or `/employee` without using `/app`. A Proposal SHALL wrap the existing Quotation, EE Contract, and deposit invoice. Amounts SHALL be formatted by the backend.
+
+#### Scenario: Owner sends a proposal
+- **WHEN** an owner opens an inquiry or job and sends a Proposal with at least one package
+- **THEN** the customer receives a link to `/client` (or tokenized proposal URL) and the Quotation is marked sent
+
+#### Scenario: Guest cannot send
+- **WHEN** an `EE Event Guest` calls the send-proposal API
+- **THEN** the request is denied (403) and no Quotation is emailed
+
 ### Requirement: Tasks & Workflow Templates
 The system SHALL support task lists and reusable workflow templates (per event type) that auto-generate
 tasks/milestones with due dates relative to the event date.
@@ -115,3 +130,25 @@ tasks/milestones with due dates relative to the event date.
 - **WHEN** a wedding booking is created and the "Wedding Workflow" template is applied
 - **THEN** its tasks/milestones (send planning form, confirm timeline, final payment, day-of checklist) are
   generated with due dates offset from the event date and assigned to owners
+
+#### Scenario: Auto-apply by event type
+- **WHEN** a booking is confirmed with an event type that has an active workflow template
+- **THEN** the template is applied once (idempotent) without staff using Desk
+
+#### Scenario: Owner sees open tasks
+- **WHEN** an owner opens Today or Reminders
+- **THEN** open workflow tasks for this tenant appear with due date and a complete action
+
+### Requirement: Appointment Creates Lead
+The system SHALL create or match a Lead on the current tenant when a public appointment is booked (email match). The Appointment SHALL store the Lead link. No other tenant’s Leads SHALL be read or written.
+
+#### Scenario: New prospect
+- **WHEN** a new email books a consult
+- **THEN** a Lead is created on this site with that email and the appointment is linked
+
+### Requirement: Lead Conversion Score
+The system SHALL store a 0–100 `ee_lead_score` on Lead for this site and update it when a lead is created.
+
+#### Scenario: New inquiry scored
+- **WHEN** a new Lead is inserted
+- **THEN** `ee_lead_score` is set from this site’s heuristic (and optional LLM nudge) without reading another site

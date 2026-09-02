@@ -80,3 +80,10 @@ Secrets, with repo files containing placeholders only.
 - **WHEN** the manifests are inspected
 - **THEN** `secret.yaml` contains placeholder values only, and running pods read real values from cluster
   Secrets
+
+### Requirement: Ollama On The GPU Node
+The system SHALL run Ollama in namespace `entertainment-express` scheduled only on node05 with the `gpu-only` toleration. Frappe bench pods SHALL continue to exclude node05.
+
+#### Scenario: GPU isolation
+- **WHEN** the Ollama Deployment is applied
+- **THEN** it targets node05 with `gpu-only:NoSchedule` toleration, and frappe-python node affinity still NotIn node05

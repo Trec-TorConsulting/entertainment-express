@@ -54,6 +54,7 @@ fixtures = [
                     "Lead-ee_consent_marketing",
                     "Lead-ee_consent_at",
                     "Lead-ee_spam_score",
+                    "Lead-ee_lead_score",
                     "Signup Application-ee_utm_source",
                     "Signup Application-ee_utm_medium",
                     "Signup Application-ee_utm_campaign",
@@ -73,7 +74,10 @@ after_install = "entertainment_express.setup.install.after_install"
 
 # After every migrate: hide ERPNext/Frappe desk onboarding so tenants never see
 # the "journey with ERPNext" guide (white-label).
-after_migrate = "entertainment_express.setup.onboarding.hide_third_party_onboarding"
+after_migrate = [
+    "entertainment_express.setup.onboarding.hide_third_party_onboarding",
+    "entertainment_express.setup.install.create_all",
+]
 
 # Scheduled tasks
 scheduler_events = {
@@ -94,6 +98,11 @@ scheduler_events = {
         "entertainment_express.hr_workforce.scheduler.check_compliance_expiry",
         "entertainment_express.event_planning.scheduler.send_form_reminders",
         "entertainment_express.api.billing.send_balance_reminders",
+        "entertainment_express.api.workflow.run_daily",
+        "entertainment_express.api.appointments.run_daily",
+        "entertainment_express.api.compliance.run_daily",
+        "entertainment_express.api.engagement.run_lifecycle",
+        "entertainment_express.api.portal_reports.run_schedules",
         "entertainment_express.notifications.send_deferred",
         "entertainment_express.equipment_fleet.scheduler.daily_fleet_alerts",
     ],
@@ -112,6 +121,7 @@ scheduler_events = {
 # Website route rules (added in phase-1 www pages)
 website_route_rules = [
     {"from_route": "/book", "to_route": "book"},
+    {"from_route": "/schedule", "to_route": "schedule"},
     {"from_route": "/request-quote", "to_route": "request-quote"},
     {"from_route": "/signup", "to_route": "signup"},
     {"from_route": "/owner/<path:app_path>", "to_route": "owner"},
@@ -136,7 +146,10 @@ website_route_rules = [
 doc_events = {
     "Event Booking": {
         "on_update": "entertainment_express.event_planning.attach.on_booking_update",
-    }
+    },
+    "Lead": {
+        "after_insert": "entertainment_express.api.ai.on_lead_insert",
+    },
 }
 
 # Permanent redirects for renamed public routes.

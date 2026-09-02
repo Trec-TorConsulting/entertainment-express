@@ -17,6 +17,22 @@
   },
   {
     "doctype": "Notification Template",
+    "name": "proposal_sent",
+    "template_key": "proposal_sent",
+    "subject": "Your proposal from {{ company_name }} is ready",
+    "active": 1,
+    "body_html": "<p>Hi {{ customer_name }},</p><p>Your proposal <b>#{{ quote_number }}</b> is ready to review, sign, and pay.</p><p><a href='{{ proposal_link }}'>Open your proposal</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "proposal_viewed",
+    "template_key": "proposal_viewed",
+    "subject": "{{ customer_name }} opened a proposal",
+    "active": 1,
+    "body_html": "<p>{{ customer_name }} opened proposal <b>#{{ quote_number }}</b>.</p>"
+  },
+  {
+    "doctype": "Notification Template",
     "name": "contract_sent",
     "template_key": "contract_sent",
     "subject": "Please sign your contract — {{ company_name }}",
@@ -77,7 +93,7 @@
     "template_key": "shift_offered",
     "subject": "Shift offer for {{ event_date }} — {{ role }}",
     "active": 1,
-    "body_html": "<p>Hi {{ employee_name }},</p><p>You've been offered a shift:</p><ul><li><b>Date:</b> {{ event_date }}</li><li><b>Role:</b> {{ role }}</li><li><b>Call Time:</b> {{ call_time }}</li><li><b>Venue:</b> {{ venue_address }}</li></ul><p><a href='{{ accept_link }}' style='background:#4CAF50;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;margin-right:10px'>Accept</a><a href='{{ decline_link }}' style='background:#F44336;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none'>Decline</a></p>"
+    "body_html": "<p>Hi {{ employee_name }},</p><p>You've been offered a shift:</p><ul><li><b>Date:</b> {{ event_date }}</li><li><b>Role:</b> {{ role }}</li><li><b>Call Time:</b> {{ call_time }}</li><li><b>Venue:</b> {{ venue_address }}</li></ul><p><a href='{{ field_link }}'>Open Field</a></p><p><a href='{{ accept_link }}' style='background:#4CAF50;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none;margin-right:10px'>Accept</a><a href='{{ decline_link }}' style='background:#F44336;color:#fff;padding:10px 20px;border-radius:4px;text-decoration:none'>Decline</a></p>"
   },
   {
     "doctype": "Notification Template",
@@ -101,7 +117,27 @@
     "template_key": "run_sheet_published",
     "subject": "📋 Run sheet published — {{ event_date }}",
     "active": 1,
-    "body_html": "<p>Hi {{ employee_name }},</p><p>Your run sheet for the <b>{{ event_date }}</b> event (role: <b>{{ role }}</b>) at <b>{{ venue_address }}</b> has been published.</p><p>Log in to your portal to view full details, checklist, and directions.</p>"
+    "body_html": "<p>Hi {{ employee_name }},</p><p>Your run sheet for the <b>{{ event_date }}</b> event (role: <b>{{ role }}</b>) at <b>{{ venue_address }}</b> has been published.</p><p><a href='{{ field_link }}'>Open Field</a> for the checklist and directions.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "field_issue",
+    "template_key": "field_issue",
+    "subject": "On-site issue: {{ kind_label }} — {{ job }}",
+    "active": 1,
+    "channels": "email,push",
+    "priority": "transactional",
+    "body_html": "<p><b>{{ person }}</b> reported {{ kind_label }} on {{ job }}.</p><p>{{ detail }}</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "report_digest",
+    "template_key": "report_digest",
+    "subject": "{{ title }}",
+    "active": 1,
+    "channels": "email",
+    "priority": "promotional",
+    "body_html": "<p>{{ body }}</p><p><a href='{{ reports_link }}'>Open reports</a></p>"
   },
   {
     "doctype": "Notification Template",
@@ -170,5 +206,89 @@
     "active": 1,
     "channels": "email",
     "body_html": "<p>There's a new note on {{ event_name }}:</p><p>{{ preview }}</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "appointment_booked",
+    "template_key": "appointment_booked",
+    "subject": "You're booked with {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ invitee_name }},</p><p>Your {{ meeting_name }} is confirmed for <b>{{ start_label }}</b>.</p><p><a href='{{ manage_link }}'>Reschedule or cancel</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "appointment_reminder",
+    "template_key": "appointment_reminder",
+    "subject": "Reminder: {{ meeting_name }} with {{ company_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ invitee_name }},</p><p>This is a reminder that {{ meeting_name }} is <b>{{ start_label }}</b>.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "appointment_canceled",
+    "template_key": "appointment_canceled",
+    "subject": "Canceled: {{ meeting_name }}",
+    "active": 1,
+    "body_html": "<p>Hi {{ invitee_name }},</p><p>Your {{ meeting_name }} on {{ start_label }} was canceled.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "coi_required",
+    "template_key": "coi_required",
+    "subject": "Certificate still needed for {{ event_name }}",
+    "active": 1,
+    "body_html": "<p>{{ event_name }} still needs a certificate of insurance.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "policy_expiring",
+    "template_key": "policy_expiring",
+    "subject": "Coverage expiring: {{ provider }}",
+    "active": 1,
+    "body_html": "<p>{{ provider }} coverage expires {{ expires }}.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "waiver_needed",
+    "template_key": "waiver_needed",
+    "subject": "Please sign a waiver for {{ event_name }}",
+    "active": 1,
+    "body_html": "<p>Open your event portal to sign the waiver for {{ event_name }}.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "campaign_blast",
+    "template_key": "campaign_blast",
+    "subject": "{{ subject }}",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>{{ body }}</p><p><img src='{{ open_pixel }}' width='1' height='1' alt=''/></p><p>You can opt out of these notes anytime.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "review_request",
+    "template_key": "review_request",
+    "subject": "How was {{ event_name }}?",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>Thanks for having us at {{ event_name }}. If it went well, a review helps other families find us.</p><p><a href='{{ review_url }}'>Leave a review</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "thank_you_event",
+    "template_key": "thank_you_event",
+    "subject": "Thank you for {{ event_name }}",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>Thank you for letting us be part of {{ event_name }}. We would love to see you again.</p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "referral_reward",
+    "template_key": "referral_reward",
+    "subject": "Your thank-you code: {{ code }}",
+    "active": 1,
+    "priority": "promotional",
+    "body_html": "<p>Someone you referred booked with us. Use code <b>{{ code }}</b> on a future quote.</p>"
   }
 ]

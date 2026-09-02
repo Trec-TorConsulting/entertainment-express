@@ -114,3 +114,42 @@ The system SHALL offer canned reports on `/employee/reports` limited to the user
 #### Scenario: Crew cannot open company profit reports
 - **WHEN** an `EE Crew` user requests an owner company revenue report API
 - **THEN** access is denied
+
+### Requirement: Sales Sends Proposals
+The system SHALL let `EE Sales` create and send Proposals from `/employee` using the same proposal APIs as the owner, scoped by sales permissions.
+
+#### Scenario: Salesperson sends a quote
+- **WHEN** an `EE Sales` user sends a Proposal for a lead they can read
+- **THEN** the Proposal is sent and a salesperson who cannot read that Customer is denied
+
+### Requirement: Field Sees Packing Lines
+The system SHALL show warehouse-only package lines on crew packing lists / run sheets even when those lines are hidden from the client Proposal.
+
+#### Scenario: Cables on the truck list
+- **WHEN** a package includes a client-hidden cable line
+- **THEN** `/employee` field/dispatch packing view lists the cable and the client Proposal does not name it
+
+### Requirement: Sales Sees Own Appointments
+The system SHALL show `EE Sales` their assigned appointments on `/employee`. They SHALL NOT see another salesperson’s appointments unless they are the assigned staff or an owner.
+
+#### Scenario: Salesperson opens My Day
+- **WHEN** an `EE Sales` user opens `/employee`
+- **THEN** today’s assigned consults appear and another salesperson’s consults do not
+
+### Requirement: Run Sheet Venue And Vendors
+The system SHALL show venue logistics and other vendors on the employee run sheet / field view for assigned jobs only.
+
+#### Scenario: Crew opens the job
+- **WHEN** assigned crew opens the job
+- **THEN** load-in, parking, power, curfew, and other-vendor contacts for that job appear
+
+### Requirement: Dispatcher Suggestions Without Auto Assign
+The system SHALL let a dispatcher request ranked crew suggestions for an unassigned job from `/employee` Dispatch. Applying a row SHALL call the existing offer/assign API, not a silent write from the LLM.
+
+#### Scenario: Suggest crew
+- **WHEN** a dispatcher requests suggestions for an unassigned event
+- **THEN** a ranked list of available crew is shown and no Crew Assignment is created until they apply one
+
+#### Scenario: Crew cannot open company chat
+- **WHEN** an `EE Crew` user calls `ask`
+- **THEN** the request is denied (403)

@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "template", "status", "signer_name", "signer_email", "signed_at", "signature_hash", "signer_ip"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Job", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "template", "fieldtype": "Link", "label": "Template", "options": "EE Waiver Template"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "pending\nsigned", "default": "pending", "in_list_view": 1},
+  {"fieldname": "signer_name", "fieldtype": "Data", "label": "Signer"},
+  {"fieldname": "signer_email", "fieldtype": "Data", "label": "Signer email"},
+  {"fieldname": "signed_at", "fieldtype": "Datetime", "label": "Signed at"},
+  {"fieldname": "signature_hash", "fieldtype": "Data", "label": "Signature hash", "hidden": 1},
+  {"fieldname": "signer_ip", "fieldtype": "Data", "label": "Signer IP", "hidden": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Waiver",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

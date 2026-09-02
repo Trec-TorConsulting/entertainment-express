@@ -69,6 +69,31 @@ def get_my_day() -> dict:
         except Exception:
             pass
 
+    appointments: list[dict] = []
+    if "EE Sales" in roles:
+        try:
+            if frappe.db.table_exists("EE Appointment"):
+                emp = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+                if emp:
+                    for row in frappe.get_all(
+                        "EE Appointment",
+                        filters={"staff": emp, "status": ["in", ["scheduled", "rescheduled"]]},
+                        fields=["name", "meeting_type", "start", "status", "invitee_name"],
+                        order_by="start asc",
+                        limit_page_length=20,
+                    ):
+                        appointments.append(
+                            {
+                                "name": row.name,
+                                "title": frappe.db.get_value("EE Meeting Type", row.meeting_type, "type_name") or "Meeting",
+                                "who": row.invitee_name,
+                                "start": str(row.start or ""),
+                                "status": row.status,
+                            }
+                        )
+        except Exception:
+            appointments = []
+
     return {
         "roles": sorted(roles),
         "tasks": tasks,
@@ -77,6 +102,7 @@ def get_my_day() -> dict:
         "today_jobs": today_jobs,
         "at_risk": at_risk,
         "at_risk_count": at_risk_count,
+        "appointments": appointments,
     }
 
 

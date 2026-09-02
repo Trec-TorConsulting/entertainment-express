@@ -7,6 +7,13 @@ from frappe.utils import now_datetime, getdate, add_days
 
 
 def send_form_reminders():
+    try:
+        from entertainment_express.api.workflow import automation_enabled
+
+        if not automation_enabled("planning_form_reminder"):
+            return
+    except Exception:
+        pass
     today = getdate()
     rows = frappe.get_all(
         "Planning Form Instance",

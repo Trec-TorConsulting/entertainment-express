@@ -180,6 +180,13 @@ def create_installments(booking_name: str, count: int = 3) -> dict:
 
 
 def send_balance_reminders():
+    try:
+        from entertainment_express.api.workflow import automation_enabled
+
+        if not automation_enabled("deposit_chase"):
+            return
+    except Exception:
+        pass
     horizon = add_days(getdate(), 3)
     rows = frappe.get_all(
         "Payment Schedule Milestone",

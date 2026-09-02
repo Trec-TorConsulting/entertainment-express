@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["booking", "venue", "status", "additional_insured", "file", "issued_on"],
+ "fields": [
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Job", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "venue", "fieldtype": "Link", "label": "Place", "options": "EE Venue"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "requested\nissued\ndelivered", "default": "requested", "in_list_view": 1},
+  {"fieldname": "additional_insured", "fieldtype": "Data", "label": "Additional insured"},
+  {"fieldname": "file", "fieldtype": "Attach", "label": "File"},
+  {"fieldname": "issued_on", "fieldtype": "Date", "label": "Issued"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Certificate of Insurance",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -88,3 +88,39 @@ availability.
 - **WHEN** a dispatcher opens the asset/crew calendar
 - **THEN** all bookings, holds, blackouts, and maintenance windows are visible per resource with conflict
   highlighting
+
+### Requirement: Potential Quote Conflicts
+The system SHALL classify resource conflicts as `actual` (confirmed bookings, active holds, maintenance) or `potential` (overlapping sent/open Quotations). Sending a quote SHALL remain allowed when only potential conflicts exist. Confirming a booking SHALL still be blocked on actual conflicts.
+
+#### Scenario: Potential overlap on two quotes
+- **WHEN** sales adds a unique asset to a second Open quotation that overlaps the first Open quotation
+- **THEN** availability returns `potential` conflicts and does not mark the slot unavailable for quoting
+
+#### Scenario: Actual conflict still blocks confirm
+- **WHEN** a unique asset is already on a confirmed Event Booking for the same slot
+- **THEN** a new booking confirm is rejected and alternatives may be suggested
+
+### Requirement: Public Catalog And Wishlist
+The system SHALL publish tenant Service Packages that are marked public on the tenant booking site with name, image, and formatted rate, and SHALL accept a wishlist or quote request that creates a Lead / inquiry for that tenant only.
+
+#### Scenario: Guest requests a quote from the catalog
+- **WHEN** a visitor adds public packages to a wishlist and submits contact details
+- **THEN** a Lead (and tentative inquiry) is created on that tenant site with those packages and no other tenant’s catalog is shown
+
+#### Scenario: Unpublished package hidden
+- **WHEN** a package is not published
+- **THEN** it does not appear on the public catalog
+
+### Requirement: Event Work Blocks Consults
+The system SHALL treat overlapping confirmed/in-progress Event Booking crew assignments as busy for appointment slot calculation for that staff member.
+
+#### Scenario: Saturday gig blocks Saturday consult
+- **WHEN** staff is assigned to a confirmed booking 2pm–6pm
+- **THEN** consult slots overlapping that window are not offered
+
+### Requirement: Booking Stores Venue Snapshot
+The system SHALL link a job to a Venue and keep address/geo snapshots on the booking so availability and history do not depend on later venue edits.
+
+#### Scenario: Venue change does not move past jobs
+- **WHEN** a venue address is updated after a confirmed job
+- **THEN** that job’s stored address remains the snapshot from link time

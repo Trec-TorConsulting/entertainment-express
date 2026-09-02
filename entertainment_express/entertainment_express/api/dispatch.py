@@ -104,7 +104,8 @@ def assign_crew(booking_name: str, employee_name: str, role_name: str,
             "call_time": str(call_time or ""),
             "accept_link": accept_link,
             "decline_link": decline_link,
-        })
+            "field_link": f"{site_url}/employee/field",
+        }, channels=["email", "push"])
 
     return {"assignment": ca.name, "status": "offered"}
 
@@ -171,14 +172,40 @@ def decline_shift(assignment: str = None, token: str = None) -> dict:
 
 
 @frappe.whitelist()
-def crew_check_in(assignment_name: str) -> dict:
-    """Mark a crew member as checked in (event has started)."""
+def crew_check_in(assignment_name: str, latitude: float = None, longitude: float = None) -> dict:
+    """Mark a crew member as checked in (event has started). Optional GPS."""
     _check_role(["EE Tenant Admin", "EE Dispatcher", "EE Crew", "EE Entertainer", "System Manager"])
     ca = frappe.get_doc("Crew Assignment", assignment_name)
     if ca.status != "accepted":
         frappe.throw(f"Cannot check in from status '{ca.status}'.")
-    ca.db_set({"status": "checked_in", "check_in": now_datetime()})
+    updates = {"status": "checked_in", "check_in": now_datetime(), "stage": "on-site"}
+    if latitude not in (None, "", "null"):
+        updates["check_in_lat"] = flt(latitude)
+    if longitude not in (None, "", "null"):
+        updates["check_in_lng"] = flt(longitude)
+    ca.db_set(updates)
     frappe.db.set_value("Event Booking", ca.booking, "ee_dispatch_status", "in_progress")
+    if latitude not in (None, "", "null") and longitude not in (None, "", "null"):
+        try:
+            from entertainment_express.api.dispatch_realtime import publish_crew_location_update
+
+            publish_crew_location_update(
+                ca.name,
+                flt(latitude),
+                flt(longitude),
+                crew_id=ca.crew_member,
+                booking_id=ca.booking,
+                status="checked_in",
+            )
+        except Exception:
+            pass
+    try:
+        from entertainment_express.api.hr_workforce import get_or_create_timesheet
+
+        today = frappe.utils.today() if hasattr(frappe.utils, "today") else frappe.utils.nowdate()
+        get_or_create_timesheet(ca.crew_member, str(today))
+    except Exception:
+        pass
     frappe.db.commit()
     return {"status": "checked_in"}
 
@@ -190,7 +217,7 @@ def crew_check_out(assignment_name: str) -> dict:
     ca = frappe.get_doc("Crew Assignment", assignment_name)
     if ca.status != "checked_in":
         frappe.throw(f"Cannot check out from status '{ca.status}'.")
-    ca.db_set({"status": "completed", "check_out": now_datetime()})
+    ca.db_set({"status": "completed", "check_out": now_datetime(), "stage": "complete"})
 
     # If all crew for the booking are completed, mark booking completed
     open_assignments = frappe.db.count(
@@ -208,10 +235,8 @@ def crew_check_out(assignment_name: str) -> dict:
 
 # ── Run sheet ────────────────────────────────────────────────────────────────
 
-@frappe.whitelist()
-def generate_run_sheet(booking_name: str) -> dict:
-    """Build or update a Run Sheet for the given booking."""
-    _check_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+def _build_run_sheet(booking_name: str):
+    """Create or refresh a Run Sheet. Caller must authorize."""
     booking = frappe.get_doc("Event Booking", booking_name)
 
     # Get or create Run Sheet
@@ -226,13 +251,21 @@ def generate_run_sheet(booking_name: str) -> dict:
     client = frappe.get_doc("Customer", booking.customer)
     rs.venue_address = booking.venue_address or ""
     rs.venue_geo = booking.venue_geo or ""
+    notes = []
+    for label, field in (("Load-in", "load_in_notes"), ("Parking", "parking_notes"), ("Power", "power_notes"), ("Curfew", "noise_curfew")):
+        value = getattr(booking, field, None) or ""
+        if value:
+            notes.append(f"{label}: {value}")
+    if notes:
+        extra = "\n".join(notes)
+        rs.access_notes = f"{rs.access_notes or ''}\n{extra}".strip() if rs.access_notes else extra
     rs.client_name = booking.customer
     rs.client_phone = frappe.db.get_value("Contact", {"link_name": booking.customer}, "mobile_no") or ""
     rs.generated_at = now_datetime()
 
     # Equipment list from assigned assets
     rs.set("equipment_items", [])
-    for asset_row in booking.assigned_assets:
+    for asset_row in booking.assigned_assets or []:
         asset = frappe.get_doc("Service Asset", asset_row.asset)
         rs.append("equipment_items", {
             "asset": asset_row.asset,
@@ -241,7 +274,7 @@ def generate_run_sheet(booking_name: str) -> dict:
             "packed": 0,
         })
     # Also add service items as equipment entries (non-asset items)
-    for item_row in booking.service_items:
+    for item_row in booking.service_items or []:
         if not any(eq.asset_name == item_row.item_name for eq in rs.equipment_items):
             rs.append("equipment_items", {
                 "asset": None,
@@ -258,6 +291,13 @@ def generate_run_sheet(booking_name: str) -> dict:
     rs.save(ignore_permissions=True)
     frappe.db.commit()
     return {"run_sheet": rs.name, "booking": booking_name}
+
+
+@frappe.whitelist()
+def generate_run_sheet(booking_name: str) -> dict:
+    """Build or update a Run Sheet for the given booking."""
+    _check_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    return _build_run_sheet(booking_name)
 
 
 @frappe.whitelist()
@@ -287,7 +327,8 @@ def publish_run_sheet(booking_name: str) -> dict:
                 "event_date": str(booking.event_date),
                 "venue_address": booking.venue_address or "",
                 "role": ca["role"],
-            })
+                "field_link": f"{frappe.utils.get_url()}/employee/field",
+            }, channels=["email", "push"])
 
     frappe.db.commit()
     return {"status": "published", "run_sheet": rs_name}

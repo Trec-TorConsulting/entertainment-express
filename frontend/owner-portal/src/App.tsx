@@ -3,6 +3,7 @@ import { Navigate, NavLink, Route, Routes, useNavigate, useParams } from "react-
 import {
   AccountPanel,
   AppShell,
+  ConflictBanner,
   DataTable,
   DispatchBoard,
   EmptyState,
@@ -25,6 +26,7 @@ const OWNER_NAV = [
       { to: "/", label: "Today" },
       { to: "/calendar", label: "Calendar" },
       { to: "/pipeline", label: "Pipeline" },
+      { to: "/schedule", label: "Consults" },
       { to: "/dispatch", label: "Dispatch" },
     ],
   },
@@ -34,6 +36,8 @@ const OWNER_NAV = [
       { to: "/catalog", label: "Packages" },
       { to: "/gear", label: "Gear" },
       { to: "/people", label: "People" },
+      { to: "/places", label: "Places" },
+      { to: "/partners", label: "Partners" },
     ],
   },
   {
@@ -41,7 +45,11 @@ const OWNER_NAV = [
     items: [
       { to: "/money", label: "Money" },
       { to: "/reports", label: "Reports" },
+      { to: "/assistant", label: "Assistant" },
       { to: "/automations", label: "Reminders" },
+      { to: "/grow", label: "Grow" },
+      { to: "/coverage", label: "Coverage" },
+      { to: "/move", label: "Move" },
       { to: "/brand", label: "Brand" },
     ],
   },
@@ -52,8 +60,11 @@ function Today() {
   const [stats, setStats] = React.useState<any>(null);
   const [approvals, setApprovals] = React.useState<any[]>([]);
   const [workflows, setWorkflows] = React.useState<any[]>([]);
+  const [setup, setSetup] = React.useState<any>(null);
   const hour = new Date().getHours();
   const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  const [forecast, setForecast] = React.useState<any>(null);
 
   React.useEffect(() => {
     call("entertainment_express.api.portal_owner.get_owner_dashboard", {})
@@ -65,6 +76,12 @@ function Today() {
     call("entertainment_express.api.portal_proposal.today_workflows", {})
       .then((res) => setWorkflows(res || []))
       .catch(() => setWorkflows([]));
+    call("entertainment_express.api.migration.onboarding", {})
+      .then(setSetup)
+      .catch(() => setSetup(null));
+    call("entertainment_express.api.ai.forecast", { months: 3 })
+      .then(setForecast)
+      .catch(() => setForecast(null));
   }, []);
 
   const jobs = stats?.jobs || [];
@@ -82,12 +99,46 @@ function Today() {
           </h1>
         </div>
       </div>
+      {setup && !setup.complete ? (
+        <section className="ee-form" style={{ maxWidth: "none" }}>
+          <h2 style={{ margin: 0 }}>Finish setup</h2>
+          <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.1rem" }}>
+            {(setup.steps || []).map((step: any) => (
+              <li key={step.key}>
+                {step.done ? (
+                  <>Done · {step.label}</>
+                ) : (
+                  <NavLink to={step.href}>{step.label}</NavLink>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <div className="ee-metrics">
+        <StatCard label="Billed this month" value={String(stats?.revenue || "0.00")} />
+        <StatCard label="Open quotes" value={String(stats?.pipeline_value || "0.00")} />
         <StatCard label="What customers owe" value={String(stats?.outstanding_balance || "0.00")} />
         <StatCard label="Jobs on the books" value={String(stats?.new_bookings || jobs.length || 0)} />
         <StatCard label="Needs a crew" value={String(stats?.at_risk_count || 0)} />
         <StatCard label="Open tasks" value={String((approvals.length || 0) + (stats?.unread_chat || 0))} />
       </div>
+      {forecast?.periods?.length ? (
+        <section className="ee-form" style={{ maxWidth: "none" }}>
+          <h2 style={{ margin: 0 }}>Next few months</h2>
+          {forecast.available === false ? <p className="ee-muted">AI suggestion unavailable</p> : null}
+          <p className="ee-muted" style={{ margin: 0 }}>
+            {forecast.message}
+          </p>
+          <ul>
+            {forecast.periods.map((row: any) => (
+              <li key={row.month}>
+                {row.month} · {row.jobs} jobs · billed {row.revenue} · still quoting {row.pipeline} · people needed {row.crew_need}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <div className="ee-split">
         <div className="ee-job-grid">
           {jobs.length ? (
@@ -100,6 +151,7 @@ function Today() {
                   {job.event_date} {job.start_time ? `· ${job.start_time}` : ""} · {job.status}
                 </p>
                 {job.venue_address ? <p>{job.venue_address}</p> : null}
+                {job.planning_incomplete ? <p>Planning {Math.round(Number(job.planning_percent) || 0)}% complete</p> : null}
                 {job.balance_due ? <p>Left {job.balance_due}</p> : null}
               </article>
             ))
@@ -146,13 +198,13 @@ function ApprovalsList({ rows, onChanged }: { rows: any[]; onChanged: () => void
       {rows.map((row) => (
         <article key={String(row.id || row.name)} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", boxShadow: "var(--ee-shadow)", padding: "0.85rem" }}>
           <p style={{ margin: 0, fontWeight: 700 }}>{row.summary || row.type || "Approval"}</p>
-          <p style={{ margin: "0.25rem 0 0.75rem", color: "var(--ee-muted)" }}>{row.id || row.name}</p>
+          <p style={{ margin: "0.25rem 0 0.75rem", color: "var(--ee-muted)" }}>{row.event || row.date || ""}</p>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <button type="button" onClick={() => act(row, "approved")} style={{ background: "var(--ee-success)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" ? "Done" : "Approve"}
+              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Done" : "Approve"}
             </button>
             <button type="button" onClick={() => act(row, "rejected")} style={{ background: "var(--ee-danger)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" ? "Dismiss" : "Reject"}
+              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Dismiss" : "Reject"}
             </button>
           </div>
         </article>
@@ -344,6 +396,278 @@ function CrudEditor({ kind, basePath }: { kind: string; basePath: string }) {
   );
 }
 
+function JobRiskPanel({ jobId }: { jobId: string }) {
+  const [risk, setRisk] = React.useState<any>(null);
+  const [venues, setVenues] = React.useState<any[]>([]);
+  const [vendors, setVendors] = React.useState<any[]>([]);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [venue, setVenue] = React.useState("");
+  const [partner, setPartner] = React.useState("");
+  const [role, setRole] = React.useState("");
+  const [cost, setCost] = React.useState("");
+  const [hold, setHold] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.compliance.job_risk", { booking: jobId })
+      .then((res) => {
+        setRisk(res);
+        setVenue(res.venue_id || "");
+      })
+      .catch(() => setRisk(null));
+    call("entertainment_express.api.venues.list_venues", {})
+      .then((res) => setVenues(res || []))
+      .catch(() => setVenues([]));
+    call("entertainment_express.api.vendors.list_vendors", {})
+      .then((res) => setVendors(res || []))
+      .catch(() => setVendors([]));
+    call("entertainment_express.api.compliance.list_waiver_templates", {})
+      .then((res) => setTemplates(res || []))
+      .catch(() => setTemplates([]));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  if (!risk) return null;
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Place, partners, and coverage</h2>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <FormField label="Place">
+        <select
+          value={venue}
+          onChange={async (e) => {
+            const next = e.target.value;
+            setVenue(next);
+            if (!next) return;
+            try {
+              await call("entertainment_express.api.venues.attach_to_booking", { booking: jobId, venue: next });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not attach that place.");
+            }
+          }}
+        >
+          <option value="">Pick a saved place</option>
+          {venues.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.name}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      {risk.coi_needed ? <p style={{ color: "var(--ee-danger)", margin: 0 }}>This place still needs a certificate of insurance.</p> : null}
+      {risk.coi?.status === "delivered" ? <p style={{ color: "var(--ee-success)", margin: 0 }}>Certificate is on file.</p> : null}
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          setError("");
+          try {
+            await call("entertainment_express.api.compliance.save_coi", { booking: jobId, status: "delivered" });
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not mark the certificate delivered.");
+          }
+        }}
+      >
+        Mark certificate delivered
+      </button>
+      {templates.length ? (
+        <FormField label="Send a waiver">
+          <select
+            defaultValue=""
+            onChange={async (e) => {
+              const tmpl = e.target.value;
+              if (!tmpl) return;
+              try {
+                await call("entertainment_express.api.compliance.issue_waiver", { booking: jobId, template: tmpl });
+                e.target.value = "";
+                reload();
+              } catch (err: any) {
+                setError(err.message || "Could not send that waiver.");
+              }
+            }}
+          >
+            <option value="">Pick a waiver</option>
+            {templates.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.title}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      ) : null}
+      {(risk.waivers || []).map((row: any) => (
+        <p key={row.id} className="ee-muted" style={{ margin: 0 }}>
+          Waiver {row.status}
+          {row.signed_at ? ` · ${row.signed_at}` : ""}
+        </p>
+      ))}
+      <p className="ee-muted" style={{ margin: 0 }}>
+        Damage hold: {risk.hold_status}
+      </p>
+      <FormField label="Hold amount">
+        <input value={hold} onChange={(e) => setHold(e.target.value)} inputMode="decimal" />
+      </FormField>
+      <div className="ee-form__actions">
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.compliance.place_hold", { booking: jobId, amount: hold });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not place a hold.");
+            }
+          }}
+        >
+          Place hold
+        </button>
+        <button type="button" className="ee-btn ee-btn--ghost" onClick={async () => call("entertainment_express.api.compliance.release_hold", { booking: jobId }).then(reload)}>
+          Release
+        </button>
+      </div>
+      <FormField label="Add a partner on this job">
+        <select value={partner} onChange={(e) => setPartner(e.target.value)}>
+          <option value="">Pick a partner</option>
+          {vendors.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.name}
+            </option>
+          ))}
+        </select>
+      </FormField>
+      <FormField label="Their role">
+        <input value={role} onChange={(e) => setRole(e.target.value)} />
+      </FormField>
+      <FormField label="Agreed cost">
+        <input value={cost} onChange={(e) => setCost(e.target.value)} inputMode="decimal" />
+      </FormField>
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={!partner}
+        onClick={async () => {
+          setError("");
+          try {
+            await call("entertainment_express.api.vendors.save_assignment", { booking: jobId, vendor: partner, role, cost });
+            setPartner("");
+            setRole("");
+            setCost("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not add that partner.");
+          }
+        }}
+      >
+        Add partner
+      </button>
+      {(risk.vendors || []).map((row: any) => (
+        <p key={row.id} className="ee-muted" style={{ margin: 0 }}>
+          {row.vendor} · {row.role} · {row.cost}
+        </p>
+      ))}
+    </section>
+  );
+}
+
+function JobFilesPanel({ jobId }: { jobId: string }) {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [title, setTitle] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const reload = () => {
+    call("entertainment_express.api.deliverables.list_deliverables", { booking: jobId })
+      .then(setRows)
+      .catch(() => setRows([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, [jobId]);
+
+  const readFile = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Could not read that file."));
+      reader.readAsDataURL(file);
+    });
+
+  return (
+    <section className="ee-form" style={{ marginTop: "1rem" }}>
+      <h2 style={{ margin: 0 }}>Photos and files</h2>
+      <p className="ee-muted" style={{ margin: 0 }}>
+        Publish a gallery for the host and guests. Keep each file under 5 MB.
+      </p>
+      <FormField label="Title">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} />
+      </FormField>
+      <FormField label="File">
+        <input
+          type="file"
+          accept="image/*,application/pdf,video/mp4"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setError("");
+            setBusy(true);
+            try {
+              const dataUrl = await readFile(file);
+              await call("entertainment_express.api.deliverables.save_deliverable", {
+                booking: jobId,
+                title: title || file.name,
+                file_name: file.name,
+                content_b64: dataUrl,
+                kind: file.type.startsWith("video/") ? "video" : file.type === "application/pdf" ? "receipt" : "photo",
+                mime: file.type,
+              });
+              setTitle("");
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not save that file.");
+            } finally {
+              setBusy(false);
+              e.target.value = "";
+            }
+          }}
+        />
+      </FormField>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {busy ? <p className="ee-muted">Saving…</p> : null}
+      {rows.length ? (
+        <ul>
+          {rows.map((row) => (
+            <li key={row.id}>
+              {row.title}
+              {row.published ? " · published" : " · hidden"}
+              <button
+                type="button"
+                className="ee-btn"
+                style={{ marginLeft: "0.5rem" }}
+                onClick={async () => {
+                  await call("entertainment_express.api.deliverables.publish_deliverable", { name: row.id, published: row.published ? 0 : 1 });
+                  reload();
+                }}
+              >
+                {row.published ? "Hide" : "Publish"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">No files yet.</p>
+      )}
+    </section>
+  );
+}
+
 function RecordExtras({ kind, id }: { kind: string; id: string }) {
   const go = useNavigate();
   const [cloneDate, setCloneDate] = React.useState("");
@@ -405,7 +729,9 @@ function RecordExtras({ kind, id }: { kind: string; id: string }) {
           </>
         ) : null}
       </section>
+      {kind === "job" ? <JobRiskPanel jobId={id} /> : null}
       {kind === "job" ? <JobCrewPanel jobId={id} /> : null}
+      {kind === "job" ? <JobFilesPanel jobId={id} /> : null}
     </>
   );
 }
@@ -420,6 +746,7 @@ function ProposalWorkspace() {
   const [picked, setPicked] = React.useState<Record<string, boolean>>({});
   const [error, setError] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const [hint, setHint] = React.useState("");
 
   const reload = () => {
     if (!id) return;
@@ -468,6 +795,9 @@ function ProposalWorkspace() {
         </div>
       </header>
       <div className="ee-form" style={{ maxWidth: "none" }}>
+        {(doc.conflicts || []).map((row: any) => (
+          <ConflictBanner key={row.id || row.title} title={row.title} message={row.message} severity={row.severity || "potential"} />
+        ))}
         {(doc.catalog || []).map((row: any) => (
           <label key={`${row.kind}:${row.id}`} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
             <input type="checkbox" checked={!!picked[row.id]} onChange={() => setPicked((prev) => ({ ...prev, [row.id]: !prev[row.id] }))} />
@@ -481,9 +811,34 @@ function ProposalWorkspace() {
           Total {doc.total} · Deposit {doc.deposit}
         </p>
         {error ? <p className="ee-form__error">{error}</p> : null}
+        {hint ? <p className="ee-muted">{hint}</p> : null}
         <div className="ee-form__actions">
           <button type="button" className="ee-btn" disabled={busy} onClick={() => save(false)}>
             Save
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              setHint("");
+              try {
+                const res = await call("entertainment_express.api.ai.suggest_quote", { source, name: id });
+                if (res.available === false) setHint("AI suggestion unavailable");
+                else setHint(res.why || res.message || "");
+                const next = { ...picked };
+                for (const row of res.items || []) next[row.id] = true;
+                setPicked(next);
+              } catch (err: any) {
+                setError(err.message || "Could not suggest a package.");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Suggest a package
           </button>
           <button type="button" className="ee-btn" disabled={busy} onClick={() => save(true)}>
             Send to client
@@ -494,26 +849,130 @@ function ProposalWorkspace() {
   );
 }
 
+function AssistantWorkspace() {
+  const [question, setQuestion] = React.useState("");
+  const [reply, setReply] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Assistant</h1>
+        <p className="ee-muted">Ask about this company&apos;s jobs. Drafts wait for you to confirm before anything is sent or saved.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setBusy(true);
+          setError("");
+          try {
+            const res = await call("entertainment_express.api.ai.ask", { message: question });
+            setReply(res);
+          } catch (err: any) {
+            setError(err.message || "Could not ask that.");
+            setReply(null);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <FormField label="Question">
+          <textarea value={question} onChange={(e) => setQuestion(e.target.value)} rows={3} required />
+        </FormField>
+        <button type="submit" className="ee-btn" disabled={busy}>
+          Ask
+        </button>
+      </form>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {reply ? (
+        <div className="ee-form" style={{ maxWidth: "none" }}>
+          {reply.available === false ? <p className="ee-muted">AI suggestion unavailable</p> : null}
+          <p style={{ margin: 0 }}>{reply.message}</p>
+          {(reply.jobs || []).length ? (
+            <ul>
+              {reply.jobs.map((job: any) => (
+                <li key={job.id}>
+                  {job.title} · {job.when}
+                  {job.unassigned ? " · needs a crew" : ""}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState title="Nothing this week" message="Jobs on the calendar for the next seven days show up here." />
+          )}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function ReportsWorkspace() {
+  const monthStart = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+  };
+  const today = () => new Date().toISOString().slice(0, 10);
+  const [fromDate, setFromDate] = React.useState(monthStart);
+  const [toDate, setToDate] = React.useState(today);
   const [pack, setPack] = React.useState<any>(null);
+  const [schedules, setSchedules] = React.useState<any[]>([]);
+  const [email, setEmail] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = React.useCallback(() => {
+    call("entertainment_express.api.portal_reports.owner_pack", { from_date: fromDate, to_date: toDate })
+      .then(setPack)
+      .catch(() => setPack(null));
+    call("entertainment_express.api.portal_reports.list_schedules", {})
+      .then((res) => setSchedules(res || []))
+      .catch(() => setSchedules([]));
+  }, [fromDate, toDate]);
+
   React.useEffect(() => {
-    call("entertainment_express.api.portal_reports.owner_pack", {}).then(setPack).catch(() => setPack(null));
-  }, []);
+    reload();
+  }, [reload]);
+
   if (!pack) return <EmptyState title="Reports" message="Company snapshots appear here." />;
   return (
     <section style={{ display: "grid", gap: "1rem" }}>
+      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+        <FormField label="From">
+          <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+        </FormField>
+        <FormField label="To">
+          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+        </FormField>
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
         <StatCard label="Jobs" value={String(pack.jobs ?? 0)} />
         <StatCard label="Billed" value={String(pack.revenue || "0.00")} />
         <StatCard label="Still owed" value={String(pack.outstanding || "0.00")} />
-        <StatCard label="Needs a crew" value={String(pack.at_risk ?? 0)} />
+        <StatCard label="Tax" value={String(pack.tax || "0.00")} />
+        <StatCard label="Deposits held" value={String(pack.deposits_held || "0.00")} />
         <StatCard label="Payouts due" value={String(pack.payouts_due || "0.00")} />
+        <StatCard label="Open quotes" value={String(pack.pipeline_value || "0.00")} />
+        <StatCard label="Average job" value={String(pack.avg_deal || "0.00")} />
+        <StatCard label="Needs a crew" value={String(pack.at_risk ?? 0)} />
+        <StatCard label="People use" value={String(pack.crew_utilization || "—")} />
+        <StatCard label="Gear use" value={String(pack.gear_utilization || "—")} />
+        <StatCard label="Pipeline" value={String(pack.pipeline_conversion || "—")} />
       </div>
+      {pack.by_service_type?.length ? (
+        <ul>
+          {pack.by_service_type.map((row: any) => (
+            <li key={row.name}>
+              {row.name} · {row.amount} · {row.jobs} jobs
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         <button
           type="button"
           onClick={async () => {
-            const csv = await call("entertainment_express.api.portal_reports.owner_pack_csv", {});
+            const csv = await call("entertainment_express.api.portal_reports.owner_pack_csv", { from_date: fromDate, to_date: toDate });
             downloadText("company-reports.csv", String(csv || ""), "text/csv");
           }}
           style={{ background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
@@ -523,7 +982,7 @@ function ReportsWorkspace() {
         <button
           type="button"
           onClick={async () => {
-            const pdf = await call("entertainment_express.api.portal_reports.owner_pack_pdf", {});
+            const pdf = await call("entertainment_express.api.portal_reports.owner_pack_pdf", { from_date: fromDate, to_date: toDate });
             if (pdf?.content_b64) downloadBase64(pdf.filename || "company-reports.pdf", pdf.content_b64, "application/pdf");
           }}
           style={{ background: "var(--ee-panel)", color: "var(--ee-text)", border: "1px solid var(--ee-border)", borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
@@ -531,12 +990,778 @@ function ReportsWorkspace() {
           Download for accountant
         </button>
       </div>
+      <section className="ee-form" style={{ maxWidth: "none" }}>
+        <h2 style={{ margin: 0 }}>Email this snapshot</h2>
+        <FormField label="Send to">
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
+        </FormField>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            setError("");
+            try {
+              await call("entertainment_express.api.portal_reports.save_schedule", {
+                title: "Weekly snapshot",
+                recipients: email,
+                pack: "owner",
+                cadence: "weekly",
+                weekday: 0,
+              });
+              setEmail("");
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not save that schedule.");
+            }
+          }}
+        >
+          Email me each Monday
+        </button>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        {schedules.map((row) => (
+          <p key={row.id} className="ee-muted">
+            {row.title} · {row.cadence} · {row.recipients}
+            {row.active ? (
+              <button type="button" className="ee-btn" style={{ marginLeft: "0.5rem" }} onClick={() => call("entertainment_express.api.portal_reports.stop_schedule", { name: row.id }).then(reload)}>
+                Stop
+              </button>
+            ) : null}
+          </p>
+        ))}
+      </section>
+    </section>
+  );
+}
+
+function PlacesWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [name, setName] = React.useState("");
+  const [address, setAddress] = React.useState("");
+  const [loadIn, setLoadIn] = React.useState("");
+  const [coi, setCoi] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.venues.list_venues", {})
+      .then(setRows)
+      .catch(() => setRows([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Places</h1>
+        <p className="ee-muted">Save halls and parks once. Jobs pick them up with load-in notes.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.venues.save_venue", { values: { name, address, load_in: loadIn, coi_required: coi ? 1 : 0 } });
+            setName("");
+            setAddress("");
+            setLoadIn("");
+            setCoi(false);
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that place.");
+          }
+        }}
+      >
+        <FormField label="Name">
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+        </FormField>
+        <FormField label="Address">
+          <textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} />
+        </FormField>
+        <FormField label="Load-in">
+          <textarea value={loadIn} onChange={(e) => setLoadIn(e.target.value)} rows={2} />
+        </FormField>
+        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <input type="checkbox" checked={coi} onChange={(e) => setCoi(e.target.checked)} />
+          Certificate of insurance required
+        </label>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save place
+        </button>
+      </form>
+      {rows.length ? (
+        <ul>
+          {rows.map((row) => (
+            <li key={row.id}>
+              {row.name}
+              {row.coi_required ? " · certificate required" : ""}
+              {row.address ? ` · ${row.address}` : ""}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add a place so jobs stop retyping the address.</p>
+      )}
+    </section>
+  );
+}
+
+function PartnersWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [referrals, setReferrals] = React.useState<any[]>([]);
+  const [name, setName] = React.useState("");
+  const [category, setCategory] = React.useState("Photographer");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.vendors.list_vendors", {})
+      .then(setRows)
+      .catch(() => setRows([]));
+    call("entertainment_express.api.vendors.list_referrals", {})
+      .then(setReferrals)
+      .catch(() => setReferrals([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Partners</h1>
+        <p className="ee-muted">Photographers, planners, and overflow help — not your own crew.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.vendors.save_vendor", { values: { name, category, preferred: 1 } });
+            setName("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that partner.");
+          }
+        }}
+      >
+        <FormField label="Name">
+          <input value={name} onChange={(e) => setName(e.target.value)} required />
+        </FormField>
+        <FormField label="Category">
+          <input value={category} onChange={(e) => setCategory(e.target.value)} />
+        </FormField>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save partner
+        </button>
+      </form>
+      {rows.length ? (
+        <ul>
+          {rows.map((row) => (
+            <li key={row.id}>
+              {row.name} · {row.category}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add partners you send or receive work with.</p>
+      )}
+      {referrals.length ? (
+        <div>
+          <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.05rem" }}>Referrals</h2>
+          <ul>
+            {referrals.map((row) => (
+              <li key={row.id}>
+                {row.direction} · {row.vendor} · {row.commission}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function CoverageWorkspace() {
+  const [policies, setPolicies] = React.useState<any[]>([]);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [provider, setProvider] = React.useState("");
+  const [expires, setExpires] = React.useState("");
+  const [title, setTitle] = React.useState("Liability waiver");
+  const [body, setBody] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.compliance.list_policies", {})
+      .then(setPolicies)
+      .catch(() => setPolicies([]));
+    call("entertainment_express.api.compliance.list_waiver_templates", {})
+      .then(setTemplates)
+      .catch(() => setTemplates([]));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Coverage</h1>
+        <p className="ee-muted">Your policies, certificates on jobs, and waivers clients sign.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.compliance.save_policy", { values: { provider, expires } });
+            setProvider("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that policy.");
+          }
+        }}
+      >
+        <FormField label="Provider">
+          <input value={provider} onChange={(e) => setProvider(e.target.value)} required />
+        </FormField>
+        <FormField label="Expires">
+          <input type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save policy
+        </button>
+      </form>
+      {policies.length ? (
+        <ul>
+          {policies.map((row) => (
+            <li key={row.id}>
+              {row.provider}
+              {row.expires ? ` · expires ${row.expires}` : ""}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add the coverage you carry so expiry reminders have somewhere to look.</p>
+      )}
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.compliance.save_waiver_template", { values: { title, body } });
+            setBody("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that waiver.");
+          }
+        }}
+      >
+        <FormField label="Waiver title">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} />
+        </FormField>
+        <FormField label="Waiver text">
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
+        </FormField>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save waiver
+        </button>
+      </form>
+      {templates.length ? (
+        <ul>
+          {templates.map((row) => (
+            <li key={row.id}>{row.title}</li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+const MOVE_TARGETS = [
+  { id: "customers", label: "Customers", fields: ["name", "email", "phone"] },
+  { id: "leads", label: "Inquiries", fields: ["name", "email", "phone"] },
+  { id: "bookings", label: "Jobs", fields: ["name", "email", "date", "address", "start", "end"] },
+  { id: "packages", label: "Packages", fields: ["name", "rate"] },
+  { id: "gear", label: "Gear", fields: ["name", "type"] },
+  { id: "venues", label: "Places", fields: ["name", "address", "load_in"] },
+  { id: "vendors", label: "Partners", fields: ["name", "category"] },
+  { id: "songs", label: "Songs", fields: ["title", "artist"] },
+];
+
+const MOVE_FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  email: "Email",
+  phone: "Phone",
+  date: "Date",
+  address: "Address",
+  start: "Start",
+  end: "End",
+  rate: "Price",
+  type: "Type",
+  load_in: "Load-in",
+  category: "Category",
+  title: "Title",
+  artist: "Artist",
+};
+
+const MOVE_PRESET_LABELS: Record<string, string> = {
+  honeybook: "HoneyBook",
+  djeventplanner: "DJ Event Planner",
+  checkcherry: "Check Cherry",
+  booqable: "Booqable",
+};
+
+function MoveWorkspace() {
+  const [target, setTarget] = React.useState("customers");
+  const [csv, setCsv] = React.useState("");
+  const [headers, setHeaders] = React.useState<string[]>([]);
+  const [mapping, setMapping] = React.useState<Record<string, string>>({});
+  const [presets, setPresets] = React.useState<any>({});
+  const [preset, setPreset] = React.useState("");
+  const [result, setResult] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const fields = MOVE_TARGETS.find((row) => row.id === target)?.fields || [];
+
+  React.useEffect(() => {
+    call("entertainment_express.api.migration.list_presets", {})
+      .then(setPresets)
+      .catch(() => setPresets({}));
+  }, []);
+
+  React.useEffect(() => {
+    setResult(null);
+    if (!preset) return;
+    const starter = presets?.[preset]?.[target] || {};
+    setMapping({ ...starter });
+  }, [preset, target, presets]);
+
+  const readFile = (file: File) => {
+    setError("");
+    setResult(null);
+    const name = file.name.toLowerCase();
+    if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+      setError("Save the spreadsheet as CSV and try again.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const text = String(reader.result || "");
+      setCsv(text);
+      try {
+        const cols = await call("entertainment_express.api.migration.preview_headers", { csv_text: text });
+        setHeaders(cols || []);
+      } catch (err: any) {
+        setError(err.message || "Could not read that file.");
+        setHeaders([]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const run = async (dry: boolean) => {
+    setError("");
+    setBusy(true);
+    try {
+      const job = await call("entertainment_express.api.migration.start_import", {
+        target,
+        csv_text: csv,
+        mapping,
+        dry_run: dry ? 1 : 0,
+      });
+      setResult(job);
+      if (!dry && job?.id && (job.status === "pending" || job.status === "running")) {
+        const tick = window.setInterval(async () => {
+          try {
+            const next = await call("entertainment_express.api.migration.get_job", { name: job.id });
+            if (next?.status && next.status !== "pending" && next.status !== "running") {
+              window.clearInterval(tick);
+              setResult(next);
+            }
+          } catch {
+            window.clearInterval(tick);
+          }
+        }, 1500);
+      }
+    } catch (err: any) {
+      setError(err.message || "Could not run that file.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const downloadExport = async () => {
+    setError("");
+    try {
+      const file = await call("entertainment_express.api.migration.export_csv", { target });
+      downloadText(file.filename || `${target}.csv`, file.content || "", "text/csv");
+    } catch (err: any) {
+      setError(err.message || "Could not download that list.");
+    }
+  };
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Move</h1>
+        <p className="ee-muted">Bring lists in from a spreadsheet, preview first, then commit. Download what is already here anytime.</p>
+      </header>
+      <form className="ee-form" onSubmit={(event) => event.preventDefault()}>
+        <FormField label="What to move">
+          <select value={target} onChange={(e) => setTarget(e.target.value)}>
+            {MOVE_TARGETS.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.label}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Starter map">
+          <select
+            value={preset}
+            onChange={(e) => setPreset(e.target.value)}
+          >
+            <option value="">None — map columns yourself</option>
+            {Object.keys(MOVE_PRESET_LABELS).map((key) => (
+              <option key={key} value={key}>
+                {MOVE_PRESET_LABELS[key]}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="CSV file">
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) readFile(file);
+            }}
+          />
+        </FormField>
+        {fields.map((field) => (
+          <FormField key={field} label={MOVE_FIELD_LABELS[field] || field}>
+            <select
+              value={mapping[field] || ""}
+              onChange={(e) => setMapping((current) => ({ ...current, [field]: e.target.value }))}
+            >
+              <option value="">Skip</option>
+              {headers.map((header) => (
+                <option key={header} value={header}>
+                  {header}
+                </option>
+              ))}
+            </select>
+          </FormField>
+        ))}
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button type="button" className="ee-btn" disabled={busy || !csv} onClick={() => run(true)}>
+            Preview
+          </button>
+          <button type="button" className="ee-btn" disabled={busy || !csv} onClick={() => run(false)}>
+            Commit
+          </button>
+          <button type="button" className="ee-btn" disabled={busy} onClick={downloadExport}>
+            Download current list
+          </button>
+        </div>
+      </form>
+      {result ? (
+        <div>
+          <p>
+            {result.dry_run ? "Preview" : "Commit"} · {result.rows_ok || 0} {result.dry_run ? "would land" : "landed"}
+            {result.skipped ? ` · ${result.skipped} already here` : ""}
+            {result.rows_failed ? ` · ${result.rows_failed} failed` : ""}
+          </p>
+          {(result.errors || []).length ? (
+            <ul>
+              {result.errors.map((row: any, idx: number) => (
+                <li key={`${row.row}-${idx}`}>
+                  Row {row.row}: {row.message}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : csv ? (
+        <p className="ee-muted">Preview before you commit. Nothing is written until you confirm.</p>
+      ) : (
+        <p className="ee-muted">Upload a CSV from HoneyBook, DJ Event Planner, Check Cherry, Booqable, or your own export.</p>
+      )}
+    </section>
+  );
+}
+
+function ScheduleWorkspace() {
+  const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const [types, setTypes] = React.useState<any[]>([]);
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [staff, setStaff] = React.useState<any[]>([]);
+  const [employee, setEmployee] = React.useState("");
+  const [hours, setHours] = React.useState<{ weekday: string; start_time: string; end_time: string }[]>([]);
+  const [name, setName] = React.useState("Free consultation");
+  const [duration, setDuration] = React.useState("30");
+  const [error, setError] = React.useState("");
+
+  const applyStaff = (row: any) => {
+    setEmployee(row.id);
+    const byDay = Object.fromEntries((row.hours || []).map((h: any) => [h.weekday, h]));
+    setHours(
+      weekdays.map((day) => {
+        const saved = byDay[day];
+        const weekend = day === "Saturday" || day === "Sunday";
+        return {
+          weekday: day,
+          start_time: saved?.start_time || (weekend ? "" : "09:00:00"),
+          end_time: saved?.end_time || (weekend ? "" : "17:00:00"),
+        };
+      })
+    );
+  };
+
+  const reload = () => {
+    call("entertainment_express.api.appointments.list_types", {})
+      .then(setTypes)
+      .catch(() => setTypes([]));
+    call("entertainment_express.api.appointments.list_mine", {})
+      .then(setRows)
+      .catch(() => setRows([]));
+    call("entertainment_express.api.appointments.list_consult_staff", {})
+      .then((list) => {
+        const next = list || [];
+        setStaff(next);
+        setEmployee((current) => {
+          const row = next.find((s: any) => s.id === current) || next[0];
+          if (row) applyStaff(row);
+          return row?.id || "";
+        });
+      })
+      .catch(() => setStaff([]));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Consults</h1>
+        <p className="ee-muted">Times people can book on your public schedule page.</p>
+      </header>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.appointments.save_meeting_type", { values: { name, duration } });
+            setName("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that meeting.");
+          }
+        }}
+      >
+        <FormField label="Meeting name">
+          <input value={name} onChange={(e) => setName(e.target.value)} />
+        </FormField>
+        <FormField label="Length (minutes)">
+          <input value={duration} onChange={(e) => setDuration(e.target.value)} />
+        </FormField>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <button type="submit" className="ee-btn">
+          Save meeting type
+        </button>
+      </form>
+      {types.length ? (
+        <ul>
+          {types.map((row) => (
+            <li key={row.id}>
+              {row.name} · {row.duration} min
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ee-muted">Add a meeting type to open public booking.</p>
+      )}
+      {staff.length ? (
+        <form
+          className="ee-form"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            setError("");
+            try {
+              await call("entertainment_express.api.appointments.save_hours", { employee, hours });
+              reload();
+            } catch (err: any) {
+              setError(err.message || "Could not save hours.");
+            }
+          }}
+        >
+          <FormField label="Who is bookable">
+            <select
+              value={employee}
+              onChange={(e) => {
+                const row = staff.find((s) => s.id === e.target.value);
+                if (row) applyStaff(row);
+              }}
+            >
+              {staff.map((row) => (
+                <option key={row.id} value={row.id}>
+                  {row.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          {hours.map((row, idx) => (
+            <div key={row.weekday} style={{ display: "grid", gridTemplateColumns: "7rem 1fr 1fr", gap: "0.5rem", alignItems: "center" }}>
+              <span>{row.weekday.slice(0, 3)}</span>
+              <input
+                type="time"
+                value={(row.start_time || "").slice(0, 5)}
+                onChange={(e) => {
+                  const next = hours.slice();
+                  next[idx] = { ...row, start_time: e.target.value ? `${e.target.value}:00` : "" };
+                  setHours(next);
+                }}
+              />
+              <input
+                type="time"
+                value={(row.end_time || "").slice(0, 5)}
+                onChange={(e) => {
+                  const next = hours.slice();
+                  next[idx] = { ...row, end_time: e.target.value ? `${e.target.value}:00` : "" };
+                  setHours(next);
+                }}
+              />
+            </div>
+          ))}
+          <button type="submit" className="ee-btn">
+            Save hours
+          </button>
+        </form>
+      ) : (
+        <p className="ee-muted">Add active people first, then set the hours they can be booked.</p>
+      )}
+      {rows.length ? (
+        <div style={{ display: "grid", gap: "0.75rem" }}>
+          {rows.map((row) => (
+            <article key={row.id} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
+              <p style={{ margin: 0, fontWeight: 700 }}>
+                {row.title} · {row.who}
+              </p>
+              <p className="ee-muted" style={{ margin: "0.25rem 0 0.5rem" }}>
+                {row.start}
+              </p>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="ee-btn"
+                  onClick={async () => {
+                    await call("entertainment_express.api.appointments.complete", { name: row.id, decision: "completed" });
+                    reload();
+                  }}
+                >
+                  Done
+                </button>
+                <button
+                  type="button"
+                  className="ee-btn ee-btn--ghost"
+                  onClick={async () => {
+                    await call("entertainment_express.api.appointments.cancel", { name: row.id });
+                    reload();
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="ee-muted">Upcoming consults show here.</p>
+      )}
     </section>
   );
 }
 
 function AutomationsWorkspace() {
-  return <EmptyState title="Reminders" message="Deposit chasers and planning nudges use your existing notification settings. Nothing extra to install." />;
+  const [doc, setDoc] = React.useState<any>(null);
+  const [error, setError] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.workflow.get_automations", {})
+      .then(setDoc)
+      .catch((err) => setError(err.message || "Could not load reminders."));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  const toggle = async (key: string, enabled: boolean) => {
+    setError("");
+    try {
+      const next = await call("entertainment_express.api.workflow.set_automation", { key, enabled: enabled ? 0 : 1 });
+      setDoc(next);
+    } catch (err: any) {
+      setError(err.message || "Could not save that reminder.");
+    }
+  };
+
+  if (error && !doc) return <EmptyState title="Reminders" message={error} />;
+  if (!doc) return <p className="ee-muted">Loading…</p>;
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Reminders</h1>
+        <p className="ee-muted">Turn automatic follow-ups on or off for this company.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        {(doc.toggles || []).map((row: any) => (
+          <label key={row.key} style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+            <input type="checkbox" checked={!!row.enabled} onChange={() => toggle(row.key, !!row.enabled)} />
+            <span>{row.label}</span>
+          </label>
+        ))}
+      </div>
+      {(doc.templates || []).length ? (
+        <div>
+          <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.05rem" }}>Checklists</h2>
+          <ul style={{ margin: 0, paddingLeft: "1.1rem", display: "grid", gap: "0.75rem" }}>
+            {(doc.templates || []).map((tmpl: any) => (
+              <li key={tmpl.id}>
+                <strong>{tmpl.name}</strong>
+                {tmpl.event_type ? <span className="ee-muted"> · {tmpl.event_type}</span> : null}
+                <span className="ee-muted"> · {tmpl.active ? "on" : "off"}</span>
+                <ul>
+                  {(tmpl.tasks || []).map((task: any, idx: number) => (
+                    <li key={`${tmpl.id}:${idx}`}>
+                      {task.title} ({task.offset_days >= 0 ? "+" : ""}
+                      {task.offset_days} days)
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="ee-muted">No checklists yet. Add one in settings when you are ready.</p>
+      )}
+    </section>
+  );
 }
 
 function TalentHome() {
@@ -549,6 +1774,275 @@ function TalentHome() {
     <DataTable id="owner-talent" columns={[{ key: "name", label: "Gig" }, { key: "booking", label: "Event" }, { key: "status", label: "Status" }]} rows={rows} />
   ) : (
     <EmptyState title="No gigs on your calendar" message="When you are booked as talent, those jobs show here." />
+  );
+}
+
+function GrowWorkspace() {
+  const [data, setData] = React.useState<any>(null);
+  const [segName, setSegName] = React.useState("");
+  const [match, setMatch] = React.useState("all_customers");
+  const [campName, setCampName] = React.useState("");
+  const [channel, setChannel] = React.useState("email");
+  const [segment, setSegment] = React.useState("");
+  const [subject, setSubject] = React.useState("");
+  const [body, setBody] = React.useState("");
+  const [code, setCode] = React.useState("");
+  const [kind, setKind] = React.useState("percent");
+  const [value, setValue] = React.useState("10");
+  const [reviewUrl, setReviewUrl] = React.useState("");
+  const [referrer, setReferrer] = React.useState("");
+  const [refEmail, setRefEmail] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [note, setNote] = React.useState("");
+
+  const reload = () => {
+    call("entertainment_express.api.engagement.get_grow", {})
+      .then((res) => {
+        setData(res);
+        setReviewUrl(res.review_url || "");
+        if (!segment && res.segments?.[0]) setSegment(res.segments[0].id);
+        if (!referrer && res.customers?.[0]) setReferrer(res.customers[0].id);
+      })
+      .catch(() => setData({ segments: [], campaigns: [], promos: [], referrals: [], customers: [] }));
+  };
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  if (!data) return <p className="ee-muted">Loading lists…</p>;
+
+  return (
+    <section className="ee-records" style={{ display: "grid", gap: "1.25rem" }}>
+      <header>
+        <h1 style={{ margin: 0 }}>Grow</h1>
+        <p className="ee-muted">Lists, campaigns, review asks, and thank-you codes — this company only.</p>
+      </header>
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {note ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{note}</p> : null}
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_segment", { values: { name: segName, match } });
+            setSegName("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that list.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Lists</h2>
+        <FormField label="List name">
+          <input value={segName} onChange={(e) => setSegName(e.target.value)} required />
+        </FormField>
+        <FormField label="Who">
+          <select value={match} onChange={(e) => setMatch(e.target.value)}>
+            <option value="all_customers">All customers</option>
+            <option value="completed_jobs">Completed jobs (last year)</option>
+            <option value="upcoming_jobs">Upcoming jobs</option>
+            <option value="leads">Inquiries</option>
+          </select>
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save list
+        </button>
+        {(data.segments || []).length ? (
+          <ul>
+            {data.segments.map((row: any) => (
+              <li key={row.id}>{row.name}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="ee-muted">Save a list before you send.</p>
+        )}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          setNote("");
+          try {
+            const saved = await call("entertainment_express.api.engagement.save_campaign", {
+              values: { name: campName, channel, segment, subject, body },
+            });
+            const result = await call("entertainment_express.api.engagement.send_campaign", { name: saved.id });
+            setCampName("");
+            setBody("");
+            setNote(`Sent ${result.sent || 0}, skipped ${result.skipped || 0}.`);
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not send that campaign.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Campaign</h2>
+        <FormField label="Name">
+          <input value={campName} onChange={(e) => setCampName(e.target.value)} required />
+        </FormField>
+        <FormField label="Channel">
+          <select value={channel} onChange={(e) => setChannel(e.target.value)}>
+            <option value="email">Email</option>
+            <option value="sms">Text</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </FormField>
+        <FormField label="List">
+          <select value={segment} onChange={(e) => setSegment(e.target.value)}>
+            <option value="">Pick a list</option>
+            {(data.segments || []).map((row: any) => (
+              <option key={row.id} value={row.id}>
+                {row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Subject">
+          <input value={subject} onChange={(e) => setSubject(e.target.value)} />
+        </FormField>
+        <FormField label="Message">
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
+        </FormField>
+        <div className="ee-form__actions">
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                const res = await call("entertainment_express.api.ai.draft_campaign", { segment, offer: subject || campName });
+                if (res.available === false) setNote("AI suggestion unavailable");
+                if (res.subject) setSubject(res.subject);
+                if (res.body) setBody(res.body);
+              } catch (err: any) {
+                setError(err.message || "Could not draft that campaign.");
+              }
+            }}
+          >
+            Draft this campaign
+          </button>
+          <button type="submit" className="ee-btn">
+            Send
+          </button>
+        </div>
+        {(data.campaigns || []).length ? (
+          <ul>
+            {data.campaigns.map((row: any) => (
+              <li key={row.id}>
+                {row.name} · sent {row.sent} · skipped {row.skipped} · opened {row.opened}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_promo", { values: { code, kind, value } });
+            setCode("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that code.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Thank-you codes</h2>
+        <FormField label="Code">
+          <input value={code} onChange={(e) => setCode(e.target.value)} required />
+        </FormField>
+        <FormField label="Kind">
+          <select value={kind} onChange={(e) => setKind(e.target.value)}>
+            <option value="percent">Percent off</option>
+            <option value="amount">Amount off</option>
+          </select>
+        </FormField>
+        <FormField label="Value">
+          <input value={value} onChange={(e) => setValue(e.target.value)} />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save code
+        </button>
+        {(data.promos || []).length ? (
+          <ul>
+            {data.promos.map((row: any) => (
+              <li key={row.id}>
+                {row.code} · {row.value} · used {row.uses}/{row.max_uses}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="ee-muted">Codes apply on quotes and jobs.</p>
+        )}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_referral", { values: { referrer, email: refEmail } });
+            setRefEmail("");
+            reload();
+          } catch (err: any) {
+            setError(err.message || "Could not save that referral.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Referrals</h2>
+        <FormField label="Who sent them">
+          <select value={referrer} onChange={(e) => setReferrer(e.target.value)}>
+            <option value="">Pick a customer</option>
+            {(data.customers || []).map((row: any) => (
+              <option key={row.id} value={row.id}>
+                {row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="New person email">
+          <input type="email" value={refEmail} onChange={(e) => setRefEmail(e.target.value)} required />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save referral
+        </button>
+        {(data.referrals || []).length ? (
+          <ul>
+            {data.referrals.map((row: any) => (
+              <li key={row.id}>
+                {row.referrer} → {row.email} · {row.status}
+                {row.reward ? ` · ${row.reward}` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </form>
+      <form
+        className="ee-form"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setError("");
+          try {
+            await call("entertainment_express.api.engagement.save_review_url", { url: reviewUrl });
+            setNote("Review link saved. Completed jobs will get a thank-you.");
+          } catch (err: any) {
+            setError(err.message || "Could not save that link.");
+          }
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Review link</h2>
+        <FormField label="Google (or other) review URL">
+          <input value={reviewUrl} onChange={(e) => setReviewUrl(e.target.value)} placeholder="https://" />
+        </FormField>
+        <button type="submit" className="ee-btn">
+          Save review link
+        </button>
+      </form>
+    </section>
   );
 }
 
@@ -648,6 +2142,11 @@ export function OwnerApp() {
           <Route path="/pipeline/new" element={<CrudEditor kind="inquiry" basePath="/pipeline" />} />
           <Route path="/pipeline/:id/proposal" element={<ProposalWorkspace />} />
           <Route path="/pipeline/:id" element={<CrudEditor kind="inquiry" basePath="/pipeline" />} />
+          <Route path="/schedule" element={<ScheduleWorkspace />} />
+          <Route path="/places" element={<PlacesWorkspace />} />
+          <Route path="/partners" element={<PartnersWorkspace />} />
+          <Route path="/coverage" element={<CoverageWorkspace />} />
+          <Route path="/move" element={<MoveWorkspace />} />
           <Route path="/dispatch" element={<DispatchWorkspace />} />
           <Route path="/catalog" element={<CatalogWorkspace />} />
           <Route path="/catalog/new" element={<CrudEditor kind="package" basePath="/catalog" />} />
@@ -660,7 +2159,9 @@ export function OwnerApp() {
           <Route path="/money" element={<MoneyWorkspace />} />
           <Route path="/money/:id" element={<CrudEditor kind="invoice" basePath="/money" />} />
           <Route path="/reports" element={<ReportsWorkspace />} />
+          <Route path="/assistant" element={<AssistantWorkspace />} />
           <Route path="/automations" element={<AutomationsWorkspace />} />
+          <Route path="/grow" element={<GrowWorkspace />} />
           <Route path="/brand" element={<SettingsWorkspace />} />
           <Route path="/account" element={<AccountPanel />} />
           <Route path="/settings" element={<Navigate to="/brand" replace />} />

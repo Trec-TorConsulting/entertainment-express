@@ -99,9 +99,10 @@ def list_contracts() -> list[dict]:
                 order_by="modified desc",
                 limit_page_length=50,
             )
-    return [
+    docs = [
         {
             "id": row.name,
+            "kind": "contract",
             "title": row.name,
             "status": row.status,
             "signer_name": row.signer_name or "",
@@ -110,6 +111,73 @@ def list_contracts() -> list[dict]:
         }
         for row in rows
     ]
+    if customer:
+        try:
+            from entertainment_express.api.compliance import list_my_waivers
+
+            docs.extend(list_my_waivers())
+        except Exception:
+            pass
+    if customer:
+        inv_fields = ["name", "grand_total"]
+        if frappe.get_meta("Sales Invoice").has_field("ee_booking"):
+            inv_fields.append("ee_booking")
+        paid = frappe.get_all(
+            "Sales Invoice",
+            filters={"customer": customer, "docstatus": 1, "outstanding_amount": ["<=", 0]},
+            fields=inv_fields,
+            order_by="modified desc",
+            limit_page_length=20,
+        )
+        for inv in paid:
+            booking = inv.get("ee_booking") if hasattr(inv, "get") else None
+            event_name = ""
+            if booking:
+                event_name = frappe.db.get_value("Event Booking", booking, "event_name") or booking
+            docs.append(
+                {
+                    "id": inv.name,
+                    "kind": "receipt",
+                    "title": f"Receipt {inv.name}",
+                    "status": "paid",
+                    "signer_name": "",
+                    "event": event_name,
+                    "can_sign": False,
+                    "total": _money(inv.grand_total),
+                }
+            )
+    return docs
+
+
+def _planning_incomplete() -> bool:
+    customer = _customer_name()
+    if not customer or not frappe.db.table_exists("Planning Form Instance"):
+        return False
+    bookings = frappe.get_all("Event Booking", filters={"customer": customer}, pluck="name")
+    if not bookings:
+        return False
+    for row in frappe.get_all(
+        "Planning Form Instance",
+        filters={"booking": ["in", bookings]},
+        fields=["completion_percent", "status"],
+        limit_page_length=50,
+    ):
+        if (row.status or "") != "complete" and flt(row.completion_percent) < 100:
+            return True
+    return False
+
+
+@frappe.whitelist()
+def next_action() -> dict:
+    """Home priority: unsigned contract → Sign, else unpaid → Pay, else incomplete planning."""
+    _require_payer()
+    if any(row.get("can_sign") for row in list_contracts()):
+        return {"key": "sign", "label": "Sign", "href": "/client/documents"}
+    if any(row.get("can_pay") for row in list_invoices()):
+        return {"key": "pay", "label": "Pay", "href": "/client/pay"}
+    if _planning_incomplete():
+        return {"key": "planning", "label": "Planning", "href": "/client/planning"}
+    return {"key": "none", "label": "", "href": ""}
 
 
 @frappe.whitelist()

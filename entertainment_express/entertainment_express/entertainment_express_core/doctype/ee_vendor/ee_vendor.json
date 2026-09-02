@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["vendor_name", "category", "preferred", "subcontractor", "rating", "w9_on_file", "coi_on_file", "default_pay_terms", "notes", "contacts"],
+ "fields": [
+  {"fieldname": "vendor_name", "fieldtype": "Data", "label": "Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "category", "fieldtype": "Data", "label": "Category", "in_list_view": 1},
+  {"fieldname": "preferred", "fieldtype": "Check", "label": "Preferred", "default": "0"},
+  {"fieldname": "subcontractor", "fieldtype": "Check", "label": "Can take overflow", "default": "0"},
+  {"fieldname": "rating", "fieldtype": "Float", "label": "Rating"},
+  {"fieldname": "w9_on_file", "fieldtype": "Check", "label": "W-9 on file", "default": "0"},
+  {"fieldname": "coi_on_file", "fieldtype": "Check", "label": "Certificate on file", "default": "0"},
+  {"fieldname": "default_pay_terms", "fieldtype": "Data", "label": "Pay terms"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"},
+  {"fieldname": "contacts", "fieldtype": "Table", "label": "Contacts", "options": "EE Vendor Contact"}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Vendor",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "vendor_name",
+ "sort_order": "ASC",
+ "title_field": "vendor_name",
+ "track_changes": 1
+}

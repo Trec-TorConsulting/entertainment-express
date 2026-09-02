@@ -115,23 +115,9 @@ def _money(amount):
 
 @frappe.whitelist(allow_guest=True)
 def public_catalog() -> dict:
-    packages = []
-    if frappe.db.table_exists("Service Package"):
-        for pkg in frappe.get_all(
-            "Service Package",
-            filters={"active": 1},
-            fields=["name", "package_name", "package_price", "description"],
-            limit_page_length=100,
-        ):
-            packages.append(
-                {
-                    "id": pkg.name,
-                    "kind": "package",
-                    "name": pkg.package_name or pkg.name,
-                    "rate": _money(pkg.package_price),
-                    "description": pkg.description or "",
-                }
-            )
+    from entertainment_express.api.storefront import list_packages
+
+    packages = [{**row, "kind": "package"} for row in list_packages()]
     items = []
     filters = {"disabled": 0}
     if frappe.get_meta("Item").has_field("ee_self_bookable"):

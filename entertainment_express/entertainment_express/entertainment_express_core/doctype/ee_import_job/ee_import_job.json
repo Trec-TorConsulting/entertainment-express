@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["target", "source_type", "status", "dry_run", "rows_total", "rows_ok", "rows_failed", "mapping", "source_csv", "errors"],
+ "fields": [
+  {"fieldname": "target", "fieldtype": "Select", "label": "What", "options": "customers\nleads\nbookings\npackages\ngear\nvenues\nvendors\nsongs", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "source_type", "fieldtype": "Select", "label": "File", "options": "csv\nexcel", "default": "csv"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "pending\nvalidating\nrunning\ncompleted\nfailed", "default": "pending", "in_list_view": 1},
+  {"fieldname": "dry_run", "fieldtype": "Check", "label": "Preview only", "default": "1"},
+  {"fieldname": "rows_total", "fieldtype": "Int", "label": "Rows"},
+  {"fieldname": "rows_ok", "fieldtype": "Int", "label": "Landed"},
+  {"fieldname": "rows_failed", "fieldtype": "Int", "label": "Failed"},
+  {"fieldname": "mapping", "fieldtype": "Code", "label": "Column map", "options": "JSON"},
+  {"fieldname": "source_csv", "fieldtype": "Long Text", "label": "Source"},
+  {"fieldname": "errors", "fieldtype": "Table", "label": "Errors", "options": "EE Import Error", "editable_grid": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Import Job",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

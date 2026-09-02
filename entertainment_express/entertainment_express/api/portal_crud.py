@@ -6,7 +6,7 @@ import re
 import secrets
 
 import frappe
-from frappe.utils import flt, fmt_money, nowdate
+from frappe.utils import cint, flt, fmt_money, nowdate
 
 from entertainment_express.api.portal_owner import _require_owner
 
@@ -53,6 +53,7 @@ def _schema(kind: str) -> dict:
                 {"key": "contact_name", "label": "Name"},
                 {"key": "email", "label": "Email"},
                 {"key": "status", "label": "Status"},
+                {"key": "score", "label": "Follow-up"},
                 {"key": "updated", "label": "Updated"},
             ],
             "fields": [
@@ -248,12 +249,19 @@ def delete_record(kind: str, name: str) -> dict:
 
 def _list_inquiries() -> list[dict]:
     rows = []
+    fields = ["name", "lead_name", "email_id", "mobile_no", "status", "modified"]
+    try:
+        if frappe.get_meta("Lead").has_field("ee_lead_score"):
+            fields.append("ee_lead_score")
+    except Exception:
+        pass
     for row in frappe.get_all(
         "Lead",
-        fields=["name", "lead_name", "email_id", "mobile_no", "status", "modified"],
+        fields=fields,
         order_by="modified desc",
         limit_page_length=200,
     ):
+        score = row.get("ee_lead_score")
         rows.append(
             {
                 "id": row.name,
@@ -261,6 +269,7 @@ def _list_inquiries() -> list[dict]:
                 "email": row.email_id or "",
                 "phone": row.mobile_no or "",
                 "status": INQUIRY_OUT.get(row.status, row.status or "New"),
+                "score": "" if score in (None, "") else str(score),
                 "updated": str(row.modified or "")[:16],
             }
         )
@@ -348,10 +357,21 @@ def _ensure_customer(customer_name: str) -> str:
     return doc.name
 
 
+def _not_template_filters(extra: dict | None = None) -> dict:
+    filters = dict(extra or {})
+    try:
+        if frappe.get_meta("Event Booking").has_field("is_template"):
+            filters["is_template"] = 0
+    except Exception:
+        pass
+    return filters
+
+
 def _list_jobs() -> list[dict]:
     rows = []
     for row in frappe.get_all(
         "Event Booking",
+        filters=_not_template_filters(),
         fields=["name", "event_name", "event_date", "status", "customer"],
         order_by="event_date desc",
         limit_page_length=200,
@@ -402,10 +422,18 @@ def _save_job(name: str | None, values: dict) -> str:
         doc = frappe.get_doc("Event Booking", name)
         doc.update(payload)
         _maybe_notes(doc, values.get("notes"))
+        if values.get("venue"):
+            from entertainment_express.api.venues import apply_venue_to_booking
+
+            apply_venue_to_booking(doc, values.get("venue"))
         doc.save(ignore_permissions=True)
         return doc.name
     doc = frappe.get_doc({"doctype": "Event Booking", **payload})
     _maybe_notes(doc, values.get("notes"))
+    if values.get("venue"):
+        from entertainment_express.api.venues import apply_venue_to_booking
+
+        apply_venue_to_booking(doc, values.get("venue"))
     doc.insert(ignore_permissions=True)
     return doc.name
 
@@ -664,7 +692,13 @@ def _as_time(val, default: str = "18:00:00"):
 
 
 @frappe.whitelist()
-def clone_job(name: str, event_date: str, start_time: str | None = None, end_time: str | None = None) -> dict:
+def clone_job(
+    name: str,
+    event_date: str,
+    start_time: str | None = None,
+    end_time: str | None = None,
+    as_template: int = 0,
+) -> dict:
     _require_owner()
     src = frappe.get_doc("Event Booking", name)
     start = _as_time(start_time or src.start_time)
@@ -676,13 +710,14 @@ def clone_job(name: str, event_date: str, start_time: str | None = None, end_tim
     window_end = datetime.combine(day, end)
     from entertainment_express.booking.availability import check
 
-    for row in src.assigned_assets or []:
-        result = check(row.asset, window_start, window_end)
-        if not result.get("available"):
-            frappe.throw("That date is not open for the gear on this job.")
+    if not cint(as_template):
+        for row in src.assigned_assets or []:
+            result = check(row.asset, window_start, window_end)
+            if not result.get("available"):
+                frappe.throw("That date is not open for the gear on this job.")
     payload = {
         "doctype": "Event Booking",
-        "event_name": f"{src.event_name} (copy)",
+        "event_name": f"{src.event_name} (copy)" if not cint(as_template) else f"{src.event_name} template",
         "customer": src.customer,
         "event_date": event_date,
         "start_time": str(start),
@@ -694,19 +729,79 @@ def clone_job(name: str, event_date: str, start_time: str | None = None, end_tim
         "notes": src.notes if isinstance(src.notes, str) else "",
         "deposit_percent": src.deposit_percent or 25,
     }
+    if src.meta.has_field("venue"):
+        payload["venue"] = src.venue
+    if src.meta.has_field("load_in_notes"):
+        payload["load_in_notes"] = src.load_in_notes
+        payload["parking_notes"] = src.parking_notes
+        payload["power_notes"] = src.power_notes
+        payload["noise_curfew"] = src.noise_curfew
     if src.meta.has_field("event_type"):
         payload["event_type"] = src.event_type
+    if src.meta.has_field("is_template"):
+        payload["is_template"] = 1 if cint(as_template) else 0
     doc = frappe.get_doc(payload)
     for row in src.service_items or []:
-        doc.append(
-            "service_items",
+        item = {
+            "item": row.item,
+            "qty": row.qty,
+            "rate": row.rate,
+            "amount": row.amount,
+            "service_package": getattr(row, "service_package", None),
+        }
+        if getattr(row, "client_visible", None) is not None:
+            item["client_visible"] = row.client_visible
+        doc.append("service_items", item)
+    doc.insert(ignore_permissions=True)
+    _clone_timeline(src.name, doc.name)
+    _clone_planning_templates(src.name, doc.name)
+    return {"name": doc.name, "id": doc.name}
+
+
+def _clone_timeline(source: str, dest: str) -> None:
+    if not frappe.db.table_exists("Event Timeline"):
+        return
+    src_name = frappe.db.get_value("Event Timeline", {"booking": source}, "name")
+    if not src_name:
+        return
+    old = frappe.get_doc("Event Timeline", src_name)
+    neu = frappe.get_doc(
+        {
+            "doctype": "Event Timeline",
+            "booking": dest,
+            "timezone": old.timezone,
+            "status": "draft",
+            "share_with_client": 0,
+        }
+    )
+    for item in old.items or []:
+        neu.append(
+            "items",
             {
-                "item": row.item,
-                "qty": row.qty,
-                "rate": row.rate,
-                "amount": row.amount,
-                "service_package": getattr(row, "service_package", None),
+                "start_time": item.start_time,
+                "end_time": item.end_time,
+                "title": item.title,
+                "description": item.description,
+                "responsible": item.responsible,
+                "location": item.location,
+                "visible_to_client": getattr(item, "visible_to_client", 1),
+                "song": getattr(item, "song", None),
             },
         )
-    doc.insert(ignore_permissions=True)
-    return {"name": doc.name, "id": doc.name}
+    neu.insert(ignore_permissions=True)
+
+
+def _clone_planning_templates(source: str, dest: str) -> None:
+    if not frappe.db.table_exists("Planning Form Instance"):
+        return
+    for row in frappe.get_all("Planning Form Instance", filters={"booking": source}, fields=["template"]):
+        if frappe.db.exists("Planning Form Instance", {"booking": dest, "template": row.template}):
+            continue
+        frappe.get_doc(
+            {
+                "doctype": "Planning Form Instance",
+                "booking": dest,
+                "template": row.template,
+                "status": "not_started",
+            }
+        ).insert(ignore_permissions=True)

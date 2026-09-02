@@ -188,12 +188,19 @@ def my_shifts() -> list[dict]:
     out = []
     for row in rows:
         when = frappe.db.get_value("Event Booking", row["booking"], "event_date")
-        place = frappe.db.get_value("Event Booking", row["booking"], "venue_address") or ""
+        booking = frappe.get_doc("Event Booking", row["booking"])
+        from entertainment_express.api.vendors import field_vendors
+
         out.append(
             {
                 "id": row["name"],
                 "job": _job_title(row["booking"]),
-                "place": place,
+                "place": booking.venue_address or "",
+                "load_in": getattr(booking, "load_in_notes", None) or "",
+                "parking": getattr(booking, "parking_notes", None) or "",
+                "power": getattr(booking, "power_notes", None) or "",
+                "curfew": getattr(booking, "noise_curfew", None) or "",
+                "vendors": field_vendors(row["booking"]),
                 "when": str(when or row.get("call_time") or ""),
                 "role": row.get("role") or "",
                 "status": _label_status(row.get("status")),
@@ -224,10 +231,10 @@ def respond(assignment: str, decision: str) -> dict:
 
 
 @frappe.whitelist()
-def check_in(assignment: str) -> dict:
+def check_in(assignment: str, latitude: float | None = None, longitude: float | None = None) -> dict:
     _require_field()
     _assert_own_or_dispatch(assignment)
-    _dispatch.crew_check_in(assignment)
+    _dispatch.crew_check_in(assignment, latitude=latitude, longitude=longitude)
     return {"status": STATUS_LABELS["checked_in"]}
 
 

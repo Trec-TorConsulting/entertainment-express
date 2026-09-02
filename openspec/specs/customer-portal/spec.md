@@ -64,6 +64,43 @@ The system SHALL make `/client` the place the paying customer does all of their 
 - **WHEN** a customer with an unsigned contract or unpaid deposit opens `/client`
 - **THEN** the home highlights Sign or Pay for that event using existing contract/payment APIs
 
+#### Scenario: Home prefers sign then pay
+- **WHEN** both an unsigned contract and an unpaid deposit exist
+- **THEN** Home’s primary action is Sign, then Pay after signature
+
+### Requirement: Working Pay Screen
+The system SHALL list the paying customer’s open invoices and deposits on `/client/pay` and start checkout through existing billing APIs. The screen SHALL NOT be an empty state that links to itself.
+
+#### Scenario: Customer pays a deposit
+- **WHEN** a customer with an unpaid deposit invoice opens `/client/pay` and completes checkout
+- **THEN** the processor capture succeeds through existing billing, the invoice updates, and amounts shown are backend strings
+
+#### Scenario: Guest denied pay
+- **WHEN** an `EE Event Guest` requests `/client/pay` or the pay API
+- **THEN** access is denied and no Payment Entry is created
+
+### Requirement: Working Documents And Sign
+The system SHALL list the customer’s contracts and receipts on `/client/documents`. Unsigned contracts SHALL be signable in the portal using the existing e-sign audit trail.
+
+#### Scenario: Customer signs in portal
+- **WHEN** a customer opens an unsigned contract on `/client/documents` and signs
+- **THEN** the contract is `signed` with signer, timestamp, and signature payload stored as today
+
+#### Scenario: Guest cannot sign
+- **WHEN** a guest calls sign for that booking’s contract
+- **THEN** the request is denied (403)
+
+### Requirement: Working Planning Hub
+The system SHALL load planning forms, timeline, and music lists for the selected booking on `/client/planning` using existing phase-15 APIs plus event-collaboration suggest/vote.
+
+#### Scenario: Customer completes a planning form
+- **WHEN** a customer saves answers on `/client/planning`
+- **THEN** the Planning Form Instance updates and completion percent is stored
+
+#### Scenario: Guest sees planning not money
+- **WHEN** an accepted guest opens `/client/planning`
+- **THEN** they can view/suggest planning items for that booking only and do not see invoices
+
 ### Requirement: Event People And Guest Experience
 The system SHALL let the paying customer invite and revoke event guests (`event-collaboration`). Accepted guests using `/client` SHALL see only that event’s planning, chat, and published photos — not Pay, not invoices, not the ability to invite others (v1).
 
@@ -74,3 +111,39 @@ The system SHALL let the paying customer invite and revoke event guests (`event-
 #### Scenario: Customer pays, guest does not
 - **WHEN** the customer pays a deposit from `/client`
 - **THEN** the payment succeeds through existing billing APIs; the same action is unavailable in the guest UI and API
+
+### Requirement: Client Books Consults
+The system SHALL let a signed-in `EE Customer` book, reschedule, and cancel their own appointments from `/client`. Event guests SHALL NOT book as the paying customer.
+
+#### Scenario: Customer reschedules
+- **WHEN** a customer picks a new offered slot for their consult
+- **THEN** the Appointment times update, the old slot is released, and both parties are notified
+
+#### Scenario: Guest cannot book as payer
+- **WHEN** an `EE Event Guest` calls the customer book-appointment API
+- **THEN** the request is denied (403)
+
+### Requirement: Client Signs Waivers
+The system SHALL list required unsigned waivers on `/client/documents` for the paying customer. Event guests SHALL NOT sign.
+
+#### Scenario: Customer signs a waiver
+- **WHEN** a customer signs a pending waiver
+- **THEN** the waiver is stored signed and guests cannot call that API
+
+### Requirement: Published Event Photos
+The system SHALL let the owner publish files on a job and SHALL list those published files on `/client/photos` for booking members. Unpublished files SHALL be hidden from customers and guests. Downloads SHALL check membership. Guests SHALL NOT upload.
+
+#### Scenario: Customer opens published gallery
+- **WHEN** the owner publishes a photo on a job and the paying customer opens Photos
+- **THEN** they can view/download that file and do not see unpublished files
+
+#### Scenario: Guest sees only this event
+- **WHEN** an accepted guest opens Photos
+- **THEN** they see published files for that event only
+
+### Requirement: Client Applies Promo
+The system SHALL let the paying customer apply a valid promo code on `/client`. Event guests SHALL NOT apply codes. Amounts SHALL be backend strings.
+
+#### Scenario: Host applies a code
+- **WHEN** a customer applies a valid unused code
+- **THEN** the discount is applied and guests cannot call that API

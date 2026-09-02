@@ -181,6 +181,73 @@ export function JobCrewPanel({ jobId }: { jobId: string }) {
   );
 }
 
+function SuggestCrew({
+  jobId,
+  atRisk,
+  onOffered,
+}: {
+  jobId: string;
+  atRisk: boolean;
+  onOffered: () => void;
+}) {
+  const [rows, setRows] = React.useState<any[] | null>(null);
+  const [note, setNote] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  if (!atRisk && !rows) {
+    return null;
+  }
+  return (
+    <div className="ee-dispatch__assign">
+      <button
+        type="button"
+        className="ee-btn"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          setError("");
+          try {
+            const res = await call("entertainment_express.api.ai.suggest_dispatch", { job: jobId });
+            setRows(res.crew || []);
+            setNote(res.available === false ? "AI suggestion unavailable" : res.message || "");
+          } catch (err: any) {
+            setError(err.message || "Could not suggest crew.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        Suggest crew
+      </button>
+      {note ? <p className="ee-muted">{note}</p> : null}
+      {error ? <p className="ee-form__error">{error}</p> : null}
+      {(rows || []).map((row) => (
+        <p key={row.employee} style={{ margin: 0 }}>
+          {row.rank}. {row.name} · {row.reason}{" "}
+          <button
+            type="button"
+            className="ee-btn"
+            onClick={async () => {
+              setError("");
+              try {
+                await call("entertainment_express.api.ai.confirm", {
+                  kind: "offer_crew",
+                  payload: { job: jobId, person: row.employee, role: (row.roles || [])[0] || "" },
+                });
+                onOffered();
+              } catch (err: any) {
+                setError(err.message || "Could not offer that shift.");
+              }
+            }}
+          >
+            Offer this person
+          </button>
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
   const [day, setDay] = React.useState(today);
   const [jobs, setJobs] = React.useState<JobRow[]>([]);
@@ -250,109 +317,11 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
               <p className="ee-muted">No crew yet.</p>
             )}
             {canAssign ? <AssignForm jobId={job.id} people={people} roles={roles} onOffered={reload} /> : null}
+            {canAssign ? <SuggestCrew jobId={job.id} atRisk={job.at_risk || !job.crew.length} onOffered={reload} /> : null}
           </article>
         ))
       ) : (
         <EmptyState title="Nothing on this day" message="Jobs with a date set appear here so you can staff them." />
-      )}
-    </section>
-  );
-}
-
-type Shift = {
-  id: string;
-  job: string;
-  place: string;
-  when: string;
-  role: string;
-  status: string;
-  can_accept?: boolean;
-  can_check_in?: boolean;
-  can_check_out?: boolean;
-};
-
-export function FieldBoard() {
-  const [shifts, setShifts] = React.useState<Shift[]>([]);
-  const [error, setError] = React.useState("");
-
-  const reload = React.useCallback(() => {
-    call("entertainment_express.api.portal_dispatch.my_shifts", {})
-      .then((res) => setShifts(res || []))
-      .catch((err) => {
-        setShifts([]);
-        setError(err.message || "Could not load your shifts.");
-      });
-  }, []);
-
-  React.useEffect(() => {
-    reload();
-  }, [reload]);
-
-  const run = async (method: string, args: Record<string, string>) => {
-    setError("");
-    try {
-      await call(method, args);
-      reload();
-    } catch (err: any) {
-      setError(err.message || "Could not update this shift.");
-    }
-  };
-
-  return (
-    <section className="ee-dispatch">
-      <div>
-        <p className="ee-muted" style={{ margin: 0 }}>
-          Your jobs
-        </p>
-        <h1>Field</h1>
-      </div>
-      {error ? <p className="ee-form__error">{error}</p> : null}
-      {shifts.length ? (
-        shifts.map((shift) => (
-          <article key={shift.id} className="ee-dispatch__job">
-            <div>
-              <h2>{shift.job}</h2>
-              <p className="ee-dispatch__meta">
-                {shift.when}
-                {shift.place ? ` · ${shift.place}` : ""}
-                {shift.role ? ` · ${shift.role}` : ""}
-              </p>
-              <p style={{ margin: 0 }}>{shift.status}</p>
-            </div>
-            <div className="ee-form__actions">
-              {shift.can_accept ? (
-                <>
-                  <button
-                    type="button"
-                    className="ee-btn"
-                    onClick={() => run("entertainment_express.api.portal_dispatch.respond", { assignment: shift.id, decision: "accept" })}
-                  >
-                    I&apos;m in
-                  </button>
-                  <button
-                    type="button"
-                    className="ee-btn ee-btn--danger"
-                    onClick={() => run("entertainment_express.api.portal_dispatch.respond", { assignment: shift.id, decision: "decline" })}
-                  >
-                    Can&apos;t make it
-                  </button>
-                </>
-              ) : null}
-              {shift.can_check_in ? (
-                <button type="button" className="ee-btn" onClick={() => run("entertainment_express.api.portal_dispatch.check_in", { assignment: shift.id })}>
-                  Check in
-                </button>
-              ) : null}
-              {shift.can_check_out ? (
-                <button type="button" className="ee-btn" onClick={() => run("entertainment_express.api.portal_dispatch.check_out", { assignment: shift.id })}>
-                  Check out
-                </button>
-              ) : null}
-            </div>
-          </article>
-        ))
-      ) : (
-        <EmptyState title="No shifts yet" message="When someone offers you a job, it shows up here." />
       )}
     </section>
   );

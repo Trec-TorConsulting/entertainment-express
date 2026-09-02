@@ -72,31 +72,36 @@ SMS/WhatsApp (Twilio), FCM push, templates, preferences/opt-out/quiet hours, del
 beyond the phase-1 email subset.
 **Spec:** `notifications`, `integrations` (comms). **Depends on:** phase-1.
 
-## Phase 7 — Customer Portal 📝
+## Phase 7 — Customer Portal ✅ archived 2026-09-01
 Authenticated self-service: dashboard, booking self-management, portal sign & pay, event questionnaires,
 messaging, deliverables access. Surfaces planning forms, timeline, and music planning (delivered in
 phase-15).
 **Spec:** `customer-portal`. **Depends on:** phase-1, phase-5, phase-6.
+**Folder:** [`archive/2026-09-01-phase-7-customer-portal/`](archive/2026-09-01-phase-7-customer-portal/)
 
-## Phase 8 — Marketing & Engagement 📝
+## Phase 8 — Marketing & Engagement ✅ archived 2026-09-01
 Segmentation, email/SMS/WhatsApp campaigns, lifecycle journeys, review generation, referrals/promotions,
 campaign analytics.
 **Spec:** `marketing-engagement`. **Depends on:** phase-6.
+**Folder:** [`archive/2026-09-01-phase-8-marketing-engagement/`](archive/2026-09-01-phase-8-marketing-engagement/)
 
-## Phase 9 — Mobile Field App (PWA) 📝
+## Phase 9 — Mobile Field App (PWA) ✅
 Crew PWA: job list/details, navigation, check-in/out, on-site workflows, media/signature capture, offline
 tolerance, push, issue reporting.
 **Spec:** `mobile-field-app`. **Depends on:** phase-2, phase-3, phase-6.
+**Folder:** [`archive/2026-09-01-phase-9-mobile-field-app/`](archive/2026-09-01-phase-9-mobile-field-app/)
 
-## Phase 10 — Reporting & BI 📝
+## Phase 10 — Reporting & BI ✅
 Operational dashboards, financial reports, utilization/ops KPIs, custom reports/exports, scheduled delivery,
 control-plane analytics.
 **Spec:** `reporting-bi`. **Depends on:** data from phases 1–9.
+**Folder:** [`archive/2026-09-01-phase-10-reporting-bi/`](archive/2026-09-01-phase-10-reporting-bi/)
 
-## Phase 11 — AI Assistant & Intelligence 📝
+## Phase 11 — AI Assistant & Intelligence ✅
 Pluggable Ollama backend, conversational assistant, smart quoting, forecasting, dispatch/route suggestions,
 content drafting, lead scoring, guardrails.
 **Spec:** `ai-assistant`. **Depends on:** phases 1–10 data; Ollama on node05.
+**Folder:** [`archive/2026-09-02-phase-11-ai-assistant/`](archive/2026-09-02-phase-11-ai-assistant/)
 
 ## Phase 12 — SaaS Control Plane (Full) 📝
 Complete self-service signup, plans/entitlements, usage metering, Stripe subscription billing + dunning,
@@ -121,24 +126,28 @@ import/preview, music library & availability check). Surfaces to crew on run she
 **Specs:** `event-planning-forms`, `event-timeline`, `music-planning`. **Depends on:** phase-1, phase-7
 (portal), phase-13 (streaming integrations), phase-9 (mobile crew view).
 
-## Phase 16 — Appointments & Consultation Scheduling 📝
-Calendly-style self-service scheduler for consultations/planning meetings: bookable meeting types,
-availability/conflict prevention, calendar sync, reminders, reschedule/cancel, video links, meeting
-confirmations.
-**Spec:** `appointments-scheduling`. **Depends on:** phase-1, phase-6 (reminders), phase-13 (calendar sync).
+## Phase 16 — Appointments & Consultation Scheduling ✅ archived 2026-09-01
+**Goal:** Calendly-style self-service scheduler for consultations/planning meetings: bookable meeting types,
+availability/conflict prevention against events and time-off, reminders, reschedule/cancel. Native EE
+calendars this phase; Google/Microsoft two-way sync stays phase 13.
+**Spec:** `appointments-scheduling` (plus portal/CRM/notification deltas). **Depends on:** phase-3 workers,
+phase-6 reminders, phase-26 portals.
+**Folder:** [`archive/2026-09-01-phase-16-appointments-scheduling/`](archive/2026-09-01-phase-16-appointments-scheduling/)
 
-## Phase 17 — Venues, Vendors & Insurance/Compliance 📝
+## Phase 17 — Venues, Vendors & Insurance/Compliance ✅ archived 2026-09-01
 Reusable **venue database** (logistics, access, COI flags), **vendor/partner network** (referrals,
 subcontracting/overflow), and **insurance & compliance** (COI tracking, liability/damage waivers, security/
 damage deposits & pre-auth, per-event insurance, policy expiry).
 **Specs:** `venue-management`, `vendor-network`, `insurance-compliance`. **Depends on:** phase-1, phase-4
 (equipment/sub-rentals), phase-5 (deposits/pre-auth).
+**Folder:** [`archive/2026-09-01-phase-17-venues-vendors-insurance/`](archive/2026-09-01-phase-17-venues-vendors-insurance/)
 
-## Phase 18 — Data Migration & Onboarding 📝
+## Phase 18 — Data Migration & Onboarding ✅ archived 2026-09-01
 Guided CSV/Excel import with mapping/validation, competitor-export mapping presets, idempotent resumable
 import jobs, data export, and a new-tenant onboarding checklist. Reduces tenant switching cost.
 **Spec:** `data-migration`. **Depends on:** phase-1 (core entities exist); can run in parallel with later
 phases as those entities become importable.
+**Folder:** [`archive/2026-09-01-phase-18-data-migration-onboarding/`](archive/2026-09-01-phase-18-data-migration-onboarding/)
 
 ## Phase 19 — SaaS Marketing Website & Lead Capture ✅
 **Goal:** The public product front door at `www.{base_domain}` (served by the control-plane site) that sells
@@ -182,7 +191,7 @@ payer-only money). Canned reports per URL. New `event-collaboration` backend.
 **Depends on:** phase-20 shells, phase-1/2/5/15 APIs.
 **Folder:** [`phase-25-experience-os/`](phase-25-experience-os/)
 
-## Phase 26 — Core Completeness (usable revenue + planning loops) ✅ proposal
+## Phase 26 — Core Completeness (usable revenue + planning loops) ✅ archived 2026-09-01
 **Goal:** Make the shells usable without Desk: interactive Proposal (packages + contract + deposit) in
 `/owner` and `/client`; working Pay / Documents / Planning (not empty states); event-type workflow
 checklists; potential vs actual quote conflicts; clone job; public catalog/wishlist; warehouse-only
@@ -192,7 +201,7 @@ EventPlanner.ai decks.
 `service-catalog`, `equipment-inventory-fleet`, `event-planning-forms`, `event-timeline`,
 `music-planning`, `event-collaboration`, `billing-payments`, `notifications`, `identity-access`.
 **Depends on:** phase-1 quotes/contracts, phase-5 payments, phase-15 planning, phase-25 OS.
-**Folder:** [`phase-26-core-completeness/`](phase-26-core-completeness/)
+**Folder:** [`archive/2026-09-01-phase-26-core-completeness/`](archive/2026-09-01-phase-26-core-completeness/)
 
 ## Phase 20 — Role-Based Portals ✅
 **Goal:** Modernize the experience layer by giving each audience its own purpose-built portal over the **one**

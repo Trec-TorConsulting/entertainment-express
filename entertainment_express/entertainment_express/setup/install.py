@@ -20,6 +20,8 @@ def create_all():
     from entertainment_express.setup.custom_fields import CUSTOM_FIELDS
 
     for doctype, fields in CUSTOM_FIELDS.items():
+        if not frappe.db.exists("DocType", doctype):
+            continue
         for field_def in fields:
             fieldname = field_def["fieldname"]
             if frappe.db.exists("Custom Field", f"{doctype}-{fieldname}"):

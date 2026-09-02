@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["title", "pack", "cadence", "weekday", "recipients", "active", "last_sent"],
+ "fields": [
+  {"fieldname": "title", "fieldtype": "Data", "label": "Title", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "pack", "fieldtype": "Select", "label": "Pack", "options": "owner\nemployee", "default": "owner", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "cadence", "fieldtype": "Select", "label": "How often", "options": "weekly\nmonthly", "default": "weekly", "in_list_view": 1},
+  {"fieldname": "weekday", "fieldtype": "Int", "label": "Weekday", "default": "0", "description": "0 = Monday"},
+  {"fieldname": "recipients", "fieldtype": "Small Text", "label": "Emails", "reqd": 1},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1", "in_list_view": 1},
+  {"fieldname": "last_sent", "fieldtype": "Date", "label": "Last sent", "read_only": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Report Schedule",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1},
+  {"role": "EE Accounting", "read": 1, "write": 1, "create": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

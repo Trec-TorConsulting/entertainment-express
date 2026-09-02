@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "autoname": "format:EE-WFT-{#####}",
+ "creation": "2026-09-01 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["template_name", "event_type", "active", "section_tasks", "tasks"],
+ "fields": [
+  {"fieldname": "template_name", "fieldtype": "Data", "label": "Template Name", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "event_type", "fieldtype": "Data", "label": "Event Type", "reqd": 1, "in_list_view": 1, "description": "Matches Event Booking.event_type; not a hard-coded vertical"},
+  {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1", "in_list_view": 1},
+  {"fieldname": "section_tasks", "fieldtype": "Section Break", "label": "Tasks"},
+  {"fieldname": "tasks", "fieldtype": "Table", "label": "Tasks", "options": "EE Workflow Template Task", "reqd": 1}
+ ],
+ "modified": "2026-09-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Workflow Template",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 1, "export": 1},
+  {"role": "EE Sales", "read": 1, "write": 1, "create": 1},
+  {"role": "EE Dispatcher", "read": 1},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1}
+ ],
+ "sort_field": "template_name",
+ "sort_order": "ASC",
+ "title_field": "template_name",
+ "track_changes": 1
+}
