@@ -27,3 +27,4 @@ entertainment_express.patches.v0_0_3.phase15_event_planning
 entertainment_express.patches.v0_0_3.phase2_scheduling
 entertainment_express.patches.v0_0_3.phase3_hr_workforce
 entertainment_express.patches.v0_0_3.phase4_equipment_fleet
+entertainment_express.patches.v0_0_3.phase5_full_billing

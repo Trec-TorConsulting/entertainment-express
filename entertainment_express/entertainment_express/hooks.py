@@ -104,6 +104,7 @@ scheduler_events = {
         "entertainment_express.hr_workforce.scheduler.check_compliance_expiry",
         "entertainment_express.event_planning.scheduler.send_form_reminders",
         "entertainment_express.api.billing.send_balance_reminders",
+        "entertainment_express.api.billing.charge_due_installments",
         "entertainment_express.api.workflow.run_daily",
         "entertainment_express.api.appointments.run_daily",
         "entertainment_express.api.compliance.run_daily",

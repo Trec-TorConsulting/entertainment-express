@@ -66,11 +66,12 @@ Owner/employee without Desk.
 **Spec:** `equipment-inventory-fleet`. **Depends on:** phase-1 service-catalog assets.
 **Folder:** [`phase-4-equipment-fleet/`](phase-4-equipment-fleet/)
 
-## Phase 5 — Full Billing & Multi-Processor Payments 📝
+## Phase 5 — Full Billing & Multi-Processor Payments ✅
 Complete deposits/payment schedules, Square + PayPal + ACH + Authorize.Net, security/damage deposits & card
 pre-authorization, installment payment plans, refunds, tips, webhook reconciliation, full accounting
-integrity beyond the phase-1 Stripe subset.
+integrity beyond the phase-1 Stripe subset. Owner/employee/client without Desk.
 **Spec:** `billing-payments`, `integrations` (payments). **Depends on:** phase-1.
+**Folder:** [`phase-5-full-billing/`](phase-5-full-billing/)
 
 ## Phase 6 — Notifications (Full Multi-Channel) 📝
 SMS/WhatsApp (Twilio), FCM push, templates, preferences/opt-out/quiet hours, delivery tracking, retries,

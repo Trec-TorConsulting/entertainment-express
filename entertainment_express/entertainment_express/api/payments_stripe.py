@@ -251,7 +251,7 @@ def _handle_payment_failed(event_data: dict) -> None:
                 "booking_name": booking_name or invoice_name,
                 "amount": obj.get("amount") or "",
                 "due_date": "now",
-                "pay_link": "/app",
+                "pay_link": "/owner/money",
             })
     frappe.db.commit()
 

@@ -235,11 +235,21 @@ function Pay() {
   const [rows, setRows] = React.useState<any[]>([]);
   const [error, setError] = React.useState("");
   const [busy, setBusy] = React.useState("");
+  const [tip, setTip] = React.useState("");
+  const [processor, setProcessor] = React.useState("stripe");
+  const [processors, setProcessors] = React.useState<any[]>([{ id: "stripe", label: "Card", ready: true }]);
 
   const reload = () => {
     call("entertainment_express.api.portal_client.list_invoices", {})
       .then((res) => setRows(res || []))
       .catch((err) => setError(err.message || "Could not load invoices."));
+    call("entertainment_express.api.portal_billing.list_processors", {})
+      .then((res) => {
+        const ready = (res || []).filter((row: any) => row.ready);
+        setProcessors(ready.length ? ready : res || []);
+        if (ready[0]) setProcessor(ready[0].id);
+      })
+      .catch(() => setProcessors([{ id: "stripe", label: "Card", ready: true }]));
   };
 
   React.useEffect(() => {
@@ -250,7 +260,11 @@ function Pay() {
     setBusy(invoice.id);
     setError("");
     try {
-      const session = await call("entertainment_express.api.portal_client.start_checkout", { invoice_name: invoice.id });
+      const session = await call("entertainment_express.api.portal_client.start_checkout", {
+        invoice_name: invoice.id,
+        tip_amount: Number(tip || 0),
+        processor,
+      });
       if (session?.checkout_url) {
         window.location.href = session.checkout_url;
         return;
@@ -267,6 +281,21 @@ function Pay() {
   return (
     <section style={{ display: "grid", gap: "0.75rem" }}>
       {error ? <p className="ee-form__error">{error}</p> : null}
+      <div className="ee-form">
+        <FormField label="Pay with">
+          <select value={processor} onChange={(e) => setProcessor(e.target.value)}>
+            {processors.map((row: any) => (
+              <option key={row.id} value={row.id} disabled={row.ready === false}>
+                {row.label}
+                {row.ready === false ? " (not connected)" : ""}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Tip (optional)">
+          <input type="number" min="0" step="0.01" value={tip} onChange={(e) => setTip(e.target.value)} />
+        </FormField>
+      </div>
       {rows.length ? (
         rows.map((row) => (
           <article key={row.id} className="ee-job-card" style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>

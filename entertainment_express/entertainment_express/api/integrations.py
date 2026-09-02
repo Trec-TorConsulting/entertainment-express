@@ -29,6 +29,11 @@ LABELS = {
     "spotify": "Spotify",
     "apple_music": "Apple Music",
     "youtube": "YouTube",
+    "stripe": "Stripe",
+    "square": "Square",
+    "paypal": "PayPal",
+    "ach": "Bank (ACH)",
+    "authorizenet": "Authorize.Net",
 }
 
 

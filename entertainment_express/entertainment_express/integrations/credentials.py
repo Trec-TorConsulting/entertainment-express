@@ -18,6 +18,11 @@ PROVIDERS = (
     "spotify",
     "apple_music",
     "youtube",
+    "stripe",
+    "square",
+    "paypal",
+    "ach",
+    "authorizenet",
 )
 
 

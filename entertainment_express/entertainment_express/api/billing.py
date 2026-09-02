@@ -280,3 +280,47 @@ def _credit_note(invoice, amount, refund_name):
         cn.submit()
     except Exception:
         frappe.log_error(frappe.get_traceback(), "EE refund credit note")
+
+
+def charge_due_installments():
+    """Auto-charge due installment rows that have a stored payment method."""
+    from entertainment_express.billing_payments.processors import ProcessorNotConfigured, get_processor
+
+    due = frappe.get_all(
+        "Payment Schedule Milestone",
+        filters={"kind": "installment", "status": ["in", ["scheduled", "invoiced"]], "due_date": ["<=", today()]},
+        fields=["name", "parent", "amount", "due_date"],
+    )
+    for row in due:
+        booking = row.parent
+        customer = frappe.db.get_value("Event Booking", booking, "customer")
+        method = frappe.get_all(
+            "Stored Payment Method",
+            filters={"customer": customer, "is_default": 1},
+            fields=["processor", "processor_payment_method_id", "processor_customer_id"],
+            limit=1,
+        )
+        if not method:
+            continue
+        pm = method[0]
+        try:
+            result = get_processor(pm.processor).charge(
+                int(round(flt(row.amount) * 100)),
+                "usd",
+                payment_method=pm.processor_payment_method_id,
+                customer=pm.processor_customer_id,
+                metadata={"booking_name": booking, "milestone": row.name},
+            )
+        except ProcessorNotConfigured:
+            continue
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "EE installment charge")
+            continue
+        if result.status in ("succeeded", "processing", "pending", "requires_action"):
+            sched = frappe.get_doc("Payment Schedule", booking)
+            for m in sched.milestones:
+                if m.name == row.name:
+                    m.status = "paid"
+                    break
+            sched.save(ignore_permissions=True)
+            frappe.db.commit()

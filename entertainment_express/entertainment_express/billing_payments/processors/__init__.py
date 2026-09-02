@@ -37,6 +37,10 @@ class Processor:
         self._require()
         raise ProcessorError("charge not implemented")
 
+    def hosted_checkout(self, amount_cents: int, currency: str, **kwargs) -> dict:
+        self._require()
+        raise ProcessorError("hosted checkout not implemented")
+
     def refund(self, processor_txn_id: str, amount_cents: int, reason: str) -> ChargeResult:
         self._require()
         raise ProcessorError("refund not implemented")

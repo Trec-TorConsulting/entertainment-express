@@ -387,7 +387,95 @@ function AccountingWorkspace() {
       ) : (
         <EmptyState title="Invoices" message="Open invoices will appear here." />
       )}
+      <BillingTools />
     </section>
+  );
+}
+
+function BillingTools() {
+  const [jobs, setJobs] = React.useState<any[]>([]);
+  const [job, setJob] = React.useState("");
+  const [invoice, setInvoice] = React.useState("");
+  const [amount, setAmount] = React.useState("");
+  const [reason, setReason] = React.useState("");
+  const [splits, setSplits] = React.useState("3");
+  const [hint, setHint] = React.useState("");
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_billing.list_jobs", {})
+      .then((res) => setJobs(res || []))
+      .catch(() => setJobs([]));
+  }, []);
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Refunds and holds</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Job">
+          <select value={job} onChange={(e) => setJob(e.target.value)}>
+            <option value="">Pick a job</option>
+            {jobs.map((row: any) => (
+              <option key={row.name} value={row.name}>
+                {row.event_name || row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Invoice">
+          <input value={invoice} onChange={(e) => setInvoice(e.target.value)} />
+        </FormField>
+        <FormField label="Amount">
+          <input type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        </FormField>
+        <FormField label="Reason">
+          <input value={reason} onChange={(e) => setReason(e.target.value)} />
+        </FormField>
+      </div>
+      {hint ? <p>{hint}</p> : null}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!invoice || !amount}
+          onClick={async () => {
+            await call("entertainment_express.api.portal_billing.refund_invoice", {
+              invoice_name: invoice,
+              amount: Number(amount),
+              reason,
+            });
+            setHint("Refund sent.");
+          }}
+        >
+          Refund
+        </button>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!job || !amount}
+          onClick={async () => {
+            await call("entertainment_express.api.portal_billing.create_damage_hold", {
+              booking_name: job,
+              amount: Number(amount),
+            });
+            setHint("Hold placed.");
+          }}
+        >
+          Hold on card
+        </button>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!job}
+          onClick={async () => {
+            await call("entertainment_express.api.portal_billing.create_installments", {
+              booking_name: job,
+              count: Number(splits),
+            });
+            setHint("Balance split.");
+          }}
+        >
+          Split balance
+        </button>
+      </div>
+    </div>
   );
 }
 
