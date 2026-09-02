@@ -537,8 +537,9 @@ def run_schedules() -> None:
         pack = _owner_snapshot() if row.pack != "employee" else _employee_snapshot()
         lines = [f"{label}: {value}" for label, value in _pack_rows(pack, OWNER_PACK_LABELS)]
         body = "<br>".join(lines) or "No numbers this period."
-        site = frappe.utils.get_url() if hasattr(frappe.utils, "get_url") else ""
-        link = f"{site}/owner/reports" if row.pack != "employee" else f"{site}/employee/reports"
+        from entertainment_express.white_label.urls import absolute_url
+
+        link = absolute_url("/owner/reports") if row.pack != "employee" else absolute_url("/employee/reports")
         for email in [p.strip() for p in (row.recipients or "").replace(";", ",").split(",") if p.strip()]:
             try:
                 send(

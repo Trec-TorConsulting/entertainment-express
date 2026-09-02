@@ -103,3 +103,17 @@ Notification Preference SHALL apply when the send recipient matches the customer
 #### Scenario: Opt-out by email
 - **WHEN** a customer opted out of SMS on their portal profile and a send targets that email
 - **THEN** SMS is blocked even if the caller omitted party
+
+### Requirement: Absolute Links Use Canonical Domain
+The system SHALL build absolute action URLs in tenant notifications using the company canonical public base URL (custom domain when verified).
+
+#### Scenario: Deposit reminder link
+- **WHEN** a payment reminder email is sent and a primary custom domain is verified
+- **THEN** the pay/portal link host is that custom domain
+
+### Requirement: From-Name Uses Company White-Label
+The system SHALL use the company white-label email from-name (or brand from-name when a booking brand is set) for client-facing notifications when configured.
+
+#### Scenario: Confirmation from company name
+- **WHEN** `email_from_name` is set on portal settings and a confirmation is sent without a brand override
+- **THEN** the from-name matches that company setting

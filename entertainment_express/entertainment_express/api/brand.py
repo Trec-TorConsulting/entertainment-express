@@ -122,6 +122,14 @@ def save_brand(data: dict | str) -> dict:
     if cint(doc.is_default):
         for other in frappe.get_all("EE Brand", filters={"name": ["!=", doc.name], "is_default": 1}):
             frappe.db.set_value("EE Brand", other.name, "is_default", 0)
+    host = (getattr(doc, "custom_host", None) or "").strip().lower()
+    if host:
+        try:
+            from entertainment_express.api import hardening
+
+            hardening.request_custom_domain(host)
+        except Exception:
+            pass
     return _payload(doc)
 
 

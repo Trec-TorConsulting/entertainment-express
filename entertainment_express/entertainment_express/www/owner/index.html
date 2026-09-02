@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ spa_title or "Your company" }}</title>
+  {% if spa_favicon %}<link rel="icon" href="{{ spa_favicon }}">{% endif %}
   <link rel="stylesheet" href="{{ spa_css or "/assets/entertainment_express/owner/assets/main.css" }}">
   <style>
     html, body, #root { margin: 0; min-height: 100vh; background: #f3f4f6; color: #0f172a; font-family: ui-sans-serif, "Segoe UI", Helvetica, Arial, sans-serif; }

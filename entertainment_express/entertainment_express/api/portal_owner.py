@@ -430,13 +430,32 @@ def get_brand() -> dict:
             "brand_name": getattr(settings, "brand_name", None) or "",
             "brand_color": getattr(settings, "brand_color", None) or "#0f766e",
             "brand_logo": getattr(settings, "brand_logo", None) or "",
+            "brand_favicon": getattr(settings, "brand_favicon", None) or "",
+            "hide_product_chrome": int(getattr(settings, "hide_product_chrome", 0) or 0),
+            "email_from_name": getattr(settings, "email_from_name", None) or "",
+            "primary_custom_domain": getattr(settings, "primary_custom_domain", None) or "",
         }
     except Exception:
-        return {"brand_name": "", "brand_color": "#0f766e", "brand_logo": ""}
+        return {
+            "brand_name": "",
+            "brand_color": "#0f766e",
+            "brand_logo": "",
+            "brand_favicon": "",
+            "hide_product_chrome": 0,
+            "email_from_name": "",
+            "primary_custom_domain": "",
+        }
 
 
 @frappe.whitelist()
-def save_brand(brand_name: str | None = None, brand_color: str | None = None) -> dict:
+def save_brand(
+    brand_name: str | None = None,
+    brand_color: str | None = None,
+    brand_logo: str | None = None,
+    brand_favicon: str | None = None,
+    hide_product_chrome: int | None = None,
+    email_from_name: str | None = None,
+) -> dict:
     _require_owner()
     if not frappe.db.exists("EE Portal Settings", "EE Portal Settings"):
         frappe.get_doc({"doctype": "EE Portal Settings"}).insert(ignore_permissions=True)
@@ -445,6 +464,21 @@ def save_brand(brand_name: str | None = None, brand_color: str | None = None) ->
         settings.brand_name = brand_name
     if brand_color is not None:
         settings.brand_color = brand_color
+    if brand_logo is not None:
+        settings.brand_logo = brand_logo
+    if brand_favicon is not None:
+        settings.brand_favicon = brand_favicon
+    if hide_product_chrome is not None:
+        settings.hide_product_chrome = 1 if int(hide_product_chrome or 0) else 0
+    if email_from_name is not None:
+        settings.email_from_name = email_from_name
     settings.save(ignore_permissions=True)
-    _audit("save_brand", {"brand_name": brand_name, "brand_color": brand_color})
+    _audit(
+        "save_brand",
+        {
+            "brand_name": brand_name,
+            "brand_color": brand_color,
+            "hide_product_chrome": hide_product_chrome,
+        },
+    )
     return {"ok": True}

@@ -12,6 +12,7 @@ from frappe.utils import cint, get_datetime, now_datetime
 
 from entertainment_express.api.portal_collaboration import is_booking_member
 from entertainment_express.api.portal_owner import OWNER_ROLES
+from entertainment_express.white_label.urls import absolute_url
 
 GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
@@ -91,7 +92,7 @@ def _gallery_payload(doc, include_items: bool = False, include_files: bool = Fal
         "title": doc.title,
         "published": bool(cint(doc.published)),
         "share_token": doc.share_token or "",
-        "share_url": f"{frappe.utils.get_url()}/g/{doc.share_token}" if doc.share_token else "",
+        "share_url": absolute_url(f"/g/{doc.share_token}") if doc.share_token else "",
         "share_expires_on": str(doc.share_expires_on or ""),
         "template_name": doc.template_name or "",
         "print_count": cint(doc.print_count),
@@ -172,7 +173,7 @@ def list_galleries(booking: str | None = None) -> list[dict]:
                 "booking": row.booking,
                 "title": row.title,
                 "published": bool(cint(row.published)),
-                "share_url": f"{frappe.utils.get_url()}/g/{row.share_token}" if row.share_token else "",
+                "share_url": absolute_url(f"/g/{row.share_token}") if row.share_token else "",
                 "print_count": cint(row.print_count),
                 "session_count": cint(row.session_count),
                 "template_name": row.template_name or "",
@@ -266,8 +267,8 @@ def publish(gallery: str, published: int = 1, notify: int = 1) -> dict:
             email or "",
             {
                 "event_name": event,
-                "gallery_url": f"{frappe.utils.get_url()}/client/events",
-                "share_url": f"{frappe.utils.get_url()}/g/{doc.share_token}",
+                "gallery_url": absolute_url("/client/events"),
+                "share_url": absolute_url(f"/g/{doc.share_token}"),
             },
         )
     return _gallery_payload(doc, include_items=True)

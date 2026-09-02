@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import cint, flt, get_datetime, now_datetime
 
 from entertainment_express.api.portal_owner import OWNER_ROLES
+from entertainment_express.white_label.urls import absolute_url
 
 STAFF = OWNER_ROLES | {"EE Sales", "EE Dispatcher", "EE Accounting", "System Manager", "EE Office"}
 GUEST_ROLE = "EE Event Guest"
@@ -548,7 +549,7 @@ def offer_rain_date(
             "event_date": str(booking_doc.event_date or ""),
             "candidate_start": str(start),
             "candidate_end": str(end),
-            "accept_link": f"{frappe.utils.get_url()}/client/events",
+            "accept_link": absolute_url("/client/events"),
             "company_name": frappe.defaults.get_global_default("company") or "Entertainment Express",
         },
     )

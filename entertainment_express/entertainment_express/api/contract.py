@@ -8,6 +8,8 @@ import secrets
 import frappe
 from frappe.utils import now_datetime, add_days
 
+from entertainment_express.white_label.urls import get_public_base_url
+
 
 @frappe.whitelist()
 def create_contract(quotation_name: str) -> dict:
@@ -52,7 +54,7 @@ def send_contract(contract_name: str) -> dict:
     if contract.status not in ("draft",):
         frappe.throw(f"Cannot send a contract in status '{contract.status}'.")
 
-    site_url = frappe.utils.get_url()
+    site_url = get_public_base_url()
     token = _signing_token(contract_name)
     sign_link = f"{site_url}/sign?contract={contract_name}&token={token}"
 

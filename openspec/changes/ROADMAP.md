@@ -9,8 +9,7 @@
 > 4. Each `phase-N-*/` folder contains `proposal.md` (why + scope + which spec requirements),
 >    `design.md` (concrete how: DocTypes, fields, APIs, manifests, file paths), and `tasks.md`
 >    (ordered, checkable steps with acceptance criteria). Do one task at a time and check it off.
-> 5. Fully-detailed proposals exist for archived phases **0–26** and active competitive-gap phases
->    **27–37** (proposal + design + specs + tasks). Research notes:
+> 5. Fully-detailed proposals exist for archived phases **0–37** and active phase **38**. Research notes:
 >    [`COMPETITIVE_GAP_NOTES.md`](COMPETITIVE_GAP_NOTES.md).
 
 > **Commands & workflow (spec-first model — important):**
@@ -320,6 +319,16 @@ reliability badge, PaaS developer surface, vertical starter kits, after-action r
 `saas-control-plane`, `owner-portal`, `media-delivery`.
 **Depends on:** phases 11, 27–36 as applicable; control plane for overflow mediation.
 **Folder:** [`archive/2026-09-02-phase-37-category-defining-differentiators/`](archive/2026-09-02-phase-37-category-defining-differentiators/)
+
+## Phase 38 — White-Label & Custom Domains ✅
+**Goal:** Per-company white-label (logo, color, favicon, hide EE product chrome, email from-name) and
+end-to-end custom domains with automated Traefik TLS so `/owner`, `/employee`, `/client`, and public
+book run on the tenant’s hostname; canonical URLs in notifications.
+**Specs:** `white-label` (new), `platform-multitenancy`, `infrastructure-deployment`, `owner-portal`,
+`employee-portal`, `customer-portal`, `notifications`, `identity-access`, `saas-control-plane`,
+`ui-design-system`, `multi-brand`, `booking-availability`.
+**Depends on:** phase-14 domain APIs, phase-20 portal settings, phase-25 portals, phase-34 brand hosts.
+**Folder:** [`phase-38-white-label-custom-domains/`](phase-38-white-label-custom-domains/)
 
 ---
 

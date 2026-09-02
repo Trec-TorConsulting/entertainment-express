@@ -32,11 +32,20 @@ def send(
 
     if automations_paused() and template_key != "saas_dunning":
         return
+    # Enrich absolute links + from-name for white-label / custom domains.
+    ctx = dict(context or {})
+    try:
+        from entertainment_express.white_label.urls import email_from_name, get_public_base_url
+
+        ctx.setdefault("site_url", get_public_base_url())
+        ctx.setdefault("from_name", email_from_name(ctx.get("brand_from") or ctx.get("email_from")))
+    except Exception:
+        pass
     frappe.enqueue(
         "entertainment_express.notifications._send_now",
         template_key=template_key,
         recipient=recipient,
-        context=context,
+        context=ctx,
         channels=channels,
         party_type=party_type,
         party=party,

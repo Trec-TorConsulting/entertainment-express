@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import frappe
-from frappe.utils import flt, get_url
+from frappe.utils import flt
 
 from entertainment_express.api import billing
 from entertainment_express.api.portal_owner import OWNER_ROLES
 from entertainment_express.billing_payments.processors import ProcessorNotConfigured, get_processor
+from entertainment_express.white_label.urls import get_public_base_url
 
 ACCT_ROLES = OWNER_ROLES | {"EE Accounting", "EE Sales", "System Manager"}
 MONEY_ROLES = OWNER_ROLES | {"EE Accounting", "System Manager"}
@@ -126,7 +127,7 @@ def start_checkout(invoice_name: str, tip_amount: float = 0, processor: str = "s
     if frappe.get_meta("Sales Invoice").has_field("ee_tip_amount") and tip_amount:
         frappe.db.set_value("Sales Invoice", invoice_name, "ee_tip_amount", tip_amount)
     cents = int(round((flt(invoice.outstanding_amount) + tip_amount) * 100))
-    site_url = get_url()
+    site_url = get_public_base_url()
     try:
         return get_processor(processor).hosted_checkout(
             cents,

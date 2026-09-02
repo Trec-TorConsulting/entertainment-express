@@ -40,6 +40,17 @@ Phases 0–26 are on `main`. Live tenant smoke (`e2esmoke.entx.app`) includes ca
 - Ticketing / marketplace / AI event decks are out of scope (phase 26 non-goals)
 - No NetworkPolicy default-deny on the whole namespace (would break Traefik); MariaDB 3306 is restricted
 
+## Custom domains (phase 38)
+
+- Owner verifies DNS (CNAME → `{slug}.app.{base}`); site adds Host to Frappe `domains`.
+- Control plane records `Tenant Domain`; CronJob `entertainment-express-domain-reconcile` publishes
+  Ingress `entertainment-express-custom-domains`.
+- Traefik certresolver for custom hosts: **`letsencrypt`** (HTTP-01). Confirm the cluster resolver
+  accepts HTTP-01 for arbitrary hostnames; wildcard DNS-01 on `*.app.*` stays on the main Ingress.
+- Set `ee_control_plane_url` + `ee_domain_register_secret` on tenant sites (same secret as
+  `domain-register-secret` in secrets). Without these, verify still works locally; ingress sync waits
+  for operator/backfill.
+
 ---
 
 ## Rollback

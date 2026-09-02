@@ -9,13 +9,21 @@ import frappe
 
 def portal_bootstrap() -> dict:
     user = frappe.session.user or "Guest"
-    branding = {"name": None, "logo": None, "color": None}
+    branding = {
+        "name": None,
+        "logo": None,
+        "color": None,
+        "favicon": None,
+        "hide_product_chrome": 0,
+    }
     try:
         settings = frappe.get_cached_doc("EE Portal Settings", "EE Portal Settings")
         branding = {
             "name": getattr(settings, "brand_name", None),
             "logo": getattr(settings, "brand_logo", None),
             "color": getattr(settings, "brand_color", None),
+            "favicon": getattr(settings, "brand_favicon", None),
+            "hide_product_chrome": int(getattr(settings, "hide_product_chrome", 0) or 0),
         }
     except Exception:
         pass
@@ -53,6 +61,14 @@ def portal_bootstrap() -> dict:
         except Exception:
             inbox_count = 0
 
+    canonical_host = ""
+    try:
+        from entertainment_express.white_label.urls import get_canonical_host
+
+        canonical_host = get_canonical_host()
+    except Exception:
+        canonical_host = getattr(frappe.local, "site", "") or ""
+
     return {
         "user": user,
         "person": person,
@@ -60,6 +76,7 @@ def portal_bootstrap() -> dict:
         "csrf_token": csrf,
         "branding": branding,
         "inbox_count": inbox_count,
+        "canonical_host": canonical_host,
     }
 
 
@@ -79,6 +96,10 @@ def apply_spa_context(context, *, title: str, portal: str) -> None:
     context.spa_css = f"/assets/entertainment_express/{portal}/assets/main.css?v={ver}"
     context.spa_js = f"/assets/entertainment_express/{portal}/main.js?v={ver}"
     context.portal_bootstrap = portal_bootstrap()
+    branding = (context.portal_bootstrap or {}).get("branding") or {}
+    if branding.get("name"):
+        context.spa_title = f"{branding['name']} · {title}" if not branding.get("hide_product_chrome") else branding["name"]
+    context.spa_favicon = branding.get("favicon") or ""
 
 
 def _portal_asset_version(portal: str) -> str:

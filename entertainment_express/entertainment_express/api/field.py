@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, now_datetime
 
 from entertainment_express.api import portal_dispatch as _pd
 from entertainment_express.api import dispatch as _dispatch
+from entertainment_express.white_label.urls import absolute_url
 
 GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
@@ -271,7 +272,7 @@ def report_issue(assignment: str, kind: str, detail: str, photo_b64: str = "") -
             "detail": text[:400],
             "job": _pd._job_title(ca.booking),
             "person": frappe.session.user,
-            "field_link": f"{frappe.utils.get_url()}/employee/dispatch",
+            "field_link": absolute_url("/employee/dispatch"),
         },
     )
     return {"id": doc.name, "status": "open"}

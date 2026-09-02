@@ -3981,9 +3981,12 @@ function SecurityWorkspace() {
       </div>
       <div className="ee-form" style={{ maxWidth: "none" }}>
         <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Custom hostname</h2>
-        <p className="ee-muted">Point a CNAME at {info?.default_host || "this company's default address"}, then verify. TLS is issued by the operator after verify.</p>
+        <p className="ee-muted">
+          Point a CNAME at <strong>{info?.cname_target || info?.default_host || "this company's default address"}</strong>, then verify.
+          After verify, TLS is issued for /owner, /employee, and /client on your domain.
+        </p>
         <FormField label="Hostname">
-          <input value={host} onChange={(e) => setHost(e.target.value)} autoComplete="off" />
+          <input value={host} onChange={(e) => setHost(e.target.value)} autoComplete="off" placeholder="events.yourcompany.com" />
         </FormField>
         <button type="button" className="ee-btn" disabled={busy || !host.trim()} onClick={addDomain}>
           Save hostname
@@ -3991,12 +3994,35 @@ function SecurityWorkspace() {
         {domains.length ? (
           <ul>
             {domains.map((row) => (
-              <li key={row.hostname}>
-                {row.hostname} · {row.verified ? "verified" : "not verified"}
+              <li key={row.hostname} style={{ marginBottom: "0.5rem" }}>
+                {row.hostname}
+                {" · "}
+                {row.verified ? "verified" : "not verified"}
+                {" · TLS "}
+                {row.tls_status || "pending"}
+                {row.is_primary ? " · primary" : ""}
+                <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
+                  {!row.verified ? (
+                    <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => verify(row.hostname)}>
+                      Check DNS
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="ee-btn ee-btn--ghost"
+                      disabled={busy || !!row.is_primary}
+                      onClick={() =>
+                        call("entertainment_express.api.hardening.set_primary_custom_domain", { hostname: row.hostname }).then(load).catch((err: any) => setError(err.message || "Could not set primary."))
+                      }
+                    >
+                      Use as primary
+                    </button>
+                  )}
+                </div>
                 {!row.verified ? (
-                  <button type="button" className="ee-btn ee-btn--ghost" disabled={busy} onClick={() => verify(row.hostname)}>
-                    Check DNS
-                  </button>
+                  <p className="ee-muted" style={{ margin: "0.25rem 0 0" }}>
+                    CNAME → {row.cname_target || info?.cname_target || info?.default_host}
+                  </p>
                 ) : null}
               </li>
             ))}
@@ -4107,6 +4133,8 @@ function SettingsWorkspace() {
   const [row, setRow] = React.useState<any>(null);
   const [brandName, setBrandName] = React.useState("");
   const [brandColor, setBrandColor] = React.useState("#0f766e");
+  const [emailFrom, setEmailFrom] = React.useState("");
+  const [hideProduct, setHideProduct] = React.useState(false);
   const [saved, setSaved] = React.useState("");
   const [weather, setWeather] = React.useState<any>(null);
   const [wxSaved, setWxSaved] = React.useState("");
@@ -4119,6 +4147,8 @@ function SettingsWorkspace() {
         setRow(doc || {});
         setBrandName(doc?.brand_name || "");
         if (doc?.brand_color) setBrandColor(doc.brand_color);
+        setEmailFrom(doc?.email_from_name || "");
+        setHideProduct(!!doc?.hide_product_chrome);
       })
       .catch(() => setRow({}));
     call("entertainment_express.api.weather.get_policy", {})
@@ -4133,8 +4163,11 @@ function SettingsWorkspace() {
     await call("entertainment_express.api.portal_owner.save_brand", {
       brand_name: brandName,
       brand_color: brandColor,
+      email_from_name: emailFrom,
+      hide_product_chrome: hideProduct ? 1 : 0,
     });
     document.documentElement.style.setProperty("--ee-brand", brandColor);
+    document.documentElement.classList.toggle("ee-hide-product", hideProduct);
     setSaved("Saved");
   };
 
@@ -4155,6 +4188,13 @@ function SettingsWorkspace() {
         <FormField label="Brand color">
           <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} />
         </FormField>
+        <FormField label="Email from name">
+          <input value={emailFrom} onChange={(e) => setEmailFrom(e.target.value)} placeholder="Acme Entertainment" />
+        </FormField>
+        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <input type="checkbox" checked={hideProduct} onChange={(e) => setHideProduct(e.target.checked)} />
+          Hide Entertainment Express product marks
+        </label>
         <button type="button" className="ee-btn" onClick={save} style={{ width: "fit-content" }}>
           Save
         </button>
