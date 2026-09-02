@@ -4133,13 +4133,40 @@ function SettingsWorkspace() {
   const [row, setRow] = React.useState<any>(null);
   const [brandName, setBrandName] = React.useState("");
   const [brandColor, setBrandColor] = React.useState("#0f766e");
+  const [colorSecondary, setColorSecondary] = React.useState("");
+  const [colorAccent, setColorAccent] = React.useState("");
+  const [colorBg, setColorBg] = React.useState("");
+  const [colorText, setColorText] = React.useState("");
+  const [fontHeading, setFontHeading] = React.useState("system");
+  const [fontBody, setFontBody] = React.useState("system");
+  const [logo, setLogo] = React.useState("");
+  const [logoDark, setLogoDark] = React.useState("");
+  const [favicon, setFavicon] = React.useState("");
+  const [ogImage, setOgImage] = React.useState("");
+  const [footerText, setFooterText] = React.useState("");
   const [emailFrom, setEmailFrom] = React.useState("");
+  const [wlMode, setWlMode] = React.useState("portals");
   const [hideProduct, setHideProduct] = React.useState(false);
   const [saved, setSaved] = React.useState("");
+  const [matchUrl, setMatchUrl] = React.useState("");
+  const [suggestion, setSuggestion] = React.useState<any>(null);
+  const [matchMsg, setMatchMsg] = React.useState("");
   const [weather, setWeather] = React.useState<any>(null);
   const [wxSaved, setWxSaved] = React.useState("");
   const [siteCfg, setSiteCfg] = React.useState<any>(null);
   const [siteSaved, setSiteSaved] = React.useState("");
+
+  const FONT_OPTS = [
+    "system",
+    "georgia",
+    "playfair",
+    "montserrat",
+    "lato",
+    "open-sans",
+    "roboto",
+    "source-sans",
+    "merriweather",
+  ];
 
   React.useEffect(() => {
     call("entertainment_express.api.portal_owner.get_brand", {})
@@ -4147,7 +4174,19 @@ function SettingsWorkspace() {
         setRow(doc || {});
         setBrandName(doc?.brand_name || "");
         if (doc?.brand_color) setBrandColor(doc.brand_color);
+        setColorSecondary(doc?.brand_color_secondary || "");
+        setColorAccent(doc?.brand_color_accent || "");
+        setColorBg(doc?.brand_color_bg || "");
+        setColorText(doc?.brand_color_text || "");
+        setFontHeading(doc?.font_heading || "system");
+        setFontBody(doc?.font_body || "system");
+        setLogo(doc?.brand_logo || "");
+        setLogoDark(doc?.logo_dark || "");
+        setFavicon(doc?.brand_favicon || "");
+        setOgImage(doc?.og_image || "");
+        setFooterText(doc?.footer_text || "");
         setEmailFrom(doc?.email_from_name || "");
+        setWlMode(doc?.white_label_mode || "portals");
         setHideProduct(!!doc?.hide_product_chrome);
       })
       .catch(() => setRow({}));
@@ -4159,16 +4198,79 @@ function SettingsWorkspace() {
       .catch(() => setSiteCfg(null));
   }, []);
 
+  const applyCssPreview = (color: string, hide: boolean) => {
+    document.documentElement.style.setProperty("--ee-brand", color);
+    document.documentElement.classList.toggle("ee-hide-product", hide);
+  };
+
   const save = async () => {
     await call("entertainment_express.api.portal_owner.save_brand", {
       brand_name: brandName,
       brand_color: brandColor,
+      brand_color_secondary: colorSecondary,
+      brand_color_accent: colorAccent,
+      brand_color_bg: colorBg,
+      brand_color_text: colorText,
+      font_heading: fontHeading,
+      font_body: fontBody,
+      brand_logo: logo,
+      logo_dark: logoDark,
+      brand_favicon: favicon,
+      og_image: ogImage,
+      footer_text: footerText,
       email_from_name: emailFrom,
+      white_label_mode: wlMode,
       hide_product_chrome: hideProduct ? 1 : 0,
     });
-    document.documentElement.style.setProperty("--ee-brand", brandColor);
-    document.documentElement.classList.toggle("ee-hide-product", hideProduct);
+    applyCssPreview(brandColor, wlMode === "full" || hideProduct);
     setSaved("Saved");
+  };
+
+  const runMatch = async () => {
+    setMatchMsg("");
+    try {
+      const out = await call("entertainment_express.api.brand_style.match_style", {
+        website_url: matchUrl || undefined,
+        logo: logo || undefined,
+      });
+      setSuggestion(out);
+      const primary = out?.colors?.primary || brandColor;
+      if (out?.colors?.primary) setBrandColor(out.colors.primary);
+      if (out?.colors?.secondary) setColorSecondary(out.colors.secondary);
+      if (out?.colors?.accent) setColorAccent(out.colors.accent);
+      if (out?.fonts?.heading) setFontHeading(out.fonts.heading);
+      if (out?.fonts?.body) setFontBody(out.fonts.body);
+      if (out?.logo_url) setLogo(out.logo_url);
+      if (out?.favicon_url) setFavicon(out.favicon_url);
+      applyCssPreview(primary, true);
+      setMatchMsg(`Suggestion ready (confidence ${Math.round((out?.confidence || 0) * 100)}%). Preview below, then Apply.`);
+    } catch (e: any) {
+      setMatchMsg(e?.message || "Match failed");
+    }
+  };
+
+  const applySuggestion = async () => {
+    if (!suggestion) return;
+    await call("entertainment_express.api.brand_style.apply_brand_suggestion", {
+      suggestion: {
+        ...suggestion,
+        white_label_mode: "full",
+        preview_draft: {
+          brand_color: brandColor,
+          brand_color_secondary: colorSecondary,
+          brand_color_accent: colorAccent,
+          font_heading: fontHeading,
+          font_body: fontBody,
+          brand_logo: logo,
+          brand_favicon: favicon,
+        },
+      },
+    });
+    setWlMode("full");
+    setHideProduct(true);
+    applyCssPreview(brandColor, true);
+    setSaved("Brand suggestion applied");
+    setMatchMsg("Applied to portal settings.");
   };
 
   const saveWeather = async () => {
@@ -4185,21 +4287,117 @@ function SettingsWorkspace() {
         <FormField label="Company name">
           <input value={brandName} onChange={(e) => setBrandName(e.target.value)} />
         </FormField>
-        <FormField label="Brand color">
-          <input type="color" value={brandColor} onChange={(e) => setBrandColor(e.target.value)} />
+        <FormField label="White-label mode">
+          <select value={wlMode} onChange={(e) => setWlMode(e.target.value)}>
+            <option value="off">Off (show product chrome)</option>
+            <option value="portals">Portals only</option>
+            <option value="full">Full site</option>
+          </select>
+        </FormField>
+        <FormField label="Primary color">
+          <input type="color" value={brandColor || "#0f766e"} onChange={(e) => setBrandColor(e.target.value)} />
+        </FormField>
+        <FormField label="Secondary color">
+          <input type="color" value={colorSecondary || "#0d9488"} onChange={(e) => setColorSecondary(e.target.value)} />
+        </FormField>
+        <FormField label="Accent color">
+          <input type="color" value={colorAccent || brandColor || "#0f766e"} onChange={(e) => setColorAccent(e.target.value)} />
+        </FormField>
+        <FormField label="Background color">
+          <input type="color" value={colorBg || "#f3f4f6"} onChange={(e) => setColorBg(e.target.value)} />
+        </FormField>
+        <FormField label="Text color">
+          <input type="color" value={colorText || "#0f172a"} onChange={(e) => setColorText(e.target.value)} />
+        </FormField>
+        <FormField label="Heading font">
+          <select value={fontHeading} onChange={(e) => setFontHeading(e.target.value)}>
+            {FONT_OPTS.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Body font">
+          <select value={fontBody} onChange={(e) => setFontBody(e.target.value)}>
+            {FONT_OPTS.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Logo URL">
+          <input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="/files/logo.png" />
+        </FormField>
+        <FormField label="Dark logo URL">
+          <input value={logoDark} onChange={(e) => setLogoDark(e.target.value)} placeholder="/files/logo-dark.png" />
+        </FormField>
+        <FormField label="Favicon URL">
+          <input value={favicon} onChange={(e) => setFavicon(e.target.value)} />
+        </FormField>
+        <FormField label="Social share image">
+          <input value={ogImage} onChange={(e) => setOgImage(e.target.value)} />
+        </FormField>
+        <FormField label="Footer text">
+          <input value={footerText} onChange={(e) => setFooterText(e.target.value)} placeholder="© Acme Events" />
         </FormField>
         <FormField label="Email from name">
           <input value={emailFrom} onChange={(e) => setEmailFrom(e.target.value)} placeholder="Acme Entertainment" />
         </FormField>
-        <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <input type="checkbox" checked={hideProduct} onChange={(e) => setHideProduct(e.target.checked)} />
-          Hide Entertainment Express product marks
-        </label>
+        {wlMode === "portals" ? (
+          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input type="checkbox" checked={hideProduct} onChange={(e) => setHideProduct(e.target.checked)} />
+            Hide Entertainment Express product marks in portals
+          </label>
+        ) : null}
         <button type="button" className="ee-btn" onClick={save} style={{ width: "fit-content" }}>
           Save
         </button>
         {saved ? <p style={{ color: "var(--ee-success)", margin: 0 }}>{saved}</p> : null}
       </div>
+
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Match style from website</h2>
+        <p style={{ margin: 0, color: "var(--ee-muted)" }}>
+          Paste your public https site URL and/or set a logo above, then Match. Nothing applies until you confirm.
+        </p>
+        <FormField label="Website URL">
+          <input
+            value={matchUrl}
+            onChange={(e) => setMatchUrl(e.target.value)}
+            placeholder="https://www.yourcompany.com"
+          />
+        </FormField>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <button type="button" className="ee-btn" onClick={runMatch}>
+            Match style
+          </button>
+          <button type="button" className="ee-btn" onClick={applySuggestion} disabled={!suggestion}>
+            Apply suggestion
+          </button>
+        </div>
+        {matchMsg ? <p style={{ margin: 0 }}>{matchMsg}</p> : null}
+        <div style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "1fr 1fr" }}>
+          <div>
+            <p style={{ margin: "0 0 0.35rem", fontWeight: 600 }}>Preview home</p>
+            <iframe
+              title="Home preview"
+              src="/?ee_brand_preview=1"
+              style={{ width: "100%", height: 220, border: "1px solid var(--ee-border)", borderRadius: 8 }}
+            />
+          </div>
+          <div>
+            <p style={{ margin: "0 0 0.35rem", fontWeight: 600 }}>Preview book</p>
+            <iframe
+              title="Book preview"
+              src="/book?ee_brand_preview=1"
+              style={{ width: "100%", height: 220, border: "1px solid var(--ee-border)", borderRadius: 8 }}
+            />
+          </div>
+        </div>
+      </div>
+
       <MultiBrandPanel />
       {weather ? (
         <div className="ee-form">

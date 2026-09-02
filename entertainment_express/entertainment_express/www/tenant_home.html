@@ -1,9 +1,9 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-<section class="ee-tenant-hero" style="max-width: 760px; margin: 0 auto; padding: 72px 20px; text-align: center;">
-  <h1 style="font-size: 2.5rem; margin-bottom: 12px;">{{ company_name }}</h1>
-  <p style="font-size: 1.15rem; color: #5a5a5a; margin-bottom: 36px;">
+<section class="ee-tenant-hero ee-wl-page" style="max-width: 760px; margin: 0 auto; padding: 72px 20px; text-align: center;">
+  <h1 class="ee-wl-display" style="font-size: 2.5rem; margin-bottom: 12px;">{% if brand_html %}{{ brand_html }}{% else %}{{ company_name }}{% endif %}</h1>
+  <p style="font-size: 1.15rem; color: var(--ee-text); opacity: 0.75; margin-bottom: 36px;">
     Live entertainment for your next event.
   </p>
   <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
@@ -11,5 +11,8 @@
     <a class="btn btn-outline-secondary btn-lg" href="/book">See packages</a>
     <a class="btn btn-outline-secondary btn-lg" href="/login?redirect-to=/client">Client Login</a>
   </div>
+  {% if footer_text and white_label_mode == 'full' %}
+  <p style="margin-top: 48px; font-size: 0.875rem; opacity: 0.65;">{{ footer_text }}</p>
+  {% endif %}
 </section>
 {% endblock %}

@@ -204,3 +204,10 @@ The system SHALL load `/employee` with company white-label chrome when the Host 
 #### Scenario: Crew uses company domain
 - **WHEN** a staff user opens `https://{custom}/employee` on a verified domain for this site
 - **THEN** the employee portal loads with tenant branding and role guards unchanged
+
+### Requirement: Employee Chrome Fully White-Labeled
+The system SHALL apply full white-label kit on `/employee` when mode is full (product marks hidden).
+
+#### Scenario: Employee shell branded
+- **WHEN** staff open `/employee` with full white-label on
+- **THEN** company branding drives shell tokens without EE product marks

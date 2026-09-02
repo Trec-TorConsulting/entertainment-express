@@ -33,6 +33,18 @@ export function AppShell({ title, portal, density = "cockpit", sidebar, bottom, 
     if (brandColor) {
       document.documentElement.style.setProperty("--ee-brand", brandColor);
     }
+    if (branding?.color_secondary) {
+      document.documentElement.style.setProperty("--ee-brand-2", branding.color_secondary);
+    }
+    if (branding?.color_accent) {
+      document.documentElement.style.setProperty("--ee-accent", branding.color_accent);
+    }
+    if (branding?.color_bg) {
+      document.documentElement.style.setProperty("--ee-bg", branding.color_bg);
+    }
+    if (branding?.color_text) {
+      document.documentElement.style.setProperty("--ee-text", branding.color_text);
+    }
     if (branding?.favicon) {
       let link = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
       if (!link) {
@@ -44,7 +56,17 @@ export function AppShell({ title, portal, density = "cockpit", sidebar, bottom, 
     }
     document.title = hideProduct ? company : `${company} · ${title}`;
     document.documentElement.classList.toggle("ee-hide-product", hideProduct);
-  }, [brandColor, branding?.favicon, company, hideProduct, title]);
+  }, [
+    brandColor,
+    branding?.color_secondary,
+    branding?.color_accent,
+    branding?.color_bg,
+    branding?.color_text,
+    branding?.favicon,
+    company,
+    hideProduct,
+    title,
+  ]);
 
   const densityClass = density === "ops" ? " ee-shell--ops" : density === "consumer" ? " ee-shell--consumer" : "";
   const links = LINKS[portal];

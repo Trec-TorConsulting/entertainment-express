@@ -15,18 +15,25 @@ def portal_bootstrap() -> dict:
         "color": None,
         "favicon": None,
         "hide_product_chrome": 0,
+        "white_label_mode": "portals",
     }
     try:
-        settings = frappe.get_cached_doc("EE Portal Settings", "EE Portal Settings")
-        branding = {
-            "name": getattr(settings, "brand_name", None),
-            "logo": getattr(settings, "brand_logo", None),
-            "color": getattr(settings, "brand_color", None),
-            "favicon": getattr(settings, "brand_favicon", None),
-            "hide_product_chrome": int(getattr(settings, "hide_product_chrome", 0) or 0),
-        }
+        from entertainment_express.white_label import kit as wl_kit
+
+        branding = wl_kit.bootstrap_branding()
     except Exception:
-        pass
+        try:
+            settings = frappe.get_cached_doc("EE Portal Settings", "EE Portal Settings")
+            branding = {
+                "name": getattr(settings, "brand_name", None),
+                "logo": getattr(settings, "brand_logo", None),
+                "color": getattr(settings, "brand_color", None),
+                "favicon": getattr(settings, "brand_favicon", None),
+                "hide_product_chrome": int(getattr(settings, "hide_product_chrome", 0) or 0),
+                "white_label_mode": getattr(settings, "white_label_mode", None) or "portals",
+            }
+        except Exception:
+            pass
     if not branding.get("name"):
         branding["name"] = (
             frappe.db.get_default("company")

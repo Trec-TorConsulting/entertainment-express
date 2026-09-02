@@ -12,9 +12,9 @@ Entertainment Express is a **site-per-tenant** Frappe/[ERPNext](https://erpnext.
 company is one Frappe site with its own MariaDB database. A shared gunicorn/RQ/scheduler tier serves
 every site; the request host selects the tenant (`dns_multitenant`).
 
-This repo is a **homelab pilot**, not a SaaS-SLA production claim. Phases 0–26 are on `main`. Live
-image tag in [`k8s-deployment.yaml`](k8s-deployment.yaml) is **`0.0.81-ee`**. Honest operator
-checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
+This repo is a **homelab pilot**, not a SaaS-SLA production claim. Phases **0–39** are implemented
+(archived under `openspec/changes/archive/`). Live image tag in [`k8s-deployment.yaml`](k8s-deployment.yaml)
+is **`0.0.81-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 
@@ -28,6 +28,7 @@ checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 | **Workforce** | Roster, availability, compliance docs, pay runs (W2 payroll and Stripe Connect still stubs). |
 | **Service catalog** | Packages, assets, service areas, travel fees. |
 | **Billing & payments** | Quotes, e-sign, deposits; **Stripe**, Square, PayPal, ACH — processor tokens only. |
+| **White-label** | Company brand kit + custom domains; full-site mode; style matcher from website/logo (`/owner` Brand). |
 | **Tenant UI** | Logged-in portals: **`/owner`**, **`/employee`**, **`/client`**. Field PWA for crew. Operator Desk (`/app`) is for SaaS Operator / System Manager. |
 
 ---
@@ -63,7 +64,7 @@ frontend/
   customer-portal/         #   /client SPA
   dispatch-portal/         #   dispatch board assets
   crew-app/                #   field PWA
-openspec/                  # Spec-first (31 baseline specs; phases 0–26 archived)
+openspec/                  # Spec-first (42 baseline specs; phases 0–39 archived)
 Dockerfile                 # Bench image (live builds are linux/amd64)
 k8s-deployment.yaml        # Namespace, data services, Frappe, ingress, Jobs
 scripts/deploy.sh          # Existing-cluster apply (skips Jobs / MariaDB STS)

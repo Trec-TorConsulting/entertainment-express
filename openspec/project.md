@@ -116,7 +116,9 @@ A single tenant will typically offer **several** of these at once. The domain mo
   the SaaS Operator.
 - **Marketing site:** `www.<BASE_DOMAIN>` + apex `<BASE_DOMAIN>` — the public product marketing site that
   sells EE to prospective tenants. Served by the control-plane site, Guest-facing. Spec'd in
-  `openspec/specs/marketing-website/` and delivered by `openspec/changes/phase-19-marketing-website/`.
+  `openspec/specs/marketing-website/`. Tenant white-label kits do **not** apply here.
+- **Tenant custom domains:** verified hostnames (phase 38+) map to the same site-per-tenant DB; portals
+  and public book run on the company hostname with Traefik TLS.
 - **Provisioning flow (automated):** signup on control plane → create site (`bench new-site`) → install
   `erpnext` + `entertainment_express` → run tenant bootstrap (roles, defaults, sample service catalog) →
   map hostname/ingress → send welcome. This must be a repeatable, idempotent job, not manual.
@@ -184,6 +186,9 @@ EntertainmentExpress/
 | **Appointment** | A consultation/planning meeting self-booked against staff availability (distinct from an Event/Booking). |
 | **Proposal** | A unified client flow combining package selection + quote + contract + deposit. |
 | **COI** | Certificate of Insurance required by some venues; tracked per booking. |
+| **White-label kit** | Company brand tokens (colors, fonts, logos, footer, mode) applied to tenant portals and public pages. |
+| **Custom domain** | Verified tenant hostname served with Traefik TLS; canonical base for notification links. |
+| **Style matcher** | Owner tool that suggests a white-label kit from a public website URL and/or logo (no HTML stored). |
 
 ---
 
@@ -272,8 +277,8 @@ full file after deleting completed Jobs.
 1. **Read this `project.md` fully.**
 2. **Read `openspec/specs/`** — these are the authoritative capability specifications (the WHAT). Each
    capability = one folder with `spec.md` containing `Requirement` + `Scenario` blocks.
-3. **Work phase by phase from `openspec/changes/ROADMAP.md`.** Do not skip ahead. Each `phase-N/` folder
-   contains:
+3. **Work phase by phase from `openspec/changes/ROADMAP.md`.** Phases **0–39** are archived. New work
+   should start as a new change proposal (do not invent scope). Each archived `phase-N/` folder contains:
    - `proposal.md` — why + scope + which spec requirements this phase delivers.
    - `design.md` — the concrete technical approach (DocTypes, fields, APIs, manifests, file paths).
    - `tasks.md` — an ordered, checkable implementation checklist with acceptance criteria.

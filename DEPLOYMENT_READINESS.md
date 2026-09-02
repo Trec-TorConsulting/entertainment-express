@@ -5,8 +5,8 @@
 **Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.81-ee`  
 **Namespace:** `entertainment-express`
 
-Phases 0–26 are on `main`. Live tenant smoke (`e2esmoke.entx.app`) includes catalog/booking data
-(phase-1 task 10.2 is **done**, not pending).
+Phases **0–39** are implemented (OpenSpec archives). Live tenant smoke (`e2esmoke.entx.app`) includes
+catalog/booking data (phase-1 task 10.2 is **done**, not pending).
 
 ---
 
@@ -50,6 +50,16 @@ Phases 0–26 are on `main`. Live tenant smoke (`e2esmoke.entx.app`) includes ca
 - Set `ee_control_plane_url` + `ee_domain_register_secret` on tenant sites (same secret as
   `domain-register-secret` in secrets). Without these, verify still works locally; ingress sync waits
   for operator/backfill.
+
+## Full-site white-label (phase 39)
+
+- After migrate, `EE Portal Settings.white_label_mode` is `full` if hide-product was on, else `portals`.
+- Owner Brand (`/owner/brand`): extended kit (colors/fonts/logos/footer), Match style from https URL
+  and/or logo, preview iframes (`?ee_brand_preview=1`), then Apply.
+- Tenant public pages + portal chrome + client email wrappers use the kit when mode is `full`.
+- EE SaaS marketing (`www` / control plane) does **not** load tenant kit.
+- Style matcher is rate-limited (10/hour/user) and rejects private/link-local URLs (SSRF guard).
+- `bench --site <tenant> migrate` applies `phase39_full_site_white_label` patch.
 
 ---
 

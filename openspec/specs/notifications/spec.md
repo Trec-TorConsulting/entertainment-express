@@ -117,3 +117,10 @@ The system SHALL use the company white-label email from-name (or brand from-name
 #### Scenario: Confirmation from company name
 - **WHEN** `email_from_name` is set on portal settings and a confirmation is sent without a brand override
 - **THEN** the from-name matches that company setting
+
+### Requirement: Email Chrome Uses White-Label Kit
+The system SHALL wrap client-facing email bodies with company from-name and optional header logo/footer text from the white-label kit when configured.
+
+#### Scenario: Confirmation email branded
+- **WHEN** a booking confirmation email is sent with full white-label configured
+- **THEN** the from-name and header/footer reflect the company kit, not Entertainment Express product copy

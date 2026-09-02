@@ -9,8 +9,18 @@
   "section_branding",
   "brand_name",
   "brand_logo",
+  "logo_dark",
   "brand_color",
+  "brand_color_secondary",
+  "brand_color_accent",
+  "brand_color_bg",
+  "brand_color_text",
+  "font_heading",
+  "font_body",
   "brand_favicon",
+  "og_image",
+  "footer_text",
+  "white_label_mode",
   "hide_product_chrome",
   "email_from_name",
   "primary_custom_domain",
@@ -22,7 +32,7 @@
  ],
  "fields": [
   {
-    "default": "enforce",
+   "default": "enforce",
    "fieldname": "portal_mode",
    "fieldtype": "Select",
    "label": "Portal Mode",
@@ -45,9 +55,49 @@
    "label": "Brand Logo"
   },
   {
+   "description": "Optional logo for dark backgrounds / rails.",
+   "fieldname": "logo_dark",
+   "fieldtype": "Attach Image",
+   "label": "Logo (Dark)"
+  },
+  {
    "fieldname": "brand_color",
    "fieldtype": "Data",
    "label": "Brand Color"
+  },
+  {
+   "fieldname": "brand_color_secondary",
+   "fieldtype": "Data",
+   "label": "Secondary Color"
+  },
+  {
+   "fieldname": "brand_color_accent",
+   "fieldtype": "Data",
+   "label": "Accent Color"
+  },
+  {
+   "fieldname": "brand_color_bg",
+   "fieldtype": "Data",
+   "label": "Background Color"
+  },
+  {
+   "fieldname": "brand_color_text",
+   "fieldtype": "Data",
+   "label": "Text Color"
+  },
+  {
+   "default": "system",
+   "description": "Curated stack key or CSS font-family.",
+   "fieldname": "font_heading",
+   "fieldtype": "Data",
+   "label": "Heading Font"
+  },
+  {
+   "default": "system",
+   "description": "Curated stack key or CSS font-family.",
+   "fieldname": "font_body",
+   "fieldtype": "Data",
+   "label": "Body Font"
   },
   {
    "fieldname": "brand_favicon",
@@ -55,8 +105,27 @@
    "label": "Favicon"
   },
   {
+   "fieldname": "og_image",
+   "fieldtype": "Attach Image",
+   "label": "Social Share Image"
+  },
+  {
+   "description": "Copyright / tagline replacing product footer on full white-label.",
+   "fieldname": "footer_text",
+   "fieldtype": "Small Text",
+   "label": "Footer Text"
+  },
+  {
+   "default": "portals",
+   "description": "off = product chrome; portals = SPA only; full = entire tenant public site.",
+   "fieldname": "white_label_mode",
+   "fieldtype": "Select",
+   "label": "White Label Mode",
+   "options": "off\nportals\nfull"
+  },
+  {
    "default": "0",
-   "description": "Hide Entertainment Express product marks in portal chrome.",
+   "description": "Hide Entertainment Express product marks in portal chrome. Synced from white_label_mode=full.",
    "fieldname": "hide_product_chrome",
    "fieldtype": "Check",
    "label": "Hide Product Chrome"
@@ -104,7 +173,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-04 00:00:00.000000",
+ "modified": "2026-09-02 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Entertainment Express Core",
  "name": "EE Portal Settings",

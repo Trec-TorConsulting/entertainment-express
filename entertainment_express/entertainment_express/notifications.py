@@ -76,12 +76,19 @@ def _send_now(
     tmpl = frappe.get_doc("Notification Template", template_name)
     subject = frappe.render_template(tmpl.subject, context)
     body = frappe.render_template(tmpl.body_html, context)
+    try:
+        from entertainment_express.white_label.kit import kit_dict, wrap_email_html
+
+        body = wrap_email_html(body, kit_dict())
+    except Exception:
+        pass
     text = frappe.utils.strip_html(body)
     wanted = channels or _channels_of(tmpl)
     fallback = (getattr(tmpl, "fallback_channel", None) or "email").strip()
     priority = (getattr(tmpl, "priority", None) or "transactional").strip()
     prefs = _prefs(party_type, party, recipient)
 
+    from_name = context.get("from_name") or ""
     delivered_any = False
     for channel in wanted:
         if not _allowed(channel, prefs, priority):
@@ -98,7 +105,7 @@ def _send_now(
                 scheduled_for=now_datetime(),
             )
             continue
-        ok, err, mid, provider = _deliver_channel(channel, recipient, subject, body, text)
+        ok, err, mid, provider = _deliver_channel(channel, recipient, subject, body, text, from_name=from_name)
         _log(
             recipient,
             channel,
@@ -113,7 +120,7 @@ def _send_now(
         delivered_any = delivered_any or ok
 
     if not delivered_any and fallback and fallback not in wanted:
-        ok, err, mid, provider = _deliver_channel(fallback, recipient, subject, body, text)
+        ok, err, mid, provider = _deliver_channel(fallback, recipient, subject, body, text, from_name=from_name)
         _log(
             recipient,
             fallback,
@@ -256,9 +263,19 @@ def _in_quiet_hours(prefs: dict) -> bool:
     return now >= s or now <= e
 
 
-def _deliver_channel(channel, recipient, subject, body, text):
+def _deliver_channel(channel, recipient, subject, body, text, from_name: str | None = None):
     if channel == "email":
-        frappe.sendmail(recipients=[recipient], subject=subject, message=body, now=True)
+        kwargs = {"recipients": [recipient], "subject": subject, "message": body, "now": True}
+        if from_name:
+            try:
+                kwargs["sender_name"] = from_name
+            except Exception:
+                pass
+        try:
+            frappe.sendmail(**kwargs)
+        except TypeError:
+            # Older frappe without sender_name
+            frappe.sendmail(recipients=[recipient], subject=subject, message=body, now=True)
         return True, "", "", "frappe"
     if channel in ("sms", "whatsapp"):
         return _twilio(channel, recipient, text)

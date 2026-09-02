@@ -217,3 +217,10 @@ that tenant's data.
 - **WHEN** a Guest opens `{slug}.app.{base_domain}/`
 - **THEN** they see that tenant's logo/brand color and never another tenant's or the SaaS marketing
   headline unless the tenant has not set branding (then a generic tenant-safe default)
+
+### Requirement: Product Marketing Excluded From Tenant Kit
+The system SHALL NOT apply a tenant white-label kit to the SaaS marketing website at `www.{base_domain}` / apex; those pages remain Entertainment Express product branding.
+
+#### Scenario: www stays EE
+- **WHEN** a prospect opens `www.{base_domain}/pricing`
+- **THEN** EE product branding is shown regardless of any tenant kit

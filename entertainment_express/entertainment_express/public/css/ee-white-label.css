@@ -1,0 +1,40 @@
+/* Full-site white-label tokens (phase 39). Values overridden via :root inject. */
+:root {
+  --ee-brand: #0f766e;
+  --ee-brand-2: #0d9488;
+  --ee-accent: #0f766e;
+  --ee-bg: #f3f4f6;
+  --ee-text: #0f172a;
+  --ee-font: ui-sans-serif, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --ee-font-display: ui-sans-serif, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+body.ee-hide-product .powered-by,
+body.ee-hide-product .powered-by-frappe,
+html.ee-hide-product .powered-by,
+html.ee-hide-product .powered-by-frappe,
+.ee-hide-product .ee-product-mark {
+  display: none !important;
+}
+
+.ee-wl-page {
+  background: var(--ee-bg);
+  color: var(--ee-text);
+  font-family: var(--ee-font);
+}
+
+.ee-wl-page h1,
+.ee-wl-page h2,
+.ee-wl-page .ee-wl-display {
+  font-family: var(--ee-font-display);
+}
+
+.ee-wl-page .btn-primary,
+.ee-wl-page .btn.btn-primary {
+  background: var(--ee-brand);
+  border-color: var(--ee-brand);
+}
+
+.ee-wl-page a {
+  color: var(--ee-brand);
+}

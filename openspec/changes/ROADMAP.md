@@ -9,7 +9,7 @@
 > 4. Each `phase-N-*/` folder contains `proposal.md` (why + scope + which spec requirements),
 >    `design.md` (concrete how: DocTypes, fields, APIs, manifests, file paths), and `tasks.md`
 >    (ordered, checkable steps with acceptance criteria). Do one task at a time and check it off.
-> 5. Fully-detailed proposals exist for archived phases **0–37** and active phase **38**. Research notes:
+> 5. Fully-detailed proposals exist for archived phases **0–39**. Research notes:
 >    [`COMPETITIVE_GAP_NOTES.md`](COMPETITIVE_GAP_NOTES.md).
 
 > **Commands & workflow (spec-first model — important):**
@@ -320,7 +320,7 @@ reliability badge, PaaS developer surface, vertical starter kits, after-action r
 **Depends on:** phases 11, 27–36 as applicable; control plane for overflow mediation.
 **Folder:** [`archive/2026-09-02-phase-37-category-defining-differentiators/`](archive/2026-09-02-phase-37-category-defining-differentiators/)
 
-## Phase 38 — White-Label & Custom Domains ✅
+## Phase 38 — White-Label & Custom Domains ✅ archived 2026-09-02
 **Goal:** Per-company white-label (logo, color, favicon, hide EE product chrome, email from-name) and
 end-to-end custom domains with automated Traefik TLS so `/owner`, `/employee`, `/client`, and public
 book run on the tenant’s hostname; canonical URLs in notifications.
@@ -328,7 +328,17 @@ book run on the tenant’s hostname; canonical URLs in notifications.
 `employee-portal`, `customer-portal`, `notifications`, `identity-access`, `saas-control-plane`,
 `ui-design-system`, `multi-brand`, `booking-availability`.
 **Depends on:** phase-14 domain APIs, phase-20 portal settings, phase-25 portals, phase-34 brand hosts.
-**Folder:** [`phase-38-white-label-custom-domains/`](phase-38-white-label-custom-domains/)
+**Folder:** [`archive/2026-09-02-phase-38-white-label-custom-domains/`](archive/2026-09-02-phase-38-white-label-custom-domains/)
+
+## Phase 39 — Full-Site White-Label & Style Matcher ✅ archived 2026-09-02
+**Goal:** Entire tenant site white-labeled (public home/book/catalog/login/emails/footers), richer brand
+kit (colors/fonts/logos/footer), and an owner **style matcher** that imports look-and-feel from the
+company’s current website URL and/or logo with preview + apply.
+**Specs:** `white-label`, `brand-style-matcher` (new), `owner-portal`, `booking-availability`,
+`customer-portal`, `employee-portal`, `ui-design-system`, `notifications`, `tenant-website`,
+`marketing-website`, `multi-brand`.
+**Depends on:** phase-38 white-label + custom domains.
+**Folder:** [`archive/2026-09-02-phase-39-full-site-white-label/`](archive/2026-09-02-phase-39-full-site-white-label/)
 
 ---
 

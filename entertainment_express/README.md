@@ -19,8 +19,9 @@ bench --site <site> install-app entertainment_express
 ```
 
 Tenant UI (not Desk): `/owner`, `/employee`, `/client`. Public catalog: `/book` and `/catalog`.
+White-label + custom domains: `/owner` Brand workspace (kit, domains, style matcher).
 
 ## Spec
 
-See `openspec/` at the workspace root. Start with `openspec/project.md`. There are **31** baseline
-capability specs; implementation phases **0–26** are archived under `openspec/changes/archive/`.
+See `openspec/` at the workspace root. Start with `openspec/project.md`. There are **42** baseline
+capability specs; implementation phases **0–39** are archived under `openspec/changes/archive/`.
