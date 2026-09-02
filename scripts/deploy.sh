@@ -46,14 +46,26 @@ kubectl -n "${NS}" rollout status deploy/frappe-python --timeout=300s
 kubectl -n "${NS}" exec deploy/frappe-python -c frappe-python -- \
   bash -lc 'cd /home/frappe/frappe-bench && bench --site all clear-cache || true'
 
+wait_http() {
+  local url="$1"
+  local i code
+  for i in 1 2 3 4 5 6 7 8; do
+    code="$(curl -sS -o /tmp/ee-deploy-http.body -w '%{http_code}' --max-time 20 "${url}" || echo 000)"
+    if [[ "${code}" == "200" ]]; then
+      cat /tmp/ee-deploy-http.body
+      echo
+      return 0
+    fi
+    echo "retry ${i}: ${url} -> ${code}" >&2
+    sleep 5
+  done
+  echo "GET ${url} last=${code}, expected 200" >&2
+  return 1
+}
+
 echo "Checking https://${TENANT_HOST}/api/method/ping" >&2
-curl -fsS "https://${TENANT_HOST}/api/method/ping"
-echo >&2
+wait_http "https://${TENANT_HOST}/api/method/ping"
 
 echo "Checking https://${TENANT_HOST}/book" >&2
-BOOK_CODE="$(curl -fsS -o /dev/null -w '%{http_code}' "https://${TENANT_HOST}/book")"
-if [[ "${BOOK_CODE}" != "200" ]]; then
-  echo "GET /book returned ${BOOK_CODE}, expected 200" >&2
-  exit 1
-fi
-echo "GET /book ${BOOK_CODE}" >&2
+wait_http "https://${TENANT_HOST}/book" >/dev/null
+echo "GET /book 200" >&2
