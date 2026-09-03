@@ -14,7 +14,7 @@ every site; the request host selects the tenant (`dns_multitenant`).
 
 This repo is a **homelab pilot**, not a SaaS-SLA production claim. Phases **0–39** are implemented
 (archived under `openspec/changes/archive/`). Live image tag in [`k8s-deployment.yaml`](k8s-deployment.yaml)
-is **`0.0.81-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
+is **`0.0.82-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 
@@ -92,7 +92,7 @@ on the Helm-era MariaDB StatefulSet `volumeClaimTemplates`; that is not a failed
 ```bash
 # 1) Build linux/amd64 and load (homelab registry is HTTP — see Dockerfile comments)
 docker buildx build --builder ee-insecure-http --platform linux/amd64 \
-  -t 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee --load -f Dockerfile .
+  -t 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee --load -f Dockerfile .
 
 # 2) Secrets (edit a local copy — never commit real values)
 kubectl -n entertainment-express apply -f secrets.example.yaml
