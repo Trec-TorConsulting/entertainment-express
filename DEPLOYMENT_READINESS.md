@@ -1,12 +1,13 @@
 # Deployment readiness — Entertainment Express (homelab pilot)
 
-**Date:** 2026-09-02  
+**Date:** 2026-09-03  
 **Status:** Pilot on K3s — **not** a SaaS-SLA / SOC2 production claim  
 **Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.82-ee`  
 **Namespace:** `entertainment-express`
 
 Phases **0–39** are implemented (OpenSpec archives). Live tenant smoke (`e2esmoke.entx.app`) includes
-catalog/booking data (phase-1 task 10.2 is **done**, not pending).
+catalog/booking data (phase-1 task 10.2 is **done**, not pending). White-label phases 38–39 are on
+`0.0.82-ee` with `phase38` / `phase39` patches applied on `e2esmoke.entx.app`.
 
 ---
 
@@ -23,20 +24,21 @@ catalog/booking data (phase-1 task 10.2 is **done**, not pending).
 
 ## Operator checklist
 
-- [ ] Secrets exist in-cluster (`ee-secrets`, `ee-stripe-secrets`); never commit real values
-- [ ] Image tag in `k8s-deployment.yaml` matches what you built and pushed
-- [ ] `TENANT_HOST=e2esmoke.entx.app ./scripts/deploy.sh` exits 0
-- [ ] `GET https://e2esmoke.entx.app/api/method/ping` and `GET …/book` return 200
-- [ ] After a python roll, `/book` is 200 **without** a manual `bench --site all clear-cache`
-- [ ] `python3 smoke_test.py` and `openspec validate --specs` pass locally
+- [x] Secrets exist in-cluster (`ee-secrets`, `ee-stripe-secrets`); never commit real values
+- [x] Image tag in `k8s-deployment.yaml` matches what you built and pushed
+- [x] `TENANT_HOST=e2esmoke.entx.app ./scripts/deploy.sh` exits 0
+- [x] `GET https://e2esmoke.entx.app/api/method/ping` and `GET …/book` return 200
+- [x] After a python roll, `/book` is 200 **without** a manual `bench --site all clear-cache`
+- [x] `python3 smoke_test.py` and `openspec validate --specs` pass locally
 
 ---
 
 ## Known gaps (do not paper over)
 
-- Homelab mixed-arch nodes; **bench images are linux/amd64** today
+- Homelab mixed-arch nodes; **bench images are linux/amd64** today — Frappe/Redis/MariaDB Deployments
+  and bench CronJobs pin `kubernetes.io/arch=amd64` so pods do not schedule on ARM nodes
 - Full `kubectl apply -f k8s-deployment.yaml` fails on completed Jobs and Helm-era MariaDB STS — use `scripts/deploy.sh`
-- Logged-in portal QA is not automated
+- Logged-in portal QA is not automated (human walkthrough)
 - Ticketing / marketplace / AI event decks are out of scope (phase 26 non-goals)
 - No NetworkPolicy default-deny on the whole namespace (would break Traefik); MariaDB 3306 is restricted
 

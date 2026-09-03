@@ -316,6 +316,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: frappe-python
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -478,6 +482,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: scheduler
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -590,6 +598,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: socketio
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -699,6 +711,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: worker
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -810,6 +826,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: worker
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -921,6 +941,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: worker
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -1005,6 +1029,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: redis-cache
         image: redis:8-alpine
@@ -1075,6 +1103,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: redis-queue
         image: redis:8-alpine
@@ -1141,6 +1173,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: redis-socketio
         image: redis:8-alpine
@@ -1315,6 +1351,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: mariadb
         image: mariadb:10.11.18
@@ -1464,6 +1504,10 @@ spec:
                     operator: NotIn
                     values:
                     - node05
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                    - amd64
           initContainers:
           - name: fix-sites-perms
             image: busybox:1.36
@@ -1794,6 +1838,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: admin-site-init
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -1942,6 +1990,10 @@ spec:
                 operator: NotIn
                 values:
                 - node05
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
       containers:
       - name: site-init
         image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -2213,6 +2265,10 @@ spec:
                     operator: NotIn
                     values:
                     - node05
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                    - amd64
           initContainers:
           - name: export-ingress
             image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
@@ -2231,9 +2287,13 @@ spec:
               fi
               bench --site "$ADMIN_SITE" execute entertainment_express.api.control_plane_domains.export_ingress_yaml --kwargs "{'path': '/shared/ingress.yaml'}" || true
               cp -f /home/frappe/frappe-bench/sites/ee_custom_domains_ingress.yaml /shared/ingress.yaml 2>/dev/null || true
-              test -f /shared/ingress.yaml || echo "apiVersion: v1
-kind: ConfigMap
-metadata: {name: ee-domain-empty}" > /shared/ingress.yaml
+              if [ ! -f /shared/ingress.yaml ]; then
+                printf '%s\n' \
+                  'apiVersion: v1' \
+                  'kind: ConfigMap' \
+                  'metadata: {name: ee-domain-empty}' \
+                  > /shared/ingress.yaml
+              fi
             volumeMounts:
             - name: sites
               mountPath: /home/frappe/frappe-bench/sites
@@ -2258,6 +2318,6 @@ metadata: {name: ee-domain-empty}" > /shared/ingress.yaml
           volumes:
           - name: sites
             persistentVolumeClaim:
-              claimName: frappe-sites
+              claimName: entertainment-express-sites
           - name: shared
             emptyDir: {}
