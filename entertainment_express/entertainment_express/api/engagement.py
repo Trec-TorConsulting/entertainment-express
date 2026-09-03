@@ -245,7 +245,8 @@ def send_campaign(name: str) -> dict:
     doc.set("recipients", [])
     sent = 0
     skipped = 0
-    site_url = (frappe.utils.get_url() or "").rstrip("/")
+    from entertainment_express.white_label.urls import get_public_base_url
+    site_url = get_public_base_url().rstrip("/")
     for person in people:
         token = secrets.token_hex(16)
         prefs = _prefs("Customer", person.get("customer"), person["email"])

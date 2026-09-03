@@ -3,20 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2f1d4f">
-  <title>{{ seo_title or title or "Entertainment Express" }}</title>
+  <meta name="theme-color" content="{{ (ee_brand_kit and ee_brand_kit.brand_color) or '#2f1d4f' }}">
+  <title>{{ seo_title or title or brand_html or "Entertainment Express" }}</title>
   <meta name="description" content="{{ meta_description or 'Client portal for contracts, music planning, and payments.' }}">
   <link rel="canonical" href="{{ canonical or request.url }}">
   <link rel="preload" href="/assets/entertainment_express/marketing/marketing.css?v=0.0.10" as="style">
   <link rel="stylesheet" href="/assets/entertainment_express/marketing/marketing.css?v=0.0.10">
+  <link rel="stylesheet" href="/assets/entertainment_express/css/ee-white-label.css">
 </head>
-<body>
+<body class="{% if hide_product_chrome or white_label_mode == 'full' %}ee-hide-product{% endif %} ee-wl-page">
   <a class="ee-skip-link" href="#ee-main">Skip to content</a>
   <header class="ee-header" role="banner">
     <div class="ee-shell ee-header-inner">
-      <a class="ee-brand" href="/client" aria-label="Entertainment Express client portal">
-        <span class="ee-brand-mark">EE</span>
-        <span class="ee-brand-text">Client Portal</span>
+      <a class="ee-brand" href="/client" aria-label="{{ brand_html or 'Client' }} portal">
+        {% if ee_brand_kit and ee_brand_kit.brand_logo %}
+        <img src="{{ ee_brand_kit.brand_logo }}" alt="" class="ee-brand-mark" style="width:auto;height:1.75rem;object-fit:contain;">
+        {% else %}
+        <span class="ee-brand-mark">{{ (brand_html or 'EE')[:2]|upper }}</span>
+        {% endif %}
+        <span class="ee-brand-text">{% if white_label_mode == 'full' %}{{ brand_html or 'Client Portal' }}{% else %}Client Portal{% endif %}</span>
       </a>
       <nav class="ee-nav" aria-label="Client navigation">
         <ul class="ee-nav-menu">
@@ -32,7 +37,7 @@
 
   <main class="ee-main" id="ee-main" role="main">
     <section class="ee-shell ee-panel">
-      <p class="eyebrow">Client Portal</p>
+      <p class="eyebrow">{% if white_label_mode == 'full' %}{{ brand_html or 'Portal' }}{% else %}Client Portal{% endif %}</p>
       <h1>Secure customer workspace</h1>
       <p>Access contracts, payment milestones, and planning details in one clean branded portal.</p>
     </section>
@@ -43,7 +48,7 @@
   <footer class="ee-footer" role="contentinfo">
     <div class="ee-shell ee-footer-inner">
       <div>
-        <p>&copy; {{ frappe.utils.now_datetime().year }} Entertainment Express</p>
+        <p>&copy; {{ frappe.utils.now_datetime().year }} {{ footer_text or brand_html or "Entertainment Express" }}</p>
         <ul class="ee-footer-links">
           <li><a href="/legal/terms">Terms</a></li>
           <li><a href="/legal/privacy">Privacy</a></li>

@@ -2,11 +2,11 @@
 
 **Date:** 2026-09-02  
 **Status:** Pilot on K3s — **not** a SaaS-SLA / SOC2 production claim  
-**Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.81-ee`  
+**Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.82-ee`  
 **Namespace:** `entertainment-express`
 
-Phases 0–26 are on `main`. Live tenant smoke (`e2esmoke.entx.app`) includes catalog/booking data
-(phase-1 task 10.2 is **done**, not pending).
+Phases **0–39** are implemented (OpenSpec archives). Live tenant smoke (`e2esmoke.entx.app`) includes
+catalog/booking data (phase-1 task 10.2 is **done**, not pending).
 
 ---
 
@@ -39,6 +39,27 @@ Phases 0–26 are on `main`. Live tenant smoke (`e2esmoke.entx.app`) includes ca
 - Logged-in portal QA is not automated
 - Ticketing / marketplace / AI event decks are out of scope (phase 26 non-goals)
 - No NetworkPolicy default-deny on the whole namespace (would break Traefik); MariaDB 3306 is restricted
+
+## Custom domains (phase 38)
+
+- Owner verifies DNS (CNAME → `{slug}.app.{base}`); site adds Host to Frappe `domains`.
+- Control plane records `Tenant Domain`; CronJob `entertainment-express-domain-reconcile` publishes
+  Ingress `entertainment-express-custom-domains`.
+- Traefik certresolver for custom hosts: **`letsencrypt`** (HTTP-01). Confirm the cluster resolver
+  accepts HTTP-01 for arbitrary hostnames; wildcard DNS-01 on `*.app.*` stays on the main Ingress.
+- Set `ee_control_plane_url` + `ee_domain_register_secret` on tenant sites (same secret as
+  `domain-register-secret` in secrets). Without these, verify still works locally; ingress sync waits
+  for operator/backfill.
+
+## Full-site white-label (phase 39)
+
+- After migrate, `EE Portal Settings.white_label_mode` is `full` if hide-product was on, else `portals`.
+- Owner Brand (`/owner/brand`): extended kit (colors/fonts/logos/footer), Match style from https URL
+  and/or logo, preview iframes (`?ee_brand_preview=1`), then Apply.
+- Tenant public pages + portal chrome + client email wrappers use the kit when mode is `full`.
+- EE SaaS marketing (`www` / control plane) does **not** load tenant kit.
+- Style matcher is rate-limited (10/hour/user) and rejects private/link-local URLs (SSRF guard).
+- `bench --site <tenant> migrate` applies `phase39_full_site_white_label` patch.
 
 ---
 

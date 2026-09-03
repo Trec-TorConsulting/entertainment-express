@@ -12,6 +12,7 @@ from frappe.utils import add_days, flt, fmt_money, nowdate
 
 from entertainment_express.api.portal_crud import _ensure_customer, _get_inquiry, _get_job
 from entertainment_express.api.portal_owner import OWNER_ROLES, _require_owner
+from entertainment_express.white_label.urls import absolute_url
 
 GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
@@ -410,7 +411,7 @@ def send_proposal(source: str, name: str) -> dict:
                 {
                     "customer_name": quote.party_name,
                     "quote_number": quote.name,
-                    "proposal_link": f"{frappe.utils.get_url()}/client/events",
+                    "proposal_link": absolute_url("/client/events"),
                 },
             )
     except Exception:

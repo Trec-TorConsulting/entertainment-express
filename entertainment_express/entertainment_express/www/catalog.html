@@ -1,9 +1,9 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-<section class="ee-section-spaced" style="max-width: 920px; margin: 0 auto; padding: 48px 20px;">
-  <h1>What we offer</h1>
-  <p style="color:#5a5a5a;">Pick a package for your event. Request a quote below — no account needed.</p>
+<section class="ee-section-spaced ee-wl-page" style="max-width: 920px; margin: 0 auto; padding: 48px 20px;">
+  <h1 class="ee-wl-display">What we offer</h1>
+  <p style="color:var(--ee-text);opacity:.75;">Pick a package for your event. Request a quote below — no account needed.</p>
 
   <div style="display:grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 2rem;">
     {% for row in packages %}
@@ -13,7 +13,7 @@
       {% endif %}
       <h2 style="margin:0 0 .35rem;font-size:1.1rem;">{{ row.name }}</h2>
       <p style="margin:0;font-weight:600;">{{ row.rate }}</p>
-      <p style="color:#5a5a5a;">{{ row.description }}</p>
+      <p style="color:var(--ee-text);opacity:.75;">{{ row.description }}</p>
       <label style="display:flex;gap:.4rem;align-items:center;margin-top:.5rem;">
         <input type="checkbox" class="ee-pkg" value="{{ row.id }}" data-name="{{ row.name }}">
         <span>Include in quote</span>
@@ -35,8 +35,11 @@
     <input name="phone" placeholder="Phone" style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
     <textarea name="message" rows="3" placeholder="Tell us about the event" style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;"></textarea>
     <button type="submit" class="btn btn-primary">Send request</button>
-    <p id="ee-quote-status" style="margin:0;color:#5a5a5a;"></p>
+    <p id="ee-quote-status" style="margin:0;color:var(--ee-text);opacity:.75;"></p>
   </form>
+  {% if footer_text and white_label_mode == 'full' %}
+  <p style="margin-top:2rem;font-size:.875rem;opacity:.65;">{{ footer_text }}</p>
+  {% endif %}
 </section>
 <script>
 document.getElementById("ee-quote-form").addEventListener("submit", async (event) => {

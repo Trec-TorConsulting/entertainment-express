@@ -1,9 +1,9 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-<section class="ee-section-spaced" style="max-width: 720px; margin: 0 auto; padding: 48px 20px;">
-  <h1>Book a time</h1>
-  <p style="color:#5a5a5a;">Pick a meeting, then an open slot. We'll email a confirmation.</p>
+<section class="ee-section-spaced ee-wl-page" style="max-width: 720px; margin: 0 auto; padding: 48px 20px;">
+  <h1 class="ee-wl-display">Book a time</h1>
+  <p style="color:var(--ee-text);opacity:.75;">Pick a meeting, then an open slot. We'll email a confirmation.</p>
   {% if not meeting_types %}
   <p>Times will show here once the company publishes them.</p>
   {% else %}
@@ -24,8 +24,11 @@
     <input name="email" type="email" required placeholder="Email">
     <input name="phone" placeholder="Phone">
     <button type="submit" class="btn btn-primary">Book</button>
-    <p id="ee-sched-status" style="margin:0;color:#5a5a5a;"></p>
+    <p id="ee-sched-status" style="margin:0;color:var(--ee-text);opacity:.75;"></p>
   </form>
+  {% endif %}
+  {% if footer_text and white_label_mode == 'full' %}
+  <p style="margin-top:2rem;font-size:.875rem;opacity:.65;">{{ footer_text }}</p>
   {% endif %}
 </section>
 {% if meeting_types %}

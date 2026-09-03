@@ -25,3 +25,10 @@ The system SHALL rate-limit embed APIs and reject keys that do not match the res
 #### Scenario: Wrong key
 - **WHEN** an embed key from tenant B is used on tenant A host
 - **THEN** the API rejects the request without leaking tenant B data
+
+### Requirement: Tenant Pages Inherit White-Label Kit
+The system SHALL render tenant website CMS pages with the same company white-label CSS variables and footer when full white-label mode is on.
+
+#### Scenario: Tenant page chrome
+- **WHEN** a Guest opens a tenant marketing page with full white-label on
+- **THEN** colors/fonts/footer match the company kit

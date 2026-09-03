@@ -1,11 +1,8 @@
-.ee-shell {
-  min-height: 100vh;
-  background: var(--ee-bg);
-  color: var(--ee-text);
-  display: grid;
-  grid-template-columns: var(--ee-nav-width) 1fr;
-  font-family: var(--ee-font);
+.ee-shell--white-label .ee-brand__text em,
+.ee-hide-product .ee-product-mark {
+  display: none;
 }
+
 
 .ee-shell--ops {
   font-size: var(--ee-ops-font-size);

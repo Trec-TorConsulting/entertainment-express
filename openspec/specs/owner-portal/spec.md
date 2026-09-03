@@ -326,3 +326,21 @@ The owner portal SHALL list and edit notification templates and recent deliverie
 #### Scenario: Guest denied
 - **WHEN** a guest calls a message-template API
 - **THEN** access is denied
+
+### Requirement: White-Label And Domain Workspaces
+The system SHALL let the owner manage company white-label settings and custom domains (DNS instructions, verify, primary domain, TLS status) from `/owner` without Desk.
+
+#### Scenario: Owner completes domain setup
+- **WHEN** an owner adds a hostname, follows CNAME instructions, and verifies successfully
+- **THEN** Security (or Brand) shows verified + TLS status and they can set it as the primary domain
+
+#### Scenario: Brand settings preview
+- **WHEN** an owner updates logo and hide-product-chrome
+- **THEN** `/owner` restyles immediately from bootstrap without a Desk visit
+
+### Requirement: Brand Matcher Workspace
+The system SHALL provide `/owner` Brand tools to run the style matcher, preview white-label on home/book, and edit the extended brand kit without Desk.
+
+#### Scenario: Owner matches existing site
+- **WHEN** an owner opens Brand, pastes their website, previews, and applies
+- **THEN** portals and public pages reflect the new kit without using Desk

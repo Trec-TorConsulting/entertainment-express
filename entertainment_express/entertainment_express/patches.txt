@@ -29,3 +29,5 @@ entertainment_express.patches.v0_0_3.phase3_hr_workforce
 entertainment_express.patches.v0_0_3.phase4_equipment_fleet
 entertainment_express.patches.v0_0_3.phase5_full_billing
 entertainment_express.patches.v0_0_3.phase6_notifications
+entertainment_express.patches.v0_0_3.phase38_white_label
+entertainment_express.patches.v0_0_3.phase39_full_site_white_label

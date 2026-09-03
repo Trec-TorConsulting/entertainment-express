@@ -424,19 +424,71 @@ def deactivate_staff(user: str) -> dict:
 @frappe.whitelist()
 def get_brand() -> dict:
     _require_owner()
+    empty = {
+        "brand_name": "",
+        "brand_color": "#0f766e",
+        "brand_color_secondary": "",
+        "brand_color_accent": "",
+        "brand_color_bg": "",
+        "brand_color_text": "",
+        "font_heading": "system",
+        "font_body": "system",
+        "brand_logo": "",
+        "logo_dark": "",
+        "brand_favicon": "",
+        "og_image": "",
+        "footer_text": "",
+        "white_label_mode": "portals",
+        "hide_product_chrome": 0,
+        "email_from_name": "",
+        "primary_custom_domain": "",
+    }
     try:
         settings = frappe.get_cached_doc("EE Portal Settings", "EE Portal Settings")
+        from entertainment_express.white_label.kit import mode_from_settings
+
         return {
             "brand_name": getattr(settings, "brand_name", None) or "",
             "brand_color": getattr(settings, "brand_color", None) or "#0f766e",
+            "brand_color_secondary": getattr(settings, "brand_color_secondary", None) or "",
+            "brand_color_accent": getattr(settings, "brand_color_accent", None) or "",
+            "brand_color_bg": getattr(settings, "brand_color_bg", None) or "",
+            "brand_color_text": getattr(settings, "brand_color_text", None) or "",
+            "font_heading": getattr(settings, "font_heading", None) or "system",
+            "font_body": getattr(settings, "font_body", None) or "system",
             "brand_logo": getattr(settings, "brand_logo", None) or "",
+            "logo_dark": getattr(settings, "logo_dark", None) or "",
+            "brand_favicon": getattr(settings, "brand_favicon", None) or "",
+            "og_image": getattr(settings, "og_image", None) or "",
+            "footer_text": getattr(settings, "footer_text", None) or "",
+            "white_label_mode": mode_from_settings(settings),
+            "hide_product_chrome": int(getattr(settings, "hide_product_chrome", 0) or 0),
+            "email_from_name": getattr(settings, "email_from_name", None) or "",
+            "primary_custom_domain": getattr(settings, "primary_custom_domain", None) or "",
         }
     except Exception:
-        return {"brand_name": "", "brand_color": "#0f766e", "brand_logo": ""}
+        return empty
 
 
 @frappe.whitelist()
-def save_brand(brand_name: str | None = None, brand_color: str | None = None) -> dict:
+def save_brand(
+    brand_name: str | None = None,
+    brand_color: str | None = None,
+    brand_logo: str | None = None,
+    brand_favicon: str | None = None,
+    hide_product_chrome: int | None = None,
+    email_from_name: str | None = None,
+    brand_color_secondary: str | None = None,
+    brand_color_accent: str | None = None,
+    brand_color_bg: str | None = None,
+    brand_color_text: str | None = None,
+    font_heading: str | None = None,
+    font_body: str | None = None,
+    logo_dark: str | None = None,
+    og_image: str | None = None,
+    footer_text: str | None = None,
+    white_label_mode: str | None = None,
+) -> dict:
     _require_owner()
     if not frappe.db.exists("EE Portal Settings", "EE Portal Settings"):
         frappe.get_doc({"doctype": "EE Portal Settings"}).insert(ignore_permissions=True)
@@ -445,6 +497,54 @@ def save_brand(brand_name: str | None = None, brand_color: str | None = None) ->
         settings.brand_name = brand_name
     if brand_color is not None:
         settings.brand_color = brand_color
+    if brand_color_secondary is not None:
+        settings.brand_color_secondary = brand_color_secondary
+    if brand_color_accent is not None:
+        settings.brand_color_accent = brand_color_accent
+    if brand_color_bg is not None:
+        settings.brand_color_bg = brand_color_bg
+    if brand_color_text is not None:
+        settings.brand_color_text = brand_color_text
+    if font_heading is not None:
+        settings.font_heading = font_heading
+    if font_body is not None:
+        settings.font_body = font_body
+    if brand_logo is not None:
+        settings.brand_logo = brand_logo
+    if logo_dark is not None:
+        settings.logo_dark = logo_dark
+    if brand_favicon is not None:
+        settings.brand_favicon = brand_favicon
+    if og_image is not None:
+        settings.og_image = og_image
+    if footer_text is not None:
+        settings.footer_text = footer_text
+    if email_from_name is not None:
+        settings.email_from_name = email_from_name
+    if white_label_mode is not None:
+        mode = str(white_label_mode or "portals").strip().lower()
+        if mode not in ("off", "portals", "full"):
+            mode = "portals"
+        settings.white_label_mode = mode
+        if mode == "full":
+            settings.hide_product_chrome = 1
+        elif mode == "off":
+            settings.hide_product_chrome = 0
+        elif hide_product_chrome is not None:
+            settings.hide_product_chrome = 1 if int(hide_product_chrome or 0) else 0
+    elif hide_product_chrome is not None:
+        settings.hide_product_chrome = 1 if int(hide_product_chrome or 0) else 0
+        # Keep mode in sync when only hide flag is toggled
+        if settings.hide_product_chrome and (getattr(settings, "white_label_mode", None) or "") == "off":
+            settings.white_label_mode = "portals"
     settings.save(ignore_permissions=True)
-    _audit("save_brand", {"brand_name": brand_name, "brand_color": brand_color})
+    _audit(
+        "save_brand",
+        {
+            "brand_name": brand_name,
+            "brand_color": brand_color,
+            "hide_product_chrome": hide_product_chrome,
+            "white_label_mode": white_label_mode,
+        },
+    )
     return {"ok": True}

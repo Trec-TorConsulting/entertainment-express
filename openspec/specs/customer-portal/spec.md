@@ -178,3 +178,17 @@ The paying customer SHALL set channel opt-in and quiet hours from `/client/accou
 #### Scenario: Client opts out of SMS
 - **WHEN** a customer turns off SMS
 - **THEN** later promotional and optional SMS to that customer are not sent
+
+### Requirement: Client Portal On Custom Host
+The system SHALL load `/client` with company white-label chrome when the Host is this tenant's default or verified custom domain.
+
+#### Scenario: Client uses company domain
+- **WHEN** a customer opens `https://{custom}/client` on a verified domain for this site
+- **THEN** the client portal loads for this tenant only with company branding
+
+### Requirement: Client Chrome Fully White-Labeled
+The system SHALL apply full white-label kit and footer text on `/client` when mode is full, including any shared portal shell chrome.
+
+#### Scenario: Client footer
+- **WHEN** a customer opens `/client` with full white-label on
+- **THEN** product EE marks are hidden and company footer/branding show

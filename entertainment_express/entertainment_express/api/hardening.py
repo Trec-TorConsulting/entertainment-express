@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import os
 import re
 import socket
+from urllib import request
 
 import frappe
 
 from entertainment_express.security import audit
 from entertainment_express.security.access import require_roles
+from entertainment_express.white_label.urls import default_site_host
 
 GUEST_ROLE = "EE Event Guest"
 OWNER = ["EE Tenant Admin", "System Manager"]
@@ -68,6 +72,10 @@ def _domains() -> list[dict]:
     return list(raw or [])
 
 
+def _default_host() -> str:
+    return default_site_host() or (getattr(frappe.local, "site", "") or "")
+
+
 @frappe.whitelist()
 def security_status() -> dict:
     _deny_guest()
@@ -79,11 +87,22 @@ def security_status() -> dict:
         sso = bool(is_enabled("oidc"))
     except Exception:
         sso = False
+    primary = ""
+    try:
+        primary = frappe.db.get_single_value("EE Portal Settings", "primary_custom_domain") or ""
+    except Exception:
+        primary = ""
     return {
         "require_2fa": int(_conf().get("ee_require_2fa") or 0),
         "sso_enabled": int(sso),
         "sso_status": "connected" if sso else "off",
-        "default_host": getattr(frappe.local, "site", "") or "",
+        "default_host": _default_host(),
+        "cname_target": _default_host(),
+        "primary_custom_domain": primary,
+        "dns_instructions": (
+            f"Create a CNAME record pointing your hostname to {_default_host()}, "
+            "wait for DNS, then click Check DNS."
+        ),
     }
 
 
@@ -134,7 +153,20 @@ def list_audit(limit: int = 50) -> list[dict]:
 def list_custom_domains() -> list[dict]:
     _deny_guest()
     require_roles(*OWNER)
-    return _domains()
+    primary = ""
+    try:
+        primary = (frappe.db.get_single_value("EE Portal Settings", "primary_custom_domain") or "").strip().lower()
+    except Exception:
+        primary = ""
+    rows = []
+    for row in _domains():
+        if not isinstance(row, dict):
+            continue
+        item = dict(row)
+        item["is_primary"] = 1 if (item.get("hostname") or "").lower() == primary else 0
+        item["cname_target"] = _default_host()
+        rows.append(item)
+    return rows
 
 
 @frappe.whitelist()
@@ -149,11 +181,21 @@ def request_custom_domain(hostname: str) -> dict:
         frappe.throw("That is already this company's address.")
     rows = _domains()
     if any((r.get("hostname") if isinstance(r, dict) else "") == host for r in rows):
-        return {"hostname": host, "verified": 0}
+        return {
+            "hostname": host,
+            "verified": 0,
+            "cname_target": _default_host(),
+            "dns_instructions": f"Point a CNAME for {host} to {_default_host()}.",
+        }
     rows.append({"hostname": host, "verified": 0, "tls_status": "pending"})
     _set_conf("ee_custom_domains", rows)
     audit.write("request_custom_domain", extra={"hostname": host})
-    return {"hostname": host, "verified": 0}
+    return {
+        "hostname": host,
+        "verified": 0,
+        "cname_target": _default_host(),
+        "dns_instructions": f"Point a CNAME for {host} to {_default_host()}.",
+    }
 
 
 def _ips(name: str) -> set[str]:
@@ -167,9 +209,37 @@ def _ips(name: str) -> set[str]:
 
 
 def hostname_resolves_here(hostname: str, default_host: str) -> bool:
+    """True when A/AAAA (after CNAME follow via getaddrinfo) intersects default host."""
     custom = _ips(hostname)
     origin = _ips(default_host)
     return bool(custom and origin and custom.intersection(origin))
+
+
+def _notify_control_plane(hostname: str, verified: int, tls_status: str = "pending") -> None:
+    """Signed HTTP to admin site — never frappe.connect to another DB."""
+    conf = _conf()
+    base = (conf.get("ee_control_plane_url") or "").rstrip("/")
+    secret = conf.get("ee_domain_register_secret") or ""
+    if not base or not secret:
+        return
+    site_name = getattr(frappe.local, "site", "") or ""
+    body = {
+        "site_name": site_name,
+        "hostname": hostname,
+        "verified": int(verified or 0),
+        "tls_status": tls_status or "pending",
+    }
+    raw = json.dumps(body, sort_keys=True, separators=(",", ":"))
+    sig = hmac.new(secret.encode("utf-8"), raw.encode("utf-8"), hashlib.sha256).hexdigest()
+    url = f"{base}/api/method/entertainment_express.api.control_plane_domains.register_tenant_domain"
+    try:
+        req = request.Request(url, data=raw.encode("utf-8"), method="POST")
+        req.add_header("Content-Type", "application/json")
+        req.add_header("X-EE-Domain-Signature", sig)
+        with request.urlopen(req, timeout=8) as resp:
+            resp.read()
+    except Exception:
+        frappe.logger().warning("EE domain register notify failed for %s", hostname)
 
 
 @frappe.whitelist()
@@ -177,14 +247,15 @@ def verify_custom_domain(hostname: str) -> dict:
     _deny_crew_write()
     require_roles(*OWNER)
     host = (hostname or "").strip().lower().rstrip(".")
-    site = getattr(frappe.local, "site", "") or ""
-    default = (_conf().get("host_name") or "").replace("https://", "").replace("http://", "").split("/")[0] or site
+    default = _default_host()
     ok = hostname_resolves_here(host, default)
     rows = _domains()
     found = False
     for row in rows:
         if isinstance(row, dict) and row.get("hostname") == host:
             row["verified"] = 1 if ok else 0
+            if ok and not row.get("tls_status"):
+                row["tls_status"] = "pending"
             found = True
     if not found:
         rows.append({"hostname": host, "verified": 1 if ok else 0, "tls_status": "pending"})
@@ -195,7 +266,55 @@ def verify_custom_domain(hostname: str) -> dict:
             live.append(host)
             _set_conf("domains", live)
         audit.write("verify_custom_domain", extra={"hostname": host, "verified": 1})
-    return {"hostname": host, "verified": int(ok)}
+        _notify_control_plane(host, 1, "pending")
+    return {
+        "hostname": host,
+        "verified": int(ok),
+        "cname_target": default,
+        "tls_status": "pending" if ok else "pending",
+    }
+
+
+@frappe.whitelist()
+def set_primary_custom_domain(hostname: str = "") -> dict:
+    _deny_crew_write()
+    require_roles(*OWNER)
+    host = (hostname or "").strip().lower().rstrip(".")
+    if host:
+        verified = { (r.get("hostname") or "").lower() for r in _domains() if isinstance(r, dict) and int(r.get("verified") or 0) }
+        if host not in verified:
+            frappe.throw("Only a verified hostname can be primary.")
+    if not frappe.db.exists("EE Portal Settings", "EE Portal Settings"):
+        frappe.get_doc({"doctype": "EE Portal Settings"}).insert(ignore_permissions=True)
+    frappe.db.set_single_value("EE Portal Settings", "primary_custom_domain", host)
+    audit.write("set_primary_custom_domain", extra={"hostname": host})
+    return {"primary_custom_domain": host}
+
+
+@frappe.whitelist()
+def unverify_custom_domain(hostname: str) -> dict:
+    _deny_crew_write()
+    require_roles(*OWNER)
+    host = (hostname or "").strip().lower().rstrip(".")
+    rows = []
+    for row in _domains():
+        if isinstance(row, dict) and row.get("hostname") == host:
+            row = dict(row)
+            row["verified"] = 0
+            row["tls_status"] = "pending"
+        rows.append(row)
+    _set_conf("ee_custom_domains", rows)
+    live = [h for h in list(_conf().get("domains") or []) if h != host]
+    _set_conf("domains", live)
+    try:
+        primary = (frappe.db.get_single_value("EE Portal Settings", "primary_custom_domain") or "").strip().lower()
+        if primary == host:
+            frappe.db.set_single_value("EE Portal Settings", "primary_custom_domain", "")
+    except Exception:
+        pass
+    _notify_control_plane(host, 0, "pending")
+    audit.write("unverify_custom_domain", extra={"hostname": host})
+    return {"hostname": host, "verified": 0}
 
 
 @frappe.whitelist()
@@ -262,7 +381,6 @@ def record_tenant_domain(tenant: str, hostname: str, verified: int = 0) -> dict:
     require_roles(*OPS)
     if not getattr(frappe.local, "conf", None) and not _conf().get("ee_control_plane"):
         if not int((_conf().get("ee_control_plane") or 0)):
-            # still allow System Manager on admin hostnames
             site = getattr(frappe.local, "site", "") or ""
             if not site.startswith("admin."):
                 frappe.throw("Not allowed.", frappe.PermissionError)
@@ -271,6 +389,15 @@ def record_tenant_domain(tenant: str, hostname: str, verified: int = 0) -> dict:
         frappe.throw("That hostname is not allowed.")
     if not frappe.db.exists("DocType", "Tenant Domain") or not frappe.db.exists("Tenant", tenant):
         frappe.throw("Not found.")
+    existing = frappe.db.get_value("Tenant Domain", {"tenant": tenant, "hostname": host}, "name")
+    if existing:
+        frappe.db.set_value(
+            "Tenant Domain",
+            existing,
+            {"verified": 1 if int(verified or 0) else 0, "tls_status": "pending"},
+        )
+        frappe.db.commit()
+        return {"hostname": host, "tenant": tenant, "name": existing}
     doc = frappe.get_doc(
         {
             "doctype": "Tenant Domain",

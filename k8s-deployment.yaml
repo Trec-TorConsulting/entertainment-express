@@ -3,7 +3,7 @@
 #
 # Self-contained, kubectl-appliable deployment for the entertainment-express
 # namespace. Built from this repo's Dockerfile image
-# (192.168.4.10:30500/entertainment-express/bench:0.0.81-ee).
+# (192.168.4.10:30500/entertainment-express/bench:0.0.82-ee).
 #
 # PREREQUISITES — create the two secrets first (never commit real secrets):
 #   see secrets.example.yaml, then:
@@ -268,7 +268,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -285,7 +285,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: link-custom-assets
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command:
         - /bin/sh
@@ -318,7 +318,7 @@ spec:
                 - node05
       containers:
       - name: frappe-python
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -452,7 +452,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -480,7 +480,7 @@ spec:
                 - node05
       containers:
       - name: scheduler
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -564,7 +564,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -592,7 +592,7 @@ spec:
                 - node05
       containers:
       - name: socketio
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["bash", "-c", "cd /home/frappe/frappe-bench && node apps/frappe/socketio.js"]
         env:
@@ -673,7 +673,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -701,7 +701,7 @@ spec:
                 - node05
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -784,7 +784,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -812,7 +812,7 @@ spec:
                 - node05
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -895,7 +895,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -923,7 +923,7 @@ spec:
                 - node05
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -1474,7 +1474,7 @@ spec:
             - name: sites
               mountPath: /mnt/sites
           - name: seed-sites
-            image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
             imagePullPolicy: Always
             command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
             volumeMounts:
@@ -1493,7 +1493,7 @@ spec:
           # Must finish before upload-to-minio; running them as sibling containers
           # races and fails the Job (BackoffLimitExceeded) when mc copies an empty dir.
           - name: bench-backup
-            image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
             imagePullPolicy: Always
             command:
             - bash
@@ -1768,7 +1768,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -1796,7 +1796,7 @@ spec:
                 - node05
       containers:
       - name: admin-site-init
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command:
         - bash
@@ -1916,7 +1916,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -1944,7 +1944,7 @@ spec:
                 - node05
       containers:
       - name: site-init
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.81-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
         imagePullPolicy: Always
         command:
         - bash
@@ -2119,3 +2119,145 @@ spec:
             name: frappe-python
             port:
               number: 8000
+---
+# Phase 38 — custom domain Ingress (hosts reconciled by CronJob)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: entertainment-express-custom-domains
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: custom-domains
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: "letsencrypt"
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-https@kubernetescrd,traefik-gzip-compress@kubernetescrd,traefik-security-headers@kubernetescrd"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - placeholder.invalid
+  rules:
+  - host: placeholder.invalid
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frappe-python
+            port:
+              number: 8000
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ee-domain-reconciler
+  namespace: entertainment-express
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ee-domain-reconciler
+  namespace: entertainment-express
+rules:
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "patch", "update", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ee-domain-reconciler
+  namespace: entertainment-express
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ee-domain-reconciler
+subjects:
+- kind: ServiceAccount
+  name: ee-domain-reconciler
+  namespace: entertainment-express
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: entertainment-express-domain-reconcile
+  namespace: entertainment-express
+  labels:
+    app.kubernetes.io/name: entertainment-express
+    app.kubernetes.io/component: custom-domains
+spec:
+  schedule: "*/10 * * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/component: custom-domains
+        spec:
+          serviceAccountName: ee-domain-reconciler
+          restartPolicy: OnFailure
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                    - node05
+          initContainers:
+          - name: export-ingress
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.82-ee
+            imagePullPolicy: Always
+            command:
+            - bash
+            - -c
+            - |
+              set -e
+              cd /home/frappe/frappe-bench
+              ADMIN_SITE=$(ls -1 sites | grep -E '^admin\.' | head -1 || true)
+              if [ -z "$ADMIN_SITE" ]; then
+                echo "[]" > /shared/hosts.json
+                echo "no admin site" >&2
+                exit 0
+              fi
+              bench --site "$ADMIN_SITE" execute entertainment_express.api.control_plane_domains.export_ingress_yaml --kwargs "{'path': '/shared/ingress.yaml'}" || true
+              cp -f /home/frappe/frappe-bench/sites/ee_custom_domains_ingress.yaml /shared/ingress.yaml 2>/dev/null || true
+              test -f /shared/ingress.yaml || echo "apiVersion: v1
+kind: ConfigMap
+metadata: {name: ee-domain-empty}" > /shared/ingress.yaml
+            volumeMounts:
+            - name: sites
+              mountPath: /home/frappe/frappe-bench/sites
+            - name: shared
+              mountPath: /shared
+          containers:
+          - name: apply
+            image: bitnami/kubectl:1.28
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              if grep -q 'kind: Ingress' /shared/ingress.yaml; then
+                kubectl apply -f /shared/ingress.yaml
+              else
+                echo "No Ingress YAML to apply"
+              fi
+            volumeMounts:
+            - name: shared
+              mountPath: /shared
+          volumes:
+          - name: sites
+            persistentVolumeClaim:
+              claimName: frappe-sites
+          - name: shared
+            emptyDir: {}
