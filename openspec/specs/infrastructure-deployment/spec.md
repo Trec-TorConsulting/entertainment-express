@@ -11,7 +11,7 @@ the bench **Dockerfile** lives at the product repo root.
 - **Workloads**: `frappe-python` (gunicorn, :8000), `frappe-socketio` (:9000), `frappe-workers` (RQ),
   `frappe-scheduler`.
 - **Data**: MariaDB (StatefulSet, Longhorn PVC), Redis (cache/queue/socketio).
-- **Ingress**: Traefik wildcard `*.app.{base_domain}` + `admin.{base_domain}`, LetsEncrypt TLS.
+- **Ingress**: Traefik wildcard `*.{base_domain}` + apex/www + `admin.{base_domain}`, TLS at edge (Cloudflare) or LetsEncrypt on origin.
 - **Provisioner**: Job/CronJob that runs `bench new-site` + installs + bootstrap for new tenants.
 - **Backups**: CronJob running per-site `bench backup` to MinIO.
 
@@ -44,7 +44,7 @@ The system SHALL expose tenants via Traefik with wildcard TLS routing tenant sub
 (:8000) and `/socket.io` to `frappe-socketio` (:9000).
 
 #### Scenario: Wildcard routing
-- **WHEN** a request arrives for `anytenant.app.{base_domain}`
+- **WHEN** a request arrives for `anytenant.{base_domain}`
 - **THEN** Traefik routes it to `frappe-python` with valid wildcard TLS, and `/socket.io` to
   `frappe-socketio`
 

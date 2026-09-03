@@ -288,7 +288,7 @@ export default function App() {
 
   // Linking configuration for deep links
   const linking: any = {
-    prefixes: ['entertainment-express://', 'https://entertainmentexpress.com'],
+    prefixes: ['entertainment-express://', 'https://entx.app'],
     config: {
       screens: {
         MainApp: {

@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-03  
 **Status:** Pilot on K3s — **not** a SaaS-SLA / SOC2 production claim  
-**Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.82-ee`  
+**Image (matches `k8s-deployment.yaml`):** `192.168.4.10:30500/entertainment-express/bench:0.0.85-ee`  
 **Namespace:** `entertainment-express`
 
 Phases **0–39** are implemented (OpenSpec archives). Live tenant smoke (`e2esmoke.entx.app`) includes

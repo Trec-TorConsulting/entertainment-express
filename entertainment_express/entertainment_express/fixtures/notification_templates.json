@@ -85,7 +85,7 @@
     "template_key": "welcome_tenant",
     "subject": "🎉 Your Entertainment Express account is ready",
     "active": 1,
-    "body_html": "<p>Hi,</p><p>Your <b>{{ company_name }}</b> account on Entertainment Express is ready!</p><p>Log in at: <a href='{{ site_url }}'>{{ site_url }}</a></p><p>Subdomain: <b>{{ tenant_slug }}</b></p>"
+    "body_html": "<p>Hi,</p><p>Your <b>{{ company_name }}</b> account on Entertainment Express is ready!</p><p>Your workspace: <a href='{{ site_url }}'>{{ site_url }}</a></p><p><a href='{{ password_link }}'>Set your password and log in</a></p>"
   },
   {
     "doctype": "Notification Template",

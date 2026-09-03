@@ -214,7 +214,7 @@ The system SHALL render the tenant public home with tenant branding and book/quo
 that tenant's data.
 
 #### Scenario: Tenant branding scoped
-- **WHEN** a Guest opens `{slug}.app.{base_domain}/`
+- **WHEN** a Guest opens `{slug}.{base_domain}/`
 - **THEN** they see that tenant's logo/brand color and never another tenant's or the SaaS marketing
   headline unless the tenant has not set branding (then a generic tenant-safe default)
 

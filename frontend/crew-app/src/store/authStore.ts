@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       // Call backend to exchange credentials for JWT
       const response = await axios.post(
-        'https://api.entertainmentexpress.com/api/v2/auth/login',
+        'https://api.entx.app/api/v2/auth/login',
         { email, password }
       );
 
@@ -92,7 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       const response = await axios.post(
-        'https://api.entertainmentexpress.com/api/v2/auth/refresh',
+        'https://api.entx.app/api/v2/auth/refresh',
         { refresh_token: refreshToken }
       );
 

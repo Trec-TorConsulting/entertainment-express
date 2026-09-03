@@ -145,7 +145,7 @@ def test_invoice_paid_sets_active_and_period(monkeypatch):
         def table_exists(self, *_):
             return True
 
-    fake = _Fake(["SaaS Operator"], site="admin.entertainmentexpress.app", conf={"ee_control_plane": 1})
+    fake = _Fake(["SaaS Operator"], site="admin.entx.app", conf={"ee_control_plane": 1})
     fake.db = DB()
     monkeypatch.setattr(saas_billing, "frappe", fake)
     monkeypatch.setattr(saas_billing, "push_plan_to_site", lambda *a, **k: None)
@@ -182,7 +182,7 @@ def test_invoice_failed_sets_past_due(monkeypatch):
         def exists(self, *a, **k):
             return False
 
-    fake = _Fake(["SaaS Operator"], site="admin.entertainmentexpress.app")
+    fake = _Fake(["SaaS Operator"], site="admin.entx.app")
     fake.db = DB()
     monkeypatch.setattr(saas_billing, "frappe", fake)
     monkeypatch.setattr(saas_billing, "push_plan_to_site", lambda *a, **k: None)

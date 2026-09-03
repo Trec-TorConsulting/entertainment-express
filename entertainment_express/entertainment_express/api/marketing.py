@@ -436,8 +436,13 @@ def start_trial(payload=None):
 
     signup = frappe.get_doc(signup_values)
     signup.insert(ignore_permissions=True)
+    frappe.db.commit()
 
-    return {"ok": True, "application": signup.name, "redirect": "/signup"}
+    from entertainment_express.api.signup_onboarding import signup_handoff
+
+    interval = (data.get("billing_interval") or "month").strip().lower()
+    handoff = signup_handoff(signup.name, requested_slug, interval=interval)
+    return handoff
 
 
 @frappe.whitelist(allow_guest=True)

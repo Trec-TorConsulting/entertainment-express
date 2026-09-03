@@ -97,7 +97,7 @@
         "data": [
           {
             "scheme": "https",
-            "host": "*.entertainmentexpress.com",
+            "host": "*.entx.app",
             "pathPrefix": "/shift/"
           }
         ],
@@ -111,8 +111,8 @@
       "eas": {
         "projectId": "entertainment-express-crew"
       },
-      "apiUrl": "https://api.entertainmentexpress.com",
-      "wsUrl": "wss://api.entertainmentexpress.com"
+      "apiUrl": "https://api.entx.app",
+      "wsUrl": "wss://api.entx.app"
     }
   }
 }

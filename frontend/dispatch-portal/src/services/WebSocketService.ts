@@ -41,7 +41,7 @@ class DispatchWebSocketService {
   /**
    * Initialize WebSocket connection
    */
-  connect(token: string, wsUrl: string = 'wss://api.entertainmentexpress.com'): Promise<void> {
+  connect(token: string, wsUrl: string = 'wss://api.entx.app'): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         this.socket = io(wsUrl, {

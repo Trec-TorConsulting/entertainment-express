@@ -82,12 +82,9 @@ def run_provisioning_job(provisioning_job_name: str) -> None:
 def _provision_create(job) -> None:
     """Create a new tenant site, install apps, bootstrap, mark active."""
     tenant = frappe.get_doc("Tenant", job.tenant)
-    base_domain = frappe.conf.get("ee_base_domain", "entertainmentexpress.app")
-    # Tenant sites are <slug>.<ee_tenant_domain>. Defaults to app.<base_domain> to
-    # preserve the historical scheme; deployments can set ee_tenant_domain to serve
-    # tenants directly under the base domain (e.g. <slug>.entx.app).
-    tenant_domain = frappe.conf.get("ee_tenant_domain") or f"app.{base_domain}"
-    site_name = f"{tenant.tenant_slug}.{tenant_domain}"
+    from entertainment_express.control_plane.tenant_urls import tenant_site_name
+
+    site_name = tenant.site_name or tenant_site_name(tenant.tenant_slug)
 
     _log(job, f"Provisioning site: {site_name}")
 
@@ -160,12 +157,16 @@ def _provision_create(job) -> None:
     ensure_subscription(tenant.name)
     _log(job, "Subscription/trial flags pushed.")
 
+    password_link = _tenant_password_setup_link(job, site_name, tenant.primary_email)
+    site_url = f"https://{site_name}"
+
     # 8. Send welcome email
     from entertainment_express.notifications import send
     send("welcome_tenant", tenant.primary_email, {
         "company_name": tenant.company_name,
-        "site_url": f"https://{site_name}",
+        "site_url": site_url,
         "tenant_slug": tenant.tenant_slug,
+        "password_link": password_link or site_url,
     })
 
 
@@ -309,6 +310,24 @@ def _bench_exec_out(job, cmd: list[str]) -> str:
         capture_output=True, text=True, timeout=60,
     )
     return result.stdout
+
+
+def _tenant_password_setup_link(job, site_name: str, email: str) -> str:
+    """Generate a one-time password setup URL on the tenant site."""
+    if not email:
+        return ""
+    try:
+        raw = _bench_exec_out(job, [
+            "bench", "--site", site_name, "execute",
+            "entertainment_express.control_plane.bootstrap.tenant_password_setup_link",
+            "--kwargs", json.dumps({"email": email}),
+        ])
+        link = (raw or "").strip().splitlines()[-1].strip().strip("'\"")
+        if link.startswith("http"):
+            return link
+    except Exception as exc:
+        _log(job, f"password setup link: {exc}")
+    return ""
 
 
 def _get_secret(key: str) -> str:

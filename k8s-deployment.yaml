@@ -3,7 +3,7 @@
 #
 # Self-contained, kubectl-appliable deployment for the entertainment-express
 # namespace. Built from this repo's Dockerfile image
-# (192.168.4.10:30500/entertainment-express/bench:0.0.83-ee).
+# (192.168.4.10:30500/entertainment-express/bench:0.0.85-ee).
 #
 # PREREQUISITES — create the two secrets first (never commit real secrets):
 #   see secrets.example.yaml, then:
@@ -268,7 +268,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -285,7 +285,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: link-custom-assets
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command:
         - /bin/sh
@@ -322,7 +322,7 @@ spec:
                 - amd64
       containers:
       - name: frappe-python
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -392,7 +392,7 @@ spec:
             port: 8000
             httpHeaders:
             - name: Host
-              value: base.app.entertainmentexpress.app
+              value: base.entx.app
           initialDelaySeconds: 60
           periodSeconds: 30
           failureThreshold: 5
@@ -402,7 +402,7 @@ spec:
             port: 8000
             httpHeaders:
             - name: Host
-              value: base.app.entertainmentexpress.app
+              value: base.entx.app
           initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 3
@@ -456,7 +456,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -488,7 +488,7 @@ spec:
                 - amd64
       containers:
       - name: scheduler
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -572,7 +572,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -604,7 +604,7 @@ spec:
                 - amd64
       containers:
       - name: socketio
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["bash", "-c", "cd /home/frappe/frappe-bench && node apps/frappe/socketio.js"]
         env:
@@ -685,7 +685,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -717,7 +717,7 @@ spec:
                 - amd64
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -800,7 +800,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -832,7 +832,7 @@ spec:
                 - amd64
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -915,7 +915,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -947,7 +947,7 @@ spec:
                 - amd64
       containers:
       - name: worker
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -1518,7 +1518,7 @@ spec:
             - name: sites
               mountPath: /mnt/sites
           - name: seed-sites
-            image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
             imagePullPolicy: Always
             command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
             volumeMounts:
@@ -1537,7 +1537,7 @@ spec:
           # Must finish before upload-to-minio; running them as sibling containers
           # races and fails the Job (BackoffLimitExceeded) when mc copies an empty dir.
           - name: bench-backup
-            image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
             imagePullPolicy: Always
             command:
             - bash
@@ -1606,7 +1606,8 @@ spec:
             emptyDir: {}
 
 ---
-# Source: entertainment-express/templates/ingress.yaml
+# Legacy hostname alias — direct access to the control-plane Frappe site (admin.entx.app).
+# Marketing/signup traffic uses entx.app / www.entx.app with the site-header middleware below.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -1626,28 +1627,9 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - "*.app.entertainmentexpress.app"
-    - "admin.entertainmentexpress.app"
-    # secretName omitted — the cert resolver manages the TLS secret automatically.
+    - "admin.entx.app"
   rules:
-  - host: "*.app.entertainmentexpress.app"
-    http:
-      paths:
-      - path: /socket.io
-        pathType: Prefix
-        backend:
-          service:
-            name: frappe-socketio
-            port:
-              number: 9000
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frappe-python
-            port:
-              number: 8000
-  - host: "admin.entertainmentexpress.app"
+  - host: "admin.entx.app"
     http:
       paths:
       - path: /socket.io
@@ -1681,7 +1663,7 @@ metadata:
 spec:
   headers:
     customRequestHeaders:
-      X-Frappe-Site-Name: admin.entertainmentexpress.app
+      X-Frappe-Site-Name: admin.entx.app
 ---
 # Public prod URL — entx.app (+ www) — control plane. TLS is terminated at Cloudflare's
 # edge (Universal SSL covers the apex + first-level *.entx.app); Traefik serves the origin
@@ -1812,7 +1794,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -1844,7 +1826,7 @@ spec:
                 - amd64
       containers:
       - name: admin-site-init
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command:
         - bash
@@ -1879,7 +1861,9 @@ spec:
           bench --site "${ADMIN_SITE}" install-app erpnext || true
           bench --site "${ADMIN_SITE}" install-app entertainment_express || true
           bench --site "${ADMIN_SITE}" migrate
-          bench --site "${ADMIN_SITE}" set-config host_name "https://${ADMIN_SITE}"
+          bench --site "${ADMIN_SITE}" set-config host_name "https://entx.app"
+          bench --site "${ADMIN_SITE}" set-config ee_base_domain "entx.app"
+          bench --site "${ADMIN_SITE}" set-config ee_tenant_domain "entx.app"
           # Flag this as the control-plane site so it serves EE SaaS marketing at
           # / (tenant sites serve their own branded landing instead).
           bench --site "${ADMIN_SITE}" set-config ee_control_plane 1
@@ -1964,7 +1948,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
         volumeMounts:
@@ -1996,14 +1980,14 @@ spec:
                 - amd64
       containers:
       - name: site-init
-        image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+        image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
         imagePullPolicy: Always
         command:
         - bash
         - -c
         - |
           set -e
-          SITE="base.app.${BASE_DOMAIN}"
+          SITE="base.${BASE_DOMAIN}"
           cd /home/frappe/frappe-bench
 
           echo "Waiting for MariaDB..."
@@ -2116,9 +2100,9 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - customer.entertainment-express.app
+    - customer.entx.app
   rules:
-  - host: customer.entertainment-express.app
+  - host: customer.entx.app
     http:
       paths:
       - path: /socket.io
@@ -2152,9 +2136,9 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - dispatch.entertainment-express.app
+    - dispatch.entx.app
   rules:
-  - host: dispatch.entertainment-express.app
+  - host: dispatch.entx.app
     http:
       paths:
       - path: /socket.io
@@ -2271,7 +2255,7 @@ spec:
                     - amd64
           initContainers:
           - name: export-ingress
-            image: 192.168.4.10:30500/entertainment-express/bench:0.0.83-ee
+            image: 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee
             imagePullPolicy: Always
             command:
             - bash

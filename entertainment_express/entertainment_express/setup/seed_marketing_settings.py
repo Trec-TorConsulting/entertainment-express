@@ -8,7 +8,7 @@ def run():
 
     settings = frappe.get_single("Marketing Settings")
     defaults = {
-        "base_domain": "entertainmentexpress.app",
+        "base_domain": "entx.app",
         "hero_headline": "Run your entertainment company on one platform.",
         "hero_subhead": "Bookings, crew scheduling, contracts, dispatch, and billing made simple.",
         "primary_cta_label": "Start free trial",

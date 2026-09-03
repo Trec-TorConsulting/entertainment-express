@@ -1,7 +1,7 @@
 name: Portal Static Hosting (Vercel)
 
 # Builds + optionally deploys customer/dispatch SPAs.
-# Domains: customer.entertainment-express.app / dispatch.entertainment-express.app
+# Domains: customer.entx.app / dispatch.entx.app
 #
 # Secrets for live deploy:
 #   VERCEL_TOKEN, VERCEL_ORG_ID

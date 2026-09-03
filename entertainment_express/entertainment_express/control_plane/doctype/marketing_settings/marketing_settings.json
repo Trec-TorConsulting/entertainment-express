@@ -32,7 +32,7 @@
  ],
  "fields": [
   {
-   "default": "entertainmentexpress.app",
+   "default": "entx.app",
    "fieldname": "base_domain",
    "fieldtype": "Data",
    "label": "Base Domain",

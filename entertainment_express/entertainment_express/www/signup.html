@@ -7,9 +7,7 @@
   <h2>Start Your Free Trial</h2>
   <p class="text-muted">Set up your mobile entertainment company on Entertainment Express.</p>
 
-  <div id="signup-success" class="alert alert-success d-none">
-    🎉 Application submitted! We'll review it and provision your account within 24 hours.
-  </div>
+  <div id="signup-success" class="alert alert-success d-none"></div>
   <div id="signup-error" class="alert alert-danger d-none"></div>
 
   <form id="signup-form">
@@ -18,41 +16,67 @@
       <input type="text" class="form-control" name="company_name" required maxlength="200">
     </div>
     <div class="mb-3">
-      <label class="form-label">Desired Subdomain *</label>
+      <label class="form-label">Your workspace address *</label>
       <div class="input-group">
-        <input type="text" class="form-control" name="requested_slug" required maxlength="50"
+        <input type="text" class="form-control" name="requested_slug" id="signup-slug" required maxlength="50"
                pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]"
                placeholder="your-company">
-        <span class="input-group-text">.app.entertainmentexpress.app</span>
+        <span class="input-group-text">.{{ tenant_domain or "entx.app" }}</span>
       </div>
-      <div class="form-text">Lowercase letters, numbers, hyphens only (3–50 chars).</div>
+      <div class="form-text">You will get: <strong id="signup-slug-preview">https://your-company.{{ tenant_domain or "entx.app" }}</strong></div>
     </div>
     <div class="mb-3">
       <label class="form-label">Your Email *</label>
       <input type="email" class="form-control" name="contact_email" required>
     </div>
-    <button type="submit" class="btn btn-primary btn-lg w-100">Request Access</button>
+    <button type="submit" class="btn btn-primary btn-lg w-100">Continue to checkout</button>
   </form>
 </div>
 
 <script>
-document.getElementById('signup-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target));
-  try {
-    const res = await frappe.call({
-      method: 'entertainment_express.api.public.submit_signup',
-      args: data,
-    });
-    if (res.message && res.message.status === 'submitted') {
-      document.getElementById('signup-success').classList.remove('d-none');
-      e.target.style.display = 'none';
-    }
-  } catch (err) {
-    const el = document.getElementById('signup-error');
-    el.textContent = err.message || 'An error occurred. Please try again.';
-    el.classList.remove('d-none');
+(function () {
+  var tenantDomain = {{ (tenant_domain or "entx.app") | tojson }};
+  var slugInput = document.getElementById("signup-slug");
+  var slugPreview = document.getElementById("signup-slug-preview");
+
+  function workspaceUrl(slug) {
+    var clean = (slug || "your-company").toLowerCase().replace(/[^a-z0-9-]/g, "") || "your-company";
+    return "https://" + clean + "." + tenantDomain;
   }
-});
+
+  function updatePreview() {
+    slugPreview.textContent = workspaceUrl(slugInput.value);
+  }
+
+  slugInput.addEventListener("input", updatePreview);
+  updatePreview();
+
+  document.getElementById('signup-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var data = Object.fromEntries(new FormData(e.target));
+    try {
+      var res = await frappe.call({
+        method: 'entertainment_express.api.public.submit_signup',
+        args: data,
+      });
+      var message = res.message || {};
+      if (message.checkout_url) {
+        window.location.href = message.checkout_url;
+        return;
+      }
+      if (message.status === 'submitted' || message.ok) {
+        var success = document.getElementById('signup-success');
+        success.textContent = (message.message || 'Application submitted!') +
+          ' Your workspace will be ' + (message.site_url || workspaceUrl(data.requested_slug)) + '.';
+        success.classList.remove('d-none');
+        e.target.style.display = 'none';
+      }
+    } catch (err) {
+      var el = document.getElementById('signup-error');
+      el.textContent = err.message || 'An error occurred. Please try again.';
+      el.classList.remove('d-none');
+    }
+  });
+})();
 </script>
 {% endblock %}

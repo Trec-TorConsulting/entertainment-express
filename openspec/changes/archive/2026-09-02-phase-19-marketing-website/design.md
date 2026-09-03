@@ -36,7 +36,7 @@
 
 | Fieldname | Type | Notes |
 |-----------|------|-------|
-| `base_domain` | Data | e.g. `entertainmentexpress.app`; used to build absolute URLs/canonicals |
+| `base_domain` | Data | e.g. `entx.app`; used to build absolute URLs/canonicals |
 | `hero_headline` | Data | home hero H1 |
 | `hero_subhead` | Small Text | home hero subhead |
 | `primary_cta_label` | Data | e.g. "Start free trial" |

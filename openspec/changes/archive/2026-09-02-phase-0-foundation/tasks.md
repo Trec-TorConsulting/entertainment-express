@@ -80,8 +80,8 @@
       **Accept:** after restart, `base.app.{base_domain}` still serves and data is intact.
       **Note:** 2026-08-14 — deleted `mariadb-0` and both `frappe-python` pods. Recreated with new UIDs;
       Longhorn PVCs stayed Bound; sites marker `ee-persist-20260814T104736Z` survived; `bench list-apps`
-      still shows frappe + erpnext + entertainment_express on `base.app.entertainmentexpress.app` and
-      `admin.entertainmentexpress.app`; `/api/method/ping` returned 200 for those hosts plus `entx.app`.
+      still shows frappe + erpnext + entertainment_express on `base.app.entx.app` and
+      `admin.entx.app`; `/api/method/ping` returned 200 for those hosts plus `entx.app`.
 
 ## Definition of Done (phase gate)
 All boxes checked; `base.app.{base_domain}` reachable over valid wildcard TLS with ERPNext +

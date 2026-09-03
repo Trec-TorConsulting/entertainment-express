@@ -109,8 +109,8 @@ A single tenant will typically offer **several** of these at once. The domain mo
 **Model:** **Site-per-tenant** using Frappe's native multi-site bench.
 
 - Each tenant company = one Frappe **site** = one MariaDB database, addressed by hostname.
-- **Tenant URL:** `{tenant-slug}.app.<BASE_DOMAIN>` (wildcard DNS + wildcard TLS).
-  - Example: `acmedjs.app.entertainmentexpress.app`.
+- **Tenant URL:** `{tenant-slug}.<BASE_DOMAIN>` (wildcard DNS + wildcard TLS).
+  - Example: `acmedjs.entx.app` (production `BASE_DOMAIN` = `entx.app`).
 - **Control-plane site:** a dedicated site `admin.<BASE_DOMAIN>` runs the **SaaS control plane**
   (tenant provisioning, plans, metering, subscription billing). It is a tenant-like site but restricted to
   the SaaS Operator.
@@ -127,7 +127,7 @@ A single tenant will typically offer **several** of these at once. The domain mo
   jobs — never by querying tenant DBs directly from tenant code.
 
 > `<BASE_DOMAIN>` is a **configuration value**, not a literal. Default placeholder used throughout the
-> specs: `entertainmentexpress.app`. The operator will point real public DNS at the Traefik ingress.
+> specs: `entx.app`. The operator will point real public DNS at the Traefik ingress.
 
 ---
 

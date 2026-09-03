@@ -125,7 +125,10 @@ def _ensure_guest_user(email: str, full_name: str) -> str:
 
 @frappe.whitelist()
 def list_my_events() -> list[dict]:
-    """Bookings the current user may plan/chat on (payer, accepted guest, or assigned talent)."""
+    """Bookings the current user may plan/chat on (payer, guest, talent, or staff preview)."""
+    from entertainment_express.api.portal_crud import _not_template_filters
+    from entertainment_express.security.access import customer_names_for_user
+
     user = frappe.session.user
     if not user or user == "Guest":
         return []
@@ -154,17 +157,27 @@ def list_my_events() -> list[dict]:
         ):
             _add(row.booking)
 
+    for customer in customer_names_for_user(user):
+        for row in frappe.get_all(
+            "Event Booking",
+            filters=_not_template_filters({"customer": customer}),
+            fields=["name"],
+            ignore_permissions=True,
+        ):
+            _add(row.name)
+
     roles = _roles(user)
-    if PAYER_ROLE in roles and email:
-        customers = frappe.get_all("Customer", filters={"email_id": email}, pluck="name", ignore_permissions=True)
-        if customers:
-            for row in frappe.get_all(
-                "Event Booking",
-                filters={"customer": ["in", customers]},
-                fields=["name"],
-                ignore_permissions=True,
-            ):
-                _add(row.name)
+    # Staff opening /client for preview/support already have full booking access elsewhere.
+    if roles.intersection(STAFF_ROLES):
+        for row in frappe.get_all(
+            "Event Booking",
+            filters=_not_template_filters(),
+            fields=["name"],
+            order_by="event_date desc",
+            ignore_permissions=True,
+            limit_page_length=200,
+        ):
+            _add(row.name)
 
     if roles.intersection(TALENT_ROLES):
         employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -181,7 +194,7 @@ def list_my_events() -> list[dict]:
         return []
     return frappe.get_all(
         "Event Booking",
-        filters={"name": ["in", names]},
+        filters=_not_template_filters({"name": ["in", names]}),
         fields=["name", "event_name", "event_date", "status"],
         order_by="event_date desc",
         ignore_permissions=True,

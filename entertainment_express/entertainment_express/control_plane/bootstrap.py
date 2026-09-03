@@ -528,6 +528,19 @@ def _ensure_email_defaults() -> None:
     pass
 
 
+def tenant_password_setup_link(email: str = "") -> str:
+    """Entry point for bench execute — returns a one-time password setup URL."""
+    email = (email or "").strip().lower()
+    if not email or not frappe.db.exists("User", email):
+        return ""
+    user = frappe.get_doc("User", email)
+    try:
+        return user.reset_password(send_email=False) or ""
+    except Exception:
+        frappe.log_error(title="EE bootstrap password link")
+        return ""
+
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 def _make_abbr(company_name: str) -> str:

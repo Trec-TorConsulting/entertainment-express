@@ -213,7 +213,7 @@ GET    /api/v2/crew/timesheets
 
 ### Demo Credentials
 ```
-Email: demo@entertainmentexpress.com
+Email: demo@entx.app
 Password: demo123456
 ```
 

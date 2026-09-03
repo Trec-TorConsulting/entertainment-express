@@ -5,4 +5,4 @@ Disallow: /desk
 Disallow: /api
 Disallow: /private
 Disallow: /client
-Sitemap: https://www.entertainmentexpress.app/sitemap.xml
+Sitemap: https://www.entx.app/sitemap.xml

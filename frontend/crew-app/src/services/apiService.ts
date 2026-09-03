@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '../store/authStore';
 import { storePendingAction, syncOfflineActions as replayOfflineQueue } from './databaseService';
 
-const API_BASE_URL = 'https://api.entertainmentexpress.com/api/v2';
+const API_BASE_URL = 'https://api.entx.app/api/v2';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // ms
 

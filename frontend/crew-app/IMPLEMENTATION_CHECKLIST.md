@@ -284,7 +284,7 @@
 npm start
 
 # Test login
-Email: demo@entertainmentexpress.com
+Email: demo@entx.app
 Password: demo123456
 
 # Test offline

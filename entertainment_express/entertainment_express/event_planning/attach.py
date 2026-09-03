@@ -37,8 +37,6 @@ def attach_forms(booking_name: str, purpose: str = "planning") -> list[str]:
         tmpl_type = (tmpl.event_type or "").strip().lower()
         if tmpl_type and event_type and tmpl_type != event_type:
             continue
-        if tmpl_type and not event_type:
-            continue
         exists = frappe.db.exists(
             "Planning Form Instance",
             {"booking": booking_name, "template": tmpl.name},

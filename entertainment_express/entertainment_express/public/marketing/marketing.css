@@ -414,6 +414,55 @@ blockquote {
   color: var(--ee-primary-strong);
 }
 
+.ee-slug-field {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.ee-slug-field input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  flex: 1 1 auto;
+}
+
+.ee-slug-suffix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.66rem 0.74rem;
+  border: 1px solid var(--ee-border);
+  border-left: 0;
+  border-radius: 0 0.62rem 0.62rem 0;
+  background: var(--ee-surface-elevated);
+  color: var(--ee-muted);
+  white-space: nowrap;
+  font-size: 0.92rem;
+}
+
+.ee-slug-preview {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ee-muted);
+}
+
+.ee-success-panel {
+  padding: 1rem 1.1rem;
+  border-radius: 0.75rem;
+  background: #edf9f0;
+  border: 1px solid #b8e6c4;
+  color: #1f4d2d;
+}
+
+.ee-success-panel h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.ee-success-panel[hidden],
+.ee-form[hidden] {
+  display: none !important;
+}
+
 .ee-honeypot {
   position: absolute;
   left: -10000px;

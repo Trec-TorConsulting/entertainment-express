@@ -144,7 +144,7 @@ def test_task_12_4_trial_handoff_logic_present():
     assert "validate_slug(requested_slug)" in source
     assert '"doctype": "Signup Application"' in source
     assert "ee_origin_lead" in source
-    assert "return {\"ok\": True, \"application\": signup.name, \"redirect\": \"/signup\"}" in source
+    assert "signup_handoff" in source
 
 
 def test_task_12_6_guest_desk_guard_test_exists():

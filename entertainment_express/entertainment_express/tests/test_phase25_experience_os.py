@@ -90,6 +90,77 @@ def test_list_my_events_guest_without_invites(monkeypatch):
     assert portal_collaboration.list_my_events() == []
 
 
+def test_list_my_events_includes_payer_bookings_without_ee_customer_role(monkeypatch):
+    fake = _Fake([], user="client@example.com")
+
+    def get_all(doctype, filters=None, fields=None, **k):
+        filters = dict(filters or {})
+        if doctype == "Event Booking" and filters.get("customer") == "CUST-1":
+            return [SimpleNamespace(name="EB-CONFIRMED")]
+        if doctype == "Event Booking" and filters.get("name") == ["in", ["EB-CONFIRMED"]]:
+            return [
+                {
+                    "name": "EB-CONFIRMED",
+                    "event_name": "Anniversary",
+                    "event_date": "2030-06-01",
+                    "status": "confirmed",
+                }
+            ]
+        return []
+
+    fake.get_all = get_all
+    monkeypatch.setattr(portal_collaboration, "frappe", fake)
+    monkeypatch.setattr(
+        "entertainment_express.security.access.customer_names_for_user",
+        lambda user=None: ["CUST-1"],
+    )
+    rows = portal_collaboration.list_my_events()
+    assert len(rows) == 1
+    assert rows[0]["name"] == "EB-CONFIRMED"
+
+
+def test_list_my_events_includes_all_jobs_for_staff(monkeypatch):
+    fake = _Fake(["EE Tenant Admin"], user="owner@test.local")
+
+    def get_all(doctype, filters=None, fields=None, **k):
+        filters = dict(filters or {})
+        if doctype == "Event Booking" and "customer" not in filters and "name" not in filters:
+            return [SimpleNamespace(name="EB-1"), SimpleNamespace(name="EB-2")]
+        if doctype == "Event Booking" and filters.get("name") == ["in", ["EB-1", "EB-2"]]:
+            return [
+                {"name": "EB-1", "event_name": "Wedding", "event_date": "2030-06-01", "status": "confirmed"},
+                {"name": "EB-2", "event_name": "Party", "event_date": "2030-07-01", "status": "inquiry"},
+            ]
+        return []
+
+    fake.get_all = get_all
+    monkeypatch.setattr(portal_collaboration, "frappe", fake)
+    monkeypatch.setattr(
+        "entertainment_express.security.access.customer_names_for_user",
+        lambda user=None: [],
+    )
+    rows = portal_collaboration.list_my_events()
+    assert {row["name"] for row in rows} == {"EB-1", "EB-2"}
+
+
+def test_customer_names_for_user_uses_profile_email(monkeypatch):
+    from entertainment_express.security import access
+
+    def get_value(doctype, filters=None, fieldname=None, **k):
+        if doctype == "User" and fieldname == "email":
+            return "login@example.com"
+        if doctype == "Customer" and filters == {"email_id": "login@example.com"}:
+            return "CUST-PROFILE"
+        return None
+
+    fake = SimpleNamespace(
+        db=SimpleNamespace(get_value=get_value),
+        get_all=lambda *a, **k: [],
+    )
+    monkeypatch.setattr(access, "frappe", fake)
+    assert access.customer_names_for_user("someuser") == ["CUST-PROFILE"]
+
+
 def test_unread_chat_is_zero_without_memberships(monkeypatch):
     fake = _Fake(["EE Event Guest"], user="stranger@test.local")
     monkeypatch.setattr(portal_collaboration, "frappe", fake)

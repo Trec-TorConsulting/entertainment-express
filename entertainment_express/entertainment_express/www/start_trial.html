@@ -3,8 +3,9 @@
 {% block marketing_content %}
 <section class="ee-shell ee-panel">
   <h1>Start Your Free Trial</h1>
-  <p>Choose your plan and create your signup application.</p>
+  <p>Choose your plan and launch your workspace at <strong>your-company.{{ tenant_domain }}</strong>.</p>
 
+  <div id="trial-success" class="ee-form-status ee-success-panel" hidden aria-live="polite"></div>
   <div id="trial-status" class="ee-form-status" aria-live="polite"></div>
 
   <form class="ee-form" id="ee-trial-form">
@@ -14,8 +15,12 @@
     <label for="trial-email">Email</label>
     <input id="trial-email" name="contact_email" type="email" maxlength="140" required>
 
-    <label for="trial-slug">Desired Subdomain</label>
-    <input id="trial-slug" name="requested_slug" type="text" pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]" required>
+    <label for="trial-slug">Your workspace address</label>
+    <div class="ee-slug-field">
+      <input id="trial-slug" name="requested_slug" type="text" pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]" required maxlength="50" placeholder="your-company" autocomplete="off">
+      <span class="ee-slug-suffix">.{{ tenant_domain }}</span>
+    </div>
+    <p class="ee-slug-preview">You will get: <strong id="trial-slug-preview">https://your-company.{{ tenant_domain }}</strong></p>
 
     <label for="trial-plan">Plan</label>
     <input id="trial-plan" name="plan_code" type="text" value="{{ plan }}" readonly>
@@ -34,33 +39,84 @@
       I agree to receive product updates.
     </label>
 
-    <button type="submit" class="ee-btn ee-btn-primary">Create application</button>
+    <button type="submit" class="ee-btn ee-btn-primary">Continue to checkout</button>
   </form>
 </section>
 
 <script>
 (function () {
+  var tenantDomain = {{ tenant_domain | tojson }};
+  var params = new URLSearchParams(window.location.search);
+  var successPanel = document.getElementById("trial-success");
+  var status = document.getElementById("trial-status");
   var form = document.getElementById("ee-trial-form");
+  var slugInput = document.getElementById("trial-slug");
+  var slugPreview = document.getElementById("trial-slug-preview");
+
+  function workspaceUrl(slug) {
+    var clean = (slug || "your-company").toLowerCase().replace(/[^a-z0-9-]/g, "") || "your-company";
+    return "https://" + clean + "." + tenantDomain;
+  }
+
+  function updatePreview() {
+    slugPreview.textContent = workspaceUrl(slugInput.value);
+  }
+
+  if (params.get("success") === "1") {
+    var slug = params.get("slug") || "";
+    var siteUrl = workspaceUrl(slug);
+    successPanel.hidden = false;
+    successPanel.innerHTML =
+      "<h2>Payment received — we're building your workspace</h2>" +
+      "<p>Your site will be ready at <a href='" + siteUrl + "'><strong>" + siteUrl + "</strong></a> " +
+      "within a few minutes. Watch your inbox for a welcome email with a link to set your password.</p>";
+    if (form) {
+      form.style.display = "none";
+    }
+    return;
+  }
+
+  if (params.get("canceled") === "1" && status) {
+    status.textContent = "Checkout was canceled. You can try again when you're ready.";
+  }
+
   if (!form) {
     return;
   }
 
+  slugInput.addEventListener("input", updatePreview);
+  updatePreview();
+
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
-    var status = document.getElementById("trial-status");
     status.textContent = "Submitting...";
 
     var data = Object.fromEntries(new FormData(form).entries());
     try {
-      await frappe.call({
+      var res = await frappe.call({
         method: "entertainment_express.api.marketing.start_trial",
         args: { payload: data }
       });
-      status.textContent = "Your application was submitted. We will contact you soon.";
+      var message = res.message || {};
+      if (message.checkout_url) {
+        status.textContent = "Redirecting to secure checkout...";
+        if (typeof window.eeTrackConversion === "function") {
+          window.eeTrackConversion("trial_started");
+        }
+        window.location.href = message.checkout_url;
+        return;
+      }
+      if (message.manual_review) {
+        status.textContent = (message.message || "Application submitted.") +
+          " Your workspace will be " + (message.site_url || workspaceUrl(data.requested_slug)) + ".";
+      } else {
+        status.textContent = "Application submitted.";
+      }
       if (typeof window.eeTrackConversion === "function") {
         window.eeTrackConversion("trial_started");
       }
       form.reset();
+      updatePreview();
     } catch (err) {
       status.textContent = "Unable to submit application. Please try again.";
     }

@@ -200,6 +200,16 @@ def request_cancel() -> dict:
 
 @frappe.whitelist(allow_guest=True)
 def saas_stripe_webhook() -> dict:
+    """Stripe webhook for SaaS signup + tenant subscription billing (control plane only).
+
+    Register in Stripe Dashboard:
+      POST https://entx.app/api/method/entertainment_express.api.saas_billing.saas_stripe_webhook
+
+    Required events:
+      checkout.session.completed, customer.subscription.created,
+      customer.subscription.updated, customer.subscription.deleted,
+      invoice.paid, invoice.payment_failed
+    """
     if not is_control_plane():
         return {"status": "ignored"}
     import stripe as stripe_lib
@@ -228,6 +238,13 @@ def saas_stripe_webhook() -> dict:
 
 def apply_stripe_event(et: str, obj: dict) -> None:
     """Pure-ish handler used by webhook and tests."""
+    if et == "checkout.session.completed":
+        from entertainment_express.api.signup_onboarding import handle_signup_checkout_completed
+
+        updated_meta = handle_signup_checkout_completed(obj)
+        if updated_meta:
+            obj = dict(obj)
+            obj["metadata"] = updated_meta
     if et in ("checkout.session.completed", "customer.subscription.updated", "customer.subscription.created"):
         _upsert_subscription(obj)
     elif et == "invoice.paid":

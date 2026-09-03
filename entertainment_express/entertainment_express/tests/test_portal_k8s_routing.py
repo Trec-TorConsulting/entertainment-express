@@ -28,8 +28,8 @@ def test_hooks_spa_routes_registered():
 
 def test_k8s_portal_ingress_present():
     k8s = (REPO / "k8s-deployment.yaml").read_text()
-    assert "customer.entertainment-express.app" in k8s
-    assert "dispatch.entertainment-express.app" in k8s
+    assert "customer.entx.app" in k8s
+    assert "dispatch.entx.app" in k8s
     assert "customer-spa-rewrite" in k8s
     assert "dispatch-spa-rewrite" in k8s
     assert "frappe-python" in k8s

@@ -677,7 +677,12 @@ function Planning({ booking }: { booking?: string }) {
   }, [eventId, guest]);
 
   if (!eventId) {
-    return <EmptyState title="Pick an event" message="Open an event first, then add songs, add-ons, and ideas." />;
+    return (
+      <EmptyState
+        title="No event selected"
+        message="When you have a confirmed booking, it shows up here so you can add songs, ideas, and event details."
+      />
+    );
   }
 
   return (

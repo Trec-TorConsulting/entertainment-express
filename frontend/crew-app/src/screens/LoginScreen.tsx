@@ -73,7 +73,7 @@ export default function LoginScreen() {
 
     try {
       // Demo account for testing
-      await login('demo@entertainmentexpress.com', 'demo123456');
+      await login('demo@entx.app', 'demo123456');
     } catch (err: any) {
       const errorMessage = err?.response?.data?.error || 'Demo login failed.';
       setError(errorMessage);

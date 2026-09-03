@@ -217,7 +217,7 @@ const registerDeviceToken = async (token: string): Promise<void> => {
     }
 
     await axios.post(
-      'https://api.entertainmentexpress.com/api/v2/crew/register-device',
+      'https://api.entx.app/api/v2/crew/register-device',
       {
         device_token: token,
         platform: 'ios', // Would be determined at runtime
@@ -246,7 +246,7 @@ export const unregisterDeviceToken = async (): Promise<void> => {
     if (!token || !authToken) return;
 
     await axios.post(
-      'https://api.entertainmentexpress.com/api/v2/crew/unregister-device',
+      'https://api.entx.app/api/v2/crew/unregister-device',
       {
         device_token: token,
       },

@@ -71,7 +71,7 @@ npm run build:ios
 ### Customer Portal (.env)
 
 ```
-VITE_API_BASE_URL=https://api.entertainmentexpress.com/api/v2
+VITE_API_BASE_URL=https://api.entx.app/api/v2
 VITE_JWT_EXPIRY=3600
 VITE_MAPBOX_TOKEN=your_mapbox_token
 ```
@@ -79,8 +79,8 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
 ### Dispatch Portal (.env)
 
 ```
-VITE_API_BASE_URL=https://api.entertainmentexpress.com/api/v2
-VITE_WEBSOCKET_URL=wss://api.entertainmentexpress.com
+VITE_API_BASE_URL=https://api.entx.app/api/v2
+VITE_WEBSOCKET_URL=wss://api.entx.app
 VITE_MAPBOX_TOKEN=your_mapbox_token
 ```
 
@@ -92,7 +92,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
     "name": "Entertainment Express",
     "slug": "ee-crew-app",
     "version": "1.0.0",
-    "apiUrl": "https://api.entertainmentexpress.com/api/v2"
+    "apiUrl": "https://api.entx.app/api/v2"
   }
 }
 ```
@@ -216,7 +216,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: customer.entertainmentexpress.com
+  - host: customer.entx.app
     http:
       paths:
       - path: /
@@ -228,7 +228,7 @@ spec:
               number: 80
   tls:
   - hosts:
-    - customer.entertainmentexpress.com
+    - customer.entx.app
     secretName: customer-portal-tls
 ```
 
@@ -262,7 +262,7 @@ spec:
               name: app-config
               key: api-url
         - name: REACT_APP_WS_URL
-          value: wss://api.entertainmentexpress.com
+          value: wss://api.entx.app
         resources:
           requests:
             cpu: 200m
@@ -317,7 +317,7 @@ jobs:
     - name: Build
       working-directory: frontend/${{ matrix.app }}
       env:
-        VITE_API_BASE_URL: https://api.entertainmentexpress.com/api/v2
+        VITE_API_BASE_URL: https://api.entx.app/api/v2
       run: npm run build
 
     - name: Upload artifacts

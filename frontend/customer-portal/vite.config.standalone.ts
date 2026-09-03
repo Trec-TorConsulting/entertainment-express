@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 /**
  * Standalone static hosting build (Vercel / S3).
- * Outputs to ./dist with base "/" for customer.entertainment-express.app
+ * Outputs to ./dist with base "/" for customer.entx.app
  */
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");

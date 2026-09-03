@@ -7,7 +7,7 @@ its own Frappe site + MariaDB database, addressed by a wildcard subdomain. This 
 `saas-control-plane`) — it only executes the technical creation/teardown of sites.
 
 ### Data Model (lives on the CONTROL-PLANE site)
-- **Tenant**: `tenant_slug` (unique, DNS-safe), company_name, status (`pending|provisioning|active|suspended|deprovisioning|deleted`), site_name (`{slug}.app.{base_domain}`), plan (link), created_on, activated_on, region, primary_contact, notes.
+- **Tenant**: `tenant_slug` (unique, DNS-safe), company_name, status (`pending|provisioning|active|suspended|deprovisioning|deleted`), site_name (`{slug}.{base_domain}`), plan (link), created_on, activated_on, region, primary_contact, notes.
 - **Provisioning Job**: tenant (link), action (`create|suspend|resume|deprovision|reprovision`), state (`queued|running|succeeded|failed`), log, attempts, provider_ref, timestamps.
 - **Tenant Domain**: tenant (link), hostname, type (`default|custom`), tls_status, verified (bool).
 
@@ -35,7 +35,7 @@ and `entertainment_express`, run tenant bootstrap, register the hostname, and ma
 
 #### Scenario: New tenant provisioned end to end
 - **WHEN** the control plane requests provisioning for `tenant_slug = acmedjs`
-- **THEN** a Frappe site `acmedjs.app.{base_domain}` is created with `erpnext` and `entertainment_express`
+- **THEN** a Frappe site `acmedjs.{base_domain}` is created with `erpnext` and `entertainment_express`
   installed, default roles/service catalog seeded, hostname routed via ingress, and Tenant status set to
   `active`
 
@@ -67,12 +67,12 @@ The system SHALL support suspend, resume, and deprovision (with backup) of a ten
   Tenant record retains the backup reference
 
 ### Requirement: Wildcard Subdomain Addressing
-The system SHALL address each tenant at `{tenant_slug}.app.{base_domain}` via wildcard DNS and wildcard TLS,
-and route the control plane at `admin.{base_domain}`.
+The system SHALL address each tenant at `{tenant_slug}.{base_domain}` via wildcard DNS and wildcard TLS,
+and route the control plane at `admin.{base_domain}` (marketing at apex `www.{base_domain}`).
 
 #### Scenario: Tenant reachable at its subdomain
 - **WHEN** an active tenant `acmedjs` is provisioned
-- **THEN** requests to `https://acmedjs.app.{base_domain}` resolve to that tenant's site over valid TLS
+- **THEN** requests to `https://acmedjs.{base_domain}` resolve to that tenant's site over valid TLS
 
 #### Scenario: Custom domain mapping (optional)
 - **WHEN** a tenant configures a verified custom domain via CNAME

@@ -16,7 +16,7 @@
   {"fieldname": "status", "fieldtype": "Select", "label": "Status",
    "options": "pending\nprovisioning\nactive\nsuspended\ndeprovisioning\ndeleted",
    "default": "pending", "in_list_view": 1, "reqd": 1},
-  {"fieldname": "site_name", "fieldtype": "Data", "label": "Frappe Site Name", "description": "e.g. acme-dj.app.entertainmentexpress.app", "read_only": 1},
+  {"fieldname": "site_name", "fieldtype": "Data", "label": "Frappe Site Name", "description": "e.g. acme-dj.entx.app", "read_only": 1},
   {"fieldname": "plan", "fieldtype": "Link", "label": "Plan", "options": "Plan", "reqd": 1},
   {"fieldname": "col1", "fieldtype": "Column Break"},
   {"fieldname": "primary_contact", "fieldtype": "Data", "label": "Primary Contact Name"},

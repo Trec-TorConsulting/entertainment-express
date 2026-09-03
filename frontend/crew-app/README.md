@@ -84,7 +84,7 @@ npm run web
   - Email validation (RFC 5322 compliant)
   - Password strength checking (min 6 chars)
   - Error messaging with inline corrections
-  - Demo account option (demo@entertainmentexpress.com)
+  - Demo account option (demo@entx.app)
   - Smooth keyboard handling (KeyboardAvoidingView)
   - Help text and support links
 - **Dependencies**: AsyncStorage, authStore
@@ -366,7 +366,7 @@ npm run test:e2e
 
 ### URL Schemes
 - App scheme: `entertainment-express://`
-- HTTPS: `https://entertainmentexpress.com`
+- HTTPS: `https://entx.app`
 
 ### Supported Routes
 - `/shift/{shiftId}` → ShiftDetail screen
@@ -562,7 +562,7 @@ git push origin feature/shift-filters
 ### Getting Help
 - GitHub Issues: Bug reports and feature requests
 - Documentation: Full API docs at /docs
-- Support Email: support@entertainmentexpress.com
+- Support Email: support@entx.app
 
 ## 📄 License
 

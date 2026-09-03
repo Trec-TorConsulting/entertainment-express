@@ -72,6 +72,10 @@ def submit_signup(
     if not contact_email or "@" not in contact_email:
         frappe.throw("Valid email required.")
 
+    from entertainment_express.control_plane.provisioner import validate_slug
+
+    validate_slug(requested_slug[:50].lower().strip())
+
     plan = frappe.db.get_value("Plan", {"plan_code": plan_code, "status": "Active"}, "name")
     if not plan:
         plan = frappe.db.get_value("Plan", {"status": "Active"}, "name")
@@ -86,7 +90,15 @@ def submit_signup(
     })
     app.insert(ignore_permissions=True)
     frappe.db.commit()
-    return {"status": "submitted", "application": app.name}
+
+    from entertainment_express.api.signup_onboarding import signup_handoff
+
+    handoff = signup_handoff(app.name, app.requested_slug.lower().strip())
+    return {
+        "status": "submitted",
+        "application": app.name,
+        **handoff,
+    }
 
 
 @frappe.whitelist()
@@ -103,41 +115,9 @@ def approve_signup(application_name: str) -> dict:
     if app.status != "new":
         frappe.throw(f"Application is already {app.status}.")
 
-    # Validate the slug before creating Tenant
-    from entertainment_express.control_plane.provisioner import validate_slug
-    validate_slug(app.requested_slug)
+    from entertainment_express.api.signup_onboarding import approve_signup_application
 
-    # Create Tenant + Provisioning Job
-    plan = app.plan or frappe.db.get_value("Plan", {"status": "Active"}, "name")
-    tenant = frappe.get_doc({
-        "doctype": "Tenant",
-        "tenant_slug": app.requested_slug,
-        "company_name": app.company_name,
-        "status": "provisioning",
-        "plan": plan,
-        "primary_email": app.contact_email,
-    })
-    tenant.insert(ignore_permissions=True)
-
-    job = frappe.get_doc({
-        "doctype": "Provisioning Job",
-        "tenant": tenant.name,
-        "action": "create",
-        "state": "queued",
-    })
-    job.insert(ignore_permissions=True)
-    frappe.db.commit()
-
-    # Enqueue
-    from entertainment_express.control_plane.provisioner import enqueue_provision
-    enqueue_provision(job.name)
-
-    app.status = "approved"
-    app.tenant = tenant.name
-    app.save(ignore_permissions=True)
-    frappe.db.commit()
-
-    return {"status": "provisioning", "tenant": tenant.name, "job": job.name}
+    return approve_signup_application(application_name)
 
 
 def _notify_lead_assigned(lead_name: str) -> None:

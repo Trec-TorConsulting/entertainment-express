@@ -1,7 +1,7 @@
 # Design: Phase 0 — Foundation & Deployment
 
 > Read `openspec/project.md` §5, §8 (repo layout, infra conventions) before starting. All values shown as
-> `{...}` are configuration placeholders. Default `{base_domain}` = `entertainmentexpress.app`.
+> `{base_domain}` default production value: `entx.app`.
 
 ## 1. Custom Frappe app skeleton
 

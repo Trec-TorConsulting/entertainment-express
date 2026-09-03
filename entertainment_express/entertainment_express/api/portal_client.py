@@ -20,8 +20,9 @@ def _require_payer() -> None:
 
 
 def _customer_name() -> str | None:
-    user = frappe.session.user
-    return frappe.db.get_value("Customer", {"email_id": user}, "name")
+    from entertainment_express.security.access import customer_name_for_user
+
+    return customer_name_for_user()
 
 
 def _money(amount) -> str:

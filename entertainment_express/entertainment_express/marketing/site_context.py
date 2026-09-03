@@ -6,7 +6,7 @@ import frappe
 def get_marketing_settings():
     """Load Marketing Settings with safe defaults for public pages."""
     defaults = {
-        "base_domain": "entertainmentexpress.app",
+        "base_domain": "entx.app",
         "hero_headline": "Run your entertainment company on one platform.",
         "hero_subhead": "Bookings, crew scheduling, contracts, dispatch, and billing made simple.",
         "primary_cta_label": "Start free trial",
@@ -51,7 +51,7 @@ def apply_common_page_context(context, settings, title, description, route):
     context.title = title
     context.seo_title = title
     context.meta_description = description
-    base_domain = settings.get("base_domain") or "entertainmentexpress.app"
+    base_domain = settings.get("base_domain") or "entx.app"
     context.canonical = f"https://www.{base_domain}{route}"
     context.base_domain = base_domain
     context.analytics_provider = settings.get("analytics_provider", "none")

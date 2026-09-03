@@ -64,6 +64,13 @@ def get_form(booking_name: str, instance_name: str | None = None) -> dict:
         filters["name"] = instance_name
     name = frappe.db.get_value("Planning Form Instance", filters, "name")
     if not name:
+        status = frappe.db.get_value("Event Booking", booking_name, "status")
+        if status in ("confirmed", "in_progress"):
+            from entertainment_express.event_planning.attach import attach_forms
+
+            attach_forms(booking_name, purpose="planning")
+            name = frappe.db.get_value("Planning Form Instance", filters, "name")
+    if not name:
         frappe.throw("No planning form for this booking yet. It appears after the booking is confirmed.")
     instance = frappe.get_doc("Planning Form Instance", name)
     template = frappe.get_doc("Planning Form Template", instance.template)

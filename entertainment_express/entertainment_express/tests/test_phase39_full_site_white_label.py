@@ -238,7 +238,7 @@ def test_full_mode_hides_ee_on_public_context(monkeypatch):
 
 
 def test_control_plane_skips_tenant_kit(monkeypatch):
-    fake = _Fake(roles=["Guest"], site="www.entertainmentexpress.app")
+    fake = _Fake(roles=["Guest"], site="www.entx.app")
     fake.conf = {"ee_control_plane": 1}
     _patch(monkeypatch, fake)
     monkeypatch.setattr(wl_kit, "skip_tenant_kit", lambda: True)

@@ -151,20 +151,32 @@ def test_start_trial_creates_signup_application(monkeypatch):
                 return "PLAN-STARTER"
             return None
 
-    monkeypatch.setattr(marketing, "_get_client_ip", lambda: "127.0.0.1")
-    monkeypatch.setattr(marketing, "_check_rate_limit", lambda *args, **kwargs: None)
-    monkeypatch.setattr(marketing, "submit_lead", lambda payload: {"ok": True, "lead": "LEAD-TEST"})
-    monkeypatch.setattr(marketing.frappe, "db", DB())
-
     def _get_doc(values):
         recorded.update(values)
         return DummySignup()
 
+    monkeypatch.setattr(marketing, "_get_client_ip", lambda: "127.0.0.1")
+    monkeypatch.setattr(marketing, "_check_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(marketing, "submit_lead", lambda payload: {"ok": True, "lead": "LEAD-TEST"})
     monkeypatch.setattr(marketing.frappe, "get_doc", _get_doc)
+    monkeypatch.setattr(marketing.frappe, "db", DB())
+    monkeypatch.setattr(marketing.frappe.db, "commit", lambda: None)
 
+    from entertainment_express.api import signup_onboarding
     from entertainment_express.control_plane import provisioner
 
     monkeypatch.setattr(provisioner, "validate_slug", lambda slug: None)
+    monkeypatch.setattr(
+        signup_onboarding,
+        "signup_handoff",
+        lambda app_name, slug, interval="month": {
+            "ok": True,
+            "application": app_name,
+            "site_url": f"https://{slug}.entx.app",
+            "checkout_url": "https://checkout.stripe.test/session",
+            "manual_review": False,
+        },
+    )
 
     out = marketing.start_trial(
         {
@@ -179,6 +191,8 @@ def test_start_trial_creates_signup_application(monkeypatch):
 
     assert out["ok"] is True
     assert out["application"] == "EE-SIGNUP-TEST"
+    assert out["site_url"] == "https://testco.entx.app"
+    assert out["checkout_url"] == "https://checkout.stripe.test/session"
     assert recorded["doctype"] == "Signup Application"
     assert recorded["requested_slug"] == "testco"
     assert recorded["plan"] == "PLAN-STARTER"

@@ -14,3 +14,6 @@ def get_context(context):
     )
     context.plan = (frappe.form_dict.get("plan") or "starter").strip().lower()
     context.no_sitemap = 1
+    from entertainment_express.control_plane.tenant_urls import tenant_base_domain
+
+    context.tenant_domain = tenant_base_domain()
