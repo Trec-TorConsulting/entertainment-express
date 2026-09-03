@@ -1,0 +1,811 @@
+import React, { useMemo, useState } from "react";
+import { NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import {
+  AccountPanel,
+  AppShell,
+  CommandPalette,
+  ConflictBanner,
+  DataTable,
+  DispatchBoard,
+  EmptyState,
+  FieldBoard,
+  FormField,
+  StatCard,
+  focusCommandPalette,
+  getSessionBootstrap,
+  call,
+  downloadBase64,
+  downloadText,
+} from "../../portal-kit/src";
+
+type SearchItem = {
+  type: string;
+  id: string;
+  label: string;
+  meta: string;
+  route: string;
+};
+
+const ROLE_PRIMARY: Array<{ roles: string[]; to: string; label: string }> = [
+  { roles: ["EE Dispatcher"], to: "/dispatch", label: "Dispatch" },
+  { roles: ["EE Crew", "EE Entertainer"], to: "/field", label: "Field" },
+  { roles: ["EE Sales"], to: "/sales", label: "Sales" },
+  { roles: ["EE Accounting"], to: "/accounting", label: "Accounting" },
+];
+
+function Home() {
+  const bootstrap = getSessionBootstrap();
+  const roles = bootstrap.roles || [];
+  const [results, setResults] = useState<SearchItem[]>([]);
+  const [day, setDay] = useState<any>(null);
+
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_employee.get_my_day", {})
+      .then(setDay)
+      .catch(() => setDay({ tasks: [], assignments: [], schedule: [], today_jobs: [], at_risk: [], at_risk_count: 0, appointments: [] }));
+  }, []);
+
+  const isDispatcher = roles.includes("EE Dispatcher");
+  const jobs = day?.today_jobs?.length ? day.today_jobs : day?.schedule || [];
+  const atRisk = day?.at_risk || jobs.filter((row: any) => row.at_risk);
+  const consults = day?.appointments || [];
+  const hasMain = isDispatcher ? jobs.length : day?.assignments?.length || day?.tasks?.length;
+
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <CommandPalette
+        onSearch={async (query) => {
+          const payload = await call("entertainment_express.api.portal_employee.search", { query });
+          setResults(payload || []);
+        }}
+      />
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.5rem" }}>
+        <StatCard compact label="User" value={bootstrap.user || "Unknown"} />
+        <StatCard compact label="Jobs today" value={String(jobs.length)} />
+        <StatCard compact label="At risk" value={String(day?.at_risk_count ?? atRisk.length ?? 0)} />
+      </div>
+
+      {isDispatcher ? (
+        jobs.length ? (
+          <DataTable
+            id="employee-my-day-jobs"
+            columns={[
+              { key: "name", label: "Booking" },
+              { key: "event_name", label: "Event" },
+              { key: "event_date", label: "Date" },
+              { key: "start_time", label: "Start" },
+              { key: "status", label: "Status" },
+            ]}
+            rows={jobs}
+          />
+        ) : (
+          <EmptyState title="Today's jobs" message="No bookings on the board for today." />
+        )
+      ) : day?.assignments?.length ? (
+        <DataTable
+          id="employee-my-day-assignments"
+          columns={[
+            { key: "name", label: "Assignment" },
+            { key: "booking", label: "Booking" },
+            { key: "status", label: "Status" },
+            { key: "role", label: "Role" },
+          ]}
+          rows={day.assignments}
+        />
+      ) : day?.tasks?.length ? (
+        <DataTable
+          id="employee-my-day-tasks"
+          columns={[
+            { key: "name", label: "Inquiry" },
+            { key: "lead_name", label: "Contact" },
+            { key: "status", label: "Status" },
+          ]}
+          rows={day.tasks}
+        />
+      ) : hasMain || consults.length ? null : (
+        <EmptyState title="My Day" message="Nothing queued for your roles yet." />
+      )}
+
+      {consults.length ? (
+        <div style={{ display: "grid", gap: "0.75rem" }}>
+          <h2 style={{ margin: 0, fontSize: "1.05rem" }}>Consults</h2>
+          {consults.map((row: any) => (
+            <article key={row.name} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
+              <p style={{ margin: 0, fontWeight: 700 }}>
+                {row.title} · {row.who}
+              </p>
+              <p className="ee-muted" style={{ margin: "0.25rem 0 0.5rem" }}>
+                {row.start}
+              </p>
+              <button
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.appointments.complete", { name: row.name, decision: "completed" });
+                  const next = await call("entertainment_express.api.portal_employee.get_my_day", {});
+                  setDay(next);
+                }}
+              >
+                Done
+              </button>
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      {isDispatcher && atRisk.length ? (
+        <DataTable
+          id="employee-my-day-at-risk"
+          columns={[
+            { key: "name", label: "At-risk booking" },
+            { key: "event_name", label: "Event" },
+            { key: "status", label: "Status" },
+          ]}
+          rows={atRisk}
+        />
+      ) : null}
+
+      {results.length ? (
+        <ul>
+          {results.map((item) => (
+            <li key={`${item.type}:${item.id}`}>
+              <a href={item.route} style={{ color: "var(--ee-brand)" }}>
+                {item.label}
+              </a>{" "}
+              - {item.meta}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+function GuardedWorkspace({ roles, allow, children }: { roles: string[]; allow: string[]; children: React.ReactNode }) {
+  const ok = roles.some((role) => allow.includes(role));
+  if (!ok) {
+    return <EmptyState title="Access Denied" message="Your role does not include this workspace." />;
+  }
+  return <>{children}</>;
+}
+
+function FieldWorkspace() {
+  return <FieldBoard />;
+}
+
+function SalesWorkspace() {
+  const go = useNavigate();
+  const [rows, setRows] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_proposal.list_inquiries", {})
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+  }, []);
+
+  return rows.length ? (
+    <DataTable
+      id="employee-sales-leads"
+      columns={[
+        { key: "contact", label: "Inquiry" },
+        { key: "status", label: "Status" },
+        { key: "updated", label: "Updated" },
+      ]}
+      rows={rows}
+      onRowClick={(row) => go(`/sales/${encodeURIComponent(row.id)}/proposal`)}
+    />
+  ) : (
+    <EmptyState title="Sales" message="Open inquiries will appear here. Click one to send a proposal." />
+  );
+}
+
+function ProposalWorkspace() {
+  const { id } = useParams();
+  const go = useNavigate();
+  const [doc, setDoc] = React.useState<any>(null);
+  const [picked, setPicked] = React.useState<Record<string, boolean>>({});
+  const [error, setError] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const reload = () => {
+    if (!id) return;
+    call("entertainment_express.api.portal_proposal.get_proposal", { source: "inquiry", name: id })
+      .then((res) => {
+        setDoc(res);
+        const next: Record<string, boolean> = {};
+        for (const line of res.lines || []) next[line.id] = true;
+        setPicked(next);
+      })
+      .catch((err) => setError(err.message || "Could not open the proposal."));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, [id]);
+
+  const selected = (doc?.catalog || []).filter((row: any) => picked[row.id]).map((row: any) => ({ id: row.id, kind: row.kind, qty: 1, rate_raw: row.rate_raw }));
+
+  const save = async (send = false) => {
+    setBusy(true);
+    setError("");
+    try {
+      await call("entertainment_express.api.portal_proposal.save_proposal", { source: "inquiry", name: id, selected, deposit_percent: doc?.deposit_percent || 25 });
+      if (send) await call("entertainment_express.api.portal_proposal.send_proposal", { source: "inquiry", name: id });
+      reload();
+    } catch (err: any) {
+      setError(err.message || "Could not save the proposal.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (error && !doc) return <EmptyState title="Proposal" message={error} />;
+  if (!doc) return <p className="ee-muted">Loading…</p>;
+
+  return (
+    <section className="ee-records">
+      <header className="ee-records__bar">
+        <div>
+          <button type="button" className="ee-back" onClick={() => go("/sales")}>
+            ← Back
+          </button>
+          <h1>Proposal for {doc.party}</h1>
+          <p className="ee-muted">{doc.status}</p>
+        </div>
+      </header>
+      <div className="ee-form" style={{ maxWidth: "none" }}>
+        {(doc.conflicts || []).map((row: any) => (
+          <ConflictBanner key={row.id || row.title} title={row.title} message={row.message} severity={row.severity || "potential"} />
+        ))}
+        {(doc.catalog || []).map((row: any) => (
+          <label key={`${row.kind}:${row.id}`} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
+            <input type="checkbox" checked={!!picked[row.id]} onChange={() => setPicked((prev) => ({ ...prev, [row.id]: !prev[row.id] }))} />
+            <span>
+              <strong>{row.name}</strong> · {row.rate}
+              {row.description ? <span style={{ display: "block", color: "var(--ee-muted)" }}>{row.description}</span> : null}
+            </span>
+          </label>
+        ))}
+        <p style={{ margin: 0 }}>
+          Total {doc.total} · Deposit {doc.deposit}
+        </p>
+        {error ? <p className="ee-form__error">{error}</p> : null}
+        <div className="ee-form__actions">
+          <button type="button" className="ee-btn" disabled={busy} onClick={() => save(false)}>
+            Save
+          </button>
+          <button type="button" className="ee-btn" disabled={busy} onClick={() => save(true)}>
+            Send to client
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AccountingWorkspace() {
+  const [rows, setRows] = React.useState<any[]>([]);
+  const [sheets, setSheets] = React.useState<any[]>([]);
+  const [runs, setRuns] = React.useState<any[]>([]);
+  const [from, setFrom] = React.useState("");
+  const [to, setTo] = React.useState("");
+
+  const reload = () => {
+    call("frappe.client.get_list", {
+      doctype: "Sales Invoice",
+      fields: ["name", "customer", "outstanding_amount", "currency"],
+      order_by: "modified desc",
+      limit_page_length: 20,
+    })
+      .then((res) => setRows(res || []))
+      .catch(() => setRows([]));
+    call("entertainment_express.api.portal_hr.list_timesheets", {})
+      .then((res) => setSheets(res || []))
+      .catch(() => setSheets([]));
+    call("entertainment_express.api.portal_hr.list_pay_runs", {})
+      .then((res) => setRuns(res || []))
+      .catch(() => setRuns([]));
+  };
+
+  React.useEffect(() => {
+    reload();
+  }, []);
+
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <h1 style={{ margin: 0 }}>Money</h1>
+      {sheets.filter((row) => row.pending).length ? (
+        <div className="ee-form">
+          <h2 style={{ margin: 0 }}>Hours to approve</h2>
+          {sheets
+            .filter((row) => row.pending)
+            .map((row) => (
+              <button
+                key={row.name}
+                type="button"
+                className="ee-btn"
+                onClick={async () => {
+                  await call("entertainment_express.api.portal_hr.approve_hours", { timesheet: row.name });
+                  reload();
+                }}
+              >
+                Approve {row.person} {row.hours}h
+              </button>
+            ))}
+        </div>
+      ) : null}
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Pay crew</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+          <FormField label="From">
+            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </FormField>
+          <FormField label="Through">
+            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </FormField>
+        </div>
+        <button
+          type="button"
+          className="ee-btn"
+          onClick={async () => {
+            await call("entertainment_express.api.portal_hr.create_pay_run", { period_from: from, period_to: to });
+            reload();
+          }}
+        >
+          Build pay run
+        </button>
+        {runs.length ? (
+          <DataTable
+            id="employee-pay-runs"
+            columns={[
+              { key: "name", label: "Run" },
+              { key: "period_from", label: "From" },
+              { key: "status", label: "Status" },
+              { key: "total_amount", label: "Total" },
+            ]}
+            rows={runs}
+            onRowClick={async (row) => {
+              if (row.status === "draft") await call("entertainment_express.api.portal_hr.finalize_pay_run", { name: row.name });
+              else if (row.status === "finalized") await call("entertainment_express.api.portal_hr.process_payout", { name: row.name });
+              reload();
+            }}
+          />
+        ) : null}
+      </div>
+      {rows.length ? (
+        <DataTable
+          id="employee-accounting-invoices"
+          columns={[
+            { key: "name", label: "Invoice" },
+            { key: "customer", label: "Client" },
+            { key: "outstanding_amount", label: "Outstanding" },
+            { key: "currency", label: "Currency" },
+          ]}
+          rows={rows}
+        />
+      ) : (
+        <EmptyState title="Invoices" message="Open invoices will appear here." />
+      )}
+      <BillingTools />
+    </section>
+  );
+}
+
+function BillingTools() {
+  const [jobs, setJobs] = React.useState<any[]>([]);
+  const [job, setJob] = React.useState("");
+  const [invoice, setInvoice] = React.useState("");
+  const [amount, setAmount] = React.useState("");
+  const [reason, setReason] = React.useState("");
+  const [splits, setSplits] = React.useState("3");
+  const [hint, setHint] = React.useState("");
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_billing.list_jobs", {})
+      .then((res) => setJobs(res || []))
+      .catch(() => setJobs([]));
+  }, []);
+  return (
+    <div className="ee-form">
+      <h2 style={{ margin: 0 }}>Refunds and holds</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Job">
+          <select value={job} onChange={(e) => setJob(e.target.value)}>
+            <option value="">Pick a job</option>
+            {jobs.map((row: any) => (
+              <option key={row.name} value={row.name}>
+                {row.event_name || row.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Invoice">
+          <input value={invoice} onChange={(e) => setInvoice(e.target.value)} />
+        </FormField>
+        <FormField label="Amount">
+          <input type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        </FormField>
+        <FormField label="Reason">
+          <input value={reason} onChange={(e) => setReason(e.target.value)} />
+        </FormField>
+      </div>
+      {hint ? <p>{hint}</p> : null}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!invoice || !amount}
+          onClick={async () => {
+            await call("entertainment_express.api.portal_billing.refund_invoice", {
+              invoice_name: invoice,
+              amount: Number(amount),
+              reason,
+            });
+            setHint("Refund sent.");
+          }}
+        >
+          Refund
+        </button>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!job || !amount}
+          onClick={async () => {
+            await call("entertainment_express.api.portal_billing.create_damage_hold", {
+              booking_name: job,
+              amount: Number(amount),
+            });
+            setHint("Hold placed.");
+          }}
+        >
+          Hold on card
+        </button>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!job}
+          onClick={async () => {
+            await call("entertainment_express.api.portal_billing.create_installments", {
+              booking_name: job,
+              count: Number(splits),
+            });
+            setHint("Balance split.");
+          }}
+        >
+          Split balance
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PullSheetWorkspace() {
+  const [jobs, setJobs] = React.useState<any[]>([]);
+  const [booking, setBooking] = React.useState("");
+  const [sheet, setSheet] = React.useState<any>(null);
+  const [code, setCode] = React.useState("");
+  const [damage, setDamage] = React.useState("");
+  const [hint, setHint] = React.useState("");
+
+  const loadSheet = (job: string) => {
+    if (!job) return;
+    call("entertainment_express.api.portal_fleet.generate_packing_list", { booking_name: job })
+      .then(setSheet)
+      .catch(() =>
+        call("entertainment_express.api.portal_fleet.packing_status", { booking_name: job })
+          .then(setSheet)
+          .catch(() => setSheet({ items: [] }))
+      );
+  };
+
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_employee.get_my_day", {})
+      .then((day) => {
+        const rows = day?.schedule?.length ? day.schedule : day?.today_jobs || [];
+        setJobs(rows);
+        if (rows[0]?.name) setBooking(rows[0].name);
+      })
+      .catch(() => setJobs([]));
+  }, []);
+
+  React.useEffect(() => {
+    loadSheet(booking);
+  }, [booking]);
+
+  const packed = async (idx: number, next: boolean) => {
+    const res = await call("entertainment_express.api.portal_fleet.mark_packed", {
+      booking_name: booking,
+      idx,
+      packed: next ? 1 : 0,
+    });
+    setSheet(res);
+  };
+
+  const scanPacked = async () => {
+    setHint("");
+    try {
+      const res = await call("entertainment_express.api.portal_fleet.mark_packed", {
+        booking_name: booking,
+        code,
+        packed: 1,
+      });
+      setSheet(res);
+      setCode("");
+    } catch (err: any) {
+      setHint(err.message || "Could not pack that scan.");
+    }
+  };
+
+  return (
+    <section style={{ display: "grid", gap: "0.75rem" }}>
+      <h1 style={{ margin: 0 }}>Pull sheet</h1>
+      {jobs.length ? (
+        <FormField label="Job">
+          <select value={booking} onChange={(e) => setBooking(e.target.value)}>
+            {jobs.map((job: any) => (
+              <option key={job.name} value={job.name}>
+                {job.event_name || job.name}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      ) : null}
+      {sheet?.missing?.length ? (
+        <p style={{ color: "var(--ee-danger)", margin: 0 }}>Still on the list: {sheet.missing.join(", ")}</p>
+      ) : null}
+      {sheet?.items?.length ? (
+        <div className="ee-form">
+          {sheet.items.map((item: any, idx: number) => (
+            <label key={`${item.item_name}-${idx}`} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <input type="checkbox" checked={!!item.packed} onChange={(e) => packed(idx, e.target.checked)} />
+              {item.item_name} × {item.qty}
+            </label>
+          ))}
+        </div>
+      ) : (
+        <EmptyState title="Nothing to pull" message="Warehouse and rental gear for today’s jobs shows here." />
+      )}
+      <div className="ee-form">
+        <h2 style={{ margin: 0 }}>Scan</h2>
+        <FormField label="Code">
+          <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Scan or type the code" />
+        </FormField>
+        {hint ? <p className="ee-form__error">{hint}</p> : null}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+          <button type="button" className="ee-btn" disabled={!booking || !code} onClick={scanPacked}>
+            Mark packed
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            disabled={!booking || !code}
+            onClick={async () => {
+              setHint("");
+              try {
+                await call("entertainment_express.api.portal_fleet.checkout", { booking_name: booking, code });
+                setHint("Checked out.");
+                setCode("");
+              } catch (err: any) {
+                setHint(err.message || "Could not check out.");
+              }
+            }}
+          >
+            Check out
+          </button>
+          <button
+            type="button"
+            className="ee-btn"
+            disabled={!booking || !code}
+            onClick={async () => {
+              setHint("");
+              try {
+                await call("entertainment_express.api.portal_fleet.checkin", {
+                  booking_name: booking,
+                  code,
+                  damage_notes: damage,
+                });
+                setHint("Checked in.");
+                setCode("");
+              } catch (err: any) {
+                setHint(err.message || "Could not check in.");
+              }
+            }}
+          >
+            Check in
+          </button>
+        </div>
+        <FormField label="Damage note">
+          <textarea value={damage} onChange={(e) => setDamage(e.target.value)} />
+        </FormField>
+        <button
+          type="button"
+          className="ee-btn"
+          disabled={!booking || !damage}
+          onClick={async () => {
+            setHint("");
+            try {
+              await call("entertainment_express.api.portal_fleet.report_damage", {
+                booking_name: booking,
+                description: damage,
+              });
+              setHint("Damage recorded. That unit is in the shop.");
+              setDamage("");
+            } catch (err: any) {
+              setHint(err.message || "Could not record damage.");
+            }
+          }}
+        >
+          Report damage
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function DispatchWorkspace() {
+  const roles = getSessionBootstrap().roles || [];
+  return <DispatchBoard canAssign={roles.includes("EE Dispatcher")} />;
+}
+
+function MeWorkspace() {
+  const [hours, setHours] = React.useState({ start: "10:00", end: "22:00" });
+  const [offFrom, setOffFrom] = React.useState("");
+  const [offTo, setOffTo] = React.useState("");
+  const [offs, setOffs] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_hr.my_time_off", {})
+      .then((res) => setOffs(res || []))
+      .catch(() => setOffs([]));
+  }, []);
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <h1 style={{ margin: 0 }}>Me</h1>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Typical start">
+          <input type="time" value={hours.start} onChange={(e) => setHours({ ...hours, start: e.target.value })} />
+        </FormField>
+        <FormField label="Typical end">
+          <input type="time" value={hours.end} onChange={(e) => setHours({ ...hours, end: e.target.value })} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          const days: Record<string, { start: string; end: string }> = {};
+          ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].forEach((day) => {
+            days[day] = { start: hours.start, end: hours.end };
+          });
+          await call("entertainment_express.api.portal_hr.save_my_hours", { days });
+        }}
+      >
+        Save my hours
+      </button>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        <FormField label="Time-off from">
+          <input type="date" value={offFrom} onChange={(e) => setOffFrom(e.target.value)} />
+        </FormField>
+        <FormField label="Through">
+          <input type="date" value={offTo} onChange={(e) => setOffTo(e.target.value)} />
+        </FormField>
+      </div>
+      <button
+        type="button"
+        className="ee-btn"
+        onClick={async () => {
+          await call("entertainment_express.api.portal_hr.save_my_time_off", {
+            start_date: offFrom,
+            end_date: offTo || offFrom,
+          });
+          const res = await call("entertainment_express.api.portal_hr.my_time_off", {});
+          setOffs(res || []);
+        }}
+      >
+        Save time-off
+      </button>
+      {offs.length ? (
+        <DataTable
+          id="my-time-off"
+          columns={[
+            { key: "start_date", label: "From" },
+            { key: "end_date", label: "Through" },
+            { key: "reason", label: "Reason" },
+          ]}
+          rows={offs}
+        />
+      ) : null}
+      <AccountPanel />
+    </section>
+  );
+}
+
+function ReportsWorkspace() {
+  const [pack, setPack] = React.useState<any>(null);
+  React.useEffect(() => {
+    call("entertainment_express.api.portal_reports.employee_pack", {}).then(setPack).catch(() => setPack(null));
+  }, []);
+  if (!pack) return <EmptyState title="Reports" message="Your numbers for this role show here." />;
+  const cards = Object.entries(pack).filter(([, value]) => value !== undefined && typeof value !== "object");
+  return (
+    <section style={{ display: "grid", gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+        {cards.map(([key, value]) => (
+          <StatCard key={key} label={key.replace(/_/g, " ")} value={String(value)} />
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={async () => {
+            const csv = await call("entertainment_express.api.portal_reports.employee_pack_csv", {});
+            downloadText("my-reports.csv", String(csv || ""), "text/csv");
+          }}
+          style={{ background: "var(--ee-brand)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+        >
+          Download spreadsheet
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            const pdf = await call("entertainment_express.api.portal_reports.employee_pack_pdf", {});
+            if (pdf?.content_b64) downloadBase64(pdf.filename || "my-reports.pdf", pdf.content_b64, "application/pdf");
+          }}
+          style={{ background: "var(--ee-panel)", color: "var(--ee-text)", border: "1px solid var(--ee-border)", borderRadius: "0.5rem", padding: "0.5rem 0.8rem" }}
+        >
+          Download PDF
+        </button>
+      </div>
+    </section>
+  );
+}
+
+export default function LegacyEmployeeWorkspaces() {
+  const roles = getSessionBootstrap().roles || [];
+  return (
+    <Routes>
+      <Route
+        path="/pull-sheet"
+        element={
+          <GuardedWorkspace roles={roles} allow={["EE Dispatcher", "EE Crew"]}>
+            <PullSheetWorkspace />
+          </GuardedWorkspace>
+        }
+      />
+      <Route
+        path="/field"
+        element={
+          <GuardedWorkspace roles={roles} allow={["EE Crew", "EE Entertainer"]}>
+            <FieldWorkspace />
+          </GuardedWorkspace>
+        }
+      />
+      <Route
+        path="/sales"
+        element={
+          <GuardedWorkspace roles={roles} allow={["EE Sales"]}>
+            <SalesWorkspace />
+          </GuardedWorkspace>
+        }
+      />
+      <Route
+        path="/sales/:id/proposal"
+        element={
+          <GuardedWorkspace roles={roles} allow={["EE Sales"]}>
+            <ProposalWorkspace />
+          </GuardedWorkspace>
+        }
+      />
+      <Route
+        path="/accounting"
+        element={
+          <GuardedWorkspace roles={roles} allow={["EE Accounting"]}>
+            <AccountingWorkspace />
+          </GuardedWorkspace>
+        }
+      />
+      <Route path="/me" element={<MeWorkspace />} />
+      <Route path="/reports" element={<ReportsWorkspace />} />
+      <Route path="*" element={<EmptyState title="Employee Workspace" message="That page is not in this portal." />} />
+    </Routes>
+  );
+}

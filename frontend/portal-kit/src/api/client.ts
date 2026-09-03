@@ -1,3 +1,5 @@
+import { showToast } from "../primitives/Toast";
+
 type RpcArgs = Record<string, unknown>;
 
 type ApiError = Error & { status?: number };
@@ -27,7 +29,11 @@ async function parseError(res: Response): Promise<ApiError> {
   return err;
 }
 
-export async function call(method: string, args: RpcArgs = {}): Promise<any> {
+export interface CallOptions {
+  silent?: boolean;
+}
+
+export async function call(method: string, args: RpcArgs = {}, options: CallOptions = {}): Promise<any> {
   const res = await fetch(`/api/method/${method}`, {
     method: "POST",
     credentials: "include",
@@ -38,7 +44,23 @@ export async function call(method: string, args: RpcArgs = {}): Promise<any> {
     body: JSON.stringify(args)
   });
 
-  if (!res.ok) throw await parseError(res);
+  if (!res.ok) {
+    const err = await parseError(res);
+    if (!options.silent) {
+      showToast({
+        title: "Action failed",
+        description: err.message,
+        variant: "danger",
+        action: {
+          label: "Retry",
+          onClick: () => {
+            call(method, args, options).catch(() => {});
+          }
+        }
+      });
+    }
+    throw err;
+  }
 
   const payload = await res.json();
   return payload?.message;

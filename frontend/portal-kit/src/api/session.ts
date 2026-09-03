@@ -28,6 +28,7 @@ export type PortalBootstrap = {
     hide_product_chrome?: number | boolean;
     email_from_name?: string;
   };
+  premium_ui_enabled?: number | boolean;
 };
 
 export function getSessionBootstrap(): PortalBootstrap {

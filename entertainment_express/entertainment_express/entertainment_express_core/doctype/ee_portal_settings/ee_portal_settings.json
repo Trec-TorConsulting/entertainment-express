@@ -164,6 +164,13 @@
    "label": "Feature Flags"
   },
   {
+   "default": "0",
+   "description": "Enable portal premium experience (Tailwind, Radix, cockpit/ops/consumer density, dark mode).",
+   "fieldname": "premium_ui_enabled",
+   "fieldtype": "Check",
+   "label": "Premium UI Enabled"
+  },
+  {
    "description": "JSON object of portal feature flags.",
    "fieldname": "feature_flags",
    "fieldtype": "Small Text",

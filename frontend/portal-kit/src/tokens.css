@@ -1,27 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --ee-bg: #f3f4f6;
+  /* Colors - Base Palette */
+  --ee-bg: #f8fafc;
   --ee-panel: #ffffff;
+  --ee-surface-base: #f8fafc;
+  --ee-surface-raised: #ffffff;
+  --ee-surface-overlay: #ffffff;
+  --ee-surface-inset: #f1f5f9;
+
+  /* Rail (Navigation) */
   --ee-rail: #0f172a;
   --ee-rail-muted: #94a3b8;
   --ee-rail-text: #e2e8f0;
+  --ee-rail-hover: #1e293b;
+  --ee-rail-active: #334155;
+
+  /* Typography Colors */
   --ee-text: #0f172a;
+  --ee-text-secondary: #475569;
   --ee-muted: #64748b;
+  --ee-text-inverse: #ffffff;
+  --ee-text-disabled: #94a3b8;
+
+  /* Brand Accents */
   --ee-brand: #0f766e;
-  --ee-brand-soft: #ccfbf1;
-  --ee-danger: #b91c1c;
+  --ee-brand-soft: #f0fdfa;
+  --ee-brand-hover: #115e59;
+  --ee-brand-active: #134e4a;
+  --ee-brand-border: #99f6e4;
+  --ee-brand-text: #0f766e;
+
+  /* Semantic Status Colors */
   --ee-success: #15803d;
+  --ee-success-soft: #f0fdf4;
+  --ee-success-border: #bbf7d0;
+  --ee-success-text: #166534;
+
+  --ee-warning: #b45309;
+  --ee-warning-soft: #fffbeb;
+  --ee-warning-border: #fde68a;
+  --ee-warning-text: #92400e;
+
+  --ee-danger: #b91c1c;
+  --ee-danger-soft: #fef2f2;
+  --ee-danger-border: #fecaca;
+  --ee-danger-text: #991b1b;
+
+  --ee-info: #0369a1;
+  --ee-info-soft: #f0f9ff;
+  --ee-info-border: #bae6fd;
+  --ee-info-text: #075985;
+
+  /* Borders */
   --ee-border: #e2e8f0;
-  --ee-radius: 12px;
-  --ee-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
+  --ee-border-subtle: #f1f5f9;
+  --ee-border-strong: #cbd5e1;
+
+  /* Shadows */
+  --ee-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --ee-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --ee-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --ee-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+  --ee-shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+
+  /* Radii */
+  --ee-radius-sm: 6px;
+  --ee-radius: 10px;
+  --ee-radius-md: 10px;
+  --ee-radius-lg: 14px;
+  --ee-radius-xl: 18px;
+  --ee-radius-full: 9999px;
+
+  /* Typography Scales */
+  --ee-font-display: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ee-font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ee-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --ee-font: var(--ee-font-body);
+
+  --ee-font-size-display: 2rem;
+  --ee-line-height-display: 2.375rem;
+  --ee-font-weight-display: 700;
+
+  --ee-font-size-title: 1.5rem;
+  --ee-line-height-title: 1.875rem;
+  --ee-font-weight-title: 600;
+
+  --ee-font-size-heading: 1.125rem;
+  --ee-line-height-heading: 1.5rem;
+  --ee-font-weight-heading: 600;
+
+  --ee-font-size-body: 0.875rem;
+  --ee-line-height-body: 1.375rem;
+  --ee-font-weight-body: 400;
+
+  --ee-font-size-label: 0.8125rem;
+  --ee-line-height-label: 1.125rem;
+  --ee-font-weight-label: 500;
+
+  --ee-font-size-caption: 0.75rem;
+  --ee-line-height-caption: 1rem;
+  --ee-font-weight-caption: 400;
+
+  --ee-font-size-mono: 0.8125rem;
+  --ee-line-height-mono: 1.25rem;
+
+  /* Spacing Grid (4px base) */
+  --ee-space-1: 0.25rem;
+  --ee-space-2: 0.5rem;
+  --ee-space-3: 0.75rem;
+  --ee-space-4: 1rem;
+  --ee-space-5: 1.25rem;
+  --ee-space-6: 1.5rem;
+  --ee-space-8: 2rem;
+  --ee-space-10: 2.5rem;
+  --ee-space-12: 3rem;
+  --ee-space-16: 4rem;
+
+  /* Motion & Easing */
+  --ee-motion-fast: 120ms;
+  --ee-motion-normal: 200ms;
+  --ee-motion-slow: 320ms;
+  --ee-ease-default: cubic-bezier(0.16, 1, 0.3, 1);
+  --ee-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ee-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Z-Index Layers */
+  --ee-z-dropdown: 1000;
+  --ee-z-sticky: 1100;
+  --ee-z-drawer: 1200;
+  --ee-z-modal: 1300;
+  --ee-z-popover: 1400;
+  --ee-z-toast: 1500;
+  --ee-z-tooltip: 1600;
+
+  /* Layout Constants */
   --ee-nav-width: 15.5rem;
+  --ee-nav-collapsed-width: 4rem;
+  --ee-header-height: 3.5rem;
   --ee-bottom-nav-height: 3.75rem;
   --ee-ops-font-size: 0.875rem;
-  --ee-header-height: 3.75rem;
-  --ee-font: ui-sans-serif, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+/* Dark Mode Overrides */
+[data-theme="dark"] {
+  --ee-bg: #0b0f17;
+  --ee-panel: #111827;
+  --ee-surface-base: #0b0f17;
+  --ee-surface-raised: #151f32;
+  --ee-surface-overlay: #19243b;
+  --ee-surface-inset: #070a10;
+
+  --ee-rail: #070a10;
+  --ee-rail-muted: #64748b;
+  --ee-rail-text: #e2e8f0;
+  --ee-rail-hover: #151f32;
+  --ee-rail-active: #1e293b;
+
+  --ee-text: #f8fafc;
+  --ee-text-secondary: #cbd5e1;
+  --ee-muted: #94a3b8;
+  --ee-text-inverse: #0f172a;
+  --ee-text-disabled: #475569;
+
+  --ee-brand: #2dd4bf;
+  --ee-brand-soft: #042f2e;
+  --ee-brand-hover: #5eead4;
+  --ee-brand-active: #14b8a6;
+  --ee-brand-border: #115e59;
+  --ee-brand-text: #2dd4bf;
+
+  --ee-success: #34d399;
+  --ee-success-soft: #064e3b;
+  --ee-success-border: #065f46;
+  --ee-success-text: #6ee7b7;
+
+  --ee-warning: #fbbf24;
+  --ee-warning-soft: #78350f;
+  --ee-warning-border: #92400e;
+  --ee-warning-text: #fde68a;
+
+  --ee-danger: #f87171;
+  --ee-danger-soft: #7f1d1d;
+  --ee-danger-border: #991b1b;
+  --ee-danger-text: #fca5a5;
+
+  --ee-info: #38bdf8;
+  --ee-info-soft: #0c4a6e;
+  --ee-info-border: #075985;
+  --ee-info-text: #7dd3fc;
+
+  --ee-border: #1e293b;
+  --ee-border-subtle: #151f32;
+  --ee-border-strong: #334155;
+
+  --ee-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ee-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ee-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45);
+  --ee-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --ee-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Base resets & typography */
 html, body, #root {
-  font-family: var(--ee-font);
+  font-family: var(--ee-font-body);
   background: var(--ee-bg);
   color: var(--ee-text);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Density classes */
+.density-cockpit {
+  --ee-font-size-body: 0.8125rem;
+  --ee-line-height-body: 1.25rem;
+  --ee-control-height: 2rem;
+  --ee-control-padding: 0.5rem;
+}
+
+.density-ops {
+  --ee-font-size-body: 0.875rem;
+  --ee-line-height-body: 1.375rem;
+  --ee-control-height: 2.375rem;
+  --ee-control-padding: 0.75rem;
+}
+
+.density-consumer {
+  --ee-font-size-body: 1rem;
+  --ee-line-height-body: 1.5rem;
+  --ee-control-height: 2.75rem;
+  --ee-control-padding: 1rem;
 }

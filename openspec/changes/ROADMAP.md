@@ -342,6 +342,24 @@ company’s current website URL and/or logo with preview + apply.
 
 ---
 
+## Phase 40 — Portal Premium Experience 📝
+**Goal:** Elevate `/owner`, `/employee`, and `/client` from functional scaffolds to enterprise-grade,
+sales-ready product surfaces. **North star:** Stripe-minimal. **Stack:** Radix + Tailwind in portal-kit.
+**Dark mode:** v1. **Marketing www:** out of scope (portals first; marketing match later).
+
+| Sub-phase | Delivers |
+|-----------|----------|
+| **40a** | portal-kit v2, Storybook, AppShell v2, PQB + CI gates (Lighthouse, axe, visual regression) |
+| **40b** | `/owner` SPA refactor + flagship routes (Today, Pipeline, Money, Brand) |
+| **40c** | `/client` + `/employee` flagship routes; staging dogfood; spec sync |
+
+**Specs:** `portal-premium-experience` (new), `ui-design-system`, `owner-portal`, `employee-portal`,
+`customer-portal`.
+**Depends on:** phases 20–25 (portals + APIs), 21 (tokens), 38–39 (white-label).
+**Folder:** [`phase-40-portal-premium-experience/`](phase-40-portal-premium-experience/)
+
+---
+
 ## After the roadmap — Production operator readiness ✅ archived 2026-09-02
 Operator docs, safe re-apply on the existing cluster, website cache flush on python start, and MariaDB
 NetworkPolicy. Not a numbered product phase.

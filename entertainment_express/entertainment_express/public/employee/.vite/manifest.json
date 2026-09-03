@@ -1,9 +1,70 @@
 {
+  "_DataTable.js": {
+    "file": "chunks/DataTable.js",
+    "name": "DataTable",
+    "imports": [
+      "src/main.tsx",
+      "_EmptyState.js"
+    ]
+  },
+  "_EmptyState.js": {
+    "file": "chunks/EmptyState.js",
+    "name": "EmptyState",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_PageHeader.js": {
+    "file": "chunks/PageHeader.js",
+    "name": "PageHeader",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/AppLegacy.tsx": {
+    "file": "chunks/AppLegacy.js",
+    "name": "AppLegacy",
+    "src": "src/AppLegacy.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_DataTable.js",
+      "_EmptyState.js"
+    ]
+  },
+  "src/app/routes/dispatch/DispatchEmbedPage.tsx": {
+    "file": "chunks/DispatchEmbedPage.js",
+    "name": "DispatchEmbedPage",
+    "src": "src/app/routes/dispatch/DispatchEmbedPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_PageHeader.js",
+      "_EmptyState.js"
+    ]
+  },
+  "src/app/routes/today/MyDayPage.tsx": {
+    "file": "chunks/MyDayPage.js",
+    "name": "MyDayPage",
+    "src": "src/app/routes/today/MyDayPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_PageHeader.js",
+      "_DataTable.js",
+      "_EmptyState.js"
+    ]
+  },
   "src/main.tsx": {
     "file": "main.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
+    "dynamicImports": [
+      "src/app/routes/today/MyDayPage.tsx",
+      "src/app/routes/dispatch/DispatchEmbedPage.tsx",
+      "src/AppLegacy.tsx"
+    ],
     "css": [
       "assets/main.css"
     ]

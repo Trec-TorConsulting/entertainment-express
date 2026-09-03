@@ -1,9 +1,132 @@
 {
+  "_Badge.js": {
+    "file": "chunks/Badge.js",
+    "name": "Badge",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_Card.js": {
+    "file": "chunks/Card.js",
+    "name": "Card",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_DataTable.js": {
+    "file": "chunks/DataTable.js",
+    "name": "DataTable",
+    "imports": [
+      "src/main.tsx",
+      "_EmptyState.js"
+    ]
+  },
+  "_EmptyState.js": {
+    "file": "chunks/EmptyState.js",
+    "name": "EmptyState",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_PageHeader.js": {
+    "file": "chunks/PageHeader.js",
+    "name": "PageHeader",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_Sparkline.js": {
+    "file": "chunks/Sparkline.js",
+    "name": "Sparkline",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_send.js": {
+    "file": "chunks/send.js",
+    "name": "send",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/AppLegacy.tsx": {
+    "file": "chunks/AppLegacy.js",
+    "name": "AppLegacy",
+    "src": "src/AppLegacy.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_DataTable.js",
+      "_EmptyState.js"
+    ]
+  },
+  "src/app/routes/brand/BrandPage.tsx": {
+    "file": "chunks/BrandPage.js",
+    "name": "BrandPage",
+    "src": "src/app/routes/brand/BrandPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card.js",
+      "_PageHeader.js"
+    ]
+  },
+  "src/app/routes/money/MoneyPage.tsx": {
+    "file": "chunks/MoneyPage.js",
+    "name": "MoneyPage",
+    "src": "src/app/routes/money/MoneyPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Badge.js",
+      "_Card.js",
+      "_PageHeader.js",
+      "_Sparkline.js",
+      "_DataTable.js",
+      "_send.js",
+      "_EmptyState.js"
+    ]
+  },
+  "src/app/routes/pipeline/PipelinePage.tsx": {
+    "file": "chunks/PipelinePage.js",
+    "name": "PipelinePage",
+    "src": "src/app/routes/pipeline/PipelinePage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Badge.js",
+      "_PageHeader.js",
+      "_DataTable.js",
+      "_send.js",
+      "_EmptyState.js"
+    ]
+  },
+  "src/app/routes/today/TodayPage.tsx": {
+    "file": "chunks/TodayPage.js",
+    "name": "TodayPage",
+    "src": "src/app/routes/today/TodayPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Badge.js",
+      "_Card.js",
+      "_PageHeader.js",
+      "_Sparkline.js",
+      "_EmptyState.js"
+    ]
+  },
   "src/main.tsx": {
     "file": "main.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
+    "dynamicImports": [
+      "src/app/routes/today/TodayPage.tsx",
+      "src/app/routes/pipeline/PipelinePage.tsx",
+      "src/app/routes/money/MoneyPage.tsx",
+      "src/app/routes/brand/BrandPage.tsx",
+      "src/AppLegacy.tsx"
+    ],
     "css": [
       "assets/main.css"
     ]

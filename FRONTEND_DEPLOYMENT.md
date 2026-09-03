@@ -19,6 +19,36 @@ All frontends follow enterprise patterns:
 
 ## Local Development Setup
 
+### Portal Kit v2 & Multi-Portal Production Suite (Phase 40)
+
+The portals share `@portal-kit` (Radix primitives, Tailwind design system, Storybook tokens, PQB quality gates):
+
+```bash
+# 1. Install & Build Shared Design System
+cd frontend/portal-kit
+npm install
+npm run build:storybook   # builds Storybook documentation & token specs
+
+# 2. Build Owner Portal SPA (Outputs to entertainment_express/public/owner)
+cd ../owner-portal
+npm install
+npm run build
+
+# 3. Build Employee Portal SPA (Outputs to entertainment_express/public/employee)
+cd ../employee-portal
+npm install
+npm run build
+
+# 4. Build Customer / Client Portal SPA (Outputs to entertainment_express/public/client)
+cd ../customer-portal
+npm install
+npm run build
+
+# 5. Verify Build Bundles
+cd ../..
+python3 smoke_test.py
+```
+
 ### Customer Portal
 
 ```bash

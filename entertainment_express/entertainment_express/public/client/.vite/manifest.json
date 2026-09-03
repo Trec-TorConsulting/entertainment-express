@@ -1,9 +1,109 @@
 {
+  "_Card.js": {
+    "file": "chunks/Card.js",
+    "name": "Card",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_PageHeader.js": {
+    "file": "chunks/PageHeader.js",
+    "name": "PageHeader",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_Tabs.js": {
+    "file": "chunks/Tabs.js",
+    "name": "Tabs",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_circle-check.js": {
+    "file": "chunks/circle-check.js",
+    "name": "circle-check",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_sparkles.js": {
+    "file": "chunks/sparkles.js",
+    "name": "sparkles",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/AppLegacy.tsx": {
+    "file": "chunks/AppLegacy.js",
+    "name": "AppLegacy",
+    "src": "src/AppLegacy.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/app/routes/event/EventDetailPage.tsx": {
+    "file": "chunks/EventDetailPage.js",
+    "name": "EventDetailPage",
+    "src": "src/app/routes/event/EventDetailPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card.js",
+      "_Tabs.js",
+      "_circle-check.js"
+    ]
+  },
+  "src/app/routes/home/HomePage.tsx": {
+    "file": "chunks/HomePage.js",
+    "name": "HomePage",
+    "src": "src/app/routes/home/HomePage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card.js",
+      "_PageHeader.js",
+      "_sparkles.js"
+    ]
+  },
+  "src/app/routes/pay/PayPage.tsx": {
+    "file": "chunks/PayPage.js",
+    "name": "PayPage",
+    "src": "src/app/routes/pay/PayPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card.js",
+      "_PageHeader.js",
+      "_circle-check.js",
+      "_sparkles.js"
+    ]
+  },
+  "src/app/routes/planning/PlanningPage.tsx": {
+    "file": "chunks/PlanningPage.js",
+    "name": "PlanningPage",
+    "src": "src/app/routes/planning/PlanningPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card.js",
+      "_Tabs.js",
+      "_PageHeader.js"
+    ]
+  },
   "src/main.tsx": {
     "file": "main.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
+    "dynamicImports": [
+      "src/app/routes/home/HomePage.tsx",
+      "src/app/routes/event/EventDetailPage.tsx",
+      "src/app/routes/pay/PayPage.tsx",
+      "src/app/routes/planning/PlanningPage.tsx",
+      "src/AppLegacy.tsx"
+    ],
     "css": [
       "assets/main.css"
     ]

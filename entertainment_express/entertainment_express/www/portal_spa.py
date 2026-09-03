@@ -76,6 +76,16 @@ def portal_bootstrap() -> dict:
     except Exception:
         canonical_host = getattr(frappe.local, "site", "") or ""
 
+    premium_ui_enabled = 0
+    try:
+        settings = frappe.get_cached_doc("EE Portal Settings", "EE Portal Settings")
+        premium_ui_enabled = int(getattr(settings, "premium_ui_enabled", 0) or 0)
+    except Exception:
+        try:
+            premium_ui_enabled = int(frappe.db.get_single_value("EE Portal Settings", "premium_ui_enabled") or 0)
+        except Exception:
+            premium_ui_enabled = 0
+
     return {
         "user": user,
         "person": person,
@@ -84,6 +94,7 @@ def portal_bootstrap() -> dict:
         "branding": branding,
         "inbox_count": inbox_count,
         "canonical_host": canonical_host,
+        "premium_ui_enabled": premium_ui_enabled,
     }
 
 

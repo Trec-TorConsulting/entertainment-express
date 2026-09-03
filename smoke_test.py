@@ -321,8 +321,12 @@ def test_portal_artifacts():
     required = [
         Path("entertainment_express/entertainment_express/public/client/main.js"),
         Path("entertainment_express/entertainment_express/public/dispatch/main.js"),
+        Path("entertainment_express/entertainment_express/public/owner/main.js"),
+        Path("entertainment_express/entertainment_express/public/employee/main.js"),
         Path("frontend/customer-portal/package.json"),
         Path("frontend/dispatch-portal/package.json"),
+        Path("frontend/owner-portal/package.json"),
+        Path("frontend/employee-portal/package.json"),
         Path("frontend/crew-app/package.json"),
     ]
     for path in required:
