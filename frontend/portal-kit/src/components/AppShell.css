@@ -1,3 +1,11 @@
+.ee-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 16.5rem minmax(0, 1fr);
+  background: var(--ee-bg);
+  color: var(--ee-text);
+}
+
 .ee-shell--white-label .ee-brand__text em,
 .ee-hide-product .ee-product-mark {
   display: none;
@@ -95,7 +103,8 @@
 .ee-shell__workspace {
   min-width: 0;
   display: grid;
-  grid-template-rows: var(--ee-header-height) 1fr;
+  /* Use auto header row height so content never renders underneath the sticky header. */
+  grid-template-rows: auto 1fr;
 }
 
 .ee-shell__header {
