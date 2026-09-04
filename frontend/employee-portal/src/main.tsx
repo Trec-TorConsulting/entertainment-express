@@ -13,10 +13,13 @@ if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   });
 }
 
+const isDev = import.meta.env.DEV;
+const basename = isDev ? "/assets/entertainment_express/employee" : "/employee";
+
 createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-          <BrowserRouter basename="/employee">
+          <BrowserRouter basename={basename}>
             <EmployeeApp />
           </BrowserRouter>
     </QueryClientProvider>

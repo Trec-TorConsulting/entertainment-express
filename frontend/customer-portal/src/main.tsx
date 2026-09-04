@@ -7,10 +7,13 @@ import "../../portal-kit/src/tokens.css";
 
 const queryClient = new QueryClient();
 
+const isDev = import.meta.env.DEV;
+const basename = isDev ? "/assets/entertainment_express/client" : "/client";
+
 createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="/client">
+      <BrowserRouter basename={basename}>
         <ClientApp />
       </BrowserRouter>
     </QueryClientProvider>
