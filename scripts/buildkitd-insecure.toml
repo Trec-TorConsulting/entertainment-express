@@ -1,4 +1,3 @@
-# Homelab registry serves plain HTTP on NodePort 30500.
-[registry."192.168.4.10:30500"]
-  http = true
-  insecure = true
+# Homelab registry is HTTPS at registry.maddscientist.com (Let's Encrypt).
+# BuildKit no longer needs http=true / insecure for pushes to this host.
+# Old NodePort HTTP entry removed; delete this file once CI stops referencing it.

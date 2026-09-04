@@ -11,7 +11,7 @@ and nightly backups. Everything after this builds on it.
 - Create the custom Frappe app `entertainment_express` (skeleton: `hooks.py`, `modules.txt`, module folders,
   `api/`, `www/`, `templates/`, `public/`, `patches/`, `fixtures/`, `tests/`).
 - Create a Frappe **bench container image** with `erpnext` + `entertainment_express` installed; push to the
-  private registry `192.168.4.10:30500`.
+  private registry `registry.maddscientist.com`.
 - Create K8s manifests in `HomeLab-Redo/entertainment-express/`: namespace, MariaDB StatefulSet (Longhorn
   PVC), Redis (cache/queue/socketio), Frappe workloads (`frappe-python`, `frappe-socketio`,
   `frappe-workers`, `frappe-scheduler`), sites PVC, ConfigMap, Secret (templates), wildcard Ingress, backup

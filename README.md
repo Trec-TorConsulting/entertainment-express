@@ -92,7 +92,7 @@ on the Helm-era MariaDB StatefulSet `volumeClaimTemplates`; that is not a failed
 ```bash
 # 1) Build linux/amd64 and load (homelab registry is HTTP — see Dockerfile comments)
 docker buildx build --builder ee-insecure-http --platform linux/amd64 \
-  -t 192.168.4.10:30500/entertainment-express/bench:0.0.85-ee --load -f Dockerfile .
+  -t registry.maddscientist.com/entertainment-express/bench:0.0.85-ee --load -f Dockerfile .
 
 # 2) Secrets (edit a local copy — never commit real values)
 kubectl -n entertainment-express apply -f secrets.example.yaml
