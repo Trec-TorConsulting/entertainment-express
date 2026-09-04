@@ -10,7 +10,7 @@ context: |
   Multi-tenancy: SITE-PER-TENANT (Frappe multi-site bench); tenant URL {tenant}.app.{base_domain};
   control plane at admin.{base_domain}. Deploy: K3S (k8s-deployment.yaml in this repo), namespace
   entertainment-express, Traefik+LetsEncrypt wildcard TLS, Longhorn storage, registry
-  192.168.4.10:30500, node05 is GPU-only (exclude via affinity).
+  registry.maddscientist.com, node05 is GPU-only (exclude via affinity).
   Payments: Stripe(primary)+Square+PayPal+ACH. Comms: email+Twilio SMS/WhatsApp+FCM push. AI: Ollama.
   AUDIENCE: a lower-capability model will implement these specs. Every change proposal must be explicit,
   unambiguous, and include concrete file paths + acceptance criteria. Never guess on money, contracts,

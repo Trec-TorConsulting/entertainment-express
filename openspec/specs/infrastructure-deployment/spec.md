@@ -7,7 +7,7 @@ backups. Kubernetes manifests live in this repo (`k8s-deployment.yaml`, applied 
 the bench **Dockerfile** lives at the product repo root.
 
 ### Components
-- **Frappe bench image**: ERPNext + `entertainment_express`, multi-arch, built from repo-root `Dockerfile`, pushed to `192.168.4.10:30500`.
+- **Frappe bench image**: ERPNext + `entertainment_express`, multi-arch, built from repo-root `Dockerfile`, pushed to `registry.maddscientist.com`.
 - **Workloads**: `frappe-python` (gunicorn, :8000), `frappe-socketio` (:9000), `frappe-workers` (RQ),
   `frappe-scheduler`.
 - **Data**: MariaDB (StatefulSet, Longhorn PVC), Redis (cache/queue/socketio).

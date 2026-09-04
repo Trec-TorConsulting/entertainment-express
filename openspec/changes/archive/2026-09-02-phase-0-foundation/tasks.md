@@ -19,15 +19,15 @@
 - [x] 2.1 Write `HL/entertainment-express/Dockerfile` basing on a pinned `frappe/erpnext` tag and installing
       `entertainment_express` (design §2).
       **Accept:** Dockerfile pins exact base tag; copies + pip-installs the app; appends to `apps.txt`.
-- [x] 2.2 Build & push a multi-arch image to `192.168.4.10:30500/entertainment-express/bench:0.0.1`.
+- [x] 2.2 Build & push a multi-arch image to `registry.maddscientist.com/entertainment-express/bench:0.0.1`.
       **Accept:** `docker manifest inspect` shows amd64 + arm64; image pullable from the cluster.
       **Note:** Build succeeded (amd64 + arm64, `entertainment_express-0.0.1` installed). Push to
-      `192.168.4.10:30500` requires cluster-network access — run the build command from a cluster node
+      `registry.maddscientist.com` requires cluster-network access — run the build command from a cluster node
       or over VPN:
       ```bash
       cd /path/to/Projects && docker buildx build \
         --platform linux/amd64,linux/arm64 \
-        -t 192.168.4.10:30500/entertainment-express/bench:0.0.1 \
+        -t registry.maddscientist.com/entertainment-express/bench:0.0.1 \
         --push \
         -f HomeLab-Redo/entertainment-express/Dockerfile .
       ```

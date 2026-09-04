@@ -91,7 +91,7 @@ RUN cd /home/frappe/frappe-bench && \
 Build & push (documented; may be manual for phase-0):
 ```bash
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t 192.168.4.10:30500/entertainment-express/bench:0.0.1 --push \
+  -t registry.maddscientist.com/entertainment-express/bench:0.0.1 --push \
   -f HomeLab-Redo/entertainment-express/Dockerfile .
 ```
 

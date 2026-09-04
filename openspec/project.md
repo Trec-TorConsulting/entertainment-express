@@ -98,7 +98,7 @@ A single tenant will typically offer **several** of these at once. The domain mo
 - **Kubernetes:** K3S homelab cluster (see §8). Deployed via `k8s-deployment.yaml` in this repo (`scripts/deploy.sh` on an existing cluster).
 - **Ingress:** Traefik (built into K3S) with **LetsEncrypt** wildcard TLS.
 - **Storage class:** **Longhorn** (distributed) for all PersistentVolumeClaims.
-- **Registry:** private registry `192.168.4.10:30500`.
+- **Registry:** private registry `registry.maddscientist.com`.
 - **Namespace:** `entertainment-express` (new, isolated — do NOT reuse the existing `frappe` namespace
   that serves www.trector.com).
 
@@ -249,7 +249,7 @@ full file after deleting completed Jobs.
   `letsencrypt`. Use a **wildcard host** `*.app.<BASE_DOMAIN>` (+ `admin.<BASE_DOMAIN>`) routed to the
   Frappe python service (port 8000) and `/socket.io` to the socketio service (port 9000). Reuse the shared
   Traefik middlewares (redirect-https, gzip, security-headers).
-- **Images:** built for Frappe bench (ERPNext + `entertainment_express`), pushed to `192.168.4.10:30500`.
+- **Images:** built for Frappe bench (ERPNext + `entertainment_express`), pushed to `registry.maddscientist.com`.
 - **Backups:** per-site MariaDB backups (Frappe `bench backup`) on a CronJob to MinIO; retain per policy.
 - **Validation approach:** `kubectl describe` / `kubectl logs` / `kubectl exec` for manual validation, plus
   Frappe unit tests in CI where available.
