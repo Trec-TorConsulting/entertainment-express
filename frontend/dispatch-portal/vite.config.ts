@@ -8,9 +8,10 @@ export default defineConfig({
   resolve: {
     alias: {
       react: path.resolve(__dirname, "./node_modules/react"),
-      "react-dom": path.resolve(__dirname, "./node_modules/react-dom")
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
+      "framer-motion": path.resolve(__dirname, "./node_modules/framer-motion")
     },
-    dedupe: ["react", "react-dom"]
+    dedupe: ["react", "react-dom", "framer-motion"]
   },
   base: "/assets/entertainment_express/dispatch/",
   server: { port: 5174 },

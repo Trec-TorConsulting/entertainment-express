@@ -6,12 +6,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@portal-kit": path.resolve(__dirname, "../portal-kit/src"),
-      react: path.resolve(__dirname, "./node_modules/react"),
-      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
-      "react-router-dom": path.resolve(__dirname, "./node_modules/react-router-dom")
+      "@portal-kit": path.resolve(__dirname, "../portal-kit/src")
     },
-    dedupe: ["react", "react-dom", "react-router-dom"]
+    dedupe: ["react", "react-dom", "react-router", "react-router-dom", "framer-motion"]
   },
   base: "/assets/entertainment_express/employee/",
   build: {

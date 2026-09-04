@@ -35,7 +35,7 @@
     ]
   },
   "src/app/routes/today/MyDayPage.tsx": {
-    "file": "chunks/MyDayPage-C9m2d3xU.js",
+    "file": "chunks/MyDayPage-BEo5Dp-T.js",
     "name": "MyDayPage",
     "src": "src/app/routes/today/MyDayPage.tsx",
     "isDynamicEntry": true,

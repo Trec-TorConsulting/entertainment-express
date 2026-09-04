@@ -3,11 +3,11 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { OwnerLayout } from "./layouts/OwnerLayout";
 import { Skeleton, EmptyState, AccountPanel } from "@portal-kit";
 
-// Flagship Route Modules - Lazy Loaded for Code Splitting
-const TodayPage = React.lazy(() => import("./routes/today/TodayPage").then((m) => ({ default: m.TodayPage })));
-const PipelinePage = React.lazy(() => import("./routes/pipeline/PipelinePage").then((m) => ({ default: m.PipelinePage })));
-const MoneyPage = React.lazy(() => import("./routes/money/MoneyPage").then((m) => ({ default: m.MoneyPage })));
-const BrandPage = React.lazy(() => import("./routes/brand/BrandPage").then((m) => ({ default: m.BrandPage })));
+// Flagship Route Modules - Statically imported for immediate, reliable rendering
+import { TodayPage } from "./routes/today/TodayPage";
+import { PipelinePage } from "./routes/pipeline/PipelinePage";
+import { MoneyPage } from "./routes/money/MoneyPage";
+import { BrandPage } from "./routes/brand/BrandPage";
 
 // Lazy-load Legacy Workspaces
 const LegacyWorkspaces = React.lazy(() => import("../AppLegacy"));

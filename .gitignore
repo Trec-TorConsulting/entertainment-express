@@ -25,6 +25,7 @@ sites/
 
 # Node / frontend
 node_modules/
+frontend/portal-kit/node_modules
 .expo/
 web-build/
 *.tsbuildinfo

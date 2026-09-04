@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   PageHeader,
   Card,
@@ -71,28 +70,10 @@ export const TodayPage: React.FC = () => {
     );
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
-  };
-
   return (
-    <motion.div 
-      className="space-y-8 max-w-5xl mx-auto"
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-    >
+    <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in-50 duration-300">
       {/* Friendly Hero Header */}
-      <motion.div variants={itemVariants}>
+      <div>
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)]">
             {greeting}, {firstName}!
@@ -104,11 +85,11 @@ export const TodayPage: React.FC = () => {
             {hasActionNeeded && " There are a few things that need your attention."}
           </p>
         </div>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Column: What's Next (Upcoming Gigs) */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-[var(--ee-text)] flex items-center gap-2">
               <Calendar className="w-5 h-5 text-[var(--ee-brand)]" />
@@ -180,10 +161,10 @@ export const TodayPage: React.FC = () => {
               />
             </Card>
           )}
-        </motion.div>
+        </div>
 
         {/* Right Column: Quick Actions & Attention Needed */}
-        <motion.div variants={itemVariants} className="space-y-8">
+        <div className="space-y-8">
           
           {/* Quick Actions */}
           <div className="space-y-4">
@@ -271,9 +252,9 @@ export const TodayPage: React.FC = () => {
              </div>
           )}
 
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
