@@ -49,10 +49,10 @@ Non-trivial work is **proposed as a spec before it is implemented**, using
 3. **Archive / sync** — once shipped, archive the change and sync deltas into the
    main specs.
 
-Cursor Agent Skills for each step live in [`.cursor/skills/`](.cursor/skills/)
+Antigravity / Gemini Agent Skills for each step live in [`.agents/skills/`](.agents/skills/)
 (`openspec-propose`, `openspec-apply-change`, `openspec-explore`,
-`openspec-archive-change`, `openspec-sync-specs`). A persistent workflow rule is
-in [`.cursor/rules/openspec-workflow.mdc`](.cursor/rules/openspec-workflow.mdc).
+`openspec-archive-change`, `openspec-sync-specs`). Persistent workflow rules are
+in [`GEMINI.md`](GEMINI.md) and [`.agents/rules/openspec-workflow.md`](.agents/rules/openspec-workflow.md).
 If a spec and `openspec/project.md` disagree, the project file wins unless a
 change proposal explicitly overrides it.
 

@@ -17,7 +17,7 @@
 >   (`phase-N-*/`) intentionally carry only `proposal.md` / `design.md` / `tasks.md` — they do **not**
 >   contain delta specs.
 > - **To start / continue building a phase:** `openspec status --change <phase-id> --json`, then work
->   its `tasks.md` (or ask Cursor to apply the change via openspec-apply-change). `applyRequires` is `["tasks"]`, which is satisfied.
+>   its `tasks.md` (or ask Antigravity / Gemini to apply the change via openspec-apply-change). `applyRequires` is `["tasks"]`, which is satisfied.
 > - **To validate:** use `openspec validate --specs` (validates all baseline specs). Do **not** expect
 >   `openspec validate <phase-id>` to pass — it reports "no deltas" by design, which is expected and is
 >   **not** an error to fix.
