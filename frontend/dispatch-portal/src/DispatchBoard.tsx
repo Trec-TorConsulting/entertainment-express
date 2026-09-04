@@ -8,7 +8,7 @@ import {
   AppShell, Card, CardHeader, CardTitle, CardContent, Badge, Button,
   Tabs, StatGrid, MetricCard, EmptyState, Skeleton
 } from '../../portal-kit/src';
-import { Calendar, Search, MapPin, AlertTriangle, Users, ClipboardList, MessageSquare, Download, CheckCircle2, Navigation } from 'lucide-react';
+import { Calendar, Search, MapPin, AlertTriangle, Users, ClipboardList, MessageSquare, Download, CheckCircle2, Navigation, Clock } from 'lucide-react';
 import '../../portal-kit/src/tokens.css';
 
 const api = axios.create({

@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ErrorBoundary } from "@portal-kit";
 import { EmployeeApp } from "./App";
 import "../../portal-kit/src/tokens.css";
 
@@ -16,12 +17,16 @@ if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
 const isDev = import.meta.env.DEV;
 const basename = isDev ? "/assets/entertainment_express/employee" : "/employee";
 
-createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-          <BrowserRouter basename={basename}>
-            <EmployeeApp />
-          </BrowserRouter>
-    </QueryClientProvider>
-  </React.StrictMode>
-);
+const rootEl = document.getElementById("root");
+if (rootEl) {
+  createRoot(rootEl).render(
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter basename={basename}>
+          <EmployeeApp />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+}
+
