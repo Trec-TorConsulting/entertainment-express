@@ -35,13 +35,6 @@
       "src/main.tsx"
     ]
   },
-  "_Sparkline.js": {
-    "file": "chunks/Sparkline.js",
-    "name": "Sparkline",
-    "imports": [
-      "src/main.tsx"
-    ]
-  },
   "_send.js": {
     "file": "chunks/send.js",
     "name": "send",
@@ -81,7 +74,6 @@
       "_Badge.js",
       "_Card.js",
       "_PageHeader.js",
-      "_Sparkline.js",
       "_DataTable.js",
       "_send.js",
       "_EmptyState.js"
@@ -110,8 +102,6 @@
       "src/main.tsx",
       "_Badge.js",
       "_Card.js",
-      "_PageHeader.js",
-      "_Sparkline.js",
       "_EmptyState.js"
     ]
   },

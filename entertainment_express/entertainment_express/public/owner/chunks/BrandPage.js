@@ -1,4 +1,4 @@
-import{c as S,p as _,r as t,a as f,j as e,S as d,B as k,q as P,a2 as E,$ as n,I as l}from"../main.js";import{C as L,a as B,b as A,c as I}from"./Card.js";import{P as R}from"./PageHeader.js";/**
+import{c as S,q as _,r as t,a as f,j as e,S as d,B as k,s as P,a1 as E,$ as n,I as l}from"../main.js";import{C as L,a as B,b as A,c as I}from"./Card.js";import{P as R}from"./PageHeader.js";/**
  * @license lucide-react v0.475.0 - ISC
  *
  * This source code is licensed under the ISC license.

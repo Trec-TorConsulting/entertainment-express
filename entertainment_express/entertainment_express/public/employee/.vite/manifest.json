@@ -1,12 +1,4 @@
 {
-  "_DataTable.js": {
-    "file": "chunks/DataTable.js",
-    "name": "DataTable",
-    "imports": [
-      "src/main.tsx",
-      "_EmptyState.js"
-    ]
-  },
   "_EmptyState.js": {
     "file": "chunks/EmptyState.js",
     "name": "EmptyState",
@@ -28,7 +20,6 @@
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_DataTable.js",
       "_EmptyState.js"
     ]
   },
@@ -51,7 +42,6 @@
     "imports": [
       "src/main.tsx",
       "_PageHeader.js",
-      "_DataTable.js",
       "_EmptyState.js"
     ]
   },

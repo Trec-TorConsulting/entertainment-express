@@ -6,7 +6,7 @@ import io, { Socket } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AppShell, Card, CardHeader, CardTitle, CardContent, Badge, Button,
-  Tabs, TabsList, TabsTrigger, StatGrid, MetricCard, EmptyState, Skeleton
+  Tabs, StatGrid, MetricCard, EmptyState, Skeleton
 } from '../../portal-kit/src';
 import { Calendar, Search, MapPin, AlertTriangle, Users, ClipboardList, MessageSquare, Download, CheckCircle2, Navigation } from 'lucide-react';
 import '../../portal-kit/src/tokens.css';
@@ -125,13 +125,17 @@ export const DispatchBoard: React.FC = () => {
       </AnimatePresence>
 
       <div className="p-4 h-[calc(100vh-100px)] flex flex-col gap-4">
-        <Tabs value={mainTab} onValueChange={setMainTab} className="w-full">
-          <TabsList className="bg-[var(--ee-surface-raised)] border border-[var(--ee-border)]">
-            <TabsTrigger value="board" className="px-6">Live Board</TabsTrigger>
-            <TabsTrigger value="scheduler" className="px-6">Scheduler</TabsTrigger>
-            <TabsTrigger value="analytics" className="px-6">Analytics</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <Tabs 
+          value={mainTab} 
+          onValueChange={setMainTab} 
+          className="w-full"
+          listClassName="bg-[var(--ee-surface-raised)] border border-[var(--ee-border)] px-4"
+          tabs={[
+            { id: 'board', label: 'Live Board', content: null },
+            { id: 'scheduler', label: 'Scheduler', content: null },
+            { id: 'analytics', label: 'Analytics', content: null }
+          ]}
+        />
 
         <div className="flex-1 overflow-hidden">
           {isLoading && <div className="p-8 text-center"><Skeleton height="300px" /></div>}
@@ -230,19 +234,16 @@ const BookingDetail: React.FC<{ bookingId: string }> = ({ bookingId }) => {
 
       <div className="flex-1 flex flex-col overflow-hidden bg-[var(--ee-surface-raised)]">
         <div className="px-5 pt-3 border-b border-[var(--ee-border)]">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-transparent border-none">
-              <TabsTrigger value="crew" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[var(--ee-brand)] rounded-none px-4">
-                Crew & Tracking
-              </TabsTrigger>
-              <TabsTrigger value="runsheet" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[var(--ee-brand)] rounded-none px-4">
-                Run Sheet
-              </TabsTrigger>
-              <TabsTrigger value="messages" className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-[var(--ee-brand)] rounded-none px-4">
-                Messages
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <Tabs 
+            value={activeTab} 
+            onValueChange={setActiveTab}
+            listClassName="bg-transparent border-none gap-0 px-2"
+            tabs={[
+              { id: 'crew', label: 'Crew & Tracking', content: null },
+              { id: 'runsheet', label: 'Run Sheet', content: null },
+              { id: 'messages', label: 'Messages', content: null }
+            ]}
+          />
         </div>
         
         <div className="flex-1 overflow-y-auto p-5">
