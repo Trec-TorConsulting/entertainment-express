@@ -13,7 +13,7 @@ export default defineConfig({
       input: "./src/main.tsx",
       output: {
         entryFileNames: "main.js",
-        chunkFileNames: "chunks/[name].js",
+        chunkFileNames: "chunks/[name]-[hash].js",
         assetFileNames: "assets/[name].[ext]",
       },
     },
