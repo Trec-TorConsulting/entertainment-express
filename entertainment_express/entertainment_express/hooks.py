@@ -1,10 +1,10 @@
 app_name = "entertainment_express"
 app_title = "Entertainment Express"
 app_publisher = "Trec-Tor Consulting"
-app_description = "Multi-tenant SaaS ERP/CRM for mobile entertainment companies"
-app_email = "tobey@trec-tor.com"
-app_license = "Proprietary"
-app_version = "0.0.1"
+app_description = "A spec-first multi-tenant vertical SaaS platform for entertainment businesses."
+app_email = "info@trector.com"
+app_license = "mit"
+app_version = "0.0.2"
 
 required_apps = ["erpnext"]
 
