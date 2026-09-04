@@ -1,9 +1,11 @@
 import React from "react";
 import { clsx } from "clsx";
+import { motion, HTMLMotionProps } from "framer-motion";
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends Omit<HTMLMotionProps<"div">, "children"> {
   elevated?: boolean;
   interactive?: boolean;
+  children?: React.ReactNode;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -14,17 +16,20 @@ export const Card: React.FC<CardProps> = ({
   ...props
 }) => {
   return (
-    <div
+    <motion.div
+      whileHover={interactive ? { y: -4, scale: 1.01 } : {}}
+      whileTap={interactive ? { scale: 0.98 } : {}}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className={clsx(
-        "rounded-[var(--ee-radius-lg)] border border-[var(--ee-border)] bg-[var(--ee-surface-raised)] text-[var(--ee-text)] transition-all",
-        elevated ? "shadow-ee-md" : "shadow-ee-sm",
-        interactive && "hover:border-[var(--ee-border-strong)] hover:shadow-ee-md cursor-pointer",
+        "rounded-[var(--ee-radius-lg)] border border-[var(--ee-border)] text-[var(--ee-text)] transition-colors",
+        elevated ? "glass-panel shadow-ee-md" : "bg-[var(--ee-surface-raised)] shadow-ee-sm",
+        interactive && "hover:border-[var(--ee-border-strong)] cursor-pointer",
         className
       )}
       {...props}
     >
       {children}
-    </div>
+    </motion.div>
   );
 };
 

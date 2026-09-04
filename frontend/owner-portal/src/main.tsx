@@ -4,9 +4,12 @@ import { BrowserRouter } from "react-router-dom";
 import { OwnerApp } from "./App";
 import "../../portal-kit/src/tokens.css";
 
+const isDev = import.meta.env.DEV;
+const basename = isDev ? "/assets/entertainment_express/owner" : "/owner";
+
 createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter basename="/owner">
+    <BrowserRouter basename={basename}>
       <OwnerApp />
     </BrowserRouter>
   </React.StrictMode>

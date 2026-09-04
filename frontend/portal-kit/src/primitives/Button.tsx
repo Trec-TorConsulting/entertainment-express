@@ -1,16 +1,20 @@
 import React, { forwardRef } from "react";
 import { clsx } from "clsx";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { Spinner } from "./Spinner";
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "destructive";
 export type Density = "cockpit" | "ops" | "consumer";
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children" | "type"> {
   variant?: ButtonVariant;
   density?: Density;
   loading?: boolean;
+  disabled?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  children?: React.ReactNode;
+  type?: "submit" | "reset" | "button";
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -51,11 +55,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const isDisabled = disabled || loading;
 
     return (
-      <button
+      <motion.button
         ref={ref}
         type={type}
         disabled={isDisabled}
         aria-busy={loading}
+        whileHover={isDisabled ? {} : { scale: 1.02 }}
+        whileTap={isDisabled ? {} : { scale: 0.97 }}
+        transition={{ duration: 0.15 }}
         className={clsx(
           "inline-flex items-center justify-center font-medium transition-colors select-none",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
@@ -75,7 +82,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!loading && rightIcon && (
           <span className="inline-flex shrink-0 items-center">{rightIcon}</span>
         )}
-      </button>
+      </motion.button>
     );
   }
 );
