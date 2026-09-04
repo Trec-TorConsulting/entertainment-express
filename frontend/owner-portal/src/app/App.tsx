@@ -9,8 +9,8 @@ import { PipelinePage } from "./routes/pipeline/PipelinePage";
 import { MoneyPage } from "./routes/money/MoneyPage";
 import { BrandPage } from "./routes/brand/BrandPage";
 
-// Lazy-load Legacy Workspaces
-const LegacyWorkspaces = React.lazy(() => import("../AppLegacy"));
+// Statically import Legacy Workspaces to eliminate chunk mismatches
+import LegacyWorkspaces from "../AppLegacy";
 
 const RouteFallback = () => (
   <div className="p-6 space-y-4">

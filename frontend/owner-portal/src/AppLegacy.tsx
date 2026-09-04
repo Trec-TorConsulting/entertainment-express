@@ -17,7 +17,7 @@ import {
   downloadBase64,
   downloadText,
   getSessionBootstrap,
-} from "../../portal-kit/src";
+} from "@portal-kit";
 
 const OWNER_NAV = [
   {

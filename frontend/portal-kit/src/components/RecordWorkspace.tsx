@@ -39,8 +39,12 @@ export function RecordList({ kind, basePath, go }: Nav) {
   React.useEffect(() => {
     call("entertainment_express.api.portal_crud.list_records", { kind })
       .then((res) => {
-        setSchema(res.schema);
-        setRows((res.rows || []).map((row: any) => ({ ...row, name: row.id })));
+        if (res && res.schema) {
+          setSchema(res.schema);
+          setRows((res.rows || []).map((row: any) => ({ ...row, name: row.id || row.name })));
+        } else {
+          setError("No data received for this workspace.");
+        }
       })
       .catch((err) => setError(err.message || "Could not load this list."));
   }, [kind]);
@@ -88,20 +92,28 @@ export function RecordEditor({ kind, basePath, go, recordId }: Nav & { recordId?
     if (isNew) {
       call("entertainment_express.api.portal_crud.describe", { kind })
         .then((next) => {
-          setSchema(next);
-          const seed: Record<string, any> = {};
-          for (const field of next.fields || []) {
-            seed[field.key] = field.type === "select" && field.options?.length ? field.options[0] : "";
+          if (next && next.fields) {
+            setSchema(next);
+            const seed: Record<string, any> = {};
+            for (const field of next.fields || []) {
+              seed[field.key] = field.type === "select" && field.options?.length ? field.options[0] : "";
+            }
+            setValues(seed);
+          } else {
+            setError("Could not load schema.");
           }
-          setValues(seed);
         })
         .catch((err) => setError(err.message || "Could not open the form."));
       return;
     }
     call("entertainment_express.api.portal_crud.get_record", { kind, name: recordId })
       .then((res) => {
-        setSchema(res.schema);
-        setValues(res.row || {});
+        if (res && res.schema) {
+          setSchema(res.schema);
+          setValues(res.row || {});
+        } else {
+          setError("Record not found.");
+        }
       })
       .catch((err) => setError(err.message || "Could not open this record."));
   }, [kind, recordId, isNew]);

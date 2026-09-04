@@ -60,7 +60,7 @@
   padding: 0.5rem 0.65rem;
   border: 1px solid var(--ee-border);
   border-radius: 0.5rem;
-  background: #fff;
+  background: var(--ee-surface-inset, #fff);
   color: var(--ee-text);
   font: inherit;
 }

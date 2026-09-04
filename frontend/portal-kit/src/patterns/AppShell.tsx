@@ -111,21 +111,41 @@ export const AppShell: React.FC<AppShellProps> = ({
   };
 
   useEffect(() => {
+    // Clear any potential inline styles on documentElement that override theme tokens
+    document.documentElement.style.removeProperty("--ee-brand");
+    document.documentElement.style.removeProperty("--ee-brand-2");
+    document.documentElement.style.removeProperty("--ee-brand-text");
+    document.documentElement.style.removeProperty("--ee-accent");
+    document.documentElement.style.removeProperty("--ee-bg");
+    document.documentElement.style.removeProperty("--ee-text");
+
+    // Inject branding CSS variables scoped to :root:not([data-theme="dark"])
+    // so custom tenant light-theme branding never destroys dark mode high-contrast text
+    let styleEl = document.getElementById("ee-branding-theme") as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = "ee-branding-theme";
+      document.head.appendChild(styleEl);
+    }
+
+    const lightRules: string[] = [];
     if (brandColor) {
-      document.documentElement.style.setProperty("--ee-brand", brandColor);
+      lightRules.push(`--ee-brand: ${brandColor};`, `--ee-brand-text: ${brandColor};`);
     }
     if (branding?.color_secondary) {
-      document.documentElement.style.setProperty("--ee-brand-2", branding.color_secondary);
+      lightRules.push(`--ee-brand-2: ${branding.color_secondary};`);
     }
     if (branding?.color_accent) {
-      document.documentElement.style.setProperty("--ee-accent", branding.color_accent);
+      lightRules.push(`--ee-accent: ${branding.color_accent};`);
     }
     if (branding?.color_bg) {
-      document.documentElement.style.setProperty("--ee-bg", branding.color_bg);
+      lightRules.push(`--ee-bg: ${branding.color_bg};`);
     }
     if (branding?.color_text) {
-      document.documentElement.style.setProperty("--ee-text", branding.color_text);
+      lightRules.push(`--ee-text: ${branding.color_text};`);
     }
+
+    styleEl.textContent = lightRules.length ? `:root:not([data-theme="dark"]) { ${lightRules.join(" ")} }` : "";
     if (branding?.favicon) {
       let link = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
       if (!link) {
