@@ -15,7 +15,7 @@ import {
   getSessionBootstrap
 } from "@portal-kit";
 import {
-  Calendar, CheckCircle2, MapPin, AlertTriangle, ArrowRight, PlusCircle, Inbox, DollarSign
+  Calendar, CheckCircle2, MapPin, AlertTriangle, ArrowRight, PlusCircle, Inbox, DollarSign, Clock
 } from "lucide-react";
 
 export const TodayPage: React.FC = () => {
