@@ -1,0 +1,144 @@
+<!-- Main Login Tab -->
+<div class="ee-auth-section" id="login-section">
+  <form class="form-signin form-login" role="form" onsubmit="return false;">
+    <div class="ee-auth-field">
+      <label class="ee-auth-label" for="login_email">{{ _("Email address") }}</label>
+      <input
+        type="text"
+        id="login_email"
+        class="form-control ee-auth-input"
+        placeholder="{{ _('name@company.com') }}"
+        required
+        autofocus
+        autocomplete="username"
+      >
+    </div>
+
+    <div class="ee-auth-field">
+      <div class="ee-auth-label-row">
+        <label class="ee-auth-label" for="login_password">{{ _("Password") }}</label>
+        <a href="#forgot" class="ee-auth-forgot-link">{{ _("Forgot password?") }}</a>
+      </div>
+      <div class="ee-auth-input-wrap">
+        <input
+          type="password"
+          id="login_password"
+          class="form-control ee-auth-input"
+          placeholder="••••••••"
+          required
+          autocomplete="current-password"
+        >
+        <button type="button" class="ee-password-toggle" data-target="login_password" aria-label="{{ _('Show password') }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-login ee-auth-btn-primary" type="submit">
+      <span>{{ _("Sign In") }}</span>
+    </button>
+  </form>
+
+  {% if social_login %}
+  <div class="social-logins text-center mt-4">
+    <p class="text-muted small mb-3">{{ _("Or continue with") }}</p>
+    <div class="social-login-buttons d-flex justify-content-center gap-2">
+      {% for provider in provider_logins %}
+      <a href="{{ provider.auth_url }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+        {% if provider.icon %}<i class="{{ provider.icon }}"></i>{% endif %}
+        <span>{{ provider.provider_name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Forgot Password Tab -->
+<div class="ee-auth-section" id="forgot-section" style="display: none;">
+  <form class="form-signin form-forgot" role="form" onsubmit="return false;">
+    <div class="ee-auth-field">
+      <label class="ee-auth-label" for="forgot_email">{{ _("Enter your email address") }}</label>
+      <input
+        type="email"
+        id="forgot_email"
+        class="form-control ee-auth-input"
+        placeholder="{{ _('name@company.com') }}"
+        required
+        autocomplete="email"
+      >
+    </div>
+
+    <button class="btn btn-primary btn-forgot ee-auth-btn-primary" type="submit">
+      <span>{{ _("Send Password Reset Link") }}</span>
+    </button>
+
+    <a href="#login" class="ee-auth-btn-secondary">
+      <span>{{ _("Back to Sign In") }}</span>
+    </a>
+  </form>
+</div>
+
+<!-- Sign Up Tab -->
+{% if not disable_signup %}
+<div class="ee-auth-section" id="signup-section" style="display: none;">
+  <form class="form-signin form-signup" role="form" onsubmit="return false;">
+    <div class="ee-auth-field">
+      <label class="ee-auth-label" for="signup_fullname">{{ _("Full Name") }}</label>
+      <input
+        type="text"
+        id="signup_fullname"
+        class="form-control ee-auth-input"
+        placeholder="{{ _('Jane Doe') }}"
+        required
+        autocomplete="name"
+      >
+    </div>
+
+    <div class="ee-auth-field">
+      <label class="ee-auth-label" for="signup_email">{{ _("Email address") }}</label>
+      <input
+        type="email"
+        id="signup_email"
+        class="form-control ee-auth-input"
+        placeholder="{{ _('jane@company.com') }}"
+        required
+        autocomplete="email"
+      >
+    </div>
+
+    <button class="btn btn-primary btn-signup ee-auth-btn-primary" type="submit">
+      <span>{{ _("Create Account") }}</span>
+    </button>
+
+    <a href="#login" class="ee-auth-btn-secondary">
+      <span>{{ _("Already have an account? Sign In") }}</span>
+    </a>
+  </form>
+</div>
+{% endif %}
+
+<!-- 2FA / OTP Verification Section -->
+<div class="ee-auth-section" id="verify-section" style="display: none;">
+  <form class="form-signin form-verify" role="form" onsubmit="return false;">
+    <div class="ee-auth-field">
+      <label class="ee-auth-label" for="login_token">{{ _("Verification Code") }}</label>
+      <input
+        type="text"
+        id="login_token"
+        class="form-control ee-auth-input"
+        placeholder="{{ _('6-digit authentication code') }}"
+        required
+        autocomplete="one-time-code"
+      >
+    </div>
+
+    <button class="btn btn-primary btn-verify ee-auth-btn-primary" type="submit">
+      <span>{{ _("Verify & Complete Login") }}</span>
+    </button>
+
+    <a href="#login" class="ee-auth-btn-secondary">
+      <span>{{ _("Cancel") }}</span>
+    </a>
+  </form>
+</div>

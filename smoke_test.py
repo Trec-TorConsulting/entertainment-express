@@ -526,6 +526,52 @@ def test_phase41_static_suite():
     return True
 
 
+def test_login_white_label_suite():
+    """Run tests for uplifted login and system pages white-labeling."""
+    print("✓ Testing Uplifted Login & Built-in System Pages...")
+    app_root = Path("entertainment_express/entertainment_express")
+    sys.path.insert(0, str(Path("entertainment_express").resolve()))
+
+    # 1. Verify all auth & system templates exist
+    templates = [
+        app_root / "templates" / "pages" / "login.html",
+        app_root / "templates" / "includes" / "login" / "login.html",
+        app_root / "templates" / "pages" / "update_password.html",
+        app_root / "templates" / "pages" / "404.html",
+        app_root / "templates" / "pages" / "500.html",
+        app_root / "templates" / "pages" / "403.html",
+    ]
+    for tmpl in templates:
+        if not tmpl.exists():
+            print(f"  ✗ Missing template: {tmpl}")
+            return False
+
+    # 2. Verify static assets exist
+    css_file = app_root / "public" / "css" / "ee-auth.css"
+    js_file = app_root / "public" / "js" / "ee-auth.js"
+    if not css_file.exists() or not js_file.exists():
+        print(f"  ✗ Missing auth assets: {css_file} or {js_file}")
+        return False
+
+    # 3. Verify DOM contract
+    login_html = (app_root / "templates" / "includes" / "login" / "login.html").read_text(encoding="utf-8")
+    for expected_id in ['id="login_email"', 'id="login_password"', 'id="forgot_email"', 'id="login_token"', "btn-login", "form-signin"]:
+        if expected_id not in login_html:
+            print(f"  ✗ login.html missing contract selector: {expected_id}")
+            return False
+
+    # 4. Verify context enrichment
+    from entertainment_express.www.branding import update_website_context
+    ctx = {"pathname": "login", "is_base_site": True}
+    update_website_context(ctx)
+    if ctx.get("app_name") != "Entertainment Express" or "ee-auth-page" not in ctx.get("body_class", ""):
+        print("  ✗ Base site website context verification failed")
+        return False
+
+    print("  ✓ All 6 auth/system templates and white-label context verified")
+    return True
+
+
 def main():
     print("\n" + "="*60)
     print("Entertainment Express — Multi-Phase Smoke Test")
@@ -543,6 +589,7 @@ def main():
         test_phase41_marketing_routes,
         test_phase41_jsonld,
         test_phase41_static_suite,
+        test_login_white_label_suite,
         test_live_marketing_smoke,
         test_portal_artifacts,
     ]

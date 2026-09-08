@@ -35,29 +35,43 @@
     <p>Modern, responsive portals designed for owners, coordinators, field crew, and your clients.</p>
   </div>
 
-  <div class="ee-showcase-tabs" role="tablist" aria-label="Product views">
-    <button class="ee-showcase-tab" role="tab" id="tab-owner" aria-controls="panel-owner" aria-selected="true">
-      📊 Owner Today
-    </button>
-    <button class="ee-showcase-tab" role="tab" id="tab-dispatch" aria-controls="panel-dispatch" aria-selected="false">
-      🚚 Dispatch Board
-    </button>
-    <button class="ee-showcase-tab" role="tab" id="tab-client" aria-controls="panel-client" aria-selected="false">
-      ✨ Client Portal
-    </button>
-    <button class="ee-showcase-tab" role="tab" id="tab-crew" aria-controls="panel-crew" aria-selected="false">
-      📱 Crew Mobile
-    </button>
+  <div class="ee-showcase-tabs-container">
+    <div class="ee-showcase-tabs" role="tablist" aria-label="Product views">
+      <button class="ee-showcase-tab" role="tab" id="tab-owner" aria-controls="panel-owner" aria-selected="true">
+        <span>📊</span> <span>Owner Today</span>
+      </button>
+      <button class="ee-showcase-tab" role="tab" id="tab-dispatch" aria-controls="panel-dispatch" aria-selected="false">
+        <span>🚚</span> <span>Dispatch Board</span>
+      </button>
+      <button class="ee-showcase-tab" role="tab" id="tab-client" aria-controls="panel-client" aria-selected="false">
+        <span>✨</span> <span>Client Portal</span>
+      </button>
+      <button class="ee-showcase-tab" role="tab" id="tab-crew" aria-controls="panel-crew" aria-selected="false">
+        <span>📱</span> <span>Crew Mobile</span>
+      </button>
+    </div>
   </div>
 
   <div class="ee-showcase-panels">
     <!-- Panel 1: Owner Today -->
     <div class="ee-showcase-panel is-active" id="panel-owner" role="tabpanel" aria-labelledby="tab-owner">
+      <div class="ee-window-chrome">
+        <div class="ee-window-controls" aria-hidden="true">
+          <span class="ee-window-dot ee-window-dot--close"></span>
+          <span class="ee-window-dot ee-window-dot--minimize"></span>
+          <span class="ee-window-dot ee-window-dot--expand"></span>
+        </div>
+        <div class="ee-window-address">
+          <span>🔒</span> entx.app/owner
+        </div>
+        <div class="ee-window-spacer" aria-hidden="true"></div>
+      </div>
       <picture>
         <source media="(max-width: 640px)" srcset="/assets/entertainment_express/marketing/img/showcase/owner-today-mobile.png?v=95">
         <img class="ee-showcase-img" src="/assets/entertainment_express/marketing/img/showcase/owner-today.png?v=95" alt="Entertainment Express Owner Today Dashboard" width="1280" height="714" loading="eager">
       </picture>
       <div class="ee-showcase-caption">
+        <span class="ee-showcase-caption-badge">Executive View</span>
         <h3>Owner Today Command Center</h3>
         <p>Real-time revenue metrics, pending quote approvals, urgent inbox items, and weekend event readiness at a glance.</p>
       </div>
@@ -65,11 +79,23 @@
 
     <!-- Panel 2: Dispatch Board -->
     <div class="ee-showcase-panel" id="panel-dispatch" role="tabpanel" aria-labelledby="tab-dispatch" hidden>
+      <div class="ee-window-chrome">
+        <div class="ee-window-controls" aria-hidden="true">
+          <span class="ee-window-dot ee-window-dot--close"></span>
+          <span class="ee-window-dot ee-window-dot--minimize"></span>
+          <span class="ee-window-dot ee-window-dot--expand"></span>
+        </div>
+        <div class="ee-window-address">
+          <span>🔒</span> entx.app/dispatch
+        </div>
+        <div class="ee-window-spacer" aria-hidden="true"></div>
+      </div>
       <picture>
         <source media="(max-width: 640px)" srcset="/assets/entertainment_express/marketing/img/showcase/dispatch-board-mobile.png?v=95">
         <img class="ee-showcase-img" src="/assets/entertainment_express/marketing/img/showcase/dispatch-board.png?v=95" alt="Entertainment Express Dispatch Board" width="1280" height="714" loading="lazy">
       </picture>
       <div class="ee-showcase-caption">
+        <span class="ee-showcase-caption-badge">Operations View</span>
         <h3>Real-Time Drag &amp; Drop Dispatch</h3>
         <p>Visual conflict detection, route-aware run sheets, vehicle capacity checks, and live crew assignment with SMS notifications.</p>
       </div>
@@ -77,11 +103,23 @@
 
     <!-- Panel 3: Client Portal -->
     <div class="ee-showcase-panel" id="panel-client" role="tabpanel" aria-labelledby="tab-client" hidden>
+      <div class="ee-window-chrome">
+        <div class="ee-window-controls" aria-hidden="true">
+          <span class="ee-window-dot ee-window-dot--close"></span>
+          <span class="ee-window-dot ee-window-dot--minimize"></span>
+          <span class="ee-window-dot ee-window-dot--expand"></span>
+        </div>
+        <div class="ee-window-address">
+          <span>🔒</span> entx.app/portal
+        </div>
+        <div class="ee-window-spacer" aria-hidden="true"></div>
+      </div>
       <picture>
         <source media="(max-width: 640px)" srcset="/assets/entertainment_express/marketing/img/showcase/client-portal-mobile.png?v=95">
         <img class="ee-showcase-img" src="/assets/entertainment_express/marketing/img/showcase/client-portal.png?v=95" alt="Entertainment Express Customer Portal" width="1280" height="714" loading="lazy">
       </picture>
       <div class="ee-showcase-caption">
+        <span class="ee-showcase-caption-badge">Client View</span>
         <h3>Branded Client Self-Service Portal</h3>
         <p>Instant proposal e-signing, credit card/ACH deposits, event timeline collaboration, and guest music request submission.</p>
       </div>
@@ -89,11 +127,23 @@
 
     <!-- Panel 4: Crew Mobile -->
     <div class="ee-showcase-panel" id="panel-crew" role="tabpanel" aria-labelledby="tab-crew" hidden>
+      <div class="ee-window-chrome">
+        <div class="ee-window-controls" aria-hidden="true">
+          <span class="ee-window-dot ee-window-dot--close"></span>
+          <span class="ee-window-dot ee-window-dot--minimize"></span>
+          <span class="ee-window-dot ee-window-dot--expand"></span>
+        </div>
+        <div class="ee-window-address">
+          <span>🔒</span> entx.app/crew
+        </div>
+        <div class="ee-window-spacer" aria-hidden="true"></div>
+      </div>
       <picture>
         <source media="(max-width: 640px)" srcset="/assets/entertainment_express/marketing/img/showcase/crew-mobile-mobile.png?v=95">
         <img class="ee-showcase-img" src="/assets/entertainment_express/marketing/img/showcase/crew-mobile.png?v=95" alt="Entertainment Express Crew Mobile App" width="1280" height="714" loading="lazy">
       </picture>
       <div class="ee-showcase-caption">
+        <span class="ee-showcase-caption-badge">Field Crew View</span>
         <h3>Mobile-First Field Crew App</h3>
         <p>Offline-tolerant run sheets, GPS venue directions, gear packing checklists, digital condition photos, and sign-offs.</p>
       </div>

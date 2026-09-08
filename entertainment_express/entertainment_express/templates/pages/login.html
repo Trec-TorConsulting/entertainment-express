@@ -1,0 +1,87 @@
+{% extends "templates/base.html" %}
+
+{% block title %}{{ _("Login") }} - {{ app_name or (ee_brand_kit and ee_brand_kit.brand_name) or "Entertainment Express" }}{% endblock %}
+
+{% block head_include %}
+{{ super() }}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="{{ (ee_brand_kit and ee_brand_kit.brand_color) or '#6d28d9' }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/entertainment_express/css/ee-white-label.css">
+<link rel="stylesheet" href="/assets/entertainment_express/css/ee-auth.css?v=1.0">
+{% if ee_brand_kit and ee_brand_kit.brand_favicon %}
+<link rel="icon" href="{{ ee_brand_kit.brand_favicon }}">
+{% endif %}
+{% endblock %}
+
+{%- block navbar -%}{%- endblock -%}
+{%- block footer -%}{%- endblock -%}
+
+{% block content %}
+<div class="ee-auth-shell">
+  <main class="ee-auth-card" id="ee-auth-card" role="main">
+    <div class="ee-auth-brand">
+      <a class="ee-auth-logo-link" href="/" aria-label="{{ app_name or 'Home' }}">
+        {% if ee_brand_kit and ee_brand_kit.brand_logo %}
+          <img class="ee-auth-logo-img" src="{{ ee_brand_kit.brand_logo }}" alt="{{ app_name or ee_brand_kit.brand_name }}">
+        {% elif not hide_product_chrome %}
+          <!-- Official Entertainment Express Gradient Badge -->
+          <svg class="ee-auth-logo-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="ee-auth-grad-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8b5cf6"/>
+                <stop offset="55%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#4338ca"/>
+              </linearGradient>
+              <linearGradient id="ee-auth-grad-accent" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#fb923c"/>
+                <stop offset="100%" stop-color="#f43f5e"/>
+              </linearGradient>
+            </defs>
+            <rect x="1" y="1" width="34" height="34" rx="8" fill="url(#ee-auth-grad-bg)"/>
+            <path d="M8.5 11C8.5 10.17 9.17 9.5 10 9.5H18C18.55 9.5 19 9.95 19 10.5V11.5C19 12.05 18.55 12.5 18 12.5H11.5V15H16.5C17.05 15 17.5 15.45 17.5 16V17C17.5 17.55 17.05 18 16.5 18H11.5V20.5H18C18.55 20.5 19 20.95 19 21.5V22.5C19 23.05 18.55 23.5 18 23.5H10C9.17 23.5 8.5 22.83 8.5 22V11Z" fill="#ffffff"/>
+            <path d="M20.5 12C20.5 11.45 20.95 11 21.5 11H26C26.55 11 27 11.45 27 12V13C27 13.55 26.55 14 26 14H22.5V15.5H25C25.55 15.5 26 15.95 26 16.5V17.5C26 18.05 25.55 18.5 25 18.5H22.5V20H26C26.55 20 27 20.45 27 21V22C27 22.55 26.55 23 26 23H21.5C20.95 23 20.5 22.55 20.5 22V12Z" fill="url(#ee-auth-grad-accent)"/>
+            <polygon points="17.5,7.5 19.5,11.5 17.5,15.5 15.5,11.5" fill="#ffffff" opacity="0.95"/>
+          </svg>
+        {% endif %}
+      </a>
+      <h1 class="ee-auth-brand-name">{{ app_name or (ee_brand_kit and ee_brand_kit.brand_name) or "Entertainment Express" }}</h1>
+      <p class="ee-auth-subtitle">{{ _("Sign in to your account to continue") }}</p>
+    </div>
+
+    <!-- Tab switcher for Login / Forgot Password / Sign up -->
+    <div class="ee-auth-nav" role="tablist" aria-label="{{ _('Authentication options') }}">
+      <a href="#login" class="ee-auth-nav-tab active" role="tab" id="tab-login" aria-selected="true" aria-controls="login-section">{{ _("Sign In") }}</a>
+      <a href="#forgot" class="ee-auth-nav-tab" role="tab" id="tab-forgot" aria-selected="false" aria-controls="forgot-section">{{ _("Reset") }}</a>
+      {% if not disable_signup %}
+      <a href="#signup" class="ee-auth-nav-tab" role="tab" id="tab-signup" aria-selected="false" aria-controls="signup-section">{{ _("Register") }}</a>
+      {% endif %}
+    </div>
+
+    <!-- Login Form Partials -->
+    {% include "entertainment_express/templates/includes/login/login.html" %}
+  </main>
+</div>
+
+<footer class="ee-auth-footer" role="contentinfo">
+  {% if footer_text %}
+    <div>{{ footer_text }}</div>
+  {% else %}
+    <div>&copy; {{ frappe.utils.now_datetime().year if frappe else "2026" }} {{ app_name or (ee_brand_kit and ee_brand_kit.brand_name) or "Entertainment Express" }}. All rights reserved.</div>
+  {% endif %}
+
+  {% if not hide_product_chrome or show_ee_badge %}
+    <div class="ee-product-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span>Powered by <a href="https://{{ base_domain or 'entx.app' }}" target="_blank" rel="noopener">Entertainment Express</a></span>
+    </div>
+  {% endif %}
+</footer>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script src="/assets/entertainment_express/js/ee-auth.js?v=1.0"></script>
+{% endblock %}
