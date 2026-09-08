@@ -362,6 +362,28 @@
       isPaused = false;
     });
 
+    // Interactive Crew Mobile Checklist count
+    var crewCheckboxes = container.querySelectorAll(".ee-crew-checkbox");
+    var crewCount = container.querySelector("#ee-crew-check-count");
+    if (crewCheckboxes.length && crewCount) {
+      function updateCrewCount() {
+        var checked = Array.from(crewCheckboxes).filter(function (cb) { return cb.checked; }).length;
+        crewCount.textContent = checked + "/" + crewCheckboxes.length + " Done";
+      }
+      crewCheckboxes.forEach(function (cb) {
+        cb.addEventListener("change", updateCrewCount);
+      });
+    }
+
+    // Interactive Owner Schedule Filter Chips
+    var filters = container.querySelectorAll(".ee-mockup-filter");
+    filters.forEach(function (filter) {
+      filter.addEventListener("click", function () {
+        filters.forEach(function (f) { f.classList.remove("is-active"); });
+        filter.classList.add("is-active");
+      });
+    });
+
     activateTab(0);
     startAutoAdvance();
   }
