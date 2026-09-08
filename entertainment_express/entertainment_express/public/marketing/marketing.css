@@ -732,10 +732,16 @@ select:focus-visible {
 
 .ee-pricing-grid {
   display: grid;
-  gap: var(--ee-space-6);
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  margin-bottom: var(--ee-space-10);
+  gap: var(--ee-space-8);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  margin-bottom: var(--ee-space-12);
   align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .ee-pricing-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .ee-plan-card {
@@ -747,7 +753,7 @@ select:focus-visible {
   flex-direction: column;
   position: relative;
   box-shadow: var(--ee-shadow-sm);
-  transition: transform var(--ee-motion-normal) var(--ee-ease-default), box-shadow var(--ee-motion-normal) var(--ee-ease-default);
+  transition: transform var(--ee-motion-normal) var(--ee-ease-default), box-shadow var(--ee-motion-normal) var(--ee-ease-default), border-color var(--ee-motion-normal) var(--ee-ease-default);
 }
 
 .ee-plan-card:hover {
@@ -755,66 +761,368 @@ select:focus-visible {
   box-shadow: var(--ee-shadow-lg);
 }
 
-/* Plan Variants */
+/* Pro / Most Popular Elevated Card (POP & WOW) */
 .ee-plan-card.is-pro {
   border-color: var(--ee-brand);
-  box-shadow: var(--ee-shadow-md);
+  background: linear-gradient(180deg, rgba(109, 40, 217, 0.04) 0%, var(--ee-panel) 24%);
+  box-shadow: 0 12px 32px -4px rgba(109, 40, 217, 0.16), 0 4px 12px -2px rgba(109, 40, 217, 0.08);
 }
 
-.ee-plan-badge {
-  position: absolute;
-  top: calc(var(--ee-space-4) * -1);
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--ee-brand), var(--ee-brand-2));
-  color: var(--ee-text-inverse);
-  padding: var(--ee-space-1) var(--ee-space-3);
-  border-radius: var(--ee-radius-full);
-  font-size: var(--ee-font-size-caption);
-  font-weight: var(--ee-font-weight-title);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
+@media (min-width: 1024px) {
+  .ee-plan-card.is-pro {
+    transform: translateY(-8px);
+  }
+  .ee-plan-card.is-pro:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 40px -4px rgba(109, 40, 217, 0.22), 0 8px 16px -2px rgba(109, 40, 217, 0.12);
+  }
 }
 
 .ee-plan-card.is-scale {
-  border: 2px solid transparent;
-  background-image: linear-gradient(var(--ee-panel), var(--ee-panel)), linear-gradient(135deg, var(--ee-brand), var(--ee-brand-2));
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  border-color: var(--ee-border-strong);
+  box-shadow: var(--ee-shadow-md);
+}
+
+/* Plan Header */
+.ee-plan-card-header {
+  margin-bottom: var(--ee-space-4);
+}
+
+.ee-plan-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--ee-space-3);
+}
+
+.ee-plan-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ee-radius-lg);
+  font-size: 1.5rem;
+  background: var(--ee-surface-inset);
+  flex-shrink: 0;
+}
+
+.is-pro .ee-plan-icon {
+  background: var(--ee-brand-soft);
+}
+
+.ee-plan-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--ee-text);
+  line-height: 1.2;
+}
+
+.ee-plan-tagline {
+  display: block;
+  font-size: var(--ee-font-size-caption);
+  color: var(--ee-muted);
+  margin-top: var(--ee-space-1);
+}
+
+/* Floating Badges */
+.ee-plan-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  border-radius: var(--ee-radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  box-shadow: var(--ee-shadow-sm);
+}
+
+.ee-badge-pro {
+  background: linear-gradient(135deg, var(--ee-brand), var(--ee-brand-2));
+  color: var(--ee-text-inverse);
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.35);
+}
+
+.ee-badge-starter {
+  background: var(--ee-success-soft);
+  color: var(--ee-success-text);
+  border: 1px solid var(--ee-success-border);
+}
+
+.ee-badge-scale {
+  background: var(--ee-surface-inset);
+  color: var(--ee-text);
+  border: 1px solid var(--ee-border-strong);
+}
+
+/* Price Box */
+.ee-plan-price-wrap {
+  margin: var(--ee-space-2) 0 var(--ee-space-4);
 }
 
 .ee-plan-price {
-  font-size: 2.75rem;
-  font-weight: var(--ee-font-weight-display);
+  font-size: clamp(2.5rem, 4vw, 3.25rem);
+  font-weight: 800;
   font-family: var(--ee-font-display);
-  margin: var(--ee-space-4) 0;
+  color: var(--ee-text);
   display: flex;
   align-items: baseline;
-  gap: var(--ee-space-1);
+  gap: 2px;
+  line-height: 1;
+}
+
+.ee-price-curr {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ee-text-secondary);
 }
 
 .ee-plan-period {
-  font-size: var(--ee-font-size-body);
-  font-weight: var(--ee-font-weight-body);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ee-muted);
+  margin-left: 4px;
+}
+
+.ee-savings-chip {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--ee-space-2);
+  padding: 3px 10px;
+  border-radius: var(--ee-radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--ee-success-soft);
+  color: var(--ee-success-text);
+  border: 1px solid var(--ee-success-border);
+}
+
+.ee-plan-subtext {
+  font-size: var(--ee-font-size-caption);
+  color: var(--ee-muted);
+  margin-top: var(--ee-space-1);
+}
+
+/* CTA Box */
+.ee-plan-cta-box {
+  margin: var(--ee-space-3) 0 var(--ee-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ee-space-2);
+}
+
+.ee-btn-glow {
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.4);
+}
+
+.ee-btn-glow:hover {
+  box-shadow: 0 6px 20px rgba(109, 40, 217, 0.55);
+}
+
+.ee-plan-cta-micro {
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
   color: var(--ee-muted);
 }
 
-.ee-plan-features {
+.ee-plan-summary {
+  font-size: var(--ee-font-size-body);
+  color: var(--ee-text-secondary);
+  line-height: 1.45;
+  margin: 0 0 var(--ee-space-5);
+  min-height: 2.8rem;
+}
+
+/* Divider */
+.ee-plan-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--ee-space-2) 0 var(--ee-space-4);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ee-muted);
+}
+
+.ee-plan-divider::before,
+.ee-plan-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--ee-border);
+}
+
+.ee-plan-divider span {
+  padding: 0 var(--ee-space-3);
+}
+
+/* Benefit List */
+.ee-plan-benefits {
   list-style: none;
   padding: 0;
-  margin: var(--ee-space-6) 0 auto;
+  margin: 0 0 var(--ee-space-6) 0;
   display: flex;
   flex-direction: column;
   gap: var(--ee-space-3);
 }
 
-.ee-plan-features li {
+.ee-benefit-item {
   display: flex;
-  align-items: center;
-  gap: var(--ee-space-2);
+  align-items: flex-start;
+  gap: var(--ee-space-3);
   font-size: var(--ee-font-size-body);
+  line-height: 1.35;
+}
+
+.ee-benefit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--ee-radius-full);
+  background: var(--ee-success-soft);
+  color: var(--ee-success);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.is-pro .ee-benefit-icon {
+  background: var(--ee-brand-soft);
+  color: var(--ee-brand);
+}
+
+.ee-benefit-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ee-benefit-title {
+  font-weight: 600;
+  color: var(--ee-text);
+  font-size: 0.875rem;
+}
+
+.ee-benefit-desc {
+  font-size: 0.8125rem;
+  color: var(--ee-muted);
+}
+
+/* Operator Quote inside card */
+.ee-plan-quote {
+  margin-top: auto;
+  padding: var(--ee-space-3) var(--ee-space-4);
+  border-radius: var(--ee-radius-lg);
+  background: var(--ee-surface-inset);
+  border-left: 3px solid var(--ee-brand);
+}
+
+.ee-quote-text {
+  font-size: 0.8125rem;
+  font-style: italic;
   color: var(--ee-text-secondary);
+  line-height: 1.4;
+  margin: 0 0 var(--ee-space-1);
+}
+
+.ee-quote-author {
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ee-text);
+  display: block;
+}
+
+.ee-quote-author span {
+  font-weight: 400;
+  color: var(--ee-muted);
+}
+
+/* Reverse Trial Guarantee Strip */
+.ee-reverse-guarantee {
+  background: var(--ee-panel);
+  border: 1px solid var(--ee-border);
+  border-radius: var(--ee-radius-xl);
+  padding: var(--ee-space-8);
+  box-shadow: var(--ee-shadow-sm);
+}
+
+.ee-guarantee-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto var(--ee-space-8);
+}
+
+.ee-guarantee-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 12px;
+  border-radius: var(--ee-radius-full);
+  background: var(--ee-brand-soft);
+  color: var(--ee-brand-text);
+  margin-bottom: var(--ee-space-2);
+}
+
+.ee-guarantee-header h3 {
+  font-size: clamp(1.375rem, 2.5vw, 1.75rem);
+  margin-bottom: var(--ee-space-2);
+}
+
+.ee-guarantee-header p {
+  color: var(--ee-text-secondary);
+  margin: 0;
+}
+
+.ee-guarantee-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--ee-space-6);
+}
+
+.ee-guarantee-step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--ee-space-4);
+  border-radius: var(--ee-radius-lg);
+  background: var(--ee-surface-inset);
+}
+
+.ee-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ee-radius-full);
+  background: linear-gradient(135deg, var(--ee-brand), var(--ee-brand-2));
+  color: var(--ee-text-inverse);
+  font-weight: 800;
+  font-size: 0.875rem;
+  margin-bottom: var(--ee-space-3);
+}
+
+.ee-guarantee-step h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 var(--ee-space-2);
+  color: var(--ee-text);
+}
+
+.ee-guarantee-step p {
+  font-size: 0.875rem;
+  color: var(--ee-text-secondary);
+  line-height: 1.45;
+  margin: 0;
 }
 
 /* FAQ Accordion */

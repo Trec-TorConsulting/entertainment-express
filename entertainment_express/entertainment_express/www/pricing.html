@@ -3,10 +3,10 @@
 {% block marketing_content %}
 <!-- 1. Hero Section -->
 <section class="ee-hero ee-shell">
-  <div class="eyebrow">Transparent Pricing</div>
-  <h1 class="ee-hero-headline">Plans That Scale With Your Event Volume</h1>
+  <div class="eyebrow">Transparent, Event-Tested Pricing</div>
+  <h1 class="ee-hero-headline">Simple Plans Built for Real Weekend Operations</h1>
   <p class="ee-hero-sub">
-    Start completely free on our Starter plan, or test-drive Pro features with a 14-day reverse trial. No credit card required.
+    No hidden booking fees, no percentage cuts of your event revenue, and zero surprise auto-renew traps. Start 100% free, or take Pro for a 14-day test run on your upcoming weekend gigs.
   </p>
   {% if pricing_error %}
   <div class="ee-alert ee-alert-warn" role="alert" style="margin:1rem auto;max-width:600px;text-align:center;">{{ pricing_error }}</div>
@@ -15,11 +15,11 @@
   <!-- Monthly / Annual Pill Toggle -->
   <div class="ee-pricing-toggle-wrap">
     <div class="ee-pricing-pill" role="group" aria-label="Billing frequency toggle">
-      <button type="button" class="ee-pricing-pill-btn is-active" data-billing-toggle="monthly">
+      <button type="button" class="ee-pricing-pill-btn is-active" data-billing-toggle="monthly" aria-pressed="true">
         Monthly Billing
       </button>
-      <button type="button" class="ee-pricing-pill-btn" data-billing-toggle="annual">
-        Annual (Save 20%) 🎁
+      <button type="button" class="ee-pricing-pill-btn" data-billing-toggle="annual" aria-pressed="false">
+        Annual (Save 20% + 2 Mo Free) 🎁
       </button>
     </div>
   </div>
@@ -34,60 +34,129 @@
   <div class="ee-pricing-grid">
     {% for plan in plans %}
     {% set pcode = plan.code or plan.name.lower() %}
-    <article class="ee-plan-card {% if pcode == 'pro' or plan.is_popular %}is-pro{% elif pcode == 'scale' %}is-scale{% endif %}">
-      {% if pcode == 'pro' or plan.is_popular %}
-      <div class="ee-plan-badge">Most Popular</div>
+    <article class="ee-plan-card {% if pcode == 'pro' or plan.is_popular %}is-pro{% elif pcode == 'scale' %}is-scale{% else %}is-starter{% endif %}">
+      
+      {% if plan.badge_text %}
+      <div class="ee-plan-badge {% if pcode == 'pro' or plan.is_popular %}ee-badge-pro{% elif pcode == 'scale' %}ee-badge-scale{% else %}ee-badge-starter{% endif %}">
+        {{ plan.badge_text }}
+      </div>
       {% endif %}
 
-      <div style="display: flex; justify-content: space-between; align-items: baseline;">
-        <h3>{{ plan.name }}</h3>
-        {% if plan.trial_days and plan.trial_days > 0 %}
-        <span class="ee-chip" style="font-size: 0.7rem; margin-bottom: 0;">{{ plan.trial_days }}-Day Trial</span>
-        {% else %}
-        <span class="ee-chip" style="font-size: 0.7rem; margin-bottom: 0; color: var(--ee-success-text); background: var(--ee-success-soft); border-color: var(--ee-success-border);">Free Forever</span>
+      <header class="ee-plan-card-header">
+        <div class="ee-plan-identity">
+          <span class="ee-plan-icon" aria-hidden="true">{{ plan.icon or "✨" }}</span>
+          <div>
+            <h3 class="ee-plan-title">{{ plan.display_name or plan.name }}</h3>
+            <span class="ee-plan-tagline">{{ plan.tagline }}</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="ee-plan-price-wrap">
+        <div class="ee-plan-price">
+          <span class="ee-price-curr">$</span>
+          <span class="ee-price-num" data-price-monthly="{{ plan.price_monthly|int }}" data-price-annual="{{ plan.price_annual|int }}">
+            {{ plan.price_monthly|int }}
+          </span>
+          <span class="ee-plan-period">/ mo</span>
+        </div>
+
+        {% if plan.savings_chip %}
+        <div class="ee-savings-chip" data-savings-badge style="display: none;">
+          {{ plan.savings_chip }}
+        </div>
+        {% endif %}
+
+        <div class="ee-plan-subtext" data-period-subtext data-monthly-note="{{ plan.monthly_subtext }}" data-annual-note="{{ plan.annual_subtext }}">
+          {{ plan.monthly_subtext }}
+        </div>
+      </div>
+
+      <div class="ee-plan-cta-box">
+        <a class="ee-btn {% if pcode == 'pro' or plan.is_popular %}ee-btn-primary ee-btn-glow{% elif pcode == 'scale' %}ee-btn-primary{% else %}ee-btn-secondary{% endif %}" href="{{ plan.cta_target or '/start-trial?plan=' + pcode }}" style="width: 100%;">
+          {{ plan.cta_label or "Get Started" }}
+        </a>
+        {% if plan.cta_subtext %}
+        <span class="ee-plan-cta-micro">{{ plan.cta_subtext }}</span>
         {% endif %}
       </div>
 
-      <p style="font-size: var(--ee-font-size-label); min-height: 2.5rem; margin-top: var(--ee-space-2);">
-        {{ plan.summary or "All the core event management tools you need." }}
+      <p class="ee-plan-summary">
+        {{ plan.summary }}
       </p>
 
-      <div class="ee-plan-price">
-        <span data-price-monthly="${{ plan.price_monthly|int }}" data-price-annual="${{ (plan.price_annual or plan.price_monthly)|int }}">
-          ${{ plan.price_monthly|int }}
-        </span>
-        <span class="ee-plan-period" data-period-text>/ mo</span>
+      <div class="ee-plan-divider">
+        <span>What's included</span>
       </div>
 
-      <div style="margin-top: var(--ee-space-2); margin-bottom: var(--ee-space-6);">
-        {% if pcode == 'starter' %}
-        <a class="ee-btn ee-btn-secondary" href="{{ plan.cta_target or '/start-trial?plan=starter' }}" style="width: 100%;">
-          Start Free
-        </a>
-        {% elif pcode == 'pro' or plan.is_popular %}
-        <a class="ee-btn ee-btn-primary" href="{{ plan.cta_target or '/start-trial?plan=pro' }}" style="width: 100%;">
-          Start Free 14-Day Trial
-        </a>
-        {% else %}
-        <a class="ee-btn ee-btn-primary" href="{{ plan.cta_target or '/start-trial?plan=scale' }}" style="width: 100%;">
-          Start Free 14-Day Trial
-        </a>
-        {% endif %}
-      </div>
-
-      <ul class="ee-plan-features">
-        {% if plan.highlights %}
-          {% for hl in plan.highlights %}
-          <li><span class="ee-check">✓</span> {{ hl }}</li>
+      <ul class="ee-plan-benefits">
+        {% if plan.key_benefits %}
+          {% for b in plan.key_benefits %}
+          <li class="ee-benefit-item">
+            <span class="ee-benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <div class="ee-benefit-text">
+              <strong class="ee-benefit-title">{{ b.title }}</strong>
+              <span class="ee-benefit-desc">{{ b.desc }}</span>
+            </div>
+          </li>
           {% endfor %}
-        {% elif plan.features %}
-          {% for f in plan.features %}
-          <li><span class="ee-check">✓</span> {{ f.feature_key.replace('_', ' ').capitalize() }}: {{ f.limit_value or 'Included' }}</li>
+        {% elif plan.highlights %}
+          {% for hl in plan.highlights %}
+          <li class="ee-benefit-item">
+            <span class="ee-benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <div class="ee-benefit-text">
+              <span class="ee-benefit-desc">{{ hl }}</span>
+            </div>
+          </li>
           {% endfor %}
         {% endif %}
       </ul>
+
+      {% if plan.operator_quote %}
+      <div class="ee-plan-quote">
+        <p class="ee-quote-text">&ldquo;{{ plan.operator_quote.quote }}&rdquo;</p>
+        <cite class="ee-quote-author">&mdash; {{ plan.operator_quote.author }}, <span>{{ plan.operator_quote.company }}</span></cite>
+      </div>
+      {% endif %}
+
     </article>
     {% endfor %}
+  </div>
+</section>
+
+<!-- Reverse Trial Trust Banner -->
+<section class="ee-shell" style="margin-top: var(--ee-space-8); margin-bottom: var(--ee-space-12);">
+  <div class="ee-reverse-guarantee">
+    <div class="ee-guarantee-header">
+      <span class="ee-guarantee-badge">Zero Risk Commitment</span>
+      <h3>How Our 14-Day Reverse Trial Protects You</h3>
+      <p>Most software tricks you with unexpected charges or locks your data behind paywalls. Here is our simple contract with you:</p>
+    </div>
+    <div class="ee-guarantee-steps">
+      <div class="ee-guarantee-step">
+        <div class="ee-step-num">1</div>
+        <h4>Test on Real Weekend Events</h4>
+        <p>Get immediate, uninhibited access to all Pro features. Send real quotes, schedule crews, and collect client payments with zero card required.</p>
+      </div>
+      <div class="ee-guarantee-step">
+        <div class="ee-step-num">2</div>
+        <h4>No Automatic Charges</h4>
+        <p>We do not take a credit card upfront. There is literally no way for us to bill you unless you deliberately choose to upgrade.</p>
+      </div>
+      <div class="ee-guarantee-step">
+        <div class="ee-step-num">3</div>
+        <h4>Always Revert to Free Starter</h4>
+        <p>If you choose not to subscribe, your account simply drops to Free Forever Starter. Your bookings, contracts, and clients stay accessible forever.</p>
+      </div>
+    </div>
   </div>
 </section>
 

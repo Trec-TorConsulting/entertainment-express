@@ -148,10 +148,26 @@
     controls.forEach(function (control) {
       control.addEventListener("click", function () {
         var mode = control.getAttribute("data-billing-toggle");
+        controls.forEach(function (c) {
+          c.classList.remove("is-active");
+          c.setAttribute("aria-pressed", "false");
+        });
+        control.classList.add("is-active");
+        control.setAttribute("aria-pressed", "true");
+
         document.querySelectorAll("[data-price-monthly]").forEach(function (priceEl) {
           var monthly = priceEl.getAttribute("data-price-monthly") || "0";
           var annual = priceEl.getAttribute("data-price-annual") || monthly;
           priceEl.textContent = mode === "annual" ? annual : monthly;
+        });
+
+        document.querySelectorAll("[data-period-subtext]").forEach(function (el) {
+          var note = el.getAttribute("data-" + mode + "-note") || "";
+          if (note) el.textContent = note;
+        });
+
+        document.querySelectorAll("[data-savings-badge]").forEach(function (el) {
+          el.style.display = mode === "annual" ? "inline-flex" : "none";
         });
       });
     });
