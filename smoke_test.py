@@ -486,7 +486,6 @@ def test_phase41_jsonld():
             build_software_app_jsonld,
             build_website_jsonld,
         )
-        import json
 
         app_ld = json.loads(build_software_app_jsonld("EE", "desc", "https://www.entx.app"))
         assert app_ld["@type"] == "SoftwareApplication"
