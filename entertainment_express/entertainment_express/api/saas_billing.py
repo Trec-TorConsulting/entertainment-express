@@ -425,3 +425,59 @@ def _subscription_canceled(obj):
     if sub:
         frappe.db.set_value("Subscription", sub, {"status": "canceled", "cancel_at_period_end": 1})
     push_plan_to_site(tenant, extra={"ee_subscription_status": "canceled", "ee_cancel_at_period_end": 1})
+
+
+def handle_trial_expirations():
+    """
+    Reverse trial logic: When status='trialing' and current_period_end < now()
+    and no payment method is attached, downgrade to Starter plan in 'active' status instead of suspending.
+    Logs downgrade with actor='system', action='trial_expired_downgrade_to_starter'.
+    """
+    if not is_control_plane():
+        return
+    now = now_datetime()
+    trialing_subs = frappe.get_all(
+        "Subscription",
+        filters={"status": "trialing"},
+        fields=["name", "tenant", "plan", "current_period_end", "provider_payment_method_id", "provider_customer_id"],
+    )
+    for sub in trialing_subs:
+        if not sub.current_period_end:
+            continue
+        if get_datetime(sub.current_period_end) > now:
+            continue
+
+        # If a Stripe payment method is attached, skip automatic downgrade
+        if sub.provider_payment_method_id:
+            continue
+
+        starter_plan = frappe.db.get_value("Plan", {"plan_code": "starter"}, "name") or "starter"
+        sub_doc = frappe.get_doc("Subscription", sub.name)
+        sub_doc.plan = starter_plan
+        sub_doc.status = "active"
+        sub_doc.save(ignore_permissions=True)
+
+        if sub.tenant and frappe.db.exists("Tenant", sub.tenant):
+            tenant = frappe.get_doc("Tenant", sub.tenant)
+            tenant.plan = starter_plan
+            tenant.save(ignore_permissions=True)
+            push_plan_to_site(sub.tenant)
+
+        event_payload = {
+            "actor": "system",
+            "action": "trial_expired_downgrade_to_starter",
+            "subscription": sub.name,
+            "tenant": sub.tenant,
+            "plan": starter_plan,
+        }
+        frappe.logger("control_plane").info(json.dumps(event_payload))
+        try:
+            frappe.log_error(
+                title="trial_expired_downgrade_to_starter",
+                message=json.dumps(event_payload),
+            )
+        except Exception:
+            pass
+
+    frappe.db.commit()
+

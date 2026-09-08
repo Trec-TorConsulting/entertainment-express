@@ -356,14 +356,9 @@ def list_staff() -> list[dict]:
 def invite_staff(email: str, full_name: str, roles: list[str]) -> dict:
     _require_owner()
 
-    from entertainment_express.control_plane.entitlements import enforce_numeric_limit
+    from entertainment_express.workforce import check_staff_limit
 
-    staff_count = frappe.db.count("User", {"enabled": 1, "user_type": "System User"})
-    enforce_numeric_limit(
-        "max_staff_users",
-        staff_count,
-        "Staff limit reached. Upgrade your plan.",
-    )
+    check_staff_limit()
 
     roles = _as_role_list(roles)
     disallowed = set(roles or []).intersection(DISALLOWED_ESCALATION_ROLES)

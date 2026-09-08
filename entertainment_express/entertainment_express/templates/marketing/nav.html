@@ -1,11 +1,90 @@
-<button class="ee-nav-toggle" id="ee-nav-toggle" aria-controls="ee-nav-menu" aria-expanded="false">
-  Menu
+<button class="ee-nav-toggle" id="ee-nav-toggle" aria-controls="ee-nav-menu" aria-expanded="false" aria-label="Toggle navigation menu">
+  <span class="ee-nav-toggle-icon">☰</span> Menu
 </button>
 <ul class="ee-nav-menu" id="ee-nav-menu">
-  <li><a href="/features">Features</a></li>
-  <li><a href="/solutions/djs">Solutions</a></li>
-  <li><a href="/pricing">Pricing</a></li>
-  <li><a href="/blog">Resources</a></li>
-  <li><a href="/about">About</a></li>
-  <li><a href="/contact">Contact</a></li>
+  <li class="ee-nav-item has-dropdown">
+    <button type="button" class="ee-nav-link" aria-expanded="false" aria-haspopup="true">
+      Solutions <span aria-hidden="true">▾</span>
+    </button>
+    <div class="ee-dropdown-menu" role="menu">
+      <a href="/solutions/djs" role="menuitem">
+        <span>🎧 Mobile DJs & MCs</span>
+      </a>
+      <a href="/solutions/rentals" role="menuitem">
+        <span>🏰 Party & Inflatables</span>
+      </a>
+      <a href="/solutions/photo-booths" role="menuitem">
+        <span>📸 Photo Booths</span>
+      </a>
+      <a href="/solutions/game-trucks" role="menuitem">
+        <span>🎮 Game Trucks & Arcades</span>
+      </a>
+      <a href="/solutions/casino" role="menuitem">
+        <span>🎲 Casino & Nightlife</span>
+      </a>
+      <a href="/solutions/performers" role="menuitem">
+        <span>🎭 Live Performers</span>
+      </a>
+    </div>
+  </li>
+
+  <li class="ee-nav-item has-dropdown">
+    <button type="button" class="ee-nav-link" aria-expanded="false" aria-haspopup="true">
+      Features <span aria-hidden="true">▾</span>
+    </button>
+    <div class="ee-dropdown-menu" role="menu">
+      <a href="/features/weather-risk" role="menuitem">
+        <span>🌦️ Weather Risk & Rain-Dates</span>
+      </a>
+      <a href="/features/dispatch-load-planning" role="menuitem">
+        <span>🚚 Dispatch & Load Planning</span>
+      </a>
+      <a href="/features/dj-playlist-export" role="menuitem">
+        <span>🎵 DJ Playlist Export</span>
+      </a>
+      <a href="/features/customer-portal" role="menuitem">
+        <span>📱 Client Portal & E-Sign</span>
+      </a>
+      <a href="/features/white-label-branding" role="menuitem">
+        <span>✨ White-Label Branding</span>
+      </a>
+      <a href="/features/ai-copilot" role="menuitem">
+        <span>🤖 AI Event Copilot</span>
+      </a>
+      <a href="/features" role="menuitem" style="border-top: 1px solid var(--ee-border); margin-top: 4px; padding-top: 8px;">
+        <span>→ View All Features</span>
+      </a>
+    </div>
+  </li>
+
+  <li class="ee-nav-item has-dropdown">
+    <button type="button" class="ee-nav-link" aria-expanded="false" aria-haspopup="true">
+      Compare <span aria-hidden="true">▾</span>
+    </button>
+    <div class="ee-dropdown-menu" role="menu">
+      <a href="/compare/inflatable-office" role="menuitem">
+        <span>vs. Inflatable Office</span>
+      </a>
+      <a href="/compare/goodshuffle-pro" role="menuitem">
+        <span>vs. Goodshuffle Pro</span>
+      </a>
+      <a href="/compare/dj-event-planner" role="menuitem">
+        <span>vs. DJ Event Planner</span>
+      </a>
+      <a href="/compare/honeybook" role="menuitem">
+        <span>vs. HoneyBook</span>
+      </a>
+      <a href="/compare/event-rental-systems" role="menuitem">
+        <span>vs. Event Rental Systems</span>
+      </a>
+    </div>
+  </li>
+
+  <li class="ee-nav-item">
+    <a class="ee-nav-link" href="/pricing">Pricing</a>
+  </li>
+
+  <li class="ee-nav-item">
+    <a class="ee-nav-link" href="/blog">Blog</a>
+  </li>
 </ul>

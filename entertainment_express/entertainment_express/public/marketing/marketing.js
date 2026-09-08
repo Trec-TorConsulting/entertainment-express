@@ -112,6 +112,31 @@
       var isOpen = menu.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
     });
+
+    // Mobile / tap dropdown toggles
+    var dropdownItems = menu.querySelectorAll(".ee-nav-item.has-dropdown");
+    dropdownItems.forEach(function (item) {
+      var btn = item.querySelector("button.ee-nav-link");
+      if (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          var isOpen = item.classList.toggle("is-open");
+          btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+      }
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+        menu.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+        dropdownItems.forEach(function (item) {
+          item.classList.remove("is-open");
+          var btn = item.querySelector("button.ee-nav-link");
+          if (btn) btn.setAttribute("aria-expanded", "false");
+        });
+      }
+    });
   }
 
   function initPricingToggle() {
@@ -227,9 +252,131 @@
     });
   }
 
+  function initShowcase() {
+    var container = document.getElementById("ee-showcase");
+    if (!container) {
+      return;
+    }
+
+    var tabs = Array.from(container.querySelectorAll(".ee-showcase-tab"));
+    var panels = Array.from(container.querySelectorAll(".ee-showcase-panel"));
+    if (!tabs.length || !panels.length) {
+      return;
+    }
+
+    var currentIndex = 0;
+    var autoTimer = null;
+    var isPaused = false;
+
+    function activateTab(index) {
+      if (index < 0) index = tabs.length - 1;
+      if (index >= tabs.length) index = 0;
+      currentIndex = index;
+
+      tabs.forEach(function (tab, i) {
+        var selected = i === currentIndex;
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+        tab.setAttribute("tabindex", selected ? "0" : "-1");
+      });
+
+      panels.forEach(function (panel, i) {
+        var active = i === currentIndex;
+        if (active) {
+          panel.classList.add("is-active");
+          panel.removeAttribute("hidden");
+          var img = panel.querySelector("img[data-src]");
+          if (img && !img.getAttribute("src")) {
+            img.setAttribute("src", img.getAttribute("data-src"));
+          }
+          var sources = panel.querySelectorAll("source[data-srcset]");
+          sources.forEach(function (source) {
+            if (!source.getAttribute("srcset")) {
+              source.setAttribute("srcset", source.getAttribute("data-srcset"));
+            }
+          });
+        } else {
+          panel.classList.remove("is-active");
+          panel.setAttribute("hidden", "until-found");
+        }
+      });
+    }
+
+    function startAutoAdvance() {
+      stopAutoAdvance();
+      autoTimer = setInterval(function () {
+        if (!isPaused) {
+          activateTab(currentIndex + 1);
+        }
+      }, 5000);
+    }
+
+    function stopAutoAdvance() {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    tabs.forEach(function (tab, idx) {
+      tab.addEventListener("click", function () {
+        activateTab(idx);
+      });
+
+      tab.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          activateTab(currentIndex + 1);
+          tabs[currentIndex].focus();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          activateTab(currentIndex - 1);
+          tabs[currentIndex].focus();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          activateTab(0);
+          tabs[0].focus();
+        } else if (e.key === "End") {
+          e.preventDefault();
+          activateTab(tabs.length - 1);
+          tabs[tabs.length - 1].focus();
+        }
+      });
+    });
+
+    container.addEventListener("mouseenter", function () {
+      isPaused = true;
+    });
+    container.addEventListener("mouseleave", function () {
+      isPaused = false;
+    });
+    container.addEventListener("focusin", function () {
+      isPaused = true;
+    });
+    container.addEventListener("focusout", function () {
+      isPaused = false;
+    });
+
+    activateTab(0);
+    startAutoAdvance();
+  }
+
+  function initFaqAccordion() {
+    var items = document.querySelectorAll(".ee-faq-section details");
+    items.forEach(function (detail) {
+      var summary = detail.querySelector("summary");
+      if (!summary) return;
+      summary.setAttribute("aria-expanded", detail.open ? "true" : "false");
+      detail.addEventListener("toggle", function () {
+        summary.setAttribute("aria-expanded", detail.open ? "true" : "false");
+      });
+    });
+  }
+
   initNav();
   captureAttribution();
   initPricingToggle();
+  initShowcase();
+  initFaqAccordion();
   initConsentBanner();
   initLeadForms();
   initNewsletterForm();

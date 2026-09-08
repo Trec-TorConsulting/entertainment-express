@@ -47,7 +47,121 @@ def get_marketing_settings():
     return values
 
 
-def apply_common_page_context(context, settings, title, description, route):
+def build_breadcrumbs(items: list[dict], site_url: str = "") -> str:
+    """Builds a JSON-LD BreadcrumbList from a list of dicts with 'label' and 'url'."""
+    elements = []
+    for idx, item in enumerate(items, start=1):
+        url = item.get("url", "")
+        if site_url and url.startswith("/"):
+            url = f"{site_url.rstrip('/')}{url}"
+        elements.append({
+            "@type": "ListItem",
+            "position": idx,
+            "name": item.get("label", ""),
+            "item": url,
+        })
+    payload = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": elements,
+    }
+    return json.dumps(payload, indent=2)
+
+
+def build_software_app_jsonld(name: str, description: str, url: str, category: str = "BusinessApplication", offers: list[dict] = None) -> str:
+    """Builds a JSON-LD SoftwareApplication schema."""
+    payload = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": name,
+        "description": description,
+        "url": url,
+        "applicationCategory": category or "BusinessApplication",
+        "operatingSystem": "Web",
+    }
+    if offers:
+        payload["offers"] = offers
+    return json.dumps(payload, indent=2)
+
+
+def build_faq_jsonld(questions: list[dict]) -> str:
+    """Builds a JSON-LD FAQPage schema from [{question, answer}, ...]."""
+    main_entities = []
+    for q in questions:
+        main_entities.append({
+            "@type": "Question",
+            "name": q.get("question", ""),
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": q.get("answer", ""),
+            },
+        })
+    payload = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": main_entities,
+    }
+    return json.dumps(payload, indent=2)
+
+
+def build_website_jsonld(name: str, url: str, search_url: str) -> str:
+    """Builds a JSON-LD WebSite schema with SearchAction."""
+    payload = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": name,
+        "url": url,
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": search_url,
+            "query-input": "required name=search_term_string",
+        },
+    }
+    return json.dumps(payload, indent=2)
+
+
+def get_sitemap_routes() -> list[str]:
+    """Returns all public marketing routes including dynamic dict-driven landing pages."""
+    base_routes = [
+        "/",
+        "/pricing",
+        "/features",
+        "/about",
+        "/contact",
+        "/blog",
+        "/demo",
+        "/start-trial",
+        "/legal/terms",
+        "/legal/privacy",
+        "/legal/cookies",
+    ]
+    solution_routes = [
+        "/solutions/djs",
+        "/solutions/rentals",
+        "/solutions/photo-booths",
+        "/solutions/game-trucks",
+        "/solutions/casino",
+        "/solutions/performers",
+    ]
+    compare_routes = [
+        "/compare/inflatable-office",
+        "/compare/goodshuffle-pro",
+        "/compare/dj-event-planner",
+        "/compare/honeybook",
+        "/compare/event-rental-systems",
+    ]
+    feature_routes = [
+        "/features/weather-risk",
+        "/features/dispatch-load-planning",
+        "/features/dj-playlist-export",
+        "/features/customer-portal",
+        "/features/white-label-branding",
+        "/features/ai-copilot",
+    ]
+    return base_routes + solution_routes + compare_routes + feature_routes
+
+
+def apply_common_page_context(context, settings, title, description, route, breadcrumbs: list[dict] = None):
     context.title = title
     context.seo_title = title
     context.meta_description = description
@@ -66,3 +180,11 @@ def apply_common_page_context(context, settings, title, description, route):
     context.secondary_cta_label = settings.get("secondary_cta_label", "Request a demo")
     context.secondary_cta_target = settings.get("secondary_cta_target", "/demo")
     context.social_links = settings.get("social_links", {})
+
+    context.breadcrumbs = breadcrumbs or []
+    if breadcrumbs:
+        context.breadcrumb_json_ld = build_breadcrumbs(breadcrumbs)
+    else:
+        context.breadcrumb_json_ld = None
+
+    context.website_json_ld = None

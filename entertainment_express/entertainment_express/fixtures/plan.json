@@ -1,0 +1,83 @@
+[
+  {
+    "doctype": "Plan",
+    "name": "starter",
+    "plan_code": "starter",
+    "plan_name": "Starter",
+    "price_monthly": 0.0,
+    "price_annual": 0.0,
+    "currency": "USD",
+    "trial_days": 0,
+    "grace_days": 7,
+    "allow_overages": 0,
+    "status": "Active",
+    "entitlements": [
+      {"feature_key": "max_staff", "limit_value": "1"},
+      {"feature_key": "active_bookings_limit", "limit_value": "3"},
+      {"feature_key": "storage_gb", "limit_value": "0.5"},
+      {"feature_key": "white_label", "limit_value": "0"},
+      {"feature_key": "custom_domain", "limit_value": "0"},
+      {"feature_key": "weather_risk", "limit_value": "0"},
+      {"feature_key": "sms_enabled", "limit_value": "0"},
+      {"feature_key": "playlist_export", "limit_value": "0"},
+      {"feature_key": "ai_assistant", "limit_value": "0"},
+      {"feature_key": "overflow_exchange", "limit_value": "0"},
+      {"feature_key": "show_ee_badge", "limit_value": "1"},
+      {"feature_key": "concierge_migration", "limit_value": "0"}
+    ]
+  },
+  {
+    "doctype": "Plan",
+    "name": "pro",
+    "plan_code": "pro",
+    "plan_name": "Pro",
+    "price_monthly": 99.0,
+    "price_annual": 948.0,
+    "currency": "USD",
+    "trial_days": 14,
+    "grace_days": 7,
+    "allow_overages": 1,
+    "status": "Active",
+    "entitlements": [
+      {"feature_key": "max_staff", "limit_value": "5"},
+      {"feature_key": "active_bookings_limit", "limit_value": "9999"},
+      {"feature_key": "storage_gb", "limit_value": "15"},
+      {"feature_key": "white_label", "limit_value": "1"},
+      {"feature_key": "custom_domain", "limit_value": "1"},
+      {"feature_key": "weather_risk", "limit_value": "1"},
+      {"feature_key": "sms_enabled", "limit_value": "1"},
+      {"feature_key": "playlist_export", "limit_value": "1"},
+      {"feature_key": "ai_assistant", "limit_value": "0"},
+      {"feature_key": "overflow_exchange", "limit_value": "0"},
+      {"feature_key": "show_ee_badge", "limit_value": "0"},
+      {"feature_key": "concierge_migration", "limit_value": "0"}
+    ]
+  },
+  {
+    "doctype": "Plan",
+    "name": "scale",
+    "plan_code": "scale",
+    "plan_name": "Scale",
+    "price_monthly": 249.0,
+    "price_annual": 2388.0,
+    "currency": "USD",
+    "trial_days": 14,
+    "grace_days": 7,
+    "allow_overages": 1,
+    "status": "Active",
+    "entitlements": [
+      {"feature_key": "max_staff", "limit_value": "9999"},
+      {"feature_key": "active_bookings_limit", "limit_value": "9999"},
+      {"feature_key": "storage_gb", "limit_value": "100"},
+      {"feature_key": "white_label", "limit_value": "1"},
+      {"feature_key": "custom_domain", "limit_value": "1"},
+      {"feature_key": "weather_risk", "limit_value": "1"},
+      {"feature_key": "sms_enabled", "limit_value": "1"},
+      {"feature_key": "playlist_export", "limit_value": "1"},
+      {"feature_key": "ai_assistant", "limit_value": "1"},
+      {"feature_key": "overflow_exchange", "limit_value": "1"},
+      {"feature_key": "show_ee_badge", "limit_value": "0"},
+      {"feature_key": "concierge_migration", "limit_value": "1"}
+    ]
+  }
+]

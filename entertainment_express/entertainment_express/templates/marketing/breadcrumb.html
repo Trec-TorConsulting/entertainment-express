@@ -1,0 +1,17 @@
+{% if breadcrumbs and breadcrumbs|length > 0 %}
+<nav class="ee-breadcrumb ee-shell" aria-label="Breadcrumb">
+  <ol class="ee-breadcrumb-list">
+    {% for item in breadcrumbs %}
+      {% if loop.last %}
+        <li class="ee-breadcrumb-item" aria-current="page">
+          <span>{{ item.label }}</span>
+        </li>
+      {% else %}
+        <li class="ee-breadcrumb-item">
+          <a href="{{ item.url }}">{{ item.label }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ol>
+</nav>
+{% endif %}

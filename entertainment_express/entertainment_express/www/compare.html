@@ -1,0 +1,114 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<!-- 1. Hero Section -->
+<section class="ee-hero ee-shell">
+  <div class="eyebrow">Entertainment Express vs. {{ competitor.name }}</div>
+  <h1 class="ee-hero-headline">{{ competitor.tagline }}</h1>
+  <p class="ee-hero-sub">{{ competitor.meta_description }}</p>
+
+  <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+    <a class="ee-btn ee-btn-primary" href="/start-trial?compare={{ slug }}">Start free 14-day trial</a>
+    <a class="ee-btn ee-btn-secondary" href="/demo">Schedule a 1-on-1 demo</a>
+  </div>
+  <p class="ee-hero-trust">✓ 15-minute preset import &bull; Zero downtime &bull; 14-day free trial</p>
+</section>
+
+<!-- 2. Feature Comparison Table Section -->
+<section class="ee-shell ee-section-spaced">
+  <div class="ee-panel">
+    <div class="eyebrow">Feature-by-Feature</div>
+    <h2>Side-by-side comparison</h2>
+    <p>See why high-volume entertainment operators are switching to Entertainment Express.</p>
+
+    <div class="ee-compare-table-wrapper">
+      <table class="ee-compare-table">
+        <thead>
+          <tr>
+            <th style="width: 40%;">Capability / Feature</th>
+            <th style="width: 30%; color: var(--ee-brand-text); font-weight: 700;">Entertainment Express</th>
+            <th style="width: 30%;">{{ competitor.name }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in competitor.comparison_features %}
+          <tr>
+            <td style="font-weight: 500;">{{ item.feature }}</td>
+            <td style="color: var(--ee-brand-text); font-weight: 600;">
+              {% if "Yes" in item.ee %}
+                <span class="ee-check">✓</span> {{ item.ee }}
+              {% else %}
+                {{ item.ee }}
+              {% endif %}
+            </td>
+            <td style="color: var(--ee-text-secondary);">
+              {% if "No" in item.competitor %}
+                <span class="ee-cross">✗</span> {{ item.competitor }}
+              {% else %}
+                {{ item.competitor }}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Weaknesses Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel">
+    <div class="eyebrow" style="color: var(--ee-danger-text); background: var(--ee-danger-soft); border-color: var(--ee-danger-border);">
+      Architecture Limitations
+    </div>
+    <h2>Why operators leave {{ competitor.name }}</h2>
+    <p>These core architecture weaknesses cost growing businesses time, revenue, and client satisfaction.</p>
+
+    <div class="ee-grid-2" style="margin-top: var(--ee-space-6);">
+      {% for weakness in competitor.weaknesses %}
+      <div style="padding: var(--ee-space-5); border: 1px solid var(--ee-border); border-radius: var(--ee-radius-lg); background: var(--ee-surface-inset); display: flex; gap: var(--ee-space-3); align-items: flex-start;">
+        <span style="color: var(--ee-danger); font-size: 1.25rem; line-height: 1;">✕</span>
+        <span style="font-size: var(--ee-font-size-body); font-weight: 500; color: var(--ee-text);">{{ weakness }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 4. Other Competitor Comparisons -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel">
+    <h3>Compare other event software platforms</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: var(--ee-space-2); margin-top: var(--ee-space-3);">
+      {% for key in competitor_keys %}
+        {% if key != slug %}
+        <a class="ee-btn ee-btn-secondary" href="/compare/{{ key }}" style="font-size: var(--ee-font-size-label);">
+          vs. {{ all_competitors[key].name }}
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 5. Migration CTA Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12); margin-bottom: var(--ee-space-8);">
+  <div class="ee-panel" style="text-align: center; padding: var(--ee-space-12) var(--ee-space-6); background: linear-gradient(135deg, var(--ee-panel) 0%, var(--ee-surface-inset) 100%);">
+    <div class="eyebrow">Zero Downtime Migration</div>
+    <h2 style="font-size: clamp(2rem, 3vw, 2.5rem); max-width: 24ch; margin: 0 auto var(--ee-space-3);">
+      {{ competitor.migration_cta }}
+    </h2>
+    <p style="font-size: 1.1rem; max-width: 48ch; margin: 0 auto var(--ee-space-6);">
+      Our automated data migration tools import your existing customers, inventory, and upcoming bookings so you can switch seamlessly.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+      <a class="ee-btn ee-btn-primary" href="/start-trial?compare={{ slug }}">Start free 14-day trial</a>
+      <a class="ee-btn ee-btn-secondary" href="/demo">Book a migration consultation</a>
+    </div>
+    <p class="ee-hero-trust" style="margin-top: var(--ee-space-4);">
+      No credit card required &bull; Free concierge onboarding assistance on Scale plan
+    </p>
+  </div>
+</section>
+{% endblock %}

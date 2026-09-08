@@ -1,16 +1,57 @@
 {% extends "entertainment_express/templates/marketing/base.html" %}
 
 {% block marketing_content %}
-<section class="ee-shell ee-panel">
-  <h1>Platform Features</h1>
-  <p>Entertainment Express unifies sales, operations, and field execution.</p>
-  <ul>
-    <li>Lead pipeline, proposals, contracts, and e-signature</li>
-    <li>Availability engine with holds, buffers, and conflict prevention</li>
-    <li>Dispatch board, run sheets, and crew status tracking</li>
-    <li>Payments, accounting sync, and reconciliation</li>
-    <li>Customer portal and mobile field app</li>
-    <li>AI-assisted quoting and planning workflows</li>
-  </ul>
+<!-- Hero -->
+<section class="ee-hero ee-shell">
+  <div class="eyebrow">The Platform Suite</div>
+  <h1 class="ee-hero-headline">Enterprise-Grade Features for Event Operators</h1>
+  <p class="ee-hero-sub">
+    Discover the deep, vertical-tailored capabilities that make Entertainment Express the gold standard for live entertainment businesses.
+  </p>
+  <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+    <a class="ee-btn ee-btn-primary" href="/start-trial">Start free 14-day trial</a>
+    <a class="ee-btn ee-btn-secondary" href="/pricing">View plan pricing</a>
+  </div>
+</section>
+
+<!-- Feature Hub Grid -->
+<section class="ee-shell ee-section-spaced">
+  <div class="ee-grid-features" style="margin-top: var(--ee-space-6);">
+    {% for key in feature_keys %}
+    {% set feat = features[key] %}
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">{{ feat.icon }}</div>
+      <h3>{{ feat.name }}</h3>
+      <p style="margin-bottom: var(--ee-space-4);">{{ feat.summary or feat.headline }}</p>
+      <ul style="list-style: none; padding: 0; margin: 0 0 var(--ee-space-4); display: flex; flex-direction: column; gap: var(--ee-space-2); font-size: var(--ee-font-size-label);">
+        {% for hl in feat.highlights[:2] %}
+        <li style="display: flex; align-items: center; gap: var(--ee-space-2); color: var(--ee-text-secondary);">
+          <span class="ee-check">✓</span> {{ hl }}
+        </li>
+        {% endfor %}
+      </ul>
+      <a class="ee-btn ee-btn-secondary" href="/features/{{ key }}" style="margin-top: auto; font-size: var(--ee-font-size-label);">
+        Deep-dive into {{ feat.name.split('&')[0].strip() }} &rarr;
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Callout section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12); margin-bottom: var(--ee-space-8);">
+  <div class="ee-panel" style="text-align: center; padding: var(--ee-space-12) var(--ee-space-6); background: linear-gradient(135deg, var(--ee-panel) 0%, var(--ee-surface-inset) 100%);">
+    <div class="eyebrow">Ready to see all features live?</div>
+    <h2 style="font-size: clamp(2rem, 3vw, 2.5rem); margin-bottom: var(--ee-space-3);">
+      Start your 14-day free trial today
+    </h2>
+    <p style="font-size: 1.1rem; max-width: 48ch; margin: 0 auto var(--ee-space-6);">
+      Full access to all Pro features with no credit card required. Experience the difference in your first event.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+      <a class="ee-btn ee-btn-primary" href="/start-trial">Start free trial</a>
+      <a class="ee-btn ee-btn-secondary" href="/demo">Request personalized demo</a>
+    </div>
+  </div>
 </section>
 {% endblock %}
