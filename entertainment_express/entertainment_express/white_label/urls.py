@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import json
 
-import frappe
+try:
+    import frappe
+except Exception:
+    frappe = None
 
 
 def _conf() -> dict:

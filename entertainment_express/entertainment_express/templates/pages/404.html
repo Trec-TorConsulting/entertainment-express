@@ -1,0 +1,77 @@
+{% extends "templates/base.html" %}
+
+{% block title %}404 - {{ _("Page Not Found") }} | {{ app_name or (ee_brand_kit and ee_brand_kit.brand_name) or "Entertainment Express" }}{% endblock %}
+
+{% block head_include %}
+{{ super() }}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="{{ (ee_brand_kit and ee_brand_kit.brand_color) or '#6d28d9' }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/entertainment_express/css/ee-white-label.css">
+<link rel="stylesheet" href="/assets/entertainment_express/css/ee-auth.css?v=1.0">
+{% if ee_brand_kit and ee_brand_kit.brand_favicon %}
+<link rel="icon" href="{{ ee_brand_kit.brand_favicon }}">
+{% endif %}
+{% endblock %}
+
+{%- block navbar -%}{%- endblock -%}
+{%- block footer -%}{%- endblock -%}
+
+{% block content %}
+<div class="ee-auth-shell">
+  <main class="ee-auth-card ee-system-card" role="main">
+    <div class="ee-auth-brand">
+      <a class="ee-auth-logo-link" href="/" aria-label="{{ app_name or 'Home' }}">
+        {% if ee_brand_kit and ee_brand_kit.brand_logo %}
+          <img class="ee-auth-logo-img" src="{{ ee_brand_kit.brand_logo }}" alt="{{ app_name or ee_brand_kit.brand_name }}">
+        {% elif not hide_product_chrome %}
+          <svg class="ee-auth-logo-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="ee-404-grad-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#8b5cf6"/>
+                <stop offset="55%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#4338ca"/>
+              </linearGradient>
+            </defs>
+            <rect x="1" y="1" width="34" height="34" rx="8" fill="url(#ee-404-grad-bg)"/>
+            <path d="M8.5 11C8.5 10.17 9.17 9.5 10 9.5H18C18.55 9.5 19 9.95 19 10.5V11.5C19 12.05 18.55 12.5 18 12.5H11.5V15H16.5C17.05 15 17.5 15.45 17.5 16V17C17.5 17.55 17.05 18 16.5 18H11.5V20.5H18C18.55 20.5 19 20.95 19 21.5V22.5C19 23.05 18.55 23.5 18 23.5H10C9.17 23.5 8.5 22.83 8.5 22V11Z" fill="#ffffff"/>
+            <polygon points="17.5,7.5 19.5,11.5 17.5,15.5 15.5,11.5" fill="#ffffff" opacity="0.95"/>
+          </svg>
+        {% endif %}
+      </a>
+    </div>
+
+    <div class="ee-system-code">404</div>
+    <h1 class="ee-system-title">{{ _("Page Not Found") }}</h1>
+    <p class="ee-system-desc">
+      {{ _("We couldn't find the page you're looking for. It might have been moved, renamed, or temporarily unavailable.") }}
+    </p>
+
+    <div class="ee-system-actions">
+      <a href="/" class="ee-auth-btn-primary">
+        <span>{{ _("Back to Home") }}</span>
+      </a>
+      <a href="/login#login" class="ee-auth-btn-secondary">
+        <span>{{ _("Go to Login") }}</span>
+      </a>
+    </div>
+  </main>
+</div>
+
+<footer class="ee-auth-footer" role="contentinfo">
+  {% if footer_text %}
+    <div>{{ footer_text }}</div>
+  {% else %}
+    <div>&copy; {{ frappe.utils.now_datetime().year if frappe else "2026" }} {{ app_name or (ee_brand_kit and ee_brand_kit.brand_name) or "Entertainment Express" }}. All rights reserved.</div>
+  {% endif %}
+
+  {% if not hide_product_chrome or show_ee_badge %}
+    <div class="ee-product-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span>Powered by <a href="https://{{ base_domain or 'entx.app' }}" target="_blank" rel="noopener">Entertainment Express</a></span>
+    </div>
+  {% endif %}
+</footer>
+{% endblock %}
