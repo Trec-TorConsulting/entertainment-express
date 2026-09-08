@@ -1,9 +1,6 @@
 <header class="ee-header" role="banner">
   <div class="ee-shell ee-header-inner">
-    <a class="ee-brand" href="/" aria-label="Entertainment Express home">
-      <span class="ee-brand-mark">EE</span>
-      <span class="ee-brand-text">Entertainment Express</span>
-    </a>
+    {% with id_suffix="hdr" %}{% include "entertainment_express/templates/marketing/brand_logo.html" %}{% endwith %}
     <nav class="ee-nav" aria-label="Primary navigation">
       {% include "entertainment_express/templates/marketing/nav.html" %}
     </nav>

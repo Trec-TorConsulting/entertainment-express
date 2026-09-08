@@ -75,11 +75,12 @@
 
     <!-- Bottom row -->
     <div class="ee-footer-bottom">
-      <div>
-        &copy; {{ frappe.utils.now_datetime().year }} Entertainment Express. All rights reserved.
+      <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+        {% with id_suffix="ftr" %}{% include "entertainment_express/templates/marketing/brand_logo.html" %}{% endwith %}
+        <span style="color: var(--ee-rail-muted); font-size: 0.85rem;">&copy; {{ frappe.utils.now_datetime().year }} All rights reserved.</span>
       </div>
       <div>
-        <a href="https://www.{{ base_domain or 'entx.app' }}" style="color: var(--ee-rail-muted);">Powered by Entertainment Express</a>
+        <span style="color: var(--ee-rail-muted); font-size: 0.85rem;">The Modern Operating System for Entertainment Companies</span>
       </div>
     </div>
   </div>

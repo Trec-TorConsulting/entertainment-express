@@ -4,6 +4,23 @@
   box-sizing: border-box;
 }
 
+/* Suppress Frappe framework default chrome (navbar, web-footer, page-breadcrumbs) */
+nav.navbar,
+header.navbar,
+.navbar-expand-lg,
+footer.web-footer,
+.page-footer,
+.page-breadcrumbs,
+.page-header-wrapper,
+#footer-subscribe {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
 body {
   margin: 0;
   font-family: var(--ee-font-body);
@@ -98,32 +115,47 @@ select:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: var(--ee-space-3);
-  font-weight: var(--ee-font-weight-title);
-  color: var(--ee-text);
   text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--ee-motion-fast) var(--ee-ease-default);
 }
 
 .ee-brand:hover {
-  color: var(--ee-brand);
+  transform: translateY(-1px);
 }
 
-.ee-brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: var(--ee-radius-md);
-  color: var(--ee-text-inverse);
-  font-weight: var(--ee-font-weight-display);
-  font-size: var(--ee-font-size-body);
-  background: linear-gradient(135deg, var(--ee-brand) 0%, var(--ee-brand-2) 100%);
-  box-shadow: var(--ee-shadow-sm);
+.ee-logo-svg {
+  display: block;
+  flex-shrink: 0;
+  transition: transform var(--ee-motion-normal) var(--ee-ease-default), filter var(--ee-motion-normal) var(--ee-ease-default);
+}
+
+.ee-brand:hover .ee-logo-svg {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.45));
 }
 
 .ee-brand-text {
-  font-size: var(--ee-font-size-heading);
-  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-family: var(--ee-font-display);
+  font-weight: var(--ee-font-weight-display);
+  font-size: 1.15rem;
+  letter-spacing: -0.025em;
+  color: var(--ee-text);
+}
+
+.ee-brand-title {
+  color: var(--ee-text);
+  font-weight: 700;
+}
+
+.ee-brand-accent {
+  background: linear-gradient(135deg, var(--ee-brand) 0%, var(--ee-brand-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
 }
 
 /* Navigation & Dropdowns */

@@ -1,0 +1,37 @@
+<a class="ee-brand" href="/" aria-label="Entertainment Express home">
+  <svg class="ee-logo-svg" viewBox="0 0 36 36" width="34" height="34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="ee-grad-bg-{{ id_suffix or 'hdr' }}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#8b5cf6"/>
+        <stop offset="55%" stop-color="#6366f1"/>
+        <stop offset="100%" stop-color="#4338ca"/>
+      </linearGradient>
+      <linearGradient id="ee-grad-accent-{{ id_suffix or 'hdr' }}" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#fb923c"/>
+        <stop offset="100%" stop-color="#f43f5e"/>
+      </linearGradient>
+      <linearGradient id="ee-grad-shine-{{ id_suffix or 'hdr' }}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="ee-glow-{{ id_suffix or 'hdr' }}" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#6366f1" flood-opacity="0.45"/>
+      </filter>
+    </defs>
+    <!-- Rounded Squircle Badge with Border -->
+    <rect x="1" y="1" width="34" height="34" rx="8" fill="url(#ee-grad-bg-{{ id_suffix or 'hdr' }})" filter="url(#ee-glow-{{ id_suffix or 'hdr' }})" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <rect x="1" y="1" width="34" height="17" rx="8" fill="url(#ee-grad-shine-{{ id_suffix or 'hdr' }})"/>
+    
+    <!-- Stylized Entertainment Express Icon Mark -->
+    <!-- Soundwave & Speed Chvrons forming EE -->
+    <path d="M8.5 11C8.5 10.17 9.17 9.5 10 9.5H18C18.55 9.5 19 9.95 19 10.5V11.5C19 12.05 18.55 12.5 18 12.5H11.5V15H16.5C17.05 15 17.5 15.45 17.5 16V17C17.5 17.55 17.05 18 16.5 18H11.5V20.5H18C18.55 20.5 19 20.95 19 21.5V22.5C19 23.05 18.55 23.5 18 23.5H10C9.17 23.5 8.5 22.83 8.5 22V11Z" fill="#ffffff"/>
+    <!-- Second E with Electric Accent -->
+    <path d="M20.5 12C20.5 11.45 20.95 11 21.5 11H26C26.55 11 27 11.45 27 12V13C27 13.55 26.55 14 26 14H22.5V15.5H25C25.55 15.5 26 15.95 26 16.5V17.5C26 18.05 25.55 18.5 25 18.5H22.5V20H26C26.55 20 27 20.45 27 21V22C27 22.55 26.55 23 26 23H21.5C20.95 23 20.5 22.55 20.5 22V12Z" fill="url(#ee-grad-accent-{{ id_suffix or 'hdr' }})"/>
+    <!-- Center Spark Prism -->
+    <polygon points="17.5,7.5 19.5,11.5 17.5,15.5 15.5,11.5" fill="#ffffff" opacity="0.95"/>
+  </svg>
+  <span class="ee-brand-text">
+    <span class="ee-brand-title">Entertainment</span>
+    <span class="ee-brand-accent">Express</span>
+  </span>
+</a>

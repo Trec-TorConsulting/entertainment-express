@@ -284,19 +284,9 @@
         if (active) {
           panel.classList.add("is-active");
           panel.removeAttribute("hidden");
-          var img = panel.querySelector("img[data-src]");
-          if (img && !img.getAttribute("src")) {
-            img.setAttribute("src", img.getAttribute("data-src"));
-          }
-          var sources = panel.querySelectorAll("source[data-srcset]");
-          sources.forEach(function (source) {
-            if (!source.getAttribute("srcset")) {
-              source.setAttribute("srcset", source.getAttribute("data-srcset"));
-            }
-          });
         } else {
           panel.classList.remove("is-active");
-          panel.setAttribute("hidden", "until-found");
+          panel.setAttribute("hidden", "");
         }
       });
     }
