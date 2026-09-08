@@ -1,21 +1,106 @@
 {% extends "entertainment_express/templates/marketing/base.html" %}
 
 {% block marketing_content %}
-<section class="ee-shell ee-panel">
-  <h1>{{ solution.name }}</h1>
-  <p>{{ solution.summary }}</p>
-  <p>Entertainment Express adapts workflows, assets, and staffing rules for your service mix.</p>
-  {% include "entertainment_express/templates/marketing/cta.html" %}
+<!-- 1. Hero Section -->
+<section class="ee-hero ee-shell">
+  <div class="eyebrow">{{ solution.name }}</div>
+  <h1 class="ee-hero-headline">{{ solution.headline }}</h1>
+  <p class="ee-hero-sub">{{ solution.summary }}</p>
+
+  <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+    <a class="ee-btn ee-btn-primary" href="/start-trial?vertical={{ vertical }}">Start free 14-day trial</a>
+    <a class="ee-btn ee-btn-secondary" href="/demo">Book a demo</a>
+  </div>
+  <p class="ee-hero-trust">✓ Tailored for {{ solution.name }} &bull; No credit card required &bull; 14-day free trial</p>
 </section>
 
+<!-- 2. Pain Points Section -->
 <section class="ee-shell ee-section-spaced">
   <div class="ee-panel">
-    <h2>Explore other verticals</h2>
-    <ul>
-      {% for key in solution_keys %}
-      <li><a href="/solutions/{{ key }}">{{ key.replace('-', ' ').title() }}</a></li>
+    <div class="eyebrow" style="color: var(--ee-danger-text); background: var(--ee-danger-soft); border-color: var(--ee-danger-border);">
+      Common Frustrations
+    </div>
+    <h2>Tired of fighting these industry bottlenecks?</h2>
+    <p>Most {{ solution.name.lower() }} struggle with disconnected legacy software and manual workarounds.</p>
+
+    <div class="ee-grid-2" style="margin-top: var(--ee-space-6);">
+      {% for pain in solution.pain_points %}
+      <div style="padding: var(--ee-space-5); border: 1px solid var(--ee-border); border-radius: var(--ee-radius-lg); background: var(--ee-surface-inset); display: flex; gap: var(--ee-space-3); align-items: flex-start;">
+        <span style="color: var(--ee-danger); font-size: 1.25rem; line-height: 1;">⚠️</span>
+        <span style="font-size: var(--ee-font-size-body); font-weight: 500; color: var(--ee-text);">{{ pain }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 3. How Entertainment Express Solves It -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="eyebrow">The Solution</div>
+  <h2>How Entertainment Express Solves It</h2>
+  <p>Engineered with purpose-built features specifically for {{ solution.name.lower() }}.</p>
+
+  <div class="ee-grid-2" style="margin-top: var(--ee-space-6);">
+    {% for feat in solution.features %}
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">✨</div>
+      <h3>{{ feat.title }}</h3>
+      <p>{{ feat.desc }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- 4. What You Get (Entitlements) -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel">
+    <div class="eyebrow">Included Capabilities</div>
+    <h2>What you get out of the box</h2>
+    <p>Everything included to manage and grow your {{ solution.name.lower() }} operations from day one.</p>
+
+    <ul class="ee-checklist" style="list-style: none; padding: 0; margin-top: var(--ee-space-6); display: grid; gap: var(--ee-space-3); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+      {% for ent in solution.entitlements %}
+      <li style="display: flex; align-items: center; gap: var(--ee-space-2); font-size: var(--ee-font-size-body);">
+        <span class="ee-check" style="font-size: 1.2rem;">✓</span>
+        <span>{{ ent }}</span>
+      </li>
       {% endfor %}
     </ul>
+  </div>
+</section>
+
+<!-- 5. Vertical Navigation (Explore other solutions) -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel">
+    <h3>Explore other entertainment verticals</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: var(--ee-space-2); margin-top: var(--ee-space-3);">
+      {% for key in solution_keys %}
+        {% if key != vertical %}
+        <a class="ee-btn ee-btn-secondary" href="/solutions/{{ key }}" style="font-size: var(--ee-font-size-label);">
+          {{ all_solutions[key].name }}
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 6. Final CTA Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12); margin-bottom: var(--ee-space-8);">
+  <div class="ee-panel" style="text-align: center; padding: var(--ee-space-12) var(--ee-space-6); background: linear-gradient(135deg, var(--ee-panel) 0%, var(--ee-surface-inset) 100%);">
+    <h2 style="font-size: clamp(2rem, 3vw, 2.5rem); margin-bottom: var(--ee-space-3);">
+      Transform your {{ solution.name.lower() }} business
+    </h2>
+    <p style="font-size: 1.1rem; max-width: 46ch; margin: 0 auto var(--ee-space-6);">
+      Start your 14-day free trial today. Switch in 15 minutes with our automated presets.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+      <a class="ee-btn ee-btn-primary" href="/start-trial?vertical={{ vertical }}">Start free 14-day trial</a>
+      <a class="ee-btn ee-btn-secondary" href="/demo">Talk to a specialist</a>
+    </div>
+    <p class="ee-hero-trust" style="margin-top: var(--ee-space-4);">
+      No credit card required &bull; Cancel anytime &bull; Full access to all Pro features during trial
+    </p>
   </div>
 </section>
 {% endblock %}

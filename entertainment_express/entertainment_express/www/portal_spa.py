@@ -81,10 +81,25 @@ def portal_bootstrap() -> dict:
         settings = frappe.get_cached_doc("EE Portal Settings", "EE Portal Settings")
         premium_ui_enabled = int(getattr(settings, "premium_ui_enabled", 0) or 0)
     except Exception:
-        try:
-            premium_ui_enabled = int(frappe.db.get_single_value("EE Portal Settings", "premium_ui_enabled") or 0)
-        except Exception:
-            premium_ui_enabled = 0
+        premium_ui_enabled = 0
+
+    show_ee_badge = 0
+    try:
+        from entertainment_express.control_plane.entitlements import has_entitlement
+
+        val = has_entitlement("show_ee_badge")
+        show_ee_badge = 1 if val in (True, 1, "1") else 0
+    except Exception:
+        show_ee_badge = 0
+
+    base_domain = "entx.app"
+    try:
+        from entertainment_express.marketing.site_context import get_marketing_settings
+
+        base_domain = (get_marketing_settings().get("base_domain") or getattr(frappe.conf, "ee_base_domain", None) or "entx.app").strip()
+    except Exception:
+        conf = getattr(frappe, "conf", None) or {}
+        base_domain = conf.get("ee_base_domain") or "entx.app"
 
     return {
         "user": user,
@@ -95,6 +110,8 @@ def portal_bootstrap() -> dict:
         "inbox_count": inbox_count,
         "canonical_host": canonical_host,
         "premium_ui_enabled": premium_ui_enabled,
+        "show_ee_badge": show_ee_badge,
+        "base_domain": base_domain,
     }
 
 
@@ -114,6 +131,8 @@ def apply_spa_context(context, *, title: str, portal: str) -> None:
     context.spa_css = f"/assets/entertainment_express/{portal}/assets/main.css?v={ver}"
     context.spa_js = f"/assets/entertainment_express/{portal}/main.js?v={ver}"
     context.portal_bootstrap = portal_bootstrap()
+    context.show_ee_badge = context.portal_bootstrap.get("show_ee_badge", 0)
+    context.base_domain = context.portal_bootstrap.get("base_domain", "entx.app")
     branding = (context.portal_bootstrap or {}).get("branding") or {}
     if branding.get("name"):
         context.spa_title = f"{branding['name']} · {title}" if not branding.get("hide_product_chrome") else branding["name"]

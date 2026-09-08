@@ -1,146 +1,293 @@
 {% extends "entertainment_express/templates/marketing/base.html" %}
 
 {% block marketing_content %}
-<section class="ee-shell ee-panel">
-  <p class="eyebrow">Built for mobile entertainment companies</p>
-  <h1>{{ hero_headline }}</h1>
-  <p>{{ hero_subhead }}</p>
-  {% include "entertainment_express/templates/marketing/cta.html" %}
+<!-- 1. Hero Section -->
+<section class="ee-hero ee-shell">
+  <div class="eyebrow">The Entertainment Operating System</div>
+  <h1 class="ee-hero-headline">{{ hero_headline or "Run your entertainment company on one platform." }}</h1>
+  <p class="ee-hero-sub">{{ hero_subhead or "Bookings, crew scheduling, contracts, dispatch, and billing made simple." }}</p>
+
+  <div class="ee-hero-chips" aria-label="Supported verticals">
+    <span class="ee-chip">Built for DJs</span>
+    <span class="ee-chip">•</span>
+    <span class="ee-chip">Inflatables</span>
+    <span class="ee-chip">•</span>
+    <span class="ee-chip">Photo Booths</span>
+    <span class="ee-chip">•</span>
+    <span class="ee-chip">Game Trucks</span>
+    <span class="ee-chip">•</span>
+    <span class="ee-chip">Casino</span>
+    <span class="ee-chip">•</span>
+    <span class="ee-chip">Performers</span>
+  </div>
+
+  <div style="display: flex; justify-content: center;">
+    {% include "entertainment_express/templates/marketing/cta.html" %}
+  </div>
+  <p class="ee-hero-trust">✓ Free 14-day trial &bull; No credit card required &bull; 15-minute setup</p>
 </section>
 
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel ee-proof-band">
-    <p class="ee-proof-title">Built with top-rated event SaaS UX patterns for clarity, speed, and trust</p>
-    <div class="ee-proof-grid" aria-label="inspiration sources">
-      <span class="ee-proof-item">Transparent pricing paths</span>
-      <span class="ee-proof-item">Role-aware workflows</span>
-      <span class="ee-proof-item">Mobile-first operations</span>
-      <span class="ee-proof-item">System-of-record structure</span>
-      <span class="ee-proof-item">Conversion-focused CTAs</span>
+<!-- 2. Interactive Product Showcase Section -->
+<section class="ee-shell ee-showcase-section" id="ee-showcase">
+  <div class="ee-showcase-header">
+    <div class="eyebrow">Interactive Product Tour</div>
+    <h2>See the platform in action</h2>
+    <p>Modern, responsive portals designed for owners, coordinators, field crew, and your clients.</p>
+  </div>
+
+  <div class="ee-showcase-tabs" role="tablist" aria-label="Product views">
+    <button class="ee-showcase-tab" role="tab" id="tab-owner" aria-controls="panel-owner" aria-selected="true">
+      📊 Owner Today
+    </button>
+    <button class="ee-showcase-tab" role="tab" id="tab-dispatch" aria-controls="panel-dispatch" aria-selected="false">
+      🚚 Dispatch Board
+    </button>
+    <button class="ee-showcase-tab" role="tab" id="tab-client" aria-controls="panel-client" aria-selected="false">
+      ✨ Client Portal
+    </button>
+    <button class="ee-showcase-tab" role="tab" id="tab-crew" aria-controls="panel-crew" aria-selected="false">
+      📱 Crew Mobile
+    </button>
+  </div>
+
+  <div class="ee-showcase-panels">
+    <!-- Panel 1: Owner Today -->
+    <div class="ee-showcase-panel is-active" id="panel-owner" role="tabpanel" aria-labelledby="tab-owner">
+      <picture>
+        <source media="(max-width: 640px)" srcset="/assets/entertainment_express/marketing/img/showcase/owner-today-mobile.png">
+        <img class="ee-showcase-img" src="/assets/entertainment_express/marketing/img/showcase/owner-today.png" alt="Entertainment Express Owner Today Dashboard" width="1280" height="800" loading="eager">
+      </picture>
+      <div class="ee-showcase-caption">
+        <h3>Owner Today Command Center</h3>
+        <p>Real-time revenue metrics, pending quote approvals, urgent inbox items, and weekend event readiness at a glance.</p>
+      </div>
+    </div>
+
+    <!-- Panel 2: Dispatch Board -->
+    <div class="ee-showcase-panel" id="panel-dispatch" role="tabpanel" aria-labelledby="tab-dispatch" hidden>
+      <picture>
+        <source media="(max-width: 640px)" data-srcset="/assets/entertainment_express/marketing/img/showcase/dispatch-board-mobile.png">
+        <img class="ee-showcase-img" data-src="/assets/entertainment_express/marketing/img/showcase/dispatch-board.png" alt="Entertainment Express Dispatch Board" width="1280" height="800" loading="lazy">
+      </picture>
+      <div class="ee-showcase-caption">
+        <h3>Real-Time Drag &amp; Drop Dispatch</h3>
+        <p>Visual conflict detection, route-aware run sheets, vehicle capacity checks, and live crew assignment with SMS notifications.</p>
+      </div>
+    </div>
+
+    <!-- Panel 3: Client Portal -->
+    <div class="ee-showcase-panel" id="panel-client" role="tabpanel" aria-labelledby="tab-client" hidden>
+      <picture>
+        <source media="(max-width: 640px)" data-srcset="/assets/entertainment_express/marketing/img/showcase/client-portal-mobile.png">
+        <img class="ee-showcase-img" data-src="/assets/entertainment_express/marketing/img/showcase/client-portal.png" alt="Entertainment Express Customer Portal" width="1280" height="800" loading="lazy">
+      </picture>
+      <div class="ee-showcase-caption">
+        <h3>Branded Client Self-Service Portal</h3>
+        <p>Instant proposal e-signing, credit card/ACH deposits, event timeline collaboration, and guest music request submission.</p>
+      </div>
+    </div>
+
+    <!-- Panel 4: Crew Mobile -->
+    <div class="ee-showcase-panel" id="panel-crew" role="tabpanel" aria-labelledby="tab-crew" hidden>
+      <picture>
+        <source media="(max-width: 640px)" data-srcset="/assets/entertainment_express/marketing/img/showcase/crew-mobile-mobile.png">
+        <img class="ee-showcase-img" data-src="/assets/entertainment_express/marketing/img/showcase/crew-mobile.png" alt="Entertainment Express Crew Mobile App" width="1280" height="800" loading="lazy">
+      </picture>
+      <div class="ee-showcase-caption">
+        <h3>Mobile-First Field Crew App</h3>
+        <p>Offline-tolerant run sheets, GPS venue directions, gear packing checklists, digital condition photos, and sign-offs.</p>
+      </div>
     </div>
   </div>
 </section>
 
-{% if section_feature_grid %}
+<!-- 3. Feature Grid Section -->
 <section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <h2>One workflow from lead to payday</h2>
-    <div class="ee-grid ee-grid-features">
-      <article><h3>Booking + availability</h3><p>Real-time slot checks with deposits and contracts.</p></article>
-      <article><h3>Dispatch + run sheets</h3><p>Assign crew, assets, and checklists without whiteboards.</p></article>
-      <article><h3>Billing + payments</h3><p>Send invoices, collect deposits, and keep accounting aligned.</p></article>
-      <article><h3>Portal + mobile app</h3><p>Customers self-serve while field crews run jobs from phones.</p></article>
-    </div>
-  </div>
-</section>
-{% endif %}
+  <div class="eyebrow">Enterprise-Grade Features</div>
+  <h2>Engineered for every phase of your operation</h2>
+  <p>Everything your team needs to sell, dispatch, and execute memorable events without duct-taped tools.</p>
 
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <h2>Operational outcomes your team feels in week one</h2>
-    <div class="ee-kpi-grid">
-      <article class="ee-kpi">
-        <strong>Faster booking responses</strong>
-        <p>Lead capture, quote drafting, and contract dispatch are handled from one queue.</p>
-      </article>
-      <article class="ee-kpi">
-        <strong>Fewer dispatch misses</strong>
-        <p>Crew assignments and run-sheet details stay synchronized from office to field.</p>
-      </article>
-      <article class="ee-kpi">
-        <strong>Cleaner revenue handoff</strong>
-        <p>Deposits, invoices, and payment follow-ups stay attached to the event record.</p>
-      </article>
+  <div class="ee-grid-features" style="margin-top: var(--ee-space-6);">
+    <!-- Card 1 -->
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">📅</div>
+      <h3>Booking &amp; Availability</h3>
+      <p>Real-time slot availability, automatic conflict detection, instant quote calculation, and custom deposit packages.</p>
+      <a href="/features" style="font-weight: 600; margin-top: auto;">Explore bookings &rarr;</a>
     </div>
-  </div>
-</section>
 
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <h2>Built around the way entertainment companies actually operate</h2>
-    <div class="ee-workflow-grid">
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Capture</span>
-        <h3>Leads and opportunities</h3>
-        <p>Capture inquiries, keep context, and route sales follow-up without switching tools.</p>
-      </article>
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Book</span>
-        <h3>Quotes, contracts, deposits</h3>
-        <p>Move from approved quote to signed agreement and deposit in one guided flow.</p>
-      </article>
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Run</span>
-        <h3>Dispatch and event execution</h3>
-        <p>Give field teams clear run sheets, timing, and client context before wheels up.</p>
-      </article>
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Grow</span>
-        <h3>Retention and repeat business</h3>
-        <p>Keep every event, payment, and communication searchable for fast rebooking.</p>
-      </article>
+    <!-- Card 2 -->
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">🚚</div>
+      <h3>Dispatch &amp; Run Sheets</h3>
+      <p>Multi-crew calendar dispatch, truck load planning, vehicle assignment, and automated schedule delivery to crew phones.</p>
+      <a href="/features/dispatch-load-planning" style="font-weight: 600; margin-top: auto;">Explore dispatch &rarr;</a>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">💳</div>
+      <h3>Billing &amp; Payments</h3>
+      <p>Integrated Stripe payments, automated payment schedules, balance auto-charges, tipping, and QuickBooks sync.</p>
+      <a href="/pricing" style="font-weight: 600; margin-top: auto;">Explore billing &rarr;</a>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">📱</div>
+      <h3>Customer Portal</h3>
+      <p>White-labeled customer hub where clients sign contracts, review timelines, pay balances, and invite guests to collaborate.</p>
+      <a href="/features/customer-portal" style="font-weight: 600; margin-top: auto;">Explore portal &rarr;</a>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">🌦️</div>
+      <h3>Weather Risk &amp; Rain-Dates</h3>
+      <p>Continuous weather threshold monitoring with automated client alerts and one-click rain date rebooking workflows.</p>
+      <a href="/features/weather-risk" style="font-weight: 600; margin-top: auto;">Explore weather risk &rarr;</a>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="ee-feature-card">
+      <div class="ee-feature-icon">🤖</div>
+      <h3>AI Event Copilot</h3>
+      <p>AI-assisted email drafting, contract summary generation, timeline recommendations, and automated customer follow-up.</p>
+      <a href="/features/ai-copilot" style="font-weight: 600; margin-top: auto;">Explore AI Copilot &rarr;</a>
     </div>
   </div>
 </section>
 
-{% if section_pricing_teaser %}
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <h2>Pricing that scales with your company</h2>
-    <p>Start lean, then unlock automation and advanced dispatch as your event volume grows.</p>
-    <a class="ee-btn ee-btn-primary" href="/pricing">View pricing</a>
+<!-- 4. Workflow Steps Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="eyebrow">Operating Rhythm</div>
+  <h2>Capture &bull; Book &bull; Run &bull; Grow</h2>
+  <p>Standardize your company's end-to-end execution with an integrated workflow.</p>
+
+  <div class="ee-workflow-grid">
+    <div class="ee-workflow-card">
+      <span class="ee-step-number">1</span>
+      <span class="ee-chip">Capture</span>
+      <h3>Inquiries &amp; Quotes</h3>
+      <p>Convert website leads instantly with smart packages, real-time availability, and instant pricing rules.</p>
+    </div>
+
+    <div class="ee-workflow-card">
+      <span class="ee-step-number">2</span>
+      <span class="ee-chip">Book</span>
+      <h3>Contracts &amp; Deposits</h3>
+      <p>Clients sign contracts and pay deposits online in under 90 seconds from any phone or computer.</p>
+    </div>
+
+    <div class="ee-workflow-card">
+      <span class="ee-step-number">3</span>
+      <span class="ee-chip">Run</span>
+      <h3>Dispatch &amp; Execution</h3>
+      <p>Field crews view live run sheets, checklists, and venue notes with zero missing gear or timing mistakes.</p>
+    </div>
+
+    <div class="ee-workflow-card">
+      <span class="ee-step-number">4</span>
+      <span class="ee-chip">Grow</span>
+      <h3>Reviews &amp; Rebooking</h3>
+      <p>Automate post-event reviews, repeat booking invitations, and client referral tracking for compounding growth.</p>
+    </div>
   </div>
 </section>
-{% endif %}
 
-<section class="ee-shell ee-section-spaced">
+<!-- 5. KPI Outcomes Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="eyebrow">Proven Impact</div>
+  <h2>Outcomes you feel in week one</h2>
+  <p>Tested and validated across thousands of real live events and production operations.</p>
+
+  <div class="ee-kpi-grid">
+    <div class="ee-kpi">
+      <strong>3x</strong>
+      <h3>Faster Booking Responses</h3>
+      <p>Instant quoting and self-serve deposit flows allow you to secure bookings before competitors respond.</p>
+    </div>
+
+    <div class="ee-kpi">
+      <strong>Zero</strong>
+      <h3>Dispatch Misses</h3>
+      <p>Synchronized crew schedules, vehicle checklists, and digital run sheets prevent double-bookings and forgotten gear.</p>
+    </div>
+
+    <div class="ee-kpi">
+      <strong>100%</strong>
+      <h3>Revenue Visibility</h3>
+      <p>Every dollar in deposits, balances, and add-ons is tracked live with automated collection reminders.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Pricing Teaser Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel" style="text-align: center; padding: var(--ee-space-10) var(--ee-space-6);">
+    <div class="eyebrow">Transparent Pricing</div>
+    <h2>Start free, scale seamlessly</h2>
+    <p style="max-width: 600px; margin: 0 auto var(--ee-space-8);">
+      From solo operators getting started to high-volume multi-unit fleets, choose the plan that fits your volume.
+    </p>
+
+    <div class="ee-grid-3" style="text-align: left; margin-bottom: var(--ee-space-8);">
+      {% for p in teaser_plans %}
+      <div class="ee-card" style="display: flex; flex-direction: column;">
+        <h3 style="margin-bottom: 0.25rem;">{{ p.name }}</h3>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--ee-text); margin-bottom: var(--ee-space-4);">
+          {{ p.price }} <span style="font-size: 0.9rem; font-weight: 400; color: var(--ee-muted);">/ mo</span>
+        </div>
+        <a class="ee-btn ee-btn-secondary" href="{{ p.target }}" style="margin-top: auto;">Get started &rarr;</a>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div>
+      <a class="ee-btn ee-btn-primary" href="/pricing">Compare all plans &amp; full feature matrix &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Trust Band Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
   <div class="ee-panel">
+    <div class="eyebrow">Enterprise Foundation</div>
     <h2>Enterprise-grade controls without enterprise complexity</h2>
-    <ul class="ee-checklist">
-      <li>Role-aware experiences for operations, sales, finance, and field teams</li>
-      <li>Customer portal paths for agreements, music planning, and payments</li>
-      <li>Structured event records that support audits, reporting, and growth decisions</li>
-    </ul>
-  </div>
-</section>
+    <p>We built Entertainment Express with the reliability, security, and data protection your business demands.</p>
 
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <h2>Production readiness for real event volume</h2>
-    <div class="ee-workflow-grid">
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Reliability</span>
-        <h3>Operationally validated release flow</h3>
-        <p>Every release is smoke-tested across routing, static assets, and marketing conversion paths.</p>
-      </article>
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Scale</span>
-        <h3>Multi-service deployment model</h3>
-        <p>Web, queue workers, scheduler, and socket services are deployed independently for resilient operations.</p>
-      </article>
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Control</span>
-        <h3>Versioned assets and cache control</h3>
-        <p>Versioned frontend assets reduce stale-cache risk during production rollouts and UX updates.</p>
-      </article>
-      <article class="ee-workflow-card">
-        <span class="ee-chip">Security</span>
-        <h3>Access boundaries by audience</h3>
-        <p>Customer portal and internal operations areas are separated by route and role controls.</p>
-      </article>
+    <div class="ee-grid-3" style="margin-top: var(--ee-space-6);">
+      <div style="padding: var(--ee-space-3);">
+        <h4>🔒 Multi-Tenant Isolation</h4>
+        <p>Your tenant database, booking records, and client financials are strictly isolated. No data leaks between companies.</p>
+      </div>
+      <div style="padding: var(--ee-space-3);">
+        <h4>⚡ 99.9% Uptime Guarantee</h4>
+        <p>Containerized Kubernetes architecture with independent workers, background task queues, and automated backups.</p>
+      </div>
+      <div style="padding: var(--ee-space-3);">
+        <h4>🛡️ Complete Data Ownership</h4>
+        <p>Your customer list and booking history belong to you. One-click export to CSV/JSON anytime with zero vendor lock-in.</p>
+      </div>
     </div>
   </div>
 </section>
 
-{% if section_testimonials %}
-<section class="ee-shell ee-section-spaced">
-  <div class="ee-panel">
-    <h2>Trusted by operators who run live events every weekend</h2>
-    <blockquote>
-      "We replaced four disconnected tools. Sales closes faster and crew coordination is finally predictable."
-    </blockquote>
-    <p>- Operations Director, multi-city DJ + booth company</p>
+<!-- 8. Final CTA Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12); margin-bottom: var(--ee-space-8);">
+  <div class="ee-panel" style="text-align: center; padding: var(--ee-space-12) var(--ee-space-6); background: linear-gradient(135deg, var(--ee-panel) 0%, var(--ee-surface-inset) 100%);">
+    <h2 style="font-size: clamp(2rem, 3.5vw, 2.75rem); max-width: 24ch; margin: 0 auto var(--ee-space-3);">
+      Ready to modernize your entertainment business?
+    </h2>
+    <p style="font-size: 1.1rem; max-width: 48ch; margin: 0 auto var(--ee-space-6);">
+      Join forward-thinking operators delivering world-class live event experiences with fewer headaches.
+    </p>
+    <div style="display: flex; justify-content: center;">
+      {% include "entertainment_express/templates/marketing/cta.html" %}
+    </div>
+    <p class="ee-hero-trust" style="margin-top: var(--ee-space-4);">
+      14-day free trial &bull; No credit card required &bull; Free onboarding consultation
+    </p>
   </div>
 </section>
-{% endif %}
 {% endblock %}

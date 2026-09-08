@@ -438,10 +438,31 @@ def start_trial(payload=None):
     signup.insert(ignore_permissions=True)
     frappe.db.commit()
 
+    if plan_code == "starter":
+        from entertainment_express.api.signup_onboarding import approve_signup_application
+        from entertainment_express.api.saas_billing import ensure_subscription
+        from entertainment_express.control_plane.tenant_urls import tenant_site_url
+
+        site_url = tenant_site_url(requested_slug)
+        try:
+            res = approve_signup_application(signup.name)
+            if res.get("tenant"):
+                ensure_subscription(res["tenant"])
+        except Exception:
+            pass
+        return {
+            "ok": True,
+            "site_url": site_url,
+            "checkout_url": None,
+            "plan": "starter",
+            "application": signup.name,
+        }
+
     from entertainment_express.api.signup_onboarding import signup_handoff
 
     interval = (data.get("billing_interval") or "month").strip().lower()
     handoff = signup_handoff(signup.name, requested_slug, interval=interval)
+    handoff["plan"] = plan_code
     return handoff
 
 

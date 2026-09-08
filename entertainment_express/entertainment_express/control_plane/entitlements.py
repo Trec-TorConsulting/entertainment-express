@@ -59,8 +59,21 @@ def has_entitlement(feature_key: str, site_name: str | None = None) -> bool | in
             ents = {}
     if isinstance(ents, dict) and feature_key in ents:
         return _parse(ents.get(feature_key))
-    if feature_key == "ai_assistant" and "ee_ai_assistant" in conf:
-        return _parse(conf.get("ee_ai_assistant"))
+    if f"ee_{feature_key}" in conf:
+        return _parse(conf.get(f"ee_{feature_key}"))
+
+    try:
+        db = getattr(frappe, "db", None)
+        if db and hasattr(db, "exists") and db.exists("DocType", "EE Portal Settings"):
+            raw_flags = db.get_single_value("EE Portal Settings", "feature_flags") or "{}"
+            if raw_flags:
+                import json
+
+                flags = json.loads(raw_flags) if isinstance(raw_flags, str) else raw_flags
+                if isinstance(flags, dict) and feature_key in flags:
+                    return _parse(flags.get(feature_key))
+    except Exception:
+        pass
 
     # Control-plane site looking at its own Tenant row (rare). Tenant sites
     # have an empty Tenant table — do not treat that as "allow all" via a

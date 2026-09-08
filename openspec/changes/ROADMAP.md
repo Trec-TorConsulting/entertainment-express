@@ -342,7 +342,7 @@ company’s current website URL and/or logo with preview + apply.
 
 ---
 
-## Phase 40 — Portal Premium Experience 📝
+## Phase 40 — Portal Premium Experience ✅ archived 2026-09-08
 **Goal:** Elevate `/owner`, `/employee`, and `/client` from functional scaffolds to enterprise-grade,
 sales-ready product surfaces. **North star:** Stripe-minimal. **Stack:** Radix + Tailwind in portal-kit.
 **Dark mode:** v1. **Marketing www:** out of scope (portals first; marketing match later).
@@ -356,7 +356,24 @@ sales-ready product surfaces. **North star:** Stripe-minimal. **Stack:** Radix +
 **Specs:** `portal-premium-experience` (new), `ui-design-system`, `owner-portal`, `employee-portal`,
 `customer-portal`.
 **Depends on:** phases 20–25 (portals + APIs), 21 (tokens), 38–39 (white-label).
-**Folder:** [`phase-40-portal-premium-experience/`](phase-40-portal-premium-experience/)
+**Folder:** [`archive/2026-09-08-phase-40-portal-premium-experience/`](archive/2026-09-08-phase-40-portal-premium-experience/)
+
+## Phase 41 — Marketing Website Refresh ✅ archived 2026-09-08
+**Goal:** Transform the public marketing front door (`www.entx.app`) into an enterprise-grade,
+SEO-optimized acquisition engine matching the portal-kit visual standard. Vertical landing pages, competitor
+comparison pages, feature deep-dives, interactive product showcase, enhanced JSON-LD structured data,
+breadcrumb navigation, 3-tier pricing (Starter free / Pro $99 / Scale $249) with reverse trial, and
+entitlement enforcement.
+
+| Sub-phase | Delivers |
+|-----------|----------|
+| **41a** | Portal-kit token mirror, base template visual upgrade (sticky glass nav, footer, breadcrumbs, dark mode) |
+| **41b** | Homepage redesign + interactive showcase, 6 vertical pages, 5 competitor pages, 6 feature pages, pricing overhaul with FAQ, SEO engine (JSON-LD, sitemap) |
+| **41c** | Free Starter plan, reverse trial auto-downgrade, entitlement enforcement (booking limit, staff limit, EE badge), smoke tests |
+
+**Specs:** `marketing-website`, `saas-control-plane`.
+**Depends on:** phase-40 (portal-kit tokens), phase-36 (competitor migration presets), phase-37 (differentiators).
+**Folder:** [`archive/2026-09-08-phase-41-marketing-website-refresh/`](archive/2026-09-08-phase-41-marketing-website-refresh/)
 
 ---
 

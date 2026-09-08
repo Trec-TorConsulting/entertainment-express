@@ -49,6 +49,23 @@ def update_website_context(context):
     context["hide_footer"] = 1
     context["disable_signup"] = 1
 
+    try:
+        from entertainment_express.control_plane.entitlements import has_entitlement
+
+        val = has_entitlement("show_ee_badge")
+        context["show_ee_badge"] = 1 if val in (True, 1, "1") else 0
+    except Exception:
+        context["show_ee_badge"] = 0
+
+    try:
+        import frappe
+        from entertainment_express.marketing.site_context import get_marketing_settings
+
+        base_domain = (get_marketing_settings().get("base_domain") or getattr(frappe.conf, "ee_base_domain", None) or "entx.app").strip()
+        context["base_domain"] = base_domain
+    except Exception:
+        context["base_domain"] = "entx.app"
+
     extra = context.get("head_html") or ""
     styles = '<link rel="stylesheet" href="/assets/entertainment_express/css/ee-white-label.css">'
     try:

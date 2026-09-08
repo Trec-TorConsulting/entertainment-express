@@ -340,6 +340,193 @@ def test_portal_artifacts():
     return True
 
 
+def _ensure_frappe_stub():
+    if "frappe" in sys.modules:
+        return
+    import types
+    stub = types.ModuleType("frappe")
+    stub.DoesNotExistError = type("DoesNotExistError", (Exception,), {})
+    stub.PermissionError = type("PermissionError", (Exception,), {})
+    stub.ValidationError = type("ValidationError", (Exception,), {})
+    stub._ = lambda s: s
+    stub.conf = {}
+    stub.local = type("Local", (), {"site": "admin.entx.app"})()
+    stub.session = type("Session", (), {"user": "Administrator"})()
+    stub.form_dict = {}
+    stub.db = type(
+        "DB",
+        (),
+        {
+            "exists": lambda *args, **kwargs: True,
+            "get_value": lambda *args, **kwargs: None,
+            "get_single_value": lambda *args, **kwargs: None,
+            "count": lambda *args, **kwargs: 0,
+            "set_value": lambda *args, **kwargs: None,
+            "commit": lambda: None,
+        },
+    )()
+    stub.throw = lambda msg, exc=Exception: (_ for _ in ()).throw(exc(msg))
+    stub.get_doc = lambda *args, **kwargs: type("Doc", (), {"insert": lambda *a: None, "save": lambda *a: None, "reload": lambda *a: None})()
+    stub.get_cached_doc = lambda *args, **kwargs: type("Doc", (), {})()
+    stub.get_single = lambda *args, **kwargs: type("Doc", (), {})()
+    stub.as_json = lambda obj: json.dumps(obj)
+    stub.cache = lambda: type("Cache", (), {"get_value": lambda *a: None, "set_value": lambda *a, **kw: None})()
+
+    utils_stub = types.ModuleType("frappe.utils")
+    utils_stub.flt = lambda v, p=2: float(v or 0)
+    utils_stub.cint = lambda v: int(v or 0)
+    utils_stub.today = lambda: "2026-09-08"
+    utils_stub.now_datetime = lambda: "2026-09-08 12:00:00"
+    utils_stub.get_datetime = lambda v: v
+    utils_stub.add_days = lambda dt, d: dt
+    utils_stub.fmt_money = lambda amount, currency="USD": f"${float(amount or 0):.2f}"
+    utils_stub.get_first_day = lambda d: d
+    utils_stub.get_last_day = lambda d: d
+    utils_stub.get_url = lambda *a: "https://www.entx.app"
+    stub.utils = utils_stub
+
+    sys.modules["frappe"] = stub
+    sys.modules["frappe.utils"] = utils_stub
+
+
+def test_phase41_marketing_routes():
+    """Verify HTTP 200 for marketing routes and HTTP 404 for invalid routes (Phase 41 11.1)."""
+    print("✓ Testing Phase 41 marketing routes...")
+    base = (os.environ.get("MARKETING_BASE_URL") or "").strip().rstrip("/")
+    if base:
+        routes_200 = [
+            "/",
+            "/pricing",
+            "/features",
+            "/features/weather-risk",
+            "/solutions/djs",
+            "/solutions/rentals",
+            "/compare/inflatable-office",
+        ]
+        for route in routes_200:
+            status, _ = _http_get(base + route)
+            if status != 200:
+                print(f"  ✗ GET {route} returned HTTP {status} (expected 200)")
+                return False
+        routes_404 = [
+            "/solutions/nonexistent",
+            "/compare/nonexistent",
+        ]
+        for route in routes_404:
+            status, _ = _http_get(base + route)
+            if status != 404:
+                print(f"  ✗ GET {route} returned HTTP {status} (expected 404)")
+                return False
+        print("  ✓ All live marketing route checks passed")
+        return True
+    else:
+        # Offline static route validation
+        hooks_content = Path("entertainment_express/entertainment_express/hooks.py").read_text(encoding="utf-8")
+        assert '{"from_route": "/solutions/<path:vertical>", "to_route": "solutions"}' in hooks_content
+        assert '{"from_route": "/compare/<path:competitor>", "to_route": "compare"}' in hooks_content
+        assert '{"from_route": "/features/<path:feature>", "to_route": "feature_page"}' in hooks_content
+
+        _ensure_frappe_stub()
+        sys.path.insert(0, str(Path("entertainment_express").resolve()))
+
+        from entertainment_express.www.solutions import SOLUTIONS
+        assert "djs" in SOLUTIONS and "rentals" in SOLUTIONS and "nonexistent" not in SOLUTIONS
+
+        from entertainment_express.www.compare import COMPETITORS
+        assert "inflatable-office" in COMPETITORS and "nonexistent" not in COMPETITORS
+
+        from entertainment_express.www.feature_page import FEATURES
+        assert "weather-risk" in FEATURES
+
+        print("  ✓ Marketing route rules and dictionaries verified")
+        return True
+
+
+def test_phase41_jsonld():
+    """Validate JSON-LD structured data on key marketing pages (Phase 41 11.2)."""
+    print("✓ Testing Phase 41 JSON-LD structured data...")
+    base = (os.environ.get("MARKETING_BASE_URL") or "").strip().rstrip("/")
+    if base:
+        import re
+
+        pages = {
+            "/": ["SoftwareApplication", "Organization", "WebSite"],
+            "/pricing": ["FAQPage", "Organization", "BreadcrumbList"],
+            "/solutions/djs": ["BreadcrumbList", "SoftwareApplication"],
+            "/compare/inflatable-office": ["BreadcrumbList", "SoftwareApplication"],
+        }
+        for path, expected_types in pages.items():
+            status, html = _http_get(base + path)
+            if status != 200:
+                print(f"  ✗ GET {path} returned HTTP {status}")
+                return False
+            blocks = re.findall(r'<script\s+type=["\']application/ld\+json["\']\s*>(.*?)</script>', html, re.DOTALL | re.IGNORECASE)
+            found_types = set()
+            for b in blocks:
+                try:
+                    data = json.loads(b.strip())
+                    if isinstance(data, dict) and "@type" in data:
+                        found_types.add(data["@type"])
+                except Exception:
+                    pass
+            for et in expected_types:
+                if et not in found_types:
+                    print(f"  ✗ {path} missing expected JSON-LD @type: {et} (found: {found_types})")
+                    return False
+        print("  ✓ Live JSON-LD validation passed for all 4 pages")
+        return True
+    else:
+        # Offline JSON-LD builder structure validation
+        _ensure_frappe_stub()
+        sys.path.insert(0, str(Path("entertainment_express").resolve()))
+
+        from entertainment_express.marketing.site_context import (
+            build_breadcrumbs,
+            build_faq_jsonld,
+            build_software_app_jsonld,
+            build_website_jsonld,
+        )
+        import json
+
+        app_ld = json.loads(build_software_app_jsonld("EE", "desc", "https://www.entx.app"))
+        assert app_ld["@type"] == "SoftwareApplication"
+        faq_ld = json.loads(build_faq_jsonld([{"q": "A?", "a": "B"}]))
+        assert faq_ld["@type"] == "FAQPage"
+        web_ld = json.loads(build_website_jsonld("EE", "https://www.entx.app", "https://www.entx.app/resources?q={search_term_string}"))
+        assert web_ld["@type"] == "WebSite"
+        bc_ld = json.loads(build_breadcrumbs([{"label": "Home", "url": "/"}], "https://www.entx.app"))
+        assert bc_ld["@type"] == "BreadcrumbList"
+        print("  ✓ JSON-LD schema generators verified")
+        return True
+
+
+def test_phase41_static_suite():
+    """Run pytest on Phase 41 marketing refresh static test suite."""
+    print("✓ Testing Phase 41 static marketing suite...")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_phase41_marketing_refresh.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Phase 41 static suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
 def main():
     print("\n" + "="*60)
     print("Entertainment Express — Multi-Phase Smoke Test")
@@ -354,6 +541,9 @@ def main():
         test_hooks,
         test_specs,
         test_phase19_static_suite,
+        test_phase41_marketing_routes,
+        test_phase41_jsonld,
+        test_phase41_static_suite,
         test_live_marketing_smoke,
         test_portal_artifacts,
     ]

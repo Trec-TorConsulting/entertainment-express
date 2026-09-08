@@ -49,6 +49,27 @@ cd ../..
 python3 smoke_test.py
 ```
 
+### Marketing Token Sync (Phase 41)
+
+The public marketing website uses server-rendered Jinja templates and vanilla CSS. Rather than taking a runtime dependency on `@portal-kit` or introducing a Node build step to marketing, marketing visual tokens mirror portal-kit tokens via `entertainment_express/public/marketing/marketing-tokens.css`.
+
+1. **Token Mirroring (`marketing-tokens.css` mirrors `tokens.css`)**:
+   `entertainment_express/public/marketing/marketing-tokens.css` extracts and mirrors all `--ee-*` CSS custom properties from `frontend/portal-kit/src/tokens.css` (base palette, dark mode overrides, typography scales, spacing, radii, motion, and elevations). `marketing.css` imports this token sheet on its first line.
+
+2. **Re-Extraction Workflow**:
+   Whenever `frontend/portal-kit/src/tokens.css` is updated:
+   - Re-extract the new `--ee-*` custom properties into `entertainment_express/public/marketing/marketing-tokens.css` for both `:root` and `@media (prefers-color-scheme: dark) { :root { ... } }` / `[data-theme="dark"]`.
+   - Ensure `grep -c '#[0-9a-fA-F]' entertainment_express/entertainment_express/public/marketing/marketing.css` continues to return `0` (no hard-coded hex colors in `marketing.css`).
+
+3. **Screenshot Recapture Checklist**:
+   When portal UI designs or layout tokens significantly change, update the marketing homepage interactive showcase assets in `entertainment_express/public/marketing/img/showcase/`:
+   - [ ] Recapture `owner-today.png` (desktop: 1280x800, mobile: 640x400)
+   - [ ] Recapture `dispatch-board.png` (desktop: 1280x800, mobile: 640x400)
+   - [ ] Recapture `client-portal.png` (desktop: 1280x800, mobile: 640x400)
+   - [ ] Recapture `crew-mobile.png` (desktop: 1280x800, mobile: 640x400)
+   - [ ] Optimize images (under 200KB each) and verify responsiveness.
+
+
 ### Customer Portal
 
 ```bash

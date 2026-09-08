@@ -1,0 +1,108 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<!-- 1. Hero Section -->
+<section class="ee-hero ee-shell">
+  <div class="eyebrow">{{ feature.icon }} {{ feature.name }}</div>
+  <h1 class="ee-hero-headline">{{ feature.headline }}</h1>
+  <p class="ee-hero-sub">{{ feature.meta_description }}</p>
+
+  <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+    <a class="ee-btn ee-btn-primary" href="/start-trial?feature={{ slug }}">Start free 14-day trial</a>
+    <a class="ee-btn ee-btn-secondary" href="/demo">Schedule a live demo</a>
+  </div>
+  <p class="ee-hero-trust">✓ Included in Pro &amp; Scale plans &bull; No credit card required &bull; 14-day free trial</p>
+</section>
+
+<!-- 2. Problem Section -->
+<section class="ee-shell ee-section-spaced">
+  <div class="ee-panel">
+    <div class="eyebrow" style="color: var(--ee-danger-text); background: var(--ee-danger-soft); border-color: var(--ee-danger-border);">
+      The Challenge
+    </div>
+    <h2>The operational bottleneck this solves</h2>
+    <p style="font-size: 1.125rem; line-height: 1.7; color: var(--ee-text); max-width: 65ch;">
+      {{ feature.problem }}
+    </p>
+  </div>
+</section>
+
+<!-- 3. Solution Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel" style="background: linear-gradient(180deg, var(--ee-panel) 0%, var(--ee-surface-inset) 100%);">
+    <div class="eyebrow">The Solution</div>
+    <h2>How Entertainment Express Solves It</h2>
+    <p style="font-size: 1.125rem; line-height: 1.7; color: var(--ee-text-secondary); max-width: 65ch; margin-bottom: var(--ee-space-8);">
+      {{ feature.solution }}
+    </p>
+
+    <!-- Visual / Illustration Box -->
+    <div style="border: 1px solid var(--ee-border); border-radius: var(--ee-radius-xl); background: var(--ee-panel); padding: var(--ee-space-8); box-shadow: var(--ee-shadow-md); display: flex; align-items: center; justify-content: center; min-height: 240px; text-align: center;">
+      <div>
+        <div style="font-size: 4rem; margin-bottom: var(--ee-space-2);">{{ feature.icon }}</div>
+        <h3 style="margin-bottom: var(--ee-space-2);">{{ feature.name }} in action</h3>
+        <p style="color: var(--ee-muted); max-width: 48ch; margin: 0 auto;">
+          Automated event monitoring and real-time execution built into your daily operations workflow.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Key Highlights Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel">
+    <div class="eyebrow">Key Capabilities</div>
+    <h2>Feature Highlights</h2>
+    <p>Everything you need to eliminate manual busywork and protect your bottom line.</p>
+
+    <ul class="ee-checklist" style="list-style: none; padding: 0; margin-top: var(--ee-space-6); display: grid; gap: var(--ee-space-4); grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+      {% for highlight in feature.highlights %}
+      <li style="display: flex; align-items: flex-start; gap: var(--ee-space-3); font-size: var(--ee-font-size-body);">
+        <span class="ee-check" style="font-size: 1.25rem; line-height: 1.2;">✓</span>
+        <span style="font-weight: 500; color: var(--ee-text);">{{ highlight }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<!-- 5. Other Features Hub Link -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-panel">
+    <h3>Explore other core features</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: var(--ee-space-2); margin-top: var(--ee-space-3);">
+      {% for key in feature_keys %}
+        {% if key != slug %}
+        <a class="ee-btn ee-btn-secondary" href="/features/{{ key }}" style="font-size: var(--ee-font-size-label);">
+          {{ all_features[key].icon }} {{ all_features[key].name }}
+        </a>
+        {% endif %}
+      {% endfor %}
+      <a class="ee-btn ee-btn-primary" href="/features" style="font-size: var(--ee-font-size-label);">
+        View All Features &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Final CTA Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12); margin-bottom: var(--ee-space-8);">
+  <div class="ee-panel" style="text-align: center; padding: var(--ee-space-12) var(--ee-space-6); background: linear-gradient(135deg, var(--ee-panel) 0%, var(--ee-surface-inset) 100%);">
+    <div class="eyebrow">Ready to upgrade?</div>
+    <h2 style="font-size: clamp(2rem, 3vw, 2.5rem); margin-bottom: var(--ee-space-3);">
+      Experience {{ feature.name }} in your business
+    </h2>
+    <p style="font-size: 1.1rem; max-width: 48ch; margin: 0 auto var(--ee-space-6);">
+      Start your free 14-day trial today and see how our modern event operations platform saves hours every week.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+      <a class="ee-btn ee-btn-primary" href="/start-trial?feature={{ slug }}">Start free 14-day trial</a>
+      <a class="ee-btn ee-btn-secondary" href="/pricing">View plan pricing</a>
+    </div>
+    <p class="ee-hero-trust" style="margin-top: var(--ee-space-4);">
+      No credit card required &bull; Reverse trial automatically drops to Free Starter plan &bull; Zero risk
+    </p>
+  </div>
+</section>
+{% endblock %}

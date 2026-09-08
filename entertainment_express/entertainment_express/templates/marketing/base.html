@@ -6,19 +6,23 @@
 {{ super() }}
 {% include "entertainment_express/templates/marketing/seo_head.html" %}
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#2f1d4f">
-<link rel="preload" href="/assets/entertainment_express/marketing/marketing.css?v=0.0.10" as="style">
-<link rel="stylesheet" href="/assets/entertainment_express/marketing/marketing.css?v=0.0.10">
+<meta name="theme-color" content="#6d28d9">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/entertainment_express/marketing/marketing.css?v=41.0" as="style">
+<link rel="stylesheet" href="/assets/entertainment_express/marketing/marketing.css?v=41.0">
 {% endblock %}
 
 {% block page_content %}
 <a class="ee-skip-link" href="#ee-main">Skip to content</a>
 {% include "entertainment_express/templates/marketing/header.html" %}
 <main class="ee-main" id="ee-main" role="main">
+  {% include "entertainment_express/templates/marketing/breadcrumb.html" %}
   {% block marketing_content %}{% endblock %}
 </main>
 {% include "entertainment_express/templates/marketing/footer.html" %}
 {% include "entertainment_express/templates/marketing/consent_banner.html" %}
 {% include "entertainment_express/templates/marketing/analytics.html" %}
-<script defer src="/assets/entertainment_express/marketing/marketing.js?v=0.0.10"></script>
+<script defer src="/assets/entertainment_express/marketing/marketing.js?v=41.0"></script>
 {% endblock %}

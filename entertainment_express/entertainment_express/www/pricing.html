@@ -1,39 +1,209 @@
 {% extends "entertainment_express/templates/marketing/base.html" %}
 
 {% block marketing_content %}
-<section class="ee-shell ee-panel">
-  <h1>Pricing</h1>
-  <p>Choose a plan and start a free trial. Prices sync from control-plane plan records.</p>
+<!-- 1. Hero Section -->
+<section class="ee-hero ee-shell">
+  <div class="eyebrow">Transparent Pricing</div>
+  <h1 class="ee-hero-headline">Plans That Scale With Your Event Volume</h1>
+  <p class="ee-hero-sub">
+    Start completely free on our Starter plan, or test-drive Pro features with a 14-day reverse trial. No credit card required.
+  </p>
   {% if pricing_error %}
-  <p>{{ pricing_error }}</p>
+  <div class="ee-alert ee-alert-warn" role="alert" style="margin:1rem auto;max-width:600px;text-align:center;">{{ pricing_error }}</div>
   {% endif %}
-  <div class="ee-cta-group ee-pricing-toggle">
-    <button type="button" class="ee-btn ee-btn-secondary" data-billing-toggle="monthly">Monthly</button>
-    <button type="button" class="ee-btn ee-btn-secondary" data-billing-toggle="annual">Annual</button>
+
+  <!-- Monthly / Annual Pill Toggle -->
+  <div class="ee-pricing-toggle-wrap">
+    <div class="ee-pricing-pill" role="group" aria-label="Billing frequency toggle">
+      <button type="button" class="ee-pricing-pill-btn is-active" data-billing-toggle="monthly">
+        Monthly Billing
+      </button>
+      <button type="button" class="ee-pricing-pill-btn" data-billing-toggle="annual">
+        Annual (Save 20%) 🎁
+      </button>
+    </div>
   </div>
+</section>
+
+<!-- 2. 3-Tier Plan Cards -->
+<section class="ee-shell">
+  {% if pricing_error %}
+  <p style="color: var(--ee-danger); text-align: center; margin-bottom: var(--ee-space-4);">{{ pricing_error }}</p>
+  {% endif %}
 
   <div class="ee-pricing-grid">
     {% for plan in plans %}
-    <article class="ee-panel ee-plan-panel">
-      <h2>{{ plan.name }}</h2>
-      <p>
-        <strong data-price-monthly="${{ '%.2f'|format(plan.price_monthly) }}/mo" data-price-annual="${{ '%.2f'|format(plan.price_annual) }}/yr">
-          ${{ '%.2f'|format(plan.price_monthly) }}/mo
-        </strong>
-      </p>
-      {% if plan.trial_days %}
-      <p>{{ plan.trial_days }} day free trial</p>
+    {% set pcode = plan.code or plan.name.lower() %}
+    <article class="ee-plan-card {% if pcode == 'pro' or plan.is_popular %}is-pro{% elif pcode == 'scale' %}is-scale{% endif %}">
+      {% if pcode == 'pro' or plan.is_popular %}
+      <div class="ee-plan-badge">Most Popular</div>
       {% endif %}
-      <ul>
-        {% for feature in plan.features %}
-        <li>{{ feature.feature_key }}: {{ feature.limit_value or 'included' }}</li>
-        {% endfor %}
+
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <h3>{{ plan.name }}</h3>
+        {% if plan.trial_days and plan.trial_days > 0 %}
+        <span class="ee-chip" style="font-size: 0.7rem; margin-bottom: 0;">{{ plan.trial_days }}-Day Trial</span>
+        {% else %}
+        <span class="ee-chip" style="font-size: 0.7rem; margin-bottom: 0; color: var(--ee-success-text); background: var(--ee-success-soft); border-color: var(--ee-success-border);">Free Forever</span>
+        {% endif %}
+      </div>
+
+      <p style="font-size: var(--ee-font-size-label); min-height: 2.5rem; margin-top: var(--ee-space-2);">
+        {{ plan.summary or "All the core event management tools you need." }}
+      </p>
+
+      <div class="ee-plan-price">
+        <span data-price-monthly="${{ plan.price_monthly|int }}" data-price-annual="${{ (plan.price_annual or plan.price_monthly)|int }}">
+          ${{ plan.price_monthly|int }}
+        </span>
+        <span class="ee-plan-period" data-period-text>/ mo</span>
+      </div>
+
+      <div style="margin-top: var(--ee-space-2); margin-bottom: var(--ee-space-6);">
+        {% if pcode == 'starter' %}
+        <a class="ee-btn ee-btn-secondary" href="{{ plan.cta_target or '/start-trial?plan=starter' }}" style="width: 100%;">
+          Start Free
+        </a>
+        {% elif pcode == 'pro' or plan.is_popular %}
+        <a class="ee-btn ee-btn-primary" href="{{ plan.cta_target or '/start-trial?plan=pro' }}" style="width: 100%;">
+          Start Free 14-Day Trial
+        </a>
+        {% else %}
+        <a class="ee-btn ee-btn-primary" href="{{ plan.cta_target or '/start-trial?plan=scale' }}" style="width: 100%;">
+          Start Free 14-Day Trial
+        </a>
+        {% endif %}
+      </div>
+
+      <ul class="ee-plan-features">
+        {% if plan.highlights %}
+          {% for hl in plan.highlights %}
+          <li><span class="ee-check">✓</span> {{ hl }}</li>
+          {% endfor %}
+        {% elif plan.features %}
+          {% for f in plan.features %}
+          <li><span class="ee-check">✓</span> {{ f.feature_key.replace('_', ' ').capitalize() }}: {{ f.limit_value or 'Included' }}</li>
+          {% endfor %}
+        {% endif %}
       </ul>
-      <a class="ee-btn ee-btn-primary" href="{{ plan.cta_target }}">Start free trial</a>
     </article>
-    {% else %}
-    <p>No active plans are currently published.</p>
     {% endfor %}
+  </div>
+</section>
+
+<!-- 3. Feature Comparison Matrix Table -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-16);">
+  <div class="ee-panel">
+    <div class="eyebrow">Detailed Entitlements</div>
+    <h2>Compare plan features &amp; limits</h2>
+    <p>Everything clearly defined so you know exactly what is included in each tier.</p>
+
+    <div class="ee-compare-table-wrapper">
+      <table class="ee-compare-table">
+        <thead>
+          <tr>
+            <th style="width: 40%;">Feature</th>
+            <th style="width: 20%;">Starter ($0)</th>
+            <th style="width: 20%; color: var(--ee-brand-text);">Pro ($99)</th>
+            <th style="width: 20%;">Scale ($249)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in feature_matrix %}
+          <tr style="background: var(--ee-surface-inset);">
+            <td colspan="4" style="font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; color: var(--ee-muted);">
+              {{ group.category }}
+            </td>
+          </tr>
+          {% for f in group.features %}
+          <tr>
+            <td style="font-weight: 500;">{{ f.label }}</td>
+            <td>
+              {% if f.starter == "Yes" %}<span class="ee-check">✓</span>
+              {% elif f.starter == "No" %}<span class="ee-cross">✗</span>
+              {% else %}{{ f.starter }}{% endif %}
+            </td>
+            <td style="color: var(--ee-brand-text); font-weight: 600;">
+              {% if f.pro == "Yes" %}<span class="ee-check">✓</span>
+              {% elif f.pro == "No" %}<span class="ee-cross">✗</span>
+              {% else %}{{ f.pro }}{% endif %}
+            </td>
+            <td>
+              {% if f.scale == "Yes" %}<span class="ee-check">✓</span>
+              {% elif f.scale == "No" %}<span class="ee-cross">✗</span>
+              {% else %}{{ f.scale }}{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Trust Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-12);">
+  <div class="ee-grid-3">
+    <div class="ee-panel" style="text-align: center;">
+      <div style="font-size: 2.25rem; margin-bottom: var(--ee-space-2);">💳</div>
+      <h3>No Credit Card for Trial</h3>
+      <p style="margin: 0; font-size: var(--ee-font-size-body);">
+        Sign up and test full Pro features for 14 days without risking unexpected auto-renew charges.
+      </p>
+    </div>
+    <div class="ee-panel" style="text-align: center;">
+      <div style="font-size: 2.25rem; margin-bottom: var(--ee-space-2);">↩️</div>
+      <h3>Reverse-Trial Protection</h3>
+      <p style="margin: 0; font-size: var(--ee-font-size-body);">
+        If your trial ends without upgrading, you drop to Free Starter. Your account is never suspended.
+      </p>
+    </div>
+    <div class="ee-panel" style="text-align: center;">
+      <div style="font-size: 2.25rem; margin-bottom: var(--ee-space-2);">📂</div>
+      <h3>Your Data is Yours</h3>
+      <p style="margin: 0; font-size: var(--ee-font-size-body);">
+        Export customer contacts, upcoming bookings, and financials to CSV anytime with zero lock-in.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. FAQ Accordion Section -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-16);">
+  <div class="ee-faq-section">
+    <div style="text-align: center; margin-bottom: var(--ee-space-8);">
+      <div class="eyebrow">Answers</div>
+      <h2>Frequently Asked Questions</h2>
+      <p>Have questions about plans, billing, or trials? Here are the facts.</p>
+    </div>
+
+    {% for item in faq_items %}
+    <div class="ee-faq-item">
+      <details>
+        <summary>{{ item.question }}</summary>
+        <div class="ee-faq-answer">
+          {{ item.answer }}
+        </div>
+      </details>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- 6. Bottom CTA -->
+<section class="ee-shell ee-section-spaced" style="margin-top: var(--ee-space-16); margin-bottom: var(--ee-space-8);">
+  <div class="ee-panel" style="text-align: center; padding: var(--ee-space-12) var(--ee-space-6); background: linear-gradient(135deg, var(--ee-panel) 0%, var(--ee-surface-inset) 100%);">
+    <h2 style="font-size: clamp(2rem, 3vw, 2.5rem); margin-bottom: var(--ee-space-3);">
+      Ready to start organizing your events?
+    </h2>
+    <p style="font-size: 1.1rem; max-width: 48ch; margin: 0 auto var(--ee-space-6);">
+      Create your account in under 2 minutes. Choose Starter for free or test-drive Pro.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--ee-space-3);">
+      <a class="ee-btn ee-btn-primary" href="/start-trial?plan=pro">Start free 14-day Pro trial</a>
+      <a class="ee-btn ee-btn-secondary" href="/start-trial?plan=starter">Get started free</a>
+    </div>
   </div>
 </section>
 {% endblock %}
