@@ -402,6 +402,7 @@ def test_phase41_marketing_routes():
             "/solutions/djs",
             "/solutions/rentals",
             "/compare/inflatable-office",
+            "/blog",
         ]
         for route in routes_200:
             status, _ = _http_get(base + route)
@@ -425,9 +426,13 @@ def test_phase41_marketing_routes():
         assert '{"from_route": "/solutions/<path:vertical>", "to_route": "solutions"}' in hooks_content
         assert '{"from_route": "/compare/<path:competitor>", "to_route": "compare"}' in hooks_content
         assert '{"from_route": "/features/<path:feature>", "to_route": "feature_page"}' in hooks_content
+        assert '{"from_route": "/blog", "to_route": "blog"}' in hooks_content
 
         _ensure_frappe_stub()
         sys.path.insert(0, str(Path("entertainment_express").resolve()))
+
+        from entertainment_express.www.blog import CURATED_PLAYBOOKS
+        assert len(CURATED_PLAYBOOKS) >= 5
 
         from entertainment_express.www.solutions import SOLUTIONS
         assert "djs" in SOLUTIONS and "rentals" in SOLUTIONS and "nonexistent" not in SOLUTIONS

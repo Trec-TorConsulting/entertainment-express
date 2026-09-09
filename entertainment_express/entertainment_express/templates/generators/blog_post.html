@@ -1,0 +1,54 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+<article class="ee-shell ee-article-view">
+  <a class="ee-article-back" href="/blog">
+    <span aria-hidden="true">&larr;</span> Back to Resource Center
+  </a>
+
+  <header class="ee-article-header">
+    <div style="display: flex; align-items: center; gap: var(--ee-space-3); flex-wrap: wrap; margin-bottom: var(--ee-space-3);">
+      {% if blog_category %}
+      <span class="ee-blog-badge">{{ blog_category }}</span>
+      {% endif %}
+      {% if read_time %}
+      <span class="ee-blog-time">{{ read_time }}</span>
+      <span class="ee-blog-time">&bull;</span>
+      {% endif %}
+      <span class="ee-blog-time">{{ frappe.utils.format_date(published_on, "medium") if published_on else "" }}</span>
+    </div>
+
+    <h1>{{ title }}</h1>
+    {% if blog_intro %}
+    <p class="ee-article-subhead">{{ blog_intro }}</p>
+    {% endif %}
+
+    <div class="ee-blog-author-block" style="border-top: none; padding-top: var(--ee-space-2);">
+      <div class="ee-blog-avatar">{{ (blogger or "EE")[:2].upper() }}</div>
+      <div class="ee-blog-author-info">
+        <span class="ee-blog-author-name">{{ blogger_info.full_name if blogger_info else (blogger or "Entertainment Express Team") }}</span>
+        <span class="ee-blog-date">{{ blogger_info.bio if blogger_info and blogger_info.bio else "Industry Contributor" }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="ee-article-content">
+    {{ content | safe }}
+  </div>
+
+  <!-- In-Article CTA Banner -->
+  <div class="ee-article-footer-cta">
+    <div class="eyebrow">The Operating System for Event Businesses</div>
+    <h3 style="font-size: 1.75rem; margin: var(--ee-space-2) 0 var(--ee-space-3);">
+      Ready to put these playbooks on autopilot?
+    </h3>
+    <p style="max-width: 52ch; margin: 0 auto var(--ee-space-6); color: var(--ee-text-secondary);">
+      See how Entertainment Express combines weather holds, multi-vehicle dispatch, automated DJ music portals, and mobile contracts into one platform.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--ee-space-3); flex-wrap: wrap;">
+      <a class="ee-btn ee-btn-primary" href="/start-trial">Start 14-day free trial</a>
+      <a class="ee-btn ee-btn-secondary" href="/demo">Request a live walkthrough</a>
+    </div>
+  </div>
+</article>
+{% endblock %}
