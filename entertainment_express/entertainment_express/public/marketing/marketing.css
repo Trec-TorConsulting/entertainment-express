@@ -21,6 +21,13 @@ footer.web-footer,
   border: none !important;
 }
 
+html,
+body {
+  display: block !important;
+  min-height: 100% !important;
+  height: auto !important;
+}
+
 body {
   margin: 0;
   font-family: var(--ee-font-body);
@@ -317,12 +324,16 @@ select:focus-visible {
 
 /* Main Content Area */
 .ee-main {
-  display: block;
-  position: relative;
-  width: 100%;
-  clear: both;
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  clear: both !important;
+  float: none !important;
+  flex: 1 0 auto !important;
+  flex-shrink: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
   padding: var(--ee-space-6) 0 var(--ee-space-12);
-  min-height: 60vh;
 }
 
 /* Buttons & CTAs */
@@ -2736,6 +2747,7 @@ select:focus-visible {
   clear: both !important;
   float: none !important;
   width: 100% !important;
+  flex-shrink: 0 !important;
   border-top: 1px solid var(--ee-border);
   margin-top: var(--ee-space-16);
   background: var(--ee-rail) !important;
