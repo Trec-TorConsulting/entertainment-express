@@ -319,15 +319,10 @@ select:focus-visible {
 .ee-main {
   display: block;
   position: relative;
-  z-index: 2;
   width: 100%;
   clear: both;
   padding: var(--ee-space-6) 0 var(--ee-space-12);
   min-height: 60vh;
-}
-
-.ee-main > * {
-  animation: ee-fade-up var(--ee-motion-slow) var(--ee-ease-out) both;
 }
 
 /* Buttons & CTAs */
@@ -2736,14 +2731,14 @@ select:focus-visible {
 
 /* Multi-Column Footer */
 .ee-footer {
-  display: block;
-  position: relative;
-  z-index: 1;
-  clear: both;
-  width: 100%;
+  display: block !important;
+  position: relative !important;
+  clear: both !important;
+  float: none !important;
+  width: 100% !important;
   border-top: 1px solid var(--ee-border);
   margin-top: var(--ee-space-16);
-  background: var(--ee-rail);
+  background: var(--ee-rail) !important;
   color: var(--ee-rail-muted);
   padding: var(--ee-space-12) 0 var(--ee-space-8);
 }
