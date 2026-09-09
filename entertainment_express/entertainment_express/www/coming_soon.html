@@ -3,49 +3,49 @@
 {% block marketing_content %}
 <div class="ee-coming-soon-wrapper">
   <!-- Hero Section -->
-  <section class="ee-hero ee-shell" style="text-align: center; max-width: 860px; margin: 0 auto; padding-top: var(--ee-space-12); padding-bottom: var(--ee-space-8);">
-    <div class="ee-badge-pill" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 1rem; border-radius: 9999px; background: rgba(109, 40, 217, 0.1); border: 1px solid rgba(109, 40, 217, 0.25); color: var(--ee-primary, #6d28d9); font-weight: 600; font-size: 0.85rem; margin-bottom: var(--ee-space-4); letter-spacing: 0.04em; text-transform: uppercase;">
-      <span class="ee-pulse-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+  <section class="ee-hero ee-shell ee-coming-soon-hero">
+    <div class="ee-badge-pill ee-coming-soon-badge">
+      <span class="ee-pulse-dot"></span>
       Launching Soon • Private Beta
     </div>
 
-    <h1 class="ee-hero-headline" style="font-size: clamp(2.25rem, 5vw, 3.75rem); line-height: 1.15; margin-bottom: var(--ee-space-4); font-weight: 800; letter-spacing: -0.03em;">
+    <h1 class="ee-hero-headline ee-coming-soon-headline">
       {{ coming_soon_headline }}
     </h1>
 
-    <p class="ee-hero-sub" style="font-size: clamp(1.05rem, 2vw, 1.25rem); color: var(--ee-text-muted, #475569); line-height: 1.6; max-width: 680px; margin: 0 auto var(--ee-space-6);">
+    <p class="ee-hero-sub ee-coming-soon-subhead">
       {{ coming_soon_subhead }}
     </p>
 
     <!-- Early Access Waitlist Form Card -->
-    <div class="ee-waitlist-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05); padding: clamp(1.5rem, 4vw, 2.5rem); margin: 1.5rem auto 2.5rem; text-align: left;">
-      <div style="text-align: center; margin-bottom: 1.75rem;">
-        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Join the VIP Waitlist</h2>
-        <p style="font-size: 0.95rem; color: #475569; margin: 0; line-height: 1.5;">Be first in line when we open doors. Early beta members receive 3 months of complimentary concierge onboarding.</p>
+    <div class="ee-waitlist-card">
+      <div class="ee-waitlist-header">
+        <h2>Join the VIP Waitlist</h2>
+        <p>Be first in line when we open doors. Early beta members receive 3 months of complimentary concierge onboarding.</p>
       </div>
 
-      <form id="ee-waitlist-form" class="ee-form" data-lead-type="waitlist" style="display: flex; flex-direction: column; gap: 1.25rem;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+      <form id="ee-waitlist-form" class="ee-form ee-waitlist-form" data-lead-type="waitlist">
+        <div class="ee-waitlist-form-row">
           <div class="ee-form-group">
-            <label for="waitlist-name" style="display: block; font-size: 0.875rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">Your Name <span style="color: #ef4444;">*</span></label>
-            <input type="text" id="waitlist-name" name="full_name" required placeholder="Alex Mercer" class="ee-input ee-form-control" style="width: 100%; height: 2.875rem; padding: 0 1rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.95rem; color: #0f172a; background-color: #ffffff; box-sizing: border-box;">
+            <label for="waitlist-name" class="ee-waitlist-label">Your Name <span class="ee-required-star">*</span></label>
+            <input type="text" id="waitlist-name" name="full_name" required placeholder="Alex Mercer" class="ee-input ee-form-control ee-waitlist-input">
           </div>
           <div class="ee-form-group">
-            <label for="waitlist-company" style="display: block; font-size: 0.875rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">Company Name <span style="color: #ef4444;">*</span></label>
-            <input type="text" id="waitlist-company" name="company" required placeholder="Premier Entertainment" class="ee-input ee-form-control" style="width: 100%; height: 2.875rem; padding: 0 1rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.95rem; color: #0f172a; background-color: #ffffff; box-sizing: border-box;">
+            <label for="waitlist-company" class="ee-waitlist-label">Company Name <span class="ee-required-star">*</span></label>
+            <input type="text" id="waitlist-company" name="company" required placeholder="Premier Entertainment" class="ee-input ee-form-control ee-waitlist-input">
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+        <div class="ee-waitlist-form-row">
           <div class="ee-form-group">
-            <label for="waitlist-email" style="display: block; font-size: 0.875rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">Work Email <span style="color: #ef4444;">*</span></label>
-            <input type="email" id="waitlist-email" name="email" required placeholder="alex@example.com" class="ee-input ee-form-control" style="width: 100%; height: 2.875rem; padding: 0 1rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.95rem; color: #0f172a; background-color: #ffffff; box-sizing: border-box;">
+            <label for="waitlist-email" class="ee-waitlist-label">Work Email <span class="ee-required-star">*</span></label>
+            <input type="email" id="waitlist-email" name="email" required placeholder="alex@example.com" class="ee-input ee-form-control ee-waitlist-input">
           </div>
           <div class="ee-form-group">
-            <label for="waitlist-vertical" style="display: block; font-size: 0.875rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">Primary Entertainment Vertical</label>
-            <select id="waitlist-vertical" name="vertical" class="ee-input ee-form-control" style="width: 100%; height: 2.875rem; padding: 0 1rem; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 0.95rem; color: #0f172a; background-color: #ffffff; box-sizing: border-box;">
+            <label for="waitlist-vertical" class="ee-waitlist-label">Primary Entertainment Vertical</label>
+            <select id="waitlist-vertical" name="vertical" class="ee-input ee-form-control ee-waitlist-input">
               {% for val, label in verticals %}
-                <option value="{{ val }}" style="color: #0f172a; background: #ffffff;">{{ label }}</option>
+                <option value="{{ val }}">{{ label }}</option>
               {% endfor %}
             </select>
           </div>
@@ -57,7 +57,7 @@
         <!-- Spam Honeypot -->
         <input type="text" name="website" value="" class="ee-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px;">
 
-        <button type="submit" class="ee-btn ee-btn-primary" style="height: 3rem; font-size: 1.05rem; font-weight: 700; border-radius: 8px; width: 100%; margin-top: 0.5rem; cursor: pointer; color: #ffffff; background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%); border: none; box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);">
+        <button type="submit" class="ee-btn ee-btn-primary" style="height: 3rem; font-size: 1.05rem; font-weight: 700; width: 100%; margin-top: 0.5rem;">
           Request VIP Early Access &rarr;
         </button>
 
@@ -66,64 +66,64 @@
     </div>
 
     <!-- Supported Verticals Strip -->
-    <div class="ee-hero-chips" aria-label="Supported verticals" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; align-items: center; margin-bottom: var(--ee-space-4);">
-      <span class="ee-chip" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; background: #ffffff; border: 1px solid #e2e8f0; color: #334155; font-weight: 600;">DJs &amp; Emcees</span>
-      <span class="ee-chip" style="color: #94a3b8;">•</span>
-      <span class="ee-chip" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; background: #ffffff; border: 1px solid #e2e8f0; color: #334155; font-weight: 600;">Inflatables &amp; Party Rentals</span>
-      <span class="ee-chip" style="color: #94a3b8;">•</span>
-      <span class="ee-chip" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; background: #ffffff; border: 1px solid #e2e8f0; color: #334155; font-weight: 600;">Photo &amp; 360 Booths</span>
-      <span class="ee-chip" style="color: #94a3b8;">•</span>
-      <span class="ee-chip" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; background: #ffffff; border: 1px solid #e2e8f0; color: #334155; font-weight: 600;">Game Trucks</span>
-      <span class="ee-chip" style="color: #94a3b8;">•</span>
-      <span class="ee-chip" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; background: #ffffff; border: 1px solid #e2e8f0; color: #334155; font-weight: 600;">Casino Nights</span>
-      <span class="ee-chip" style="color: #94a3b8;">•</span>
-      <span class="ee-chip" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; background: #ffffff; border: 1px solid #e2e8f0; color: #334155; font-weight: 600;">Performers</span>
+    <div class="ee-hero-chips ee-chip-list" aria-label="Supported verticals">
+      <span class="ee-chip ee-coming-soon-chip">DJs &amp; Emcees</span>
+      <span class="ee-chip-bullet">•</span>
+      <span class="ee-chip ee-coming-soon-chip">Inflatables &amp; Party Rentals</span>
+      <span class="ee-chip-bullet">•</span>
+      <span class="ee-chip ee-coming-soon-chip">Photo &amp; 360 Booths</span>
+      <span class="ee-chip-bullet">•</span>
+      <span class="ee-chip ee-coming-soon-chip">Game Trucks</span>
+      <span class="ee-chip-bullet">•</span>
+      <span class="ee-chip ee-coming-soon-chip">Casino Nights</span>
+      <span class="ee-chip-bullet">•</span>
+      <span class="ee-chip ee-coming-soon-chip">Performers</span>
     </div>
   </section>
 
   <!-- What to Expect / Features Preview Grid -->
-  <section class="ee-shell" style="padding: 3rem 1rem; border-top: 1px solid #e2e8f0;">
-    <div style="text-align: center; max-width: 600px; margin: 0 auto 2.5rem;">
-      <div class="eyebrow" style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.08em; color: #6d28d9; font-weight: 800; margin-bottom: 0.5rem;">What To Expect</div>
-      <h2 style="font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; letter-spacing: -0.02em;">Engineered for every phase of your operation</h2>
-      <p style="color: #475569; font-size: 1.05rem;">A single unified platform replacing 6 disjointed apps.</p>
+  <section class="ee-shell ee-features-section">
+    <div class="ee-features-section-header">
+      <div class="eyebrow ee-features-eyebrow">What To Expect</div>
+      <h2 class="ee-features-title">Engineered for every phase of your operation</h2>
+      <p class="ee-features-subtitle">A single unified platform replacing 6 disjointed apps.</p>
     </div>
 
-    <div class="ee-grid-features" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+    <div class="ee-grid-features ee-features-grid">
       {% for card in features_preview %}
-      <div class="ee-feature-card" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 1.75rem; display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;">
-        <div class="ee-feature-icon" style="font-size: 2rem; margin-bottom: 0.25rem;">{{ card.icon }}</div>
-        <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin: 0;">{{ card.title }}</h3>
-        <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0;">{{ card.description }}</p>
+      <div class="ee-feature-card ee-coming-soon-card">
+        <div class="ee-card-icon">{{ card.icon }}</div>
+        <h3 class="ee-card-title">{{ card.title }}</h3>
+        <p class="ee-card-desc">{{ card.description }}</p>
       </div>
       {% endfor %}
     </div>
   </section>
 
   <!-- Beta Tester / Staff Access Strip -->
-  <section class="ee-shell" style="padding: 2.5rem 1rem; text-align: center; border-top: 1px solid #e2e8f0; margin-top: 2rem;">
-    <div style="display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 1.5rem; font-size: 0.95rem; color: #475569;">
-      <span>Are you an invited beta tester? <a href="javascript:void(0)" id="ee-unlock-beta-btn" style="color: #6d28d9; font-weight: 700; text-decoration: underline;">Enter access code &rarr;</a></span>
-      <span style="color: #cbd5e1;">|</span>
-      <span>Team or Client? <a href="/login" style="color: #0f172a; font-weight: 700;">Sign in to account</a></span>
+  <section class="ee-shell ee-access-strip">
+    <div class="ee-access-strip-inner">
+      <span>Are you an invited beta tester? <a href="javascript:void(0)" id="ee-unlock-beta-btn" class="ee-access-link-beta">Enter access code &rarr;</a></span>
+      <span class="ee-access-divider">|</span>
+      <span>Team or Client? <a href="/login" class="ee-access-link-login">Sign in to account</a></span>
     </div>
   </section>
 </div>
 
 <!-- Beta Access Unlock Modal -->
-<div id="ee-beta-modal" class="ee-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="ee-modal-box" style="background: #ffffff; border-radius: 12px; width: 100%; max-width: 420px; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; border: 1px solid #e2e8f0;">
-    <button id="ee-close-modal-btn" type="button" aria-label="Close" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; line-height: 1;">&times;</button>
-    <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 800; color: #0f172a;">Beta Tester Preview Access</h3>
-    <p style="font-size: 0.9rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.5;">Enter the preview passcode provided in your beta invitation email.</p>
+<div id="ee-beta-modal" class="ee-modal-backdrop ee-coming-soon-modal-backdrop">
+  <div class="ee-modal-box ee-coming-soon-modal-box">
+    <button id="ee-close-modal-btn" type="button" aria-label="Close" class="ee-modal-close-btn">&times;</button>
+    <h3 class="ee-modal-heading">Beta Tester Preview Access</h3>
+    <p class="ee-modal-desc">Enter the preview passcode provided in your beta invitation email.</p>
 
     <form id="ee-beta-code-form">
       <div style="margin-bottom: 1rem;">
-        <label for="ee-beta-passcode-input" style="display: block; font-size: 0.875rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">Passcode</label>
-        <input type="text" id="ee-beta-passcode-input" required placeholder="EE-BETA-..." style="width: 100%; height: 2.75rem; padding: 0 0.85rem; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 0.95rem; text-transform: uppercase; color: #0f172a; background-color: #ffffff; box-sizing: border-box;">
+        <label for="ee-beta-passcode-input" class="ee-waitlist-label">Passcode</label>
+        <input type="text" id="ee-beta-passcode-input" required placeholder="EE-BETA-..." class="ee-input ee-form-control ee-waitlist-input" style="text-transform: uppercase;">
       </div>
-      <p id="ee-beta-status" style="font-size: 0.85rem; min-height: 1.2rem; margin: 0 0 0.75rem; color: #ef4444; font-weight: 500;"></p>
-      <button type="submit" id="ee-beta-submit-btn" class="ee-btn ee-btn-primary" style="width: 100%; height: 2.875rem; font-weight: 700; font-size: 1rem; border-radius: 6px; cursor: pointer; color: #ffffff; background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%); border: none;">
+      <p id="ee-beta-status" class="ee-modal-status"></p>
+      <button type="submit" id="ee-beta-submit-btn" class="ee-btn ee-btn-primary" style="width: 100%; height: 2.875rem; font-weight: 700;">
         Unlock Full Preview
       </button>
     </form>
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var code = (betaInput ? betaInput.value : "").trim();
       if (!code) return;
 
-      betaStatus.style.color = "#475569";
+      betaStatus.style.color = "var(--ee-text-secondary)";
       betaStatus.textContent = "Verifying access code...";
 
       try {
@@ -180,17 +180,17 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (res && res.message && res.message.ok) {
-          betaStatus.style.color = "#10b981";
+          betaStatus.style.color = "var(--ee-success)";
           betaStatus.textContent = "Access unlocked! Redirecting to preview...";
           setTimeout(function () {
             window.location.href = "/";
           }, 600);
         } else {
-          betaStatus.style.color = "#ef4444";
+          betaStatus.style.color = "var(--ee-danger)";
           betaStatus.textContent = "Invalid passcode. Please check your invitation.";
         }
       } catch (err) {
-        betaStatus.style.color = "#ef4444";
+        betaStatus.style.color = "var(--ee-danger)";
         betaStatus.textContent = (err && err.message) || "Invalid access passcode.";
       }
     });
