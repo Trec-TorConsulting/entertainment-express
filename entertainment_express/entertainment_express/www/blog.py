@@ -259,7 +259,7 @@ def _build_blog_jsonld(posts: list[dict], base_url: str) -> str:
                 "@type": "Person",
                 "name": p.get("author_name") or "Entertainment Express Editorial Team",
             },
-            "url": f"{base_url.rstrip('/')}/blog/{p.get('slug')}",
+            "url": f"{base_url.rstrip('/')}/blog?post={p.get('slug')}",
         })
 
     payload = {
@@ -294,7 +294,7 @@ def _build_article_jsonld(post: dict, base_url: str) -> str:
         },
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": f"{base_url.rstrip('/')}/blog/{post.get('slug')}",
+            "@id": f"{base_url.rstrip('/')}/blog?post={post.get('slug')}",
         },
     }
     return json.dumps(payload, indent=2)
@@ -359,14 +359,14 @@ def get_context(context):
             breadcrumbs = [
                 {"label": "Home", "url": "/"},
                 {"label": "Blog", "url": "/blog"},
-                {"label": matched_post["title"], "url": f"/blog/{matched_post['slug']}"},
+                {"label": matched_post["title"], "url": f"/blog?post={matched_post['slug']}"},
             ]
             apply_common_page_context(
                 context,
                 settings,
                 f"{matched_post['title']} | Entertainment Express",
                 matched_post.get("excerpt") or matched_post.get("subtitle") or "Entertainment Express Playbook",
-                f"/blog/{matched_post['slug']}",
+                f"/blog?post={matched_post['slug']}",
                 breadcrumbs=breadcrumbs,
             )
             context.current_post = matched_post
