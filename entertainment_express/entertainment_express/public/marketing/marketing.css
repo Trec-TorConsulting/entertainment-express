@@ -3438,6 +3438,30 @@ select:focus-visible {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.ee-waitlist-card input,
+.ee-waitlist-card select,
+.ee-waitlist-card textarea,
+#ee-beta-modal input {
+  color: var(--ee-text) !important;
+  background-color: var(--ee-panel) !important;
+  border-color: var(--ee-border-strong) !important;
+}
+
+.ee-waitlist-card input::placeholder,
+.ee-waitlist-card textarea::placeholder,
+#ee-beta-modal input::placeholder {
+  color: var(--ee-text-disabled) !important;
+  opacity: 1 !important;
+}
+
+.ee-waitlist-card input:focus,
+.ee-waitlist-card select:focus,
+#ee-beta-modal input:focus {
+  border-color: var(--ee-brand) !important;
+  outline: 2px solid rgba(109, 40, 217, 0.25) !important;
+  outline-offset: 1px !important;
+}
+
 .ee-feature-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
