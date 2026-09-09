@@ -142,7 +142,7 @@ def _rewrite_path(location: str) -> None:
     frappe.local.path = location.strip("/")
 
 
-COMING_SOON_PATH = "/coming-soon"
+COMING_SOON_PATH = "/coming_soon"
 BETA_COOKIE_NAME = "ee_beta_access"
 
 
@@ -151,7 +151,7 @@ def is_coming_soon_enabled() -> bool:
     conf_val = frappe.conf.get("ee_coming_soon")
     if conf_val is not None:
         return bool(conf_val)
-    if not frappe.db.table_exists("tabMarketing Settings"):
+    if not frappe.db.table_exists("Singles"):
         return False
     try:
         val = frappe.db.get_single_value("Marketing Settings", "coming_soon_mode")
@@ -165,7 +165,7 @@ def get_beta_passcode() -> str:
     conf_pass = (frappe.conf.get("ee_beta_passcode") or "").strip()
     if conf_pass:
         return conf_pass
-    if not frappe.db.table_exists("tabMarketing Settings"):
+    if not frappe.db.table_exists("Singles"):
         return "EE-BETA-2026"
     try:
         return (frappe.db.get_single_value("Marketing Settings", "beta_access_passcode") or "EE-BETA-2026").strip()
@@ -405,4 +405,6 @@ def get_website_user_home_page(user: str | None) -> str | None:
     """
     if user and user != "Guest":
         return resolve_home_portal(user)
+    if is_coming_soon_enabled() and not has_beta_access():
+        return "coming_soon"
     return EE_MARKETING_HOME if _is_control_plane() else TENANT_HOME

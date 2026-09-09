@@ -176,6 +176,7 @@ website_route_rules = [
     {"from_route": "/p/<route>", "to_route": "p"},
     {"from_route": "/g/<token>", "to_route": "g"},
     {"from_route": "/t/<token>", "to_route": "t"},
+    {"from_route": "/coming-soon", "to_route": "coming_soon"},
     {"from_route": "/live/<token>", "to_route": "live"},
 ]
 
