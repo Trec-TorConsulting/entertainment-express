@@ -169,7 +169,6 @@ website_route_rules = [
     {"from_route": "/features/<path:feature>", "to_route": "feature_page"},
     {"from_route": "/start-trial", "to_route": "start_trial"},
     {"from_route": "/blog", "to_route": "blog"},
-    {"from_route": "/blog/<path:post_slug>", "to_route": "blog"},
     {"from_route": "/resources", "to_route": "blog"},
     {"from_route": "/guest-requests", "to_route": "guest_requests"},
     {"from_route": "/w/<token>", "to_route": "w"},

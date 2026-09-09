@@ -72,7 +72,7 @@
           <span class="ee-blog-badge">{{ post.category }}</span>
           <span class="ee-blog-time">{{ post.read_time }}</span>
         </div>
-        <h3><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h3>
+        <h3><a href="/blog?post={{ post.slug }}">{{ post.title }}</a></h3>
         <p>{{ post.excerpt }}</p>
         <div class="ee-blog-author-block">
           <div class="ee-blog-avatar">{{ post.author_initials }}</div>
@@ -140,7 +140,7 @@
         <span class="ee-blog-time">{{ featured_post.read_time }}</span>
       </div>
       <h2>
-        <a href="/blog/{{ featured_post.slug }}">{{ featured_post.title }}</a>
+        <a href="/blog?post={{ featured_post.slug }}">{{ featured_post.title }}</a>
       </h2>
       <p class="ee-blog-featured-excerpt">
         {{ featured_post.excerpt }}
@@ -153,7 +153,7 @@
             <span class="ee-blog-date">{{ featured_post.author_title }} &bull; {{ featured_post.published_on }}</span>
           </div>
         </div>
-        <a class="ee-btn ee-btn-primary" href="/blog/{{ featured_post.slug }}">
+        <a class="ee-btn ee-btn-primary" href="/blog?post={{ featured_post.slug }}">
           Read Full Playbook <span aria-hidden="true">&rarr;</span>
         </a>
       </div>
@@ -172,7 +172,7 @@
           <span class="ee-blog-time">{{ post.read_time }}</span>
         </div>
         <h3>
-          <a href="/blog/{{ post.slug }}">{{ post.title }}</a>
+          <a href="/blog?post={{ post.slug }}">{{ post.title }}</a>
         </h3>
         <p>{{ post.excerpt }}</p>
         <div class="ee-blog-author-block">
