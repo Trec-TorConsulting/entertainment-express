@@ -70,7 +70,7 @@ FEATURE_MATRIX = [
             {"label": "Weather Risk & Rain-Dates", "key": "weather_risk", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "SMS Client & Crew Reminders", "key": "sms_enabled", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Serato & Rekordbox DJ Export", "key": "playlist_export", "starter": "No", "pro": "Yes", "scale": "Yes"},
-            {"label": "AI Event Operations Copilot", "key": "ai_assistant", "starter": "No", "pro": "No", "scale": "Yes"},
+            {"label": "Smart Operations Assistant", "key": "ai_assistant", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "Partner Overflow Exchange", "key": "overflow_exchange", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "Concierge Onboarding & Migration", "key": "concierge_migration", "starter": "Self-serve", "pro": "Self-serve", "scale": "Dedicated Agent"},
         ],
@@ -154,7 +154,7 @@ PLAN_DETAILS = {
         },
         "key_benefits": [
             {"title": "Unlimited Staff, Crew & Trucks", "desc": "Never pay per-seat penalties as your team expands"},
-            {"title": "AI Operations Copilot", "desc": "Intelligent route drafting, gear packing & load optimization"},
+            {"title": "Smart Operations Assistant", "desc": "Smart email drafting, venue rule summaries & schedule buffering"},
             {"title": "Partner Overflow Exchange", "desc": "Pass overflow gigs to vetted peer partners & earn booking fees"},
             {"title": "White-Glove Concierge Migration", "desc": "Our team imports your data from Goodshuffle, IO, or DJEP"},
             {"title": "100 GB Cloud Storage", "desc": "High-resolution media, inspection checklists, and archival data"},

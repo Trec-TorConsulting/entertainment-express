@@ -317,6 +317,11 @@ select:focus-visible {
 
 /* Main Content Area */
 .ee-main {
+  display: block;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  clear: both;
   padding: var(--ee-space-6) 0 var(--ee-space-12);
   min-height: 60vh;
 }
@@ -2001,6 +2006,7 @@ select:focus-visible {
 
 /* Feature Cards */
 .ee-feature-card {
+  position: relative;
   background: var(--ee-panel);
   border: 1px solid var(--ee-border);
   border-radius: var(--ee-radius-lg);
@@ -2008,6 +2014,7 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--ee-space-3);
+  isolation: isolate;
   transition: transform var(--ee-motion-normal) var(--ee-ease-default), box-shadow var(--ee-motion-normal) var(--ee-ease-default);
 }
 
@@ -2729,6 +2736,11 @@ select:focus-visible {
 
 /* Multi-Column Footer */
 .ee-footer {
+  display: block;
+  position: relative;
+  z-index: 1;
+  clear: both;
+  width: 100%;
   border-top: 1px solid var(--ee-border);
   margin-top: var(--ee-space-16);
   background: var(--ee-rail);

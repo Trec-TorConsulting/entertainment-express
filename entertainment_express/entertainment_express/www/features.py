@@ -17,7 +17,7 @@ def get_context(context):
         context,
         settings,
         "Platform Features | Entertainment Express",
-        "Explore weather risk automation, visual dispatch, DJ playlist export, client portals, white-label branding, and AI Copilot.",
+        "Explore weather risk automation, visual dispatch, playlist exports, client portals, white-label branding, and smart operations tools.",
         "/features",
         breadcrumbs=breadcrumbs,
     )
