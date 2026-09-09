@@ -1,0 +1,164 @@
+{
+  "actions": [],
+  "autoname": "SUB-.YYYY.-.#####",
+  "creation": "2026-09-09 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "booking",
+    "vendor",
+    "status",
+    "scope_type",
+    "agreed_cost",
+    "client_price",
+    "expected_margin",
+    "margin_percent",
+    "pay_terms",
+    "white_label",
+    "special_instructions",
+    "offer_token",
+    "offer_sent_at",
+    "response_at",
+    "decline_reason",
+    "purchase_invoice"
+  ],
+  "fields": [
+    {
+      "fieldname": "booking",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Booking",
+      "options": "Event Booking",
+      "reqd": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "vendor",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Vendor",
+      "options": "EE Vendor",
+      "reqd": 1,
+      "search_index": 1
+    },
+    {
+      "default": "draft",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "draft\noffered\naccepted\ndeclined\nin_progress\ncompleted\nbilled\npaid\ncancelled"
+    },
+    {
+      "default": "full_booking",
+      "fieldname": "scope_type",
+      "fieldtype": "Select",
+      "label": "Scope Type",
+      "options": "full_booking\npartial_services"
+    },
+    {
+      "fieldname": "agreed_cost",
+      "fieldtype": "Currency",
+      "in_list_view": 1,
+      "label": "Agreed Cost",
+      "reqd": 1
+    },
+    {
+      "fieldname": "client_price",
+      "fieldtype": "Currency",
+      "label": "Client Price",
+      "read_only": 1
+    },
+    {
+      "fieldname": "expected_margin",
+      "fieldtype": "Currency",
+      "in_list_view": 1,
+      "label": "Expected Margin",
+      "read_only": 1
+    },
+    {
+      "fieldname": "margin_percent",
+      "fieldtype": "Percent",
+      "label": "Margin %",
+      "read_only": 1
+    },
+    {
+      "fieldname": "pay_terms",
+      "fieldtype": "Data",
+      "label": "Pay Terms"
+    },
+    {
+      "default": "1",
+      "fieldname": "white_label",
+      "fieldtype": "Check",
+      "label": "White Label (Mask Client Details)"
+    },
+    {
+      "fieldname": "special_instructions",
+      "fieldtype": "Small Text",
+      "label": "Special Instructions"
+    },
+    {
+      "fieldname": "offer_token",
+      "fieldtype": "Data",
+      "label": "Offer Token",
+      "read_only": 1,
+      "search_index": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "offer_sent_at",
+      "fieldtype": "Datetime",
+      "label": "Offer Sent At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "response_at",
+      "fieldtype": "Datetime",
+      "label": "Response At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "decline_reason",
+      "fieldtype": "Small Text",
+      "label": "Decline Reason"
+    },
+    {
+      "fieldname": "purchase_invoice",
+      "fieldtype": "Link",
+      "label": "Purchase Invoice",
+      "options": "Purchase Invoice"
+    }
+  ],
+  "modified": "2026-09-09 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Entertainment Express Core",
+  "name": "EE Subcontract Job",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "export": 1,
+      "read": 1,
+      "role": "EE Tenant Admin",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "role": "EE Dispatcher",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "role": "System Manager",
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}

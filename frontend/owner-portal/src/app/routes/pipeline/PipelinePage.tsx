@@ -16,8 +16,9 @@ import {
 } from "@portal-kit";
 import {
   Sparkles, CheckCircle2, Send, Check, AlertTriangle,
-  FileText, Clock, User, DollarSign, ChevronRight
+  FileText, Clock, User, DollarSign, ChevronRight, Handshake
 } from "lucide-react";
+import { SubOutModal } from "../subcontractors/SubOutModal";
 
 const STAGES = [
   { id: "inquiry", label: "Inquiry" },
@@ -40,6 +41,7 @@ export const PipelinePage: React.FC = () => {
   const [proposalLoading, setProposalLoading] = useState(false);
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [subModalOpen, setSubModalOpen] = useState(false);
 
   const reload = async () => {
     try {
@@ -265,6 +267,13 @@ export const PipelinePage: React.FC = () => {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
+                  onClick={() => setSubModalOpen(true)}
+                  leftIcon={<Handshake className="w-3.5 h-3.5" />}
+                >
+                  Sub Out
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => navigate(`/pipeline/${encodeURIComponent(selectedInquiry.id)}/proposal`)}
                 >
                   Full Editor
@@ -385,6 +394,16 @@ export const PipelinePage: React.FC = () => {
           </Button>
         </div>
       </Dialog>
+
+      {/* Sub Out Modal */}
+      {selectedInquiry && (
+        <SubOutModal
+          open={subModalOpen}
+          onOpenChange={setSubModalOpen}
+          booking={selectedInquiry}
+          onSuccess={() => reload()}
+        />
+      )}
     </div>
   );
 };

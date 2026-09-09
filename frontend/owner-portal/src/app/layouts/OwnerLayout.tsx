@@ -50,6 +50,7 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
         { id: "people", label: "People", icon: <Users className="w-4 h-4" />, active: currentPath.startsWith("/people"), onClick: () => navigate("/people") },
         { id: "places", label: "Places", icon: <MapPin className="w-4 h-4" />, active: currentPath.startsWith("/places"), onClick: () => navigate("/places") },
         { id: "partners", label: "Partners", icon: <Handshake className="w-4 h-4" />, active: currentPath.startsWith("/partners"), onClick: () => navigate("/partners") },
+        { id: "subcontractors", label: "Subcontractors", icon: <Handshake className="w-4 h-4" />, active: currentPath.startsWith("/subcontractors"), onClick: () => navigate("/subcontractors") },
       ]
     },
     {
