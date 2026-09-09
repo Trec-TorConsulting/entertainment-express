@@ -6,7 +6,7 @@ from frappe.utils import get_url
 from frappe.utils import flt, now_datetime
 
 
-ALLOWED_LEAD_TYPES = {"demo", "contact", "newsletter", "trial"}
+ALLOWED_LEAD_TYPES = {"demo", "contact", "newsletter", "trial", "waitlist", "beta"}
 NEWSLETTER_GROUP_NAME = "EE Newsletter"
 
 
@@ -541,3 +541,20 @@ def confirm_subscription(token=None):
         confirmed=True,
     )
     return {"ok": True, "confirmed": True}
+
+
+@frappe.whitelist(allow_guest=True)
+def unlock_beta_access(passcode=None):
+    """Validate beta access passcode and set HTTP cookie for bypass."""
+    from entertainment_express.security.request_guards import BETA_COOKIE_NAME, get_beta_passcode
+
+    input_code = (passcode or "").strip()
+    expected = get_beta_passcode()
+
+    if not input_code or input_code != expected:
+        frappe.throw(_("Invalid beta access code."), frappe.AuthenticationError)
+
+    # Set cookie for 30 days
+    frappe.local.cookie_manager.set_cookie(BETA_COOKIE_NAME, expected, max_age=86400 * 30)
+    return {"ok": True, "message": _("Beta access granted.")}
+

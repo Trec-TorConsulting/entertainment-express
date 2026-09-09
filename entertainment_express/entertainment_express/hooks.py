@@ -22,6 +22,7 @@ update_website_context = [
 before_request = [
     "entertainment_express.security.auth_hardening.check_login_lockout",
     "entertainment_express.security.auth_hardening.enforce_privileged_2fa",
+    "entertainment_express.security.request_guards.enforce_coming_soon",
     "entertainment_express.security.request_guards.enforce_tenant_suspension",
     "entertainment_express.security.request_guards.sanitize_backend_urls",
     "entertainment_express.security.request_guards.enforce_backend_boundary",

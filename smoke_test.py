@@ -244,6 +244,67 @@ def test_phase19_static_suite():
     return True
 
 
+def test_subcontractors_suite():
+    """Run subcontractor unit & multi-tenant isolation tests when pytest is available."""
+    print("✓ Testing Subcontractor Jobs & Multi-Tenant Isolation suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_subcontractors.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Subcontractor tests failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+def test_coming_soon_suite():
+    """Run coming soon security guard & template tests when pytest is available."""
+    print("✓ Testing Coming Soon Landing & Beta Tester Bypass suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_coming_soon_guard.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ coming soon suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+
 def test_live_marketing_smoke():
     """
     Optional live smoke for task 13.3.
@@ -591,6 +652,8 @@ def main():
         test_hooks,
         test_specs,
         test_phase19_static_suite,
+        test_subcontractors_suite,
+        test_coming_soon_suite,
         test_phase41_marketing_routes,
         test_phase41_jsonld,
         test_phase41_static_suite,

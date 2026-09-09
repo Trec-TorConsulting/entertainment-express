@@ -24,6 +24,11 @@ def get_marketing_settings():
         "section_pricing_teaser": 1,
         "section_testimonials": 1,
         "social_links": {},
+        "coming_soon_mode": 1,
+        "coming_soon_headline": "The Operating System for Entertainment Professionals",
+        "coming_soon_subhead": "Bookings, crew scheduling, contracts, dispatch, and client management built specifically for mobile entertainment. Launching soon.",
+        "coming_soon_launch_date": "",
+        "beta_access_passcode": "EE-BETA-2026",
     }
 
     if not frappe.db.exists("DocType", "Marketing Settings"):

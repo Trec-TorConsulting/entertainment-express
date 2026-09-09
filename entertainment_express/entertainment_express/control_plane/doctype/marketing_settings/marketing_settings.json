@@ -28,7 +28,13 @@
   "consent_banner_text",
   "section_captcha",
   "captcha_provider",
-  "captcha_site_key"
+  "captcha_site_key",
+  "section_coming_soon",
+  "coming_soon_mode",
+  "coming_soon_headline",
+  "coming_soon_subhead",
+  "coming_soon_launch_date",
+  "beta_access_passcode"
  ],
  "fields": [
   {
@@ -168,6 +174,40 @@
    "fieldname": "captcha_site_key",
    "fieldtype": "Data",
    "label": "Captcha Site Key"
+  },
+  {
+   "fieldname": "section_coming_soon",
+   "fieldtype": "Section Break",
+   "label": "Coming Soon & Beta Preview"
+  },
+  {
+   "default": "1",
+   "fieldname": "coming_soon_mode",
+   "fieldtype": "Check",
+   "label": "Enable Coming Soon Mode"
+  },
+  {
+   "default": "The Operating System for Entertainment Professionals",
+   "fieldname": "coming_soon_headline",
+   "fieldtype": "Data",
+   "label": "Coming Soon Headline"
+  },
+  {
+   "default": "Bookings, crew scheduling, contracts, dispatch, and client management built specifically for mobile entertainment. Launching soon.",
+   "fieldname": "coming_soon_subhead",
+   "fieldtype": "Small Text",
+   "label": "Coming Soon Subhead"
+  },
+  {
+   "fieldname": "coming_soon_launch_date",
+   "fieldtype": "Date",
+   "label": "Target Launch Date"
+  },
+  {
+   "default": "EE-BETA-2026",
+   "fieldname": "beta_access_passcode",
+   "fieldtype": "Data",
+   "label": "Beta Access Passcode"
   }
  ],
  "index_web_pages_for_search": 1,

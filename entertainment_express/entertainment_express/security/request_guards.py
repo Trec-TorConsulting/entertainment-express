@@ -142,6 +142,96 @@ def _rewrite_path(location: str) -> None:
     frappe.local.path = location.strip("/")
 
 
+COMING_SOON_PATH = "/coming-soon"
+BETA_COOKIE_NAME = "ee_beta_access"
+
+
+def is_coming_soon_enabled() -> bool:
+    """Check if coming soon mode is enabled via site config or Marketing Settings."""
+    conf_val = frappe.conf.get("ee_coming_soon")
+    if conf_val is not None:
+        return bool(conf_val)
+    if not frappe.db.table_exists("tabMarketing Settings"):
+        return False
+    try:
+        val = frappe.db.get_single_value("Marketing Settings", "coming_soon_mode")
+        return bool(int(val or 0))
+    except Exception:
+        return False
+
+
+def get_beta_passcode() -> str:
+    """Get expected beta passcode from site config or Marketing Settings."""
+    conf_pass = (frappe.conf.get("ee_beta_passcode") or "").strip()
+    if conf_pass:
+        return conf_pass
+    if not frappe.db.table_exists("tabMarketing Settings"):
+        return "EE-BETA-2026"
+    try:
+        return (frappe.db.get_single_value("Marketing Settings", "beta_access_passcode") or "EE-BETA-2026").strip()
+    except Exception:
+        return "EE-BETA-2026"
+
+
+def has_beta_access() -> bool:
+    """Check if request has valid beta access via query param ?beta_key= or cookie."""
+    req = getattr(frappe.local, "request", None)
+    if not req:
+        return False
+
+    passcode = get_beta_passcode()
+    if not passcode:
+        return False
+
+    # Check query param
+    query_key = (req.args.get("beta_key") or "").strip()
+    if query_key and query_key == passcode:
+        # Set cookie on outgoing response
+        frappe.local.cookie_manager.set_cookie(BETA_COOKIE_NAME, passcode, max_age=86400 * 30)
+        return True
+
+    # Check cookie
+    cookie_val = (frappe.request.cookies.get(BETA_COOKIE_NAME) or "").strip() if getattr(frappe, "request", None) else ""
+    return cookie_val == passcode
+
+
+def enforce_coming_soon() -> None:
+    """When coming soon mode is active, route all unauthenticated marketing visits to /coming-soon."""
+    if not is_coming_soon_enabled():
+        return
+
+    req = getattr(frappe.local, "request", None)
+    if not req:
+        return
+
+    path = (getattr(req, "path", "") or "").strip() or "/"
+
+    # Exempt health, auth, assets, api, and coming soon page itself
+    if (
+        _is_health_path(path)
+        or path == COMING_SOON_PATH
+        or path.startswith(COMING_SOON_PATH + "/")
+        or path.startswith("/login")
+        or path.startswith("/logout")
+        or path.startswith("/api/")
+        or path.startswith("/assets/")
+        or path.startswith("/files/")
+    ):
+        return
+
+    # Logged-in non-guest users bypass coming soon completely
+    user = frappe.session.user or "Guest"
+    if user != "Guest":
+        return
+
+    # Check beta passcode bypass
+    if has_beta_access():
+        return
+
+    # Otherwise, rewrite public visitor to coming soon
+    _rewrite_path(COMING_SOON_PATH)
+
+
 def enforce_tenant_suspension() -> None:
     """Tenant sites with ee_suspended refuse API work except health and login."""
     if not frappe.conf.get("ee_suspended"):

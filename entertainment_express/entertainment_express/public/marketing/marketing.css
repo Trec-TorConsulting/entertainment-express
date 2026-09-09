@@ -3413,3 +3413,34 @@ select:focus-visible {
   }
 }
 
+/* Coming Soon & Waitlist */
+.ee-coming-soon-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.ee-pulse-dot {
+  animation: ee-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ee-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+
+.ee-waitlist-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ee-feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+}
+
+
