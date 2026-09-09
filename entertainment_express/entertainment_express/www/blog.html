@@ -1,0 +1,235 @@
+{% extends "entertainment_express/templates/marketing/base.html" %}
+
+{% block marketing_content %}
+{% if is_single_post and current_post %}
+<!-- ========================================================================
+     Single Article Reader View
+     ======================================================================== -->
+<article class="ee-shell ee-article-view">
+  <a class="ee-article-back" href="/blog">
+    <span aria-hidden="true">&larr;</span> Back to Resource Center
+  </a>
+
+  <header class="ee-article-header">
+    <div style="display: flex; align-items: center; gap: var(--ee-space-3); flex-wrap: wrap; margin-bottom: var(--ee-space-3);">
+      <span class="ee-blog-badge">{{ current_post.category }}</span>
+      <span class="ee-blog-time">{{ current_post.read_time }}</span>
+      <span class="ee-blog-time">&bull;</span>
+      <span class="ee-blog-time">{{ current_post.published_on }}</span>
+    </div>
+
+    <h1>{{ current_post.title }}</h1>
+    {% if current_post.subtitle %}
+    <p class="ee-article-subhead">{{ current_post.subtitle }}</p>
+    {% endif %}
+
+    <div class="ee-blog-author-block" style="border-top: none; padding-top: var(--ee-space-2);">
+      <div class="ee-blog-avatar">{{ current_post.author_initials }}</div>
+      <div class="ee-blog-author-info">
+        <span class="ee-blog-author-name">{{ current_post.author_name }}</span>
+        <span class="ee-blog-date">{{ current_post.author_title }}</span>
+      </div>
+    </div>
+  </header>
+
+  {% if current_post.takeaways %}
+  <div class="ee-article-takeaways">
+    <div class="ee-article-takeaways-title">⚡ Key Executive Takeaways</div>
+    <ul>
+      {% for takeaway in current_post.takeaways %}
+      <li>{{ takeaway }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="ee-article-content">
+    {{ current_post.content_html | safe }}
+  </div>
+
+  <!-- In-Article CTA Banner -->
+  <div class="ee-article-footer-cta">
+    <div class="eyebrow">The Operating System for Event Businesses</div>
+    <h3 style="font-size: 1.75rem; margin: var(--ee-space-2) 0 var(--ee-space-3);">
+      Ready to put these playbooks on autopilot?
+    </h3>
+    <p style="max-width: 52ch; margin: 0 auto var(--ee-space-6); color: var(--ee-text-secondary);">
+      See how Entertainment Express combines weather holds, multi-vehicle dispatch, automated DJ music portals, and mobile contracts into one platform.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--ee-space-3); flex-wrap: wrap;">
+      <a class="ee-btn ee-btn-primary" href="/start-trial">Start 14-day free trial</a>
+      <a class="ee-btn ee-btn-secondary" href="/demo">Request a live walkthrough</a>
+    </div>
+  </div>
+
+  {% if related_posts %}
+  <div style="margin-top: var(--ee-space-16); padding-top: var(--ee-space-8); border-top: 1px solid var(--ee-border);">
+    <h3 style="font-size: 1.5rem; margin-bottom: var(--ee-space-6);">Related Playbooks & Guides</h3>
+    <div class="ee-blog-grid" style="margin-bottom: 0;">
+      {% for post in related_posts %}
+      <article class="ee-blog-card">
+        <div class="ee-blog-card-meta">
+          <span class="ee-blog-badge">{{ post.category }}</span>
+          <span class="ee-blog-time">{{ post.read_time }}</span>
+        </div>
+        <h3><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h3>
+        <p>{{ post.excerpt }}</p>
+        <div class="ee-blog-author-block">
+          <div class="ee-blog-avatar">{{ post.author_initials }}</div>
+          <div class="ee-blog-author-info">
+            <span class="ee-blog-author-name">{{ post.author_name }}</span>
+            <span class="ee-blog-date">{{ post.published_on }}</span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</article>
+
+{% else %}
+<!-- ========================================================================
+     Blog Hub & Resource Center View
+     ======================================================================== -->
+<section class="ee-hero ee-shell ee-blog-hero">
+  <div class="eyebrow">Resource Center & Insights</div>
+  <h1 class="ee-hero-headline">Tactical Playbooks for Entertainment Operators</h1>
+  <p class="ee-hero-sub">
+    Field-tested operational blueprints, severe weather protocols, fleet dispatch strategies, and revenue guides for modern event businesses.
+  </p>
+
+  <!-- Search Bar -->
+  <form method="GET" action="/blog" class="ee-blog-search-bar" role="search">
+    {% if selected_category and selected_category != 'all' %}
+    <input type="hidden" name="category" value="{{ selected_category }}">
+    {% endif %}
+    <input
+      type="search"
+      name="q"
+      class="ee-blog-search-input"
+      placeholder="Search playbooks, guides, and topics..."
+      value="{{ search_query }}"
+      aria-label="Search articles"
+    >
+    <button type="submit" class="ee-blog-search-btn">Search</button>
+  </form>
+
+  <!-- Category Filter Pills -->
+  <nav class="ee-blog-filter-bar" aria-label="Article categories">
+    {% for cat in categories %}
+    <a
+      href="/blog{% if cat.slug != 'all' %}?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}{% elif search_query %}?q={{ search_query }}{% endif %}"
+      class="ee-blog-pill {% if selected_category == cat.slug %}is-active{% endif %}"
+    >
+      <span aria-hidden="true" style="margin-right: 4px;">{{ cat.icon }}</span> {{ cat.name }}
+    </a>
+    {% endfor %}
+  </nav>
+</section>
+
+<div class="ee-shell">
+  <!-- Featured Flagship Playbook Spotlight -->
+  {% if featured_post %}
+  <section class="ee-blog-featured" aria-label="Featured Playbook">
+    <div>
+      <div class="ee-blog-featured-meta">
+        <span class="ee-blog-badge">Flagship Playbook</span>
+        <span class="ee-blog-time">{{ featured_post.category }}</span>
+        <span class="ee-blog-time">&bull;</span>
+        <span class="ee-blog-time">{{ featured_post.read_time }}</span>
+      </div>
+      <h2>
+        <a href="/blog/{{ featured_post.slug }}">{{ featured_post.title }}</a>
+      </h2>
+      <p class="ee-blog-featured-excerpt">
+        {{ featured_post.excerpt }}
+      </p>
+      <div class="ee-blog-featured-footer">
+        <div class="ee-blog-author-block" style="border-top: none; padding-top: 0; margin-top: 0;">
+          <div class="ee-blog-avatar">{{ featured_post.author_initials }}</div>
+          <div class="ee-blog-author-info">
+            <span class="ee-blog-author-name">{{ featured_post.author_name }}</span>
+            <span class="ee-blog-date">{{ featured_post.author_title }} &bull; {{ featured_post.published_on }}</span>
+          </div>
+        </div>
+        <a class="ee-btn ee-btn-primary" href="/blog/{{ featured_post.slug }}">
+          Read Full Playbook <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Article Grid -->
+  <section class="ee-section-spaced" aria-label="All Articles">
+    {% if grid_posts %}
+    <div class="ee-blog-grid">
+      {% for post in grid_posts %}
+      <article class="ee-blog-card">
+        <div class="ee-blog-card-meta">
+          <span class="ee-blog-badge">{{ post.category }}</span>
+          <span class="ee-blog-time">{{ post.read_time }}</span>
+        </div>
+        <h3>
+          <a href="/blog/{{ post.slug }}">{{ post.title }}</a>
+        </h3>
+        <p>{{ post.excerpt }}</p>
+        <div class="ee-blog-author-block">
+          <div class="ee-blog-avatar">{{ post.author_initials }}</div>
+          <div class="ee-blog-author-info">
+            <span class="ee-blog-author-name">{{ post.author_name }}</span>
+            <span class="ee-blog-date">{{ post.published_on }}</span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="ee-panel" style="text-align: center; padding: var(--ee-space-12) var(--ee-space-6); margin-bottom: var(--ee-space-12);">
+      <span style="font-size: 2.5rem; display: block; margin-bottom: var(--ee-space-3);">🔍</span>
+      <h3>No playbooks found</h3>
+      <p style="color: var(--ee-text-secondary); max-width: 44ch; margin: 0 auto var(--ee-space-6);">
+        We couldn't find any articles matching your search{% if search_query %} for <strong>"{{ search_query }}"</strong>{% endif %}{% if selected_category and selected_category != 'all' %} in category <strong>"{{ selected_category }}"</strong>{% endif %}.
+      </p>
+      <a class="ee-btn ee-btn-secondary" href="/blog">Reset Filters</a>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Newsletter Capture Box -->
+  <section class="ee-blog-newsletter-card" aria-label="Newsletter Subscription">
+    <h3>Get Tactical Operations Playbooks in Your Inbox</h3>
+    <p>
+      Join over 1,200 entertainment company owners receiving our monthly breakdown of severe weather checklists, fleet dispatch optimizations, and growth tactics.
+    </p>
+    <form class="ee-blog-newsletter-form ee-newsletter-form" id="ee-blog-newsletter-form" novalidate>
+      <input
+        id="ee-blog-newsletter-email"
+        name="email"
+        type="email"
+        placeholder="you@entertainmentcompany.com"
+        required
+        aria-label="Email address for operations newsletter"
+      >
+      <button type="submit" class="ee-btn ee-btn-primary">Subscribe</button>
+      <input type="hidden" name="source_page" value="/blog">
+      <input type="hidden" name="utm_source" value="blog_newsletter">
+      <input type="text" name="website" value="" class="ee-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="ee-form-status" aria-live="polite" style="width: 100%; margin-top: var(--ee-space-2); font-size: 0.85rem;"></p>
+    </form>
+  </section>
+</div>
+{% endif %}
+
+<!-- Schema.org Structured Data -->
+{% if is_single_post and article_json_ld %}
+<script type="application/ld+json">
+{{ article_json_ld | safe }}
+</script>
+{% elif blog_json_ld %}
+<script type="application/ld+json">
+{{ blog_json_ld | safe }}
+</script>
+{% endif %}
+{% endblock %}

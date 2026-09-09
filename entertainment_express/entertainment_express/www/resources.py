@@ -1,32 +1,14 @@
 import frappe
-
-from entertainment_express.marketing.site_context import apply_common_page_context, get_marketing_settings
+from entertainment_express.www import blog
 
 
 def get_context(context):
-    settings = get_marketing_settings()
-    apply_common_page_context(
-        context,
-        settings,
-        "Resources | Entertainment Express",
-        "Guides and articles for growing entertainment operations teams.",
-        "/resources",
-    )
+    # Populate context via modern blog context
+    blog.get_context(context)
 
-    posts = []
-    if frappe.db.exists("DocType", "Blog Post"):
-        posts = frappe.get_all(
-            "Blog Post",
-            filters={"published": 1},
-            fields=["name", "title", "blog_intro", "route", "published_on"],
-            order_by="published_on desc",
-            limit_page_length=12,
-        )
+    # Issue 301 redirect to canonical /blog route if running in Frappe HTTP context
+    if getattr(frappe, "local", None) and hasattr(frappe.local, "flags"):
+        frappe.local.flags.redirect_location = "/blog"
+        if hasattr(frappe, "Redirect"):
+            raise frappe.Redirect
 
-    categories = []
-    if frappe.db.exists("DocType", "Blog Category"):
-        categories = frappe.get_all("Blog Category", fields=["title", "route"], order_by="title asc")
-
-    context.posts = posts
-    context.categories = categories
-    context.rss_url = "/blog?format=rss"

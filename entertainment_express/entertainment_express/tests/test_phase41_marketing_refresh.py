@@ -212,11 +212,42 @@ def test_jsonld_builders():
 
 
 def test_website_route_rules():
-    """Verify route rules for solutions, compare, and features in hooks.py."""
+    """Verify route rules for solutions, compare, features, and blog in hooks.py."""
     hooks = _read(HOOKS_FILE)
     assert '{"from_route": "/solutions/<path:vertical>", "to_route": "solutions"}' in hooks
     assert '{"from_route": "/compare/<path:competitor>", "to_route": "compare"}' in hooks
     assert '{"from_route": "/features/<path:feature>", "to_route": "feature_page"}' in hooks
+    assert '{"from_route": "/blog", "to_route": "blog"}' in hooks
+    assert '{"from_route": "/resources", "to_route": "blog"}' in hooks
+
+
+def test_blog_playbooks_and_context():
+    """Verify curated playbooks schema and blog context builder."""
+    from entertainment_express.www.blog import CATEGORIES, CURATED_PLAYBOOKS, get_context
+
+    assert len(CURATED_PLAYBOOKS) >= 5
+    assert len(CATEGORIES) >= 5
+
+    for pb in CURATED_PLAYBOOKS:
+        assert pb.get("slug"), f"Missing slug in playbook: {pb}"
+        assert pb.get("title"), f"Missing title in playbook: {pb.get('slug')}"
+        assert pb.get("excerpt"), f"Missing excerpt in playbook: {pb.get('slug')}"
+        assert pb.get("category"), f"Missing category in playbook: {pb.get('slug')}"
+        assert pb.get("author_name"), f"Missing author_name in playbook: {pb.get('slug')}"
+        assert pb.get("content_html"), f"Missing content_html in playbook: {pb.get('slug')}"
+        assert len(pb.get("takeaways", [])) >= 2, f"Expected takeaways in playbook: {pb.get('slug')}"
+
+    # Verify context generation for hub
+    context = type("Context", (), {})()
+    get_context(context)
+    assert hasattr(context, "categories")
+    assert hasattr(context, "grid_posts")
+    assert hasattr(context, "blog_json_ld")
+    assert context.canonical == "https://www.entx.app/blog"
+
+    blog_ld = json.loads(context.blog_json_ld)
+    assert blog_ld["@type"] == "Blog"
+    assert "blogPost" in blog_ld
 
 
 def test_reverse_trial_downgrades_to_starter():
@@ -224,3 +255,4 @@ def test_reverse_trial_downgrades_to_starter():
     src = _read(ROOT / "api" / "saas_billing.py")
     assert "trial_expired_downgrade_to_starter" in src
     assert 'sub_doc.status = "active"' in src
+
