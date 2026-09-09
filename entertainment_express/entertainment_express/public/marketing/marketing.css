@@ -91,6 +91,11 @@ select:focus-visible {
   margin: 0 auto;
 }
 
+.ee-section-spaced {
+  padding-top: var(--ee-space-10);
+  padding-bottom: var(--ee-space-10);
+}
+
 /* Header & Glass Nav */
 .ee-header {
   position: sticky;
