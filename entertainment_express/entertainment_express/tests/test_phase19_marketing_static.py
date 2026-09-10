@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +21,8 @@ SIGNUP_JS_FILE = ROOT / "control_plane" / "doctype" / "signup_application" / "si
 ONBOARDING_FILE = ROOT / "setup" / "onboarding.py"
 TENANT_HOME_FILE = ROOT / "www" / "tenant_home.html"
 TENANT_HOME_PY_FILE = ROOT / "www" / "tenant_home.py"
+WEBSITE_API_FILE = ROOT / "api" / "portal_website.py"
+PORTAL_SETTINGS_JSON = ROOT / "entertainment_express_core" / "doctype" / "ee_portal_settings" / "ee_portal_settings.json"
 ROLE_FIXTURE_FILE = ROOT / "fixtures" / "role.json"
 WORKSPACE_HIDE_PATCH_FILE = ROOT / "patches" / "v0_0_1" / "hide_unused_erpnext_workspaces.py"
 
@@ -346,3 +349,33 @@ def test_workspace_hiding_uses_allowlist_model():
     assert "has_field(\"is_standard\")" in source
     assert '"public"' in source
     assert "frappe.db.set_value(\"Workspace\"" in source
+
+
+def test_portal_website_api_whitelisted_and_isolated():
+    source = _read(WEBSITE_API_FILE)
+    assert "@frappe.whitelist()" in source
+    assert "def get_website_config()" in source
+    assert "def save_website_config(" in source
+    assert "_require_staff()" in source
+    assert "OWNER_ROLES" in source
+    assert "frappe.init(" not in source
+    assert "bench " not in source
+    assert "new-site" not in source
+
+
+def test_ee_portal_settings_has_website_builder_fields():
+    doc = json.loads(_read(PORTAL_SETTINGS_JSON))
+    field_names = {f["fieldname"] for f in doc.get("fields", []) if "fieldname" in f}
+    for expected in [
+        "hero_headline",
+        "hero_subtitle",
+        "hero_image",
+        "hero_cta_text",
+        "hero_cta_url",
+        "show_packages",
+        "show_reviews",
+        "show_contact",
+        "value_props_json",
+    ]:
+        assert expected in field_names
+

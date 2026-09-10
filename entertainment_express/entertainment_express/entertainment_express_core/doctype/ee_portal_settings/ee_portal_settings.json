@@ -25,6 +25,16 @@
   "email_from_name",
   "primary_custom_domain",
   "review_url",
+  "section_website",
+  "hero_headline",
+  "hero_subtitle",
+  "hero_image",
+  "hero_cta_text",
+  "hero_cta_url",
+  "show_packages",
+  "show_reviews",
+  "show_contact",
+  "value_props_json",
   "section_embed",
   "public_embed_key",
   "section_flags",
@@ -146,6 +156,61 @@
    "fieldname": "review_url",
    "fieldtype": "Data",
    "label": "Review link"
+  },
+  {
+   "fieldname": "section_website",
+   "fieldtype": "Section Break",
+   "label": "Website Builder"
+  },
+  {
+   "fieldname": "hero_headline",
+   "fieldtype": "Data",
+   "label": "Hero Headline"
+  },
+  {
+   "fieldname": "hero_subtitle",
+   "fieldtype": "Small Text",
+   "label": "Hero Subtitle"
+  },
+  {
+   "fieldname": "hero_image",
+   "fieldtype": "Attach Image",
+   "label": "Hero Image"
+  },
+  {
+   "default": "Book Your Event",
+   "fieldname": "hero_cta_text",
+   "fieldtype": "Data",
+   "label": "Hero CTA Text"
+  },
+  {
+   "default": "/book",
+   "fieldname": "hero_cta_url",
+   "fieldtype": "Data",
+   "label": "Hero CTA URL"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_packages",
+   "fieldtype": "Check",
+   "label": "Show Featured Packages"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_reviews",
+   "fieldtype": "Check",
+   "label": "Show Trust & Reviews"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_contact",
+   "fieldtype": "Check",
+   "label": "Show Quick Quote Form"
+  },
+  {
+   "fieldname": "value_props_json",
+   "fieldtype": "Small Text",
+   "label": "Value Props JSON"
   },
   {
    "fieldname": "section_embed",

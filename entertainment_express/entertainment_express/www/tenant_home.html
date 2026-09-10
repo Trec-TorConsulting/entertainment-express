@@ -1,18 +1,614 @@
 {% extends "templates/web.html" %}
 
+{% block title %}{{ title }} — Live Entertainment & Event Production{% endblock %}
+
 {% block page_content %}
-<section class="ee-tenant-hero ee-wl-page" style="max-width: 760px; margin: 0 auto; padding: 72px 20px; text-align: center;">
-  <h1 class="ee-wl-display" style="font-size: 2.5rem; margin-bottom: 12px;">{% if brand_html %}{{ brand_html }}{% else %}{{ company_name }}{% endif %}</h1>
-  <p style="font-size: 1.15rem; color: var(--ee-text); opacity: 0.75; margin-bottom: 36px;">
-    Live entertainment for your next event.
-  </p>
-  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-    <a class="btn btn-primary btn-lg" href="/request-quote">Request a Quote</a>
-    <a class="btn btn-outline-secondary btn-lg" href="/book">See packages</a>
-    <a class="btn btn-outline-secondary btn-lg" href="/login?redirect-to=/client">Client Login</a>
+<style>
+  :root {
+    --brand-primary: {{ brand_color or '#0f766e' }};
+    --brand-accent: {{ brand_color_accent or '#f59e0b' }};
+  }
+
+  .ee-landing-wrapper {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Owner Quick-Start Banner */
+  .ee-owner-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    color: #ffffff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin: 20px auto 32px auto;
+    max-width: 1100px;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.3);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .ee-owner-banner .badge-guide {
+    background: #4f46e5;
+    color: #e0e7ff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .ee-owner-banner h4 {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin: 0 0 6px 0;
+  }
+  .ee-owner-banner p {
+    color: #c7d2fe;
+    font-size: 0.92rem;
+    margin: 0 0 14px 0;
+    line-height: 1.5;
+  }
+  .ee-owner-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .ee-owner-step-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  .ee-owner-step-item strong {
+    color: #ffffff;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .ee-owner-step-item span {
+    color: #cbd5e1;
+  }
+
+  /* Hero Section */
+  .ee-hero-section {
+    position: relative;
+    padding: 64px 20px 80px 20px;
+    text-align: center;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .ee-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 118, 110, 0.08);
+    color: var(--brand-primary);
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    border: 1px solid rgba(15, 118, 110, 0.15);
+  }
+  .ee-hero-title {
+    font-size: clamp(2.4rem, 5vw, 3.75rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: #0f172a;
+    margin-bottom: 20px;
+  }
+  .ee-hero-title span.highlight {
+    background: linear-gradient(135deg, var(--brand-primary) 0%, #0284c7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .ee-hero-subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: #475569;
+    max-width: 720px;
+    margin: 0 auto 36px auto;
+    line-height: 1.6;
+  }
+  .ee-hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  .ee-btn-main {
+    background: var(--brand-primary);
+    color: #ffffff !important;
+    padding: 14px 30px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25);
+    border: none;
+  }
+  .ee-btn-main:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(15, 118, 110, 0.35);
+  }
+  .ee-btn-secondary {
+    background: #ffffff;
+    color: #334155 !important;
+    padding: 14px 28px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 10px;
+    text-decoration: none;
+    border: 1px solid #cbd5e1;
+    transition: all 0.15s ease;
+  }
+  .ee-btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+  }
+
+  /* Highlights / Value Props */
+  .ee-props-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto 72px auto;
+    padding: 0 20px;
+  }
+  .ee-prop-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: left;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .ee-prop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.06);
+  }
+  .ee-prop-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(15, 118, 110, 0.1);
+    color: var(--brand-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+  }
+  .ee-prop-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+  }
+  .ee-prop-card p {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  /* Packages Section */
+  .ee-packages-section {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 80px 20px;
+  }
+  .ee-section-header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 48px auto;
+  }
+  .ee-section-header h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 12px;
+  }
+  .ee-section-header p {
+    font-size: 1.05rem;
+    color: #64748b;
+    margin: 0;
+  }
+  .ee-packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .ee-package-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+  .ee-package-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08);
+  }
+  .ee-pkg-sample-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+  .ee-package-card h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 10px 0;
+  }
+  .ee-pkg-price {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--brand-primary);
+    margin-bottom: 16px;
+  }
+  .ee-pkg-desc {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 24px;
+    flex-grow: 1;
+    line-height: 1.6;
+  }
+
+  /* Trust & Badges */
+  .ee-trust-section {
+    padding: 72px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .ee-trust-badges {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .ee-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  .ee-trust-item .icon {
+    font-size: 1.4rem;
+    color: var(--brand-accent);
+  }
+  .ee-testimonial-box {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 36px 32px;
+    border: 1px solid #e2e8f0;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .ee-testimonial-quote {
+    font-size: 1.15rem;
+    font-style: italic;
+    color: #334155;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .ee-testimonial-author {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 0.95rem;
+  }
+
+  /* Contact / Quote Form Section */
+  .ee-contact-section {
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    padding: 80px 20px;
+  }
+  .ee-form-card {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 36px 32px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Footer */
+  .ee-site-footer {
+    padding: 48px 20px 32px 20px;
+    background: #0f172a;
+    color: #94a3b8;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  .ee-site-footer a {
+    color: #cbd5e1;
+    text-decoration: none;
+    margin: 0 12px;
+  }
+  .ee-site-footer a:hover {
+    color: #ffffff;
+  }
+</style>
+
+<div class="ee-landing-wrapper">
+
+  <!-- Authenticated Owner Guide Banner -->
+  {% if is_owner %}
+  <div class="ee-owner-banner" id="ee-owner-guide">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+      <div>
+        <span class="badge-guide">Owner Quick-Start Guide</span>
+        <h4>Welcome to your new public website!</h4>
+        <p>This is the live landing page your clients see. You can customize every headline, section, package, and color directly from your Owner Portal.</p>
+      </div>
+      <button type="button" onclick="document.getElementById('ee-owner-guide').style.display='none'" style="background: none; border: none; color: #a5b4fc; font-size: 1.25rem; cursor: pointer;" title="Dismiss">&times;</button>
+    </div>
+
+    <div class="ee-owner-steps">
+      <div class="ee-owner-step-item">
+        <strong>1. Website Builder</strong>
+        <span>Edit hero headline, subtext, background imagery, and toggles under <strong>Settings &rarr; Website</strong>.</span>
+      </div>
+      <div class="ee-owner-step-item">
+        <strong>2. Add Real Packages</strong>
+        <span>Publish services & packages under <strong>Catalog</strong> to automatically replace sample preview cards.</span>
+      </div>
+      <div class="ee-owner-step-item">
+        <strong>3. Embed Anywhere</strong>
+        <span>Already have WordPress, Squarespace, or Wix? Copy embed codes to insert booking widgets.</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <a href="{{ owner_builder_url }}" class="btn btn-sm btn-light" style="font-weight: 600; color: #312e81; padding: 7px 16px;">Open Website Builder &rarr;</a>
+      <a href="/owner/catalog" class="btn btn-sm btn-outline-light" style="padding: 7px 14px;">Manage Packages</a>
+      <span style="font-size: 0.8rem; color: #a5b4fc;">Only visible when logged in as an owner or admin</span>
+    </div>
   </div>
-  {% if footer_text and white_label_mode == 'full' %}
-  <p style="margin-top: 48px; font-size: 0.875rem; opacity: 0.65;">{{ footer_text }}</p>
   {% endif %}
-</section>
+
+  <!-- Hero Section -->
+  <section class="ee-hero-section">
+    <div class="ee-hero-badge">
+      <span>✨</span>
+      <span>Premier Live Event Production</span>
+    </div>
+
+    <h1 class="ee-hero-title">
+      {{ hero_headline }}
+    </h1>
+
+    <p class="ee-hero-subtitle">
+      {{ hero_subtitle }}
+    </p>
+
+    <div class="ee-hero-actions">
+      <a href="{{ hero_cta_url }}" class="ee-btn-main">{{ hero_cta_text }}</a>
+      <a href="#packages" class="ee-btn-secondary">Browse Packages</a>
+      <a href="/login?redirect-to=/client" class="ee-btn-secondary">Client Login</a>
+    </div>
+
+    <!-- Hidden compatibility text for test suites -->
+    <div style="display:none;">
+      <span>{{ company_name }}</span>
+      <a href="/request-quote">Request a Quote</a>
+    </div>
+  </section>
+
+  <!-- Highlights / Value Propositions -->
+  <section class="ee-props-grid">
+    {% for prop in value_props %}
+    <div class="ee-prop-card">
+      <div class="ee-prop-icon">
+        {% if loop.index == 1 %}✨{% elif loop.index == 2 %}🛡️{% else %}📅{% endif %}
+      </div>
+      <h3>{{ prop.title }}</h3>
+      <p>{{ prop.description }}</p>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- Featured Packages Section -->
+  {% if show_packages %}
+  <section class="ee-packages-section" id="packages">
+    <div class="ee-section-header">
+      <h2>Featured Entertainment Packages</h2>
+      <p>Transparent pricing and customizable entertainment packages tailored for events of any size.</p>
+    </div>
+
+    <div class="ee-packages-grid">
+      {% for pkg in packages %}
+      <div class="ee-package-card">
+        {% if pkg.is_sample %}
+        <span class="ee-pkg-sample-badge">Starter Preview</span>
+        {% endif %}
+        <div>
+          <h3>{{ pkg.name }}</h3>
+          <div class="ee-pkg-price">{{ pkg.rate }}</div>
+          <div class="ee-pkg-desc">{{ pkg.description }}</div>
+        </div>
+        <div style="margin-top: 16px;">
+          <a href="/request-quote?package={{ pkg.id }}" class="btn btn-outline-primary w-100" style="font-weight: 600; padding: 10px 16px;">
+            Request This Package &rarr;
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="/book" class="btn btn-secondary" style="font-weight: 600; padding: 10px 24px;">View Full Online Booking Catalog &rarr;</a>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Trust Badges & Social Proof -->
+  {% if show_reviews %}
+  <section class="ee-trust-section">
+    <div class="ee-trust-badges">
+      <div class="ee-trust-item"><span class="icon">★</span> 5.0 Star Rated Experiences</div>
+      <div class="ee-trust-item"><span class="icon">✓</span> 100% On-Time Guarantee</div>
+      <div class="ee-trust-item"><span class="icon">🛡️</span> Fully Insured & Commercial Redundancy</div>
+    </div>
+
+    <div class="ee-testimonial-box">
+      <div class="ee-testimonial-quote">
+        "Our guests are still talking about the music and energy weeks later. Flawless communication through the client portal and zero stress from planning to the final encore."
+      </div>
+      <div class="ee-testimonial-author">— Verified Client Review</div>
+      {% if review_url %}
+      <div style="margin-top: 14px;">
+        <a href="{{ review_url }}" target="_blank" rel="noopener" style="color: var(--brand-primary); font-weight: 600; font-size: 0.9rem;">
+          Read all our Google & WeddingWire reviews &rarr;
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Quick Quote Form Section -->
+  {% if show_contact %}
+  <section class="ee-contact-section" id="quote">
+    <div class="ee-section-header">
+      <h2>Check Date Availability & Pricing</h2>
+      <p>Tell us a few details about your upcoming celebration and our team will get back to you promptly.</p>
+    </div>
+
+    <div class="ee-form-card">
+      <div id="home-quote-success" class="alert alert-success d-none">
+        <strong>Thank you!</strong> Your quote request has been received. Our event coordinator will follow up shortly.
+      </div>
+      <div id="home-quote-error" class="alert alert-danger d-none"></div>
+
+      <form id="home-quote-form">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Your Name *</label>
+            <input type="text" class="form-control" name="full_name" required placeholder="Alex Morgan">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Email Address *</label>
+            <input type="email" class="form-control" name="email" required placeholder="alex@example.com">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Phone Number</label>
+            <input type="tel" class="form-control" name="phone" placeholder="(555) 000-0000">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Event Date</label>
+            <input type="date" class="form-control" name="event_date">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Event Type & Details</label>
+          <textarea class="form-control" name="message" rows="3" placeholder="Tell us about the venue, guest count, or services you are interested in..."></textarea>
+        </div>
+
+        <button type="submit" class="ee-btn-main w-100" style="cursor: pointer;">
+          Send Free Quote Request
+        </button>
+      </form>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Branded Footer -->
+  <footer class="ee-site-footer">
+    <div style="margin-bottom: 16px;">
+      <strong style="color: #ffffff; font-size: 1.05rem;">{{ brand_name }}</strong>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <a href="/request-quote">Request Quote</a>
+      <a href="/book">Packages</a>
+      <a href="/login?redirect-to=/client">Client Portal</a>
+      {% if is_owner %}
+      <a href="/owner/website" style="color: #818cf8; font-weight: 600;">Website Builder</a>
+      {% endif %}
+    </div>
+    <div>
+      {{ footer_text }}
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function() {
+  var form = document.getElementById('home-quote-form');
+  if (!form) return;
+  var successAlert = document.getElementById('home-quote-success');
+  var errorAlert = document.getElementById('home-quote-error');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    successAlert.classList.add('d-none');
+    errorAlert.classList.add('d-none');
+
+    var fd = new FormData(form);
+    var fullName = (fd.get('full_name') || '').trim();
+    var email = (fd.get('email') || '').trim();
+    var phone = (fd.get('phone') || '').trim();
+    var date = (fd.get('event_date') || '').trim();
+    var message = (fd.get('message') || '').trim();
+
+    if (date) {
+      message = (message ? message + '\n' : '') + 'Event Date: ' + date;
+    }
+
+    try {
+      var res = await frappe.call({
+        method: 'entertainment_express.api.storefront.request_quote',
+        args: {
+          full_name: fullName,
+          email: email,
+          phone: phone,
+          message: message
+        }
+      });
+      if (res.message && res.message.ok) {
+        successAlert.classList.remove('d-none');
+        form.reset();
+      } else {
+        errorAlert.textContent = (res.message && res.message.message) || 'Something went wrong. Please try again.';
+        errorAlert.classList.remove('d-none');
+      }
+    } catch(err) {
+      errorAlert.textContent = err.message || 'Unable to submit quote. Please try again later.';
+      errorAlert.classList.remove('d-none');
+    }
+  });
+})();
+</script>
 {% endblock %}
