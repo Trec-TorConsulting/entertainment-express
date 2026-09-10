@@ -1,0 +1,1 @@
+import{j as e}from"../main.js";function i({label:r,children:s}){return e.jsxs("label",{style:{display:"grid",gap:"0.35rem"},children:[e.jsx("span",{style:{color:"var(--ee-muted)",fontSize:"0.9rem"},children:r}),s]})}export{i as F};

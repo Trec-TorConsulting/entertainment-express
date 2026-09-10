@@ -1,7 +1,14 @@
 {
-  "_Card-DIXw2lJG.js": {
-    "file": "chunks/Card-DIXw2lJG.js",
+  "_Card-ObenK-NM.js": {
+    "file": "chunks/Card-ObenK-NM.js",
     "name": "Card",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_FormField-C2f0CBai.js": {
+    "file": "chunks/FormField-C2f0CBai.js",
+    "name": "FormField",
     "imports": [
       "src/main.tsx"
     ]
@@ -13,8 +20,8 @@
       "src/main.tsx"
     ]
   },
-  "_Tabs-BkfuMmxh.js": {
-    "file": "chunks/Tabs-BkfuMmxh.js",
+  "_Tabs-_jIdSrnU.js": {
+    "file": "chunks/Tabs-_jIdSrnU.js",
     "name": "Tabs",
     "imports": [
       "src/main.tsx"
@@ -27,69 +34,240 @@
       "src/main.tsx"
     ]
   },
-  "_sparkles-CsKgCmAz.js": {
-    "file": "chunks/sparkles-CsKgCmAz.js",
+  "_download-9esHq2rv.js": {
+    "file": "chunks/download-9esHq2rv.js",
+    "name": "download",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_file-check-Bkwqht-i.js": {
+    "file": "chunks/file-check-Bkwqht-i.js",
+    "name": "file-check",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_lock-CMfOiZfI.js": {
+    "file": "chunks/lock-CMfOiZfI.js",
+    "name": "lock",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_map-pin-Dttfb3Sg.js": {
+    "file": "chunks/map-pin-Dttfb3Sg.js",
+    "name": "map-pin",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_music-BXp85xLp.js": {
+    "file": "chunks/music-BXp85xLp.js",
+    "name": "music",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_plus-CmLnDkbr.js": {
+    "file": "chunks/plus-CmLnDkbr.js",
+    "name": "plus",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_share-2-DhMiBjen.js": {
+    "file": "chunks/share-2-DhMiBjen.js",
+    "name": "share-2",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_shield-check-CNeY2glY.js": {
+    "file": "chunks/shield-check-CNeY2glY.js",
+    "name": "shield-check",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_sparkles-CcgyyRp4.js": {
+    "file": "chunks/sparkles-CcgyyRp4.js",
     "name": "sparkles",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "src/AppLegacy.tsx": {
-    "file": "chunks/AppLegacy-ZziSa9Yh.js",
-    "name": "AppLegacy",
-    "src": "src/AppLegacy.tsx",
-    "isDynamicEntry": true,
+  "_trash-2-Bn-xFj4u.js": {
+    "file": "chunks/trash-2-Bn-xFj4u.js",
+    "name": "trash-2",
     "imports": [
       "src/main.tsx"
     ]
   },
+  "_video-DkI5F9DO.js": {
+    "file": "chunks/video-DkI5F9DO.js",
+    "name": "video",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/app/routes/account/AccountPage.tsx": {
+    "file": "chunks/AccountPage-DmBUoGx9.js",
+    "name": "AccountPage",
+    "src": "src/app/routes/account/AccountPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card-ObenK-NM.js",
+      "_PageHeader-gXYNovKC.js",
+      "_FormField-C2f0CBai.js"
+    ]
+  },
+  "src/app/routes/appointments/AppointmentsPage.tsx": {
+    "file": "chunks/AppointmentsPage-COKlqAtz.js",
+    "name": "AppointmentsPage",
+    "src": "src/app/routes/appointments/AppointmentsPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card-ObenK-NM.js",
+      "_PageHeader-gXYNovKC.js",
+      "_FormField-C2f0CBai.js",
+      "_lock-CMfOiZfI.js",
+      "_plus-CmLnDkbr.js",
+      "_video-DkI5F9DO.js",
+      "_circle-check-DCW8S5F8.js"
+    ]
+  },
+  "src/app/routes/chat/ChatPage.tsx": {
+    "file": "chunks/ChatPage-CqNQv0j2.js",
+    "name": "ChatPage",
+    "src": "src/app/routes/chat/ChatPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card-ObenK-NM.js",
+      "_PageHeader-gXYNovKC.js"
+    ]
+  },
+  "src/app/routes/documents/DocumentsPage.tsx": {
+    "file": "chunks/DocumentsPage-UlqNLPrI.js",
+    "name": "DocumentsPage",
+    "src": "src/app/routes/documents/DocumentsPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card-ObenK-NM.js",
+      "_PageHeader-gXYNovKC.js",
+      "_FormField-C2f0CBai.js",
+      "_lock-CMfOiZfI.js",
+      "_circle-check-DCW8S5F8.js",
+      "_shield-check-CNeY2glY.js",
+      "_download-9esHq2rv.js"
+    ]
+  },
   "src/app/routes/event/EventDetailPage.tsx": {
-    "file": "chunks/EventDetailPage-DURadC_E.js",
+    "file": "chunks/EventDetailPage-Bd308cF5.js",
     "name": "EventDetailPage",
     "src": "src/app/routes/event/EventDetailPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_Card-DIXw2lJG.js",
-      "_Tabs-BkfuMmxh.js",
+      "_Card-ObenK-NM.js",
+      "_Tabs-_jIdSrnU.js",
+      "_sparkles-CcgyyRp4.js",
+      "_music-BXp85xLp.js",
+      "_file-check-Bkwqht-i.js",
+      "_download-9esHq2rv.js",
+      "_map-pin-Dttfb3Sg.js",
       "_circle-check-DCW8S5F8.js"
     ]
   },
+  "src/app/routes/events/EventsListPage.tsx": {
+    "file": "chunks/EventsListPage-BqbvBjLW.js",
+    "name": "EventsListPage",
+    "src": "src/app/routes/events/EventsListPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card-ObenK-NM.js",
+      "_PageHeader-gXYNovKC.js",
+      "_map-pin-Dttfb3Sg.js",
+      "_sparkles-CcgyyRp4.js"
+    ]
+  },
   "src/app/routes/home/HomePage.tsx": {
-    "file": "chunks/HomePage-D2i7doUz.js",
+    "file": "chunks/HomePage-D9efBXn2.js",
     "name": "HomePage",
     "src": "src/app/routes/home/HomePage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_Card-DIXw2lJG.js",
+      "_Card-ObenK-NM.js",
       "_PageHeader-gXYNovKC.js",
-      "_sparkles-CsKgCmAz.js"
+      "_sparkles-CcgyyRp4.js",
+      "_video-DkI5F9DO.js",
+      "_file-check-Bkwqht-i.js"
     ]
   },
   "src/app/routes/pay/PayPage.tsx": {
-    "file": "chunks/PayPage-DEdLWoeM.js",
+    "file": "chunks/PayPage-DrPL7Rk6.js",
     "name": "PayPage",
     "src": "src/app/routes/pay/PayPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_Card-DIXw2lJG.js",
+      "_Card-ObenK-NM.js",
       "_PageHeader-gXYNovKC.js",
+      "_lock-CMfOiZfI.js",
       "_circle-check-DCW8S5F8.js",
-      "_sparkles-CsKgCmAz.js"
+      "_download-9esHq2rv.js",
+      "_sparkles-CcgyyRp4.js",
+      "_shield-check-CNeY2glY.js"
+    ]
+  },
+  "src/app/routes/people/PeoplePage.tsx": {
+    "file": "chunks/PeoplePage-CMf3EVdh.js",
+    "name": "PeoplePage",
+    "src": "src/app/routes/people/PeoplePage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card-ObenK-NM.js",
+      "_PageHeader-gXYNovKC.js",
+      "_trash-2-Bn-xFj4u.js",
+      "_share-2-DhMiBjen.js"
+    ]
+  },
+  "src/app/routes/photos/PhotosPage.tsx": {
+    "file": "chunks/PhotosPage-Dw9fbVHX.js",
+    "name": "PhotosPage",
+    "src": "src/app/routes/photos/PhotosPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_Card-ObenK-NM.js",
+      "_PageHeader-gXYNovKC.js",
+      "_share-2-DhMiBjen.js",
+      "_music-BXp85xLp.js",
+      "_download-9esHq2rv.js"
     ]
   },
   "src/app/routes/planning/PlanningPage.tsx": {
-    "file": "chunks/PlanningPage-C9oKHIb3.js",
+    "file": "chunks/PlanningPage-lTbi7D1V.js",
     "name": "PlanningPage",
     "src": "src/app/routes/planning/PlanningPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_Card-DIXw2lJG.js",
-      "_Tabs-BkfuMmxh.js",
-      "_PageHeader-gXYNovKC.js"
+      "_Card-ObenK-NM.js",
+      "_Tabs-_jIdSrnU.js",
+      "_PageHeader-gXYNovKC.js",
+      "_FormField-C2f0CBai.js",
+      "_plus-CmLnDkbr.js",
+      "_trash-2-Bn-xFj4u.js",
+      "_circle-check-DCW8S5F8.js",
+      "_music-BXp85xLp.js"
     ]
   },
   "src/main.tsx": {
@@ -99,10 +277,16 @@
     "isEntry": true,
     "dynamicImports": [
       "src/app/routes/home/HomePage.tsx",
+      "src/app/routes/events/EventsListPage.tsx",
       "src/app/routes/event/EventDetailPage.tsx",
       "src/app/routes/pay/PayPage.tsx",
       "src/app/routes/planning/PlanningPage.tsx",
-      "src/AppLegacy.tsx"
+      "src/app/routes/documents/DocumentsPage.tsx",
+      "src/app/routes/appointments/AppointmentsPage.tsx",
+      "src/app/routes/people/PeoplePage.tsx",
+      "src/app/routes/chat/ChatPage.tsx",
+      "src/app/routes/photos/PhotosPage.tsx",
+      "src/app/routes/account/AccountPage.tsx"
     ],
     "css": [
       "assets/main.css"
