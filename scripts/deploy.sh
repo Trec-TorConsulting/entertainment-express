@@ -33,12 +33,12 @@ if kubectl -n "${NS}" get statefulset mariadb >/dev/null 2>&1; then
 fi
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then
-  python3 "${ROOT}/scripts/k8s_apply.py" --dry-run "${APPLY_ARGS[@]}" "${MANIFEST}"
+  python3 "${ROOT}/scripts/k8s_apply.py" --dry-run ${APPLY_ARGS[@]+"${APPLY_ARGS[@]}"} "${MANIFEST}"
   echo "TENANT_HOST=${TENANT_HOST} (curl skipped in --dry-run)" >&2
   exit 0
 fi
 
-python3 "${ROOT}/scripts/k8s_apply.py" "${APPLY_ARGS[@]}" "${MANIFEST}" \
+python3 "${ROOT}/scripts/k8s_apply.py" ${APPLY_ARGS[@]+"${APPLY_ARGS[@]}"} "${MANIFEST}" \
   | kubectl apply -f -
 
 kubectl -n "${NS}" rollout status deploy/frappe-python --timeout=300s
