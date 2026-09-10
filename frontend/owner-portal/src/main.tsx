@@ -6,7 +6,12 @@ import { OwnerApp } from "./App";
 import "../../portal-kit/src/tokens.css";
 
 const isDev = import.meta.env.DEV;
-const basename = isDev ? "/assets/entertainment_express/owner" : "/owner";
+const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+const basename = isDev
+  ? "/assets/entertainment_express/owner"
+  : pathname.startsWith("/owner")
+  ? "/owner"
+  : "/";
 
 const rootEl = document.getElementById("root");
 if (rootEl) {

@@ -397,14 +397,12 @@ def _is_control_plane() -> bool:
 def get_website_user_home_page(user: str | None) -> str | None:
     """Resolve the website home (Frappe get_website_user_home_page hook).
 
-    - Logged-in customers -> the /client portal.
-    - Everyone else (guests, staff) -> the public home: EE SaaS marketing on the
-      control plane, or the tenant's own branded landing on a tenant site.
-    Staff still reach the desk via /app on login (Frappe handles that), so this
-    only governs the public site root and "View Website".
+    The public site root (/) always serves the public home: EE SaaS marketing
+    on the control plane, or the tenant's own branded landing (with in-context
+    Owner Quick-Start guide for authenticated owners) on tenant sites.
+    Role-based cockpit SPAs (/owner, /employee, /client) are mounted at their
+    own dedicated paths.
     """
-    if user and user != "Guest":
-        return resolve_home_portal(user)
     if is_coming_soon_enabled() and not has_beta_access():
         return "coming_soon"
     return EE_MARKETING_HOME if _is_control_plane() else TENANT_HOME
