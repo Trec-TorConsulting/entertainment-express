@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { isGuest } from "../../layouts/ClientLayout";
 import { getSessionBootstrap } from "@portal-kit";
+import { formatMoney } from "../../utils/money";
 
 export const PayPage: React.FC = () => {
   const navigate = useNavigate();
@@ -253,19 +254,19 @@ export const PayPage: React.FC = () => {
         <Card elevated className="p-4 text-center">
           <span className="text-[10px] uppercase font-bold text-[var(--ee-muted)] block">Total Event Cost</span>
           <span className="font-mono font-bold text-xl text-[var(--ee-text)] tabular-nums">
-            ${money?.owed || "0.00"}
+            {formatMoney(money?.owed)}
           </span>
         </Card>
         <Card elevated className="p-4 text-center">
           <span className="text-[10px] uppercase font-bold text-[var(--ee-muted)] block">Total Paid to Date</span>
           <span className="font-mono font-bold text-xl text-[var(--ee-success)] tabular-nums">
-            ${money?.paid || "0.00"}
+            {formatMoney(money?.paid)}
           </span>
         </Card>
         <Card elevated className="p-4 text-center border-[var(--ee-brand-border)] bg-[var(--ee-brand-soft)]/20">
           <span className="text-[10px] uppercase font-bold text-[var(--ee-brand)] block">Remaining Balance</span>
           <span className="font-mono font-bold text-xl text-[var(--ee-brand)] tabular-nums">
-            ${money?.remaining || "0.00"}
+            {formatMoney(money?.remaining)}
           </span>
         </Card>
       </div>

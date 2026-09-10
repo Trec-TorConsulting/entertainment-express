@@ -20,6 +20,7 @@ import {
   MessageSquare, UserPlus, Video, AlertCircle
 } from "lucide-react";
 import { isGuest } from "../../layouts/ClientLayout";
+import { formatMoney } from "../../utils/money";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -141,7 +142,7 @@ export const HomePage: React.FC = () => {
     onClick: () => navigate(`/documents?booking=${encodeURIComponent(activeEvent?.name || "")}`)
   } : action?.key === "pay" || Number(money?.remaining || 0) > 0 ? {
     title: "Confirm Your Date with a Deposit",
-    description: `A balance of $${money?.remaining || "500.00"} is due. Submit payment securely online with card, ACH, or mobile wallet.`,
+    description: `A balance of ${formatMoney(money?.remaining || "500.00")} is due. Submit payment securely online with card, ACH, or mobile wallet.`,
     buttonLabel: "Pay Deposit Now",
     badge: "Payment Due",
     variant: "warning" as const,
@@ -294,19 +295,19 @@ export const HomePage: React.FC = () => {
               <div>
                 <span className="text-[10px] uppercase font-bold text-[var(--ee-muted)] block">Total Billed</span>
                 <span className="font-mono font-bold text-base sm:text-lg tabular-nums text-[var(--ee-text)]">
-                  ${money?.owed || "0.00"}
+                  {formatMoney(money?.owed)}
                 </span>
               </div>
               <div className="border-x border-[var(--ee-border)]">
                 <span className="text-[10px] uppercase font-bold text-[var(--ee-muted)] block">Paid So Far</span>
                 <span className="font-mono font-bold text-base sm:text-lg tabular-nums text-[var(--ee-success)]">
-                  ${money?.paid || "0.00"}
+                  {formatMoney(money?.paid)}
                 </span>
               </div>
               <div>
                 <span className="text-[10px] uppercase font-bold text-[var(--ee-muted)] block">Balance Due</span>
                 <span className="font-mono font-bold text-base sm:text-lg tabular-nums text-[var(--ee-brand)]">
-                  ${money?.remaining || "0.00"}
+                  {formatMoney(money?.remaining)}
                 </span>
               </div>
             </div>

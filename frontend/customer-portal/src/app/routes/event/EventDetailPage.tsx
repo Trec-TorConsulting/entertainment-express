@@ -21,6 +21,7 @@ import {
   CreditCard, Music, Sparkles, MessageSquare, Download,
   ExternalLink, UserPlus, FileCheck, ArrowRight
 } from "lucide-react";
+import { formatMoney } from "../../utils/money";
 
 export const EventDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -200,11 +201,11 @@ export const EventDetailPage: React.FC = () => {
           <CardContent className="space-y-3 text-xs">
             <div className="flex justify-between py-1.5 border-b border-[var(--ee-border)]">
               <span className="text-[var(--ee-muted)]">Contract Total</span>
-              <span className="font-mono font-bold text-[var(--ee-text)]">{booking?.grand_total || "$0.00"}</span>
+              <span className="font-mono font-bold text-[var(--ee-text)]">{formatMoney(booking?.grand_total)}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--ee-border)]">
               <span className="text-[var(--ee-muted)]">Remaining Balance</span>
-              <span className="font-mono font-bold text-[var(--ee-brand)]">{booking?.balance_due || "$0.00"}</span>
+              <span className="font-mono font-bold text-[var(--ee-brand)]">{formatMoney(booking?.balance_due)}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--ee-border)]">
               <span className="text-[var(--ee-muted)]">Deposit Status</span>

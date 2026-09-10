@@ -62,6 +62,13 @@
       "src/main.tsx"
     ]
   },
+  "_money-BhDRm8A1.js": {
+    "file": "chunks/money-BhDRm8A1.js",
+    "name": "money",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
   "_music-BXp85xLp.js": {
     "file": "chunks/music-BXp85xLp.js",
     "name": "music",
@@ -86,13 +93,6 @@
   "_shield-check-CNeY2glY.js": {
     "file": "chunks/shield-check-CNeY2glY.js",
     "name": "shield-check",
-    "imports": [
-      "src/main.tsx"
-    ]
-  },
-  "_sparkles-CcgyyRp4.js": {
-    "file": "chunks/sparkles-CcgyyRp4.js",
-    "name": "sparkles",
     "imports": [
       "src/main.tsx"
     ]
@@ -167,7 +167,7 @@
     ]
   },
   "src/app/routes/event/EventDetailPage.tsx": {
-    "file": "chunks/EventDetailPage-Bd308cF5.js",
+    "file": "chunks/EventDetailPage-DwUC1xzL.js",
     "name": "EventDetailPage",
     "src": "src/app/routes/event/EventDetailPage.tsx",
     "isDynamicEntry": true,
@@ -175,7 +175,7 @@
       "src/main.tsx",
       "_Card-ObenK-NM.js",
       "_Tabs-_jIdSrnU.js",
-      "_sparkles-CcgyyRp4.js",
+      "_money-BhDRm8A1.js",
       "_music-BXp85xLp.js",
       "_file-check-Bkwqht-i.js",
       "_download-9esHq2rv.js",
@@ -184,7 +184,7 @@
     ]
   },
   "src/app/routes/events/EventsListPage.tsx": {
-    "file": "chunks/EventsListPage-BqbvBjLW.js",
+    "file": "chunks/EventsListPage-BWf2LjTq.js",
     "name": "EventsListPage",
     "src": "src/app/routes/events/EventsListPage.tsx",
     "isDynamicEntry": true,
@@ -192,12 +192,12 @@
       "src/main.tsx",
       "_Card-ObenK-NM.js",
       "_PageHeader-gXYNovKC.js",
-      "_map-pin-Dttfb3Sg.js",
-      "_sparkles-CcgyyRp4.js"
+      "_money-BhDRm8A1.js",
+      "_map-pin-Dttfb3Sg.js"
     ]
   },
   "src/app/routes/home/HomePage.tsx": {
-    "file": "chunks/HomePage-D9efBXn2.js",
+    "file": "chunks/HomePage-D3EbA550.js",
     "name": "HomePage",
     "src": "src/app/routes/home/HomePage.tsx",
     "isDynamicEntry": true,
@@ -205,13 +205,13 @@
       "src/main.tsx",
       "_Card-ObenK-NM.js",
       "_PageHeader-gXYNovKC.js",
-      "_sparkles-CcgyyRp4.js",
+      "_money-BhDRm8A1.js",
       "_video-DkI5F9DO.js",
       "_file-check-Bkwqht-i.js"
     ]
   },
   "src/app/routes/pay/PayPage.tsx": {
-    "file": "chunks/PayPage-DrPL7Rk6.js",
+    "file": "chunks/PayPage-CyIPUVOd.js",
     "name": "PayPage",
     "src": "src/app/routes/pay/PayPage.tsx",
     "isDynamicEntry": true,
@@ -219,10 +219,10 @@
       "src/main.tsx",
       "_Card-ObenK-NM.js",
       "_PageHeader-gXYNovKC.js",
+      "_money-BhDRm8A1.js",
       "_lock-CMfOiZfI.js",
       "_circle-check-DCW8S5F8.js",
       "_download-9esHq2rv.js",
-      "_sparkles-CcgyyRp4.js",
       "_shield-check-CNeY2glY.js"
     ]
   },

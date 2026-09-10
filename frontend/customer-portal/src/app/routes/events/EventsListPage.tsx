@@ -14,6 +14,7 @@ import {
   Calendar, MapPin, Clock, ArrowRight, Search,
   CheckCircle2, CreditCard, Sparkles, Filter
 } from "lucide-react";
+import { formatMoney } from "../../utils/money";
 
 export const EventsListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -155,9 +156,9 @@ export const EventsListPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <CreditCard className="w-3.5 h-3.5 text-[var(--ee-brand)]" />
                     <span>
-                      Total {ev.grand_total || "$0.00"} · Balance{" "}
+                      Total {formatMoney(ev.grand_total)} · Balance{" "}
                       <strong className={hasBalance ? "text-[var(--ee-brand)]" : "text-[var(--ee-success)]"}>
-                        {ev.balance_due || "$0.00"}
+                        {formatMoney(ev.balance_due)}
                       </strong>
                     </span>
                   </div>
