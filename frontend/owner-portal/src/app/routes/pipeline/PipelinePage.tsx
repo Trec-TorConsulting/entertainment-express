@@ -129,8 +129,8 @@ export const PipelinePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton width="220px" height="2rem" />
+      <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in-50 duration-200 p-2 sm:p-0">
+        <Skeleton width="220px" height="2.5rem" />
         <Skeleton height="3rem" />
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -142,16 +142,21 @@ export const PipelinePage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-200">
-      <PageHeader
-        title="Inquiries & Pipeline"
-        subtitle="Manage client inquiries, customize proposal packages, and convert quotes into confirmed bookings."
-        badge={
+    <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in-50 duration-300">
+      {/* Friendly Hero Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)]">
+            Inquiries & Pipeline
+          </h1>
+          <p className="text-base text-[var(--ee-muted)]">
+            Track inquiries, customize proposal packages, and convert leads into confirmed bookings.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
           <Badge variant="brand" size="sm">
             {inquiries.length} Active Deals
           </Badge>
-        }
-        actions={
           <Button
             variant="primary"
             density="cockpit"
@@ -160,92 +165,96 @@ export const PipelinePage: React.FC = () => {
           >
             + New Inquiry
           </Button>
-        }
-      />
+        </div>
+      </div>
 
-      <FilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Filter deals by client, event, or status..."
-        chips={[
-          { id: "all", label: "All Inquiries", count: inquiries.length },
-          { id: "quote", label: "Quoted", count: inquiries.filter((i) => i.status?.toLowerCase().includes("quote")).length },
-          { id: "contract", label: "Contract Out", count: inquiries.filter((i) => i.status?.toLowerCase().includes("contract")).length },
-        ]}
-      />
+      <div className="space-y-4">
+        <FilterBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Filter deals by client, event, or status..."
+          chips={[
+            { id: "all", label: "All Inquiries", count: inquiries.length },
+            { id: "quote", label: "Quoted", count: inquiries.filter((i) => i.status?.toLowerCase().includes("quote")).length },
+            { id: "contract", label: "Contract Out", count: inquiries.filter((i) => i.status?.toLowerCase().includes("contract")).length },
+          ]}
+        />
 
-      <DataTable
-        id="owner-pipeline-table"
-        columns={[
-          {
-            key: "client_name",
-            label: "Client / Event",
-            render: (val, row) => (
-              <div>
-                <div className="font-semibold text-[var(--ee-text)]">{val || row.party || row.name}</div>
-                <div className="text-xs text-[var(--ee-muted)]">{row.event_type || row.package || "General Event"}</div>
-              </div>
-            )
-          },
-          {
-            key: "event_date",
-            label: "Event Date",
-            render: (val) => val || "TBD"
-          },
-          {
-            key: "total_amount",
-            label: "Deal Value",
-            align: "right",
-            render: (val, row) => (
-              <span className="font-mono tabular-nums font-medium">
-                {val || row.total || "—"}
-              </span>
-            )
-          },
-          {
-            key: "status",
-            label: "Stage",
-            align: "center",
-            render: (val) => {
-              const statusStr = val || "Inquiry";
-              const isQuote = statusStr.toLowerCase().includes("quote");
-              const isBooked = statusStr.toLowerCase().includes("booked") || statusStr.toLowerCase().includes("won");
+        <Card elevated className="overflow-hidden">
+          <DataTable
+            id="owner-pipeline-table"
+            columns={[
+              {
+                key: "client_name",
+                label: "Client / Event",
+                render: (val, row) => (
+                  <div>
+                    <div className="font-semibold text-[var(--ee-text)]">{val || row.party || row.name}</div>
+                    <div className="text-xs text-[var(--ee-muted)]">{row.event_type || row.package || "General Event"}</div>
+                  </div>
+                )
+              },
+              {
+                key: "event_date",
+                label: "Event Date",
+                render: (val) => val || "TBD"
+              },
+              {
+                key: "total_amount",
+                label: "Deal Value",
+                align: "right",
+                render: (val, row) => (
+                  <span className="font-mono tabular-nums font-medium">
+                    {val || row.total || "—"}
+                  </span>
+                )
+              },
+              {
+                key: "status",
+                label: "Stage",
+                align: "center",
+                render: (val) => {
+                  const statusStr = val || "Inquiry";
+                  const isQuote = statusStr.toLowerCase().includes("quote");
+                  const isBooked = statusStr.toLowerCase().includes("booked") || statusStr.toLowerCase().includes("won");
+                  return (
+                    <Badge
+                      variant={isBooked ? "success" : isQuote ? "brand" : "default"}
+                      size="sm"
+                    >
+                      {statusStr}
+                    </Badge>
+                  );
+                }
+              }
+            ]}
+            rows={inquiries.filter((row) => {
+              if (!searchQuery.trim()) return true;
+              const q = searchQuery.toLowerCase();
               return (
-                <Badge
-                  variant={isBooked ? "success" : isQuote ? "brand" : "default"}
-                  size="sm"
-                >
-                  {statusStr}
-                </Badge>
+                (row.client_name || "").toLowerCase().includes(q) ||
+                (row.party || "").toLowerCase().includes(q) ||
+                (row.event_type || "").toLowerCase().includes(q) ||
+                (row.status || "").toLowerCase().includes(q)
               );
-            }
-          }
-        ]}
-        rows={inquiries.filter((row) => {
-          if (!searchQuery.trim()) return true;
-          const q = searchQuery.toLowerCase();
-          return (
-            (row.client_name || "").toLowerCase().includes(q) ||
-            (row.party || "").toLowerCase().includes(q) ||
-            (row.event_type || "").toLowerCase().includes(q) ||
-            (row.status || "").toLowerCase().includes(q)
-          );
-        })}
-        onRowClick={(row) => openInquiryDetail(row)}
-        renderActions={(row) => (
-          <Button
-            variant="ghost"
-            density="cockpit"
-            onClick={(e) => {
-              e.stopPropagation();
-              openInquiryDetail(row);
-            }}
-            rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
-          >
-            Review
-          </Button>
-        )}
-      />
+            })}
+            onRowClick={(row) => openInquiryDetail(row)}
+            renderActions={(row) => (
+              <Button
+                variant="ghost"
+                density="cockpit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openInquiryDetail(row);
+                }}
+                rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
+              >
+                Review
+              </Button>
+            )}
+          />
+        </Card>
+      </div>
 
       {/* Flagship Split Workspace / RecordDrawer */}
       {selectedInquiry && (

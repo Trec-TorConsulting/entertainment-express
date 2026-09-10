@@ -63,10 +63,16 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
         { id: "plan", label: "Plan", icon: <Compass className="w-4 h-4" />, active: currentPath.startsWith("/plan"), onClick: () => navigate("/plan") },
         { id: "automations", label: "Reminders", icon: <Bell className="w-4 h-4" />, active: currentPath.startsWith("/automations"), onClick: () => navigate("/automations") },
         { id: "grow", label: "Grow", icon: <TrendingUp className="w-4 h-4" />, active: currentPath.startsWith("/grow"), onClick: () => navigate("/grow") },
+        { id: "move", label: "Move", icon: <Move className="w-4 h-4" />, active: currentPath.startsWith("/move"), onClick: () => navigate("/move") },
+      ]
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      items: [
+        { id: "brand", label: "Brand", icon: <Palette className="w-4 h-4" />, active: currentPath.startsWith("/brand"), onClick: () => navigate("/brand") },
         { id: "website", label: "Website", icon: <Globe className="w-4 h-4" />, active: currentPath.startsWith("/website"), onClick: () => navigate("/website") },
         { id: "coverage", label: "Coverage", icon: <Shield className="w-4 h-4" />, active: currentPath.startsWith("/coverage"), onClick: () => navigate("/coverage") },
-        { id: "move", label: "Move", icon: <Move className="w-4 h-4" />, active: currentPath.startsWith("/move"), onClick: () => navigate("/move") },
-        { id: "brand", label: "Brand", icon: <Palette className="w-4 h-4" />, active: currentPath.startsWith("/brand"), onClick: () => navigate("/brand") },
         { id: "connections", label: "Connections", icon: <Key className="w-4 h-4" />, active: currentPath.startsWith("/connections"), onClick: () => navigate("/connections") },
         { id: "security", label: "Security", icon: <Lock className="w-4 h-4" />, active: currentPath.startsWith("/security"), onClick: () => navigate("/security") },
       ]

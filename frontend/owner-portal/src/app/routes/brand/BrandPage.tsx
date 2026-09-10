@@ -82,8 +82,8 @@ export const BrandPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton width="220px" height="2rem" />
+      <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in-50 duration-200 p-2 sm:p-0">
+        <Skeleton width="220px" height="2.5rem" />
         <Skeleton height="3rem" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Skeleton height="20rem" />
@@ -94,11 +94,18 @@ export const BrandPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-200">
-      <PageHeader
-        title="Brand Identity & Appearance"
-        subtitle="Configure the visual identity for your owner dashboard, talent app, client booking portal, and automated proposals."
-        actions={
+    <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in-50 duration-300">
+      {/* Friendly Hero Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)]">
+            Brand Identity & Appearance
+          </h1>
+          <p className="text-base text-[var(--ee-muted)]">
+            Configure the visual identity for your dashboard, client booking portal, and proposals.
+          </p>
+        </div>
+        <div>
           <Button
             variant="primary"
             density="cockpit"
@@ -108,8 +115,8 @@ export const BrandPage: React.FC = () => {
           >
             Save Brand Settings
           </Button>
-        }
-      />
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Brand Controls */}

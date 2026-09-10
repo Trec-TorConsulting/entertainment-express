@@ -110,8 +110,8 @@ export const MoneyPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton width="240px" height="2rem" />
+      <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in-50 duration-200 p-2 sm:p-0">
+        <Skeleton width="240px" height="2.5rem" />
         <Skeleton height="3rem" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Skeleton height="7rem" />
@@ -210,63 +210,65 @@ export const MoneyPage: React.FC = () => {
 
   const invoicesTab = (
     <div className="space-y-4">
-      <DataTable
-        id="owner-invoices-table"
-        columns={[
-          {
-            key: "name",
-            label: "Invoice #",
-            render: (val) => <span className="font-mono font-medium text-xs">{val}</span>
-          },
-          {
-            key: "customer",
-            label: "Customer / Event",
-            render: (val, row) => (
-              <div>
-                <div className="font-semibold text-[var(--ee-text)]">{val || row.party}</div>
-                <div className="text-xs text-[var(--ee-muted)]">{row.event_name || "Event Service"}</div>
-              </div>
-            )
-          },
-          {
-            key: "due_date",
-            label: "Due Date",
-            render: (val) => <span className="text-xs">{val || "On receipt"}</span>
-          },
-          {
-            key: "grand_total",
-            label: "Amount",
-            align: "right",
-            render: (val, row) => (
-              <span className="font-mono font-bold tabular-nums text-[var(--ee-text)]">
-                {val || row.total || "$0.00"}
-              </span>
-            )
-          },
-          {
-            key: "status",
-            label: "Status",
-            align: "center",
-            render: (val) => (
-              <Badge variant={val === "Paid" ? "success" : val === "Overdue" ? "danger" : "warning"} size="sm">
-                {val || "Unpaid"}
-              </Badge>
-            )
-          }
-        ]}
-        rows={invoices}
-        onRowClick={(row) => navigate(`/money/${encodeURIComponent(row.name || row.id)}`)}
-        renderActions={(row) => (
-          <DropdownMenu
-            trigger={<Button variant="ghost" density="cockpit">Options</Button>}
-            items={[
-              { key: "dl", label: "Download PDF", icon: <Download className="w-3.5 h-3.5" />, onClick: () => handleInvoiceAction("download", row) },
-              { key: "rem", label: "Send Reminder", icon: <Send className="w-3.5 h-3.5" />, onClick: () => handleInvoiceAction("reminder", row) },
-              { key: "ref", label: "Refund / Adjust", icon: <RotateCcw className="w-3.5 h-3.5 text-[var(--ee-danger)]" />, destructive: true, separatorBefore: true, onClick: () => handleInvoiceAction("refund", row) }
-            ]}
-          />
-        )}
-      />
+      <Card elevated className="overflow-hidden">
+        <DataTable
+          id="owner-invoices-table"
+          columns={[
+            {
+              key: "name",
+              label: "Invoice #",
+              render: (val) => <span className="font-mono font-medium text-xs">{val}</span>
+            },
+            {
+              key: "customer",
+              label: "Customer / Event",
+              render: (val, row) => (
+                <div>
+                  <div className="font-semibold text-[var(--ee-text)]">{val || row.party}</div>
+                  <div className="text-xs text-[var(--ee-muted)]">{row.event_name || "Event Service"}</div>
+                </div>
+              )
+            },
+            {
+              key: "due_date",
+              label: "Due Date",
+              render: (val) => <span className="text-xs">{val || "On receipt"}</span>
+            },
+            {
+              key: "grand_total",
+              label: "Amount",
+              align: "right",
+              render: (val, row) => (
+                <span className="font-mono font-bold tabular-nums text-[var(--ee-text)]">
+                  {val || row.total || "$0.00"}
+                </span>
+              )
+            },
+            {
+              key: "status",
+              label: "Status",
+              align: "center",
+              render: (val) => (
+                <Badge variant={val === "Paid" ? "success" : val === "Overdue" ? "danger" : "warning"} size="sm">
+                  {val || "Unpaid"}
+                </Badge>
+              )
+            }
+          ]}
+          rows={invoices}
+          onRowClick={(row) => navigate(`/money/${encodeURIComponent(row.name || row.id)}`)}
+          renderActions={(row) => (
+            <DropdownMenu
+              trigger={<Button variant="ghost" density="cockpit">Options</Button>}
+              items={[
+                { key: "dl", label: "Download PDF", icon: <Download className="w-3.5 h-3.5" />, onClick: () => handleInvoiceAction("download", row) },
+                { key: "rem", label: "Send Reminder", icon: <Send className="w-3.5 h-3.5" />, onClick: () => handleInvoiceAction("reminder", row) },
+                { key: "ref", label: "Refund / Adjust", icon: <RotateCcw className="w-3.5 h-3.5 text-[var(--ee-danger)]" />, destructive: true, separatorBefore: true, onClick: () => handleInvoiceAction("refund", row) }
+              ]}
+            />
+          )}
+        />
+      </Card>
     </div>
   );
 
@@ -306,36 +308,38 @@ export const MoneyPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      <DataTable
-        id="owner-pay-runs-table"
-        columns={[
-          { key: "name", label: "Run ID", render: (val) => <span className="font-mono text-xs">{val}</span> },
-          { key: "period_from", label: "From" },
-          { key: "period_to", label: "Through" },
-          {
-            key: "total_amount",
-            label: "Total Payout",
-            align: "right",
-            render: (val) => <span className="font-mono font-bold tabular-nums">{val}</span>
-          },
-          {
-            key: "status",
-            label: "Status",
-            render: (val) => <Badge variant={val === "finalized" ? "success" : "default"}>{val}</Badge>
-          }
-        ]}
-        rows={payRuns}
-        onRowClick={async (row) => {
-          if (row.status === "draft") {
-            await call("entertainment_express.api.portal_hr.finalize_pay_run", { name: row.name });
-            toast({ title: "Pay Run Finalized", description: `${row.name} ready for payout transfer.`, variant: "success" });
-          } else if (row.status === "finalized") {
-            await call("entertainment_express.api.portal_hr.process_payout", { name: row.name });
-            toast({ title: "Payout Dispatched", description: "ACH and direct deposits queued.", variant: "success" });
-          }
-          loadData();
-        }}
-      />
+      <Card elevated className="overflow-hidden">
+        <DataTable
+          id="owner-pay-runs-table"
+          columns={[
+            { key: "name", label: "Run ID", render: (val) => <span className="font-mono text-xs">{val}</span> },
+            { key: "period_from", label: "From" },
+            { key: "period_to", label: "Through" },
+            {
+              key: "total_amount",
+              label: "Total Payout",
+              align: "right",
+              render: (val) => <span className="font-mono font-bold tabular-nums">{val}</span>
+            },
+            {
+              key: "status",
+              label: "Status",
+              render: (val) => <Badge variant={val === "finalized" ? "success" : "default"}>{val}</Badge>
+            }
+          ]}
+          rows={payRuns}
+          onRowClick={async (row) => {
+            if (row.status === "draft") {
+              await call("entertainment_express.api.portal_hr.finalize_pay_run", { name: row.name });
+              toast({ title: "Pay Run Finalized", description: `${row.name} ready for payout transfer.`, variant: "success" });
+            } else if (row.status === "finalized") {
+              await call("entertainment_express.api.portal_hr.process_payout", { name: row.name });
+              toast({ title: "Payout Dispatched", description: "ACH and direct deposits queued.", variant: "success" });
+            }
+            loadData();
+          }}
+        />
+      </Card>
     </div>
   );
 
@@ -362,11 +366,18 @@ export const MoneyPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-200">
-      <PageHeader
-        title="Money & Financial Operations"
-        subtitle="Track cashflow, manage invoices, process talent payroll, and review held deposits."
-        actions={
+    <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in-50 duration-300">
+      {/* Friendly Hero Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)]">
+            Money & Financials
+          </h1>
+          <p className="text-base text-[var(--ee-muted)]">
+            Track cashflow, manage client invoices, run talent payroll, and review deposits.
+          </p>
+        </div>
+        <div>
           <Button
             variant="primary"
             density="cockpit"
@@ -375,8 +386,8 @@ export const MoneyPage: React.FC = () => {
           >
             + Create Invoice
           </Button>
-        }
-      />
+        </div>
+      </div>
 
       <Tabs
         value={activeTab}
