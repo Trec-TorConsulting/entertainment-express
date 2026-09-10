@@ -141,38 +141,49 @@
               pwd: pwd
             },
             freeze: true,
-            callback: function (r) {
-              setButtonLoading(btn, false, originalText, originalText);
-              if (r.message === 'Logged In') {
-                var urlParams = new URLSearchParams(window.location.search);
-                var redirect = urlParams.get('redirect-to') || r.home_page || '/app';
-                window.location.href = redirect;
-              } else if (r.message === 'Password Reset') {
-                window.location.href = r.redirect_to || '/update-password';
-              } else if (r.verification) {
-                // Two-factor required
-                document.cookie = 'tmp_id=' + r.tmp_id;
-                window.location.hash = '#verify';
-              } else if (r.home_page) {
-                window.location.href = r.home_page;
-              }
-            },
-            error: function (err) {
-              setButtonLoading(btn, false, originalText, originalText);
-              var msg = 'Invalid login credentials. Please try again.';
-              if (err && err.responseJSON && err.responseJSON._server_messages) {
-                try {
-                  var serverMsgs = JSON.parse(err.responseJSON._server_messages);
-                  if (serverMsgs.length > 0) {
-                    var parsed = typeof serverMsgs[0] === 'string' ? JSON.parse(serverMsgs[0]) : serverMsgs[0];
-                    msg = parsed.message || msg;
-                  }
-                } catch (ex) {}
-              }
-              showAlert(formLogin, msg, 'error');
-              if (pwdInput) {
-                pwdInput.value = '';
-                pwdInput.focus();
+            statusCode: {
+              200: function (r) {
+                setButtonLoading(btn, false, originalText, originalText);
+                if (r.message === 'Logged In') {
+                  var urlParams = new URLSearchParams(window.location.search);
+                  var redirect = urlParams.get('redirect-to') || r.home_page || '/app';
+                  window.location.href = redirect;
+                } else if (r.message === 'Password Reset') {
+                  window.location.href = r.redirect_to || '/update-password';
+                } else if (r.verification) {
+                  // Two-factor required
+                  document.cookie = 'tmp_id=' + r.tmp_id;
+                  window.location.hash = '#verify';
+                } else if (r.home_page) {
+                  window.location.href = r.home_page;
+                }
+              },
+              401: function (xhr) {
+                setButtonLoading(btn, false, originalText, originalText);
+                var err = xhr.responseJSON;
+                var msg = 'Invalid login credentials. Please try again.';
+                if (err && err._server_messages) {
+                  try {
+                    var serverMsgs = JSON.parse(err._server_messages);
+                    if (serverMsgs.length > 0) {
+                      var parsed = typeof serverMsgs[0] === 'string' ? JSON.parse(serverMsgs[0]) : serverMsgs[0];
+                      msg = parsed.message || msg;
+                    }
+                  } catch (ex) {}
+                }
+                showAlert(formLogin, msg, 'error');
+                if (pwdInput) {
+                  pwdInput.value = '';
+                  pwdInput.focus();
+                }
+              },
+              404: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formLogin, 'User does not exist.', 'error');
+              },
+              500: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formLogin, 'Server error. Please try again later.', 'error');
               }
             }
           });
@@ -231,23 +242,29 @@
               user: user
             },
             freeze: true,
-            callback: function (r) {
-              setButtonLoading(btn, false, originalText, originalText);
-              if (r.message === 'not found') {
+            statusCode: {
+              200: function (r) {
+                setButtonLoading(btn, false, originalText, originalText);
+                if (r.message === 'not found') {
+                  showAlert(formForgot, 'No account found with this email address.', 'error');
+                } else if (r.message === 'disabled') {
+                  showAlert(formForgot, 'This account is disabled. Please contact support.', 'error');
+                } else {
+                  showAlert(formForgot, 'Password reset instructions have been emailed to you.', 'success');
+                }
+              },
+              401: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formForgot, 'Unauthorized. Please try again.', 'error');
+              },
+              404: function () {
+                setButtonLoading(btn, false, originalText, originalText);
                 showAlert(formForgot, 'No account found with this email address.', 'error');
-              } else if (r.message === 'disabled') {
-                showAlert(formForgot, 'This account is disabled. Please contact support.', 'error');
-              } else {
-                showAlert(formForgot, 'Password reset instructions have been emailed to you.', 'success');
+              },
+              500: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formForgot, 'Unable to send password reset. Please try again.', 'error');
               }
-            },
-            error: function (err) {
-              setButtonLoading(btn, false, originalText, originalText);
-              var msg = 'Unable to send password reset. Please try again.';
-              if (err && err.responseJSON && err.responseJSON.message) {
-                msg = err.responseJSON.message;
-              }
-              showAlert(formForgot, msg, 'error');
             }
           });
         } else {
@@ -312,18 +329,43 @@
               redirect_to: redirectTo
             },
             freeze: true,
-            callback: function (r) {
-              setButtonLoading(btn, false, originalText, originalText);
-              if (Array.isArray(r.message) && r.message[0] === 0) {
-                showAlert(formSignup, r.message[1] || 'Signup failed.', 'error');
-              } else {
-                var successMsg = (Array.isArray(r.message) ? r.message[1] : r.message) || 'Account created! Please check your email to activate.';
-                showAlert(formSignup, successMsg, 'success');
+            statusCode: {
+              200: function (r) {
+                setButtonLoading(btn, false, originalText, originalText);
+                if (Array.isArray(r.message) && r.message[0] === 0) {
+                  showAlert(formSignup, r.message[1] || 'Signup failed.', 'error');
+                } else {
+                  var successMsg = (Array.isArray(r.message) ? r.message[1] : r.message) || 'Account created! Please check your email to activate.';
+                  showAlert(formSignup, successMsg, 'success');
+                }
+              },
+              401: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formSignup, 'Signup request failed. Please try again.', 'error');
+              },
+              404: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formSignup, 'Not found. Please try again.', 'error');
+              },
+              417: function (xhr) {
+                setButtonLoading(btn, false, originalText, originalText);
+                var err = xhr.responseJSON;
+                var msg = 'Signup request failed.';
+                if (err && err._server_messages) {
+                  try {
+                    var serverMsgs = JSON.parse(err._server_messages);
+                    if (serverMsgs.length > 0) {
+                      var parsed = typeof serverMsgs[0] === 'string' ? JSON.parse(serverMsgs[0]) : serverMsgs[0];
+                      msg = parsed.message || msg;
+                    }
+                  } catch (ex) {}
+                }
+                showAlert(formSignup, msg, 'error');
+              },
+              500: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formSignup, 'Server error during signup.', 'error');
               }
-            },
-            error: function (err) {
-              setButtonLoading(btn, false, originalText, originalText);
-              showAlert(formSignup, 'Signup request failed. Please try again.', 'error');
             }
           });
         }
@@ -361,17 +403,23 @@
               tmp_id: getCookie('tmp_id')
             },
             freeze: true,
-            callback: function (r) {
-              setButtonLoading(btn, false, originalText, originalText);
-              if (r.message === 'Logged In') {
-                var urlParams = new URLSearchParams(window.location.search);
-                var redirect = urlParams.get('redirect-to') || r.home_page || '/app';
-                window.location.href = redirect;
+            statusCode: {
+              200: function (r) {
+                setButtonLoading(btn, false, originalText, originalText);
+                if (r.message === 'Logged In') {
+                  var urlParams = new URLSearchParams(window.location.search);
+                  var redirect = urlParams.get('redirect-to') || r.home_page || '/app';
+                  window.location.href = redirect;
+                }
+              },
+              401: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formVerify, 'Invalid verification code.', 'error');
+              },
+              500: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formVerify, 'Server error. Please try again.', 'error');
               }
-            },
-            error: function () {
-              setButtonLoading(btn, false, originalText, originalText);
-              showAlert(formVerify, 'Invalid verification code.', 'error');
             }
           });
         }
@@ -420,20 +468,42 @@
             url: '/',
             args: args,
             freeze: true,
-            callback: function (r) {
-              setButtonLoading(btn, false, originalText, originalText);
-              showAlert(formUpdatePwd, 'Password updated successfully! Redirecting...', 'success');
-              setTimeout(function () {
-                window.location.href = (typeof r.message === 'string' && r.message.startsWith('/')) ? r.message : '/app';
-              }, 1200);
-            },
-            error: function (err) {
-              setButtonLoading(btn, false, originalText, originalText);
-              var msg = 'Password update failed.';
-              if (err && err.responseJSON && err.responseJSON.message) {
-                msg = err.responseJSON.message;
+            statusCode: {
+              200: function (r) {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formUpdatePwd, 'Password updated successfully! Redirecting...', 'success');
+                setTimeout(function () {
+                  window.location.href = (typeof r.message === 'string' && r.message.startsWith('/')) ? r.message : '/app';
+                }, 1200);
+              },
+              401: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formUpdatePwd, 'Unauthorized or session expired.', 'error');
+              },
+              410: function (xhr) {
+                setButtonLoading(btn, false, originalText, originalText);
+                var err = xhr.responseJSON || {};
+                showAlert(formUpdatePwd, err.message || 'Link expired or invalid.', 'error');
+              },
+              417: function (xhr) {
+                setButtonLoading(btn, false, originalText, originalText);
+                var err = xhr.responseJSON;
+                var msg = 'Password update failed.';
+                if (err && err._server_messages) {
+                  try {
+                    var serverMsgs = JSON.parse(err._server_messages);
+                    if (serverMsgs.length > 0) {
+                      var parsed = typeof serverMsgs[0] === 'string' ? JSON.parse(serverMsgs[0]) : serverMsgs[0];
+                      msg = parsed.message || msg;
+                    }
+                  } catch (ex) {}
+                }
+                showAlert(formUpdatePwd, msg, 'error');
+              },
+              500: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formUpdatePwd, 'Server error. Please try again.', 'error');
               }
-              showAlert(formUpdatePwd, msg, 'error');
             }
           });
         }
