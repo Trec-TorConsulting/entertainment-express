@@ -31,7 +31,13 @@ import {
   Tag,
   ShieldCheck,
   Layers,
-  Code
+  Code,
+  Calendar,
+  Star,
+  Bookmark,
+  MousePointerClick,
+  Laptop,
+  CheckCircle2
 } from "lucide-react";
 import { PageModal } from "./PageModal";
 
@@ -65,6 +71,10 @@ export const WebsitePage: React.FC = () => {
   const [embedKey, setEmbedKey] = useState("");
   const [embedSnippet, setEmbedSnippet] = useState("");
   const [rotatingKey, setRotatingKey] = useState(false);
+  const [selectedWidget, setSelectedWidget] = useState<"catalog" | "availability" | "book" | "reviews" | "wishlist">("catalog");
+  const [previewDate, setPreviewDate] = useState("2026-10-24");
+  const [previewBookLabel, setPreviewBookLabel] = useState("Book Your Event Now");
+  const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
@@ -516,67 +526,453 @@ export const WebsitePage: React.FC = () => {
   );
 
   // --- TAB 3: EMBEDS & WIDGETS ---
+  const handleCopySpecific = (code: string, label: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedItem(label);
+    setTimeout(() => setCopiedItem(null), 2500);
+    toast({
+      title: `${label} Copied!`,
+      description: "Paste this HTML snippet into your WordPress, Squarespace, Wix, or Shopify site.",
+      variant: "success",
+    });
+  };
+
+  const widgetCatalogSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="catalog" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`;
+  const widgetAvailabilitySnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="availability" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`;
+  const widgetBookSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="book" data-ee-key="${embedKey || "YOUR_KEY"}" data-ee-label="${previewBookLabel}"></div>`;
+  const widgetReviewsSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="reviews" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`;
+  const widgetWishlistSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="wishlist" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`;
+
   const embedsTab = (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Overview Card */}
       <Card elevated>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <CardTitle className="text-lg font-bold flex items-center gap-2">
               <Code className="w-5 h-5 text-[var(--ee-brand)]" />
-              Embed on WordPress, Squarespace, or Wix
+              Embed Widgets on Any External Website
             </CardTitle>
             <p className="text-xs text-[var(--ee-muted)] mt-1">
-              Already have an existing website? Embed our live booking catalog and availability calendar with two lines of code.
+              Already have a website on WordPress, Squarespace, Wix, or Shopify? Embed live booking calendars, package menus, and review badges with two lines of code.
             </p>
           </div>
-          <Button
-            variant="outline"
-            density="compact"
-            onClick={handleRotateEmbedKey}
-            loading={rotatingKey}
-          >
-            <RefreshCw className="w-3.5 h-3.5 mr-1" />
-            Rotate Key
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              density="compact"
+              onClick={handleRotateEmbedKey}
+              loading={rotatingKey}
+            >
+              <RefreshCw className="w-3.5 h-3.5 mr-1" />
+              Rotate Embed Key
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <div className="text-xs font-semibold text-[var(--ee-text)] mb-1">Your Site's Embed Snippet:</div>
-            <div className="relative">
-              <pre className="p-4 rounded-lg bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto">
-                {embedSnippet || `<!-- Embed snippet for ${companyName} -->\n<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="catalog" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`}
-              </pre>
-              <Button
-                variant="primary"
-                density="compact"
-                className="absolute top-3 right-3"
-                onClick={handleCopySnippet}
-              >
-                <Copy className="w-3.5 h-3.5 mr-1" />
-                Copy Snippet
-              </Button>
+          <div className="p-3.5 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div>
+              <span className="font-semibold text-[var(--ee-text)]">Your Public Embed Key: </span>
+              <code className="font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-[var(--ee-brand)] font-bold">
+                {embedKey || "Loading..."}
+              </code>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)]">
-              <div className="text-xs font-bold text-[var(--ee-text)] mb-1">Catalog Widget</div>
-              <code className="text-[11px] text-[var(--ee-brand)] font-mono">data-ee-widget="catalog"</code>
-              <div className="text-[11px] text-[var(--ee-muted)] mt-1">Displays interactive package cards with price & instant quote buttons.</div>
-            </div>
-            <div className="p-3 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)]">
-              <div className="text-xs font-bold text-[var(--ee-text)] mb-1">Date Availability</div>
-              <code className="text-[11px] text-[var(--ee-brand)] font-mono">data-ee-widget="availability"</code>
-              <div className="text-[11px] text-[var(--ee-muted)] mt-1">Allows prospective clients to check if their event date is open.</div>
-            </div>
-            <div className="p-3 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)]">
-              <div className="text-xs font-bold text-[var(--ee-text)] mb-1">Reviews Badge</div>
-              <code className="text-[11px] text-[var(--ee-brand)] font-mono">data-ee-widget="reviews"</code>
-              <div className="text-[11px] text-[var(--ee-muted)] mt-1">Shows your 5-star rating badge linking to verified reviews.</div>
-            </div>
+            <span className="text-[var(--ee-muted)]">Site-scoped & isolated to your account</span>
           </div>
         </CardContent>
       </Card>
+
+      {/* Interactive Widget Previews & Code Generator */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="text-xl font-bold text-[var(--ee-text)] flex items-center gap-2">
+              <Laptop className="w-5 h-5 text-[var(--ee-brand)]" />
+              Interactive Widget Previews
+            </h3>
+            <p className="text-xs text-[var(--ee-muted)]">
+              Choose a widget below to see an exact visual simulation of how it looks and behaves when embedded on an external page.
+            </p>
+          </div>
+        </div>
+
+        {/* Widget Selector Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <button
+            type="button"
+            onClick={() => setSelectedWidget("catalog")}
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              selectedWidget === "catalog"
+                ? "bg-[var(--ee-brand)] text-white border-[var(--ee-brand)] shadow-sm"
+                : "bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] hover:bg-[var(--ee-surface-inset)]"
+            }`}
+          >
+            <Tag className="w-3.5 h-3.5" />
+            1. Packages Catalog
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedWidget("availability")}
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              selectedWidget === "availability"
+                ? "bg-[var(--ee-brand)] text-white border-[var(--ee-brand)] shadow-sm"
+                : "bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] hover:bg-[var(--ee-surface-inset)]"
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            2. Date Availability
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedWidget("book")}
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              selectedWidget === "book"
+                ? "bg-[var(--ee-brand)] text-white border-[var(--ee-brand)] shadow-sm"
+                : "bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] hover:bg-[var(--ee-surface-inset)]"
+            }`}
+          >
+            <MousePointerClick className="w-3.5 h-3.5" />
+            3. Instant Booking Button
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedWidget("reviews")}
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              selectedWidget === "reviews"
+                ? "bg-[var(--ee-brand)] text-white border-[var(--ee-brand)] shadow-sm"
+                : "bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] hover:bg-[var(--ee-surface-inset)]"
+            }`}
+          >
+            <Star className="w-3.5 h-3.5" />
+            4. Reviews Badge
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedWidget("wishlist")}
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              selectedWidget === "wishlist"
+                ? "bg-[var(--ee-brand)] text-white border-[var(--ee-brand)] shadow-sm"
+                : "bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] hover:bg-[var(--ee-surface-inset)]"
+            }`}
+          >
+            <Bookmark className="w-3.5 h-3.5" />
+            5. Saved Wishlist
+          </button>
+        </div>
+
+        {/* Selected Widget Live Preview & Snippet Card */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Visual Simulation Frame */}
+          <div className="lg:col-span-7 space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-[var(--ee-muted)] flex items-center justify-between">
+              <span>Visual Appearance on Client's External Site</span>
+              <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                Live Render Mode
+              </span>
+            </div>
+
+            {/* Browser Mockup Wrapper */}
+            <div className="rounded-xl border border-[var(--ee-border)] bg-white dark:bg-slate-950 overflow-hidden shadow-sm">
+              {/* Browser Mockup Header */}
+              <div className="px-4 py-2.5 bg-slate-100 dark:bg-slate-900 border-b border-[var(--ee-border)] flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                </div>
+                <div className="flex-1 max-w-xs mx-auto text-center">
+                  <span className="px-3 py-0.5 rounded text-[11px] bg-white dark:bg-slate-800 text-slate-500 font-mono">
+                    https://my-wordpress-site.com
+                  </span>
+                </div>
+              </div>
+
+              {/* Embedded Widget Live Sandbox */}
+              <div className="p-6 bg-slate-50/50 dark:bg-slate-900/30">
+                {/* 1. CATALOG WIDGET PREVIEW */}
+                {selectedWidget === "catalog" && (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4 max-w-lg mx-auto">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                      <div>
+                        <h4 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                          {companyName || "Our Entertainment Studio"} — Featured Packages
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Live real-time rates directly from your Catalog</p>
+                      </div>
+                      <Badge variant="brand" size="sm">Online Booking</Badge>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:border-[var(--ee-brand)] transition-colors flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">Signature Celebration Package</div>
+                          <div className="text-xs text-slate-500">Up to 4 hours sound & lighting, wireless mics, digital portal</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-sm text-[var(--ee-brand)]">$1,495</div>
+                          <button
+                            type="button"
+                            className="mt-1 px-2.5 py-1 text-xs font-semibold rounded text-white shadow-xs"
+                            style={{ backgroundColor: brandColor }}
+                          >
+                            Book now
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:border-[var(--ee-brand)] transition-colors flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">Premier Gala & Wedding Experience</div>
+                          <div className="text-xs text-slate-500">Full-day production, dance lighting, custom monogram</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-sm text-[var(--ee-brand)]">$2,295</div>
+                          <button
+                            type="button"
+                            className="mt-1 px-2.5 py-1 text-xs font-semibold rounded text-white shadow-xs"
+                            style={{ backgroundColor: brandColor }}
+                          >
+                            Book now
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center pt-1">
+                      <a href="/book" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-[var(--ee-brand)] hover:underline flex items-center justify-center gap-1">
+                        View Complete Catalog & Booking Portal <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. AVAILABILITY WIDGET PREVIEW */}
+                {selectedWidget === "availability" && (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4 max-w-md mx-auto">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-[var(--ee-brand)]" />
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                        Check Date Availability
+                      </h4>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                          Select Your Proposed Event Date:
+                        </label>
+                        <input
+                          type="date"
+                          value={previewDate}
+                          onChange={(e) => setPreviewDate(e.target.value)}
+                          className="w-full px-3 py-2 text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200"
+                        />
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-bold text-emerald-900 dark:text-emerald-200">
+                            Available — Open for Booking!
+                          </div>
+                          <div className="text-emerald-700 dark:text-emerald-300 mt-0.5">
+                            Our team currently has performers and sound equipment available on {previewDate}.
+                          </div>
+                        </div>
+                      </div>
+
+                      <a
+                        href="/book"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full py-2.5 text-center text-xs font-bold rounded-lg text-white shadow-sm transition-transform hover:-translate-y-0.5"
+                        style={{ backgroundColor: brandColor }}
+                      >
+                        Reserve Your Date Online &rarr;
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. INSTANT BOOKING BUTTON PREVIEW */}
+                {selectedWidget === "book" && (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm space-y-5 max-w-md mx-auto text-center">
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                        Embedded Branded Call-To-Action Button
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Place this button anywhere on a pricing or landing page to route clients into your checkout flow.
+                      </p>
+                    </div>
+
+                    <div className="py-4">
+                      <a
+                        href="/book"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold rounded-lg text-white shadow-md transition-transform hover:-translate-y-0.5"
+                        style={{ backgroundColor: brandColor }}
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        {previewBookLabel} &rarr;
+                      </a>
+                    </div>
+
+                    <div className="text-left bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                        Customize Button Label Preview:
+                      </label>
+                      <input
+                        type="text"
+                        value={previewBookLabel}
+                        onChange={(e) => setPreviewBookLabel(e.target.value)}
+                        className="w-full px-2.5 py-1 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                        placeholder="e.g. Reserve Your Experience"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. REVIEWS BADGE PREVIEW */}
+                {selectedWidget === "reviews" && (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4 max-w-sm mx-auto text-center">
+                    <div className="flex items-center justify-center gap-1 text-amber-400 text-lg">
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                    </div>
+
+                    <div>
+                      <div className="text-base font-bold text-slate-900 dark:text-slate-100">
+                        5.0 Star Rated Experience
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        Verified Reviews on Google & WeddingWire
+                      </div>
+                    </div>
+
+                    <div>
+                      <a
+                        href={reviewUrl || "/"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--ee-brand)] hover:underline"
+                      >
+                        Read all verified client feedback &rarr;
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. WISHLIST WIDGET PREVIEW */}
+                {selectedWidget === "wishlist" && (
+                  <div className="bg-white dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-5 shadow-sm space-y-3 max-w-md mx-auto">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                      <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900 dark:text-slate-100">
+                        <Bookmark className="w-4 h-4 text-[var(--ee-brand)]" />
+                        Saved Packages Wishlist (2 items)
+                      </div>
+                      <span className="text-[11px] text-slate-400">Stored locally in browser</span>
+                    </div>
+
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-slate-800">
+                        <span className="font-medium text-slate-800 dark:text-slate-200">Signature Celebration Package</span>
+                        <span className="font-bold text-[var(--ee-brand)]">$1,495</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-slate-800">
+                        <span className="font-medium text-slate-800 dark:text-slate-200">Wireless Uplighting Expansion Bundle</span>
+                        <span className="font-bold text-[var(--ee-brand)]">$350</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <a
+                        href="/request-quote"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full py-2 text-center text-xs font-bold rounded-lg text-white shadow-sm"
+                        style={{ backgroundColor: brandColor }}
+                      >
+                        Request Quote for Saved Items &rarr;
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* HTML Embed Snippet & Configuration */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="text-xs font-bold uppercase tracking-wider text-[var(--ee-muted)]">
+              Embed Code Snippet
+            </div>
+
+            <Card elevated className="bg-slate-900 text-slate-100 border-slate-800">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-400">
+                    {selectedWidget === "catalog" && "Catalog Widget Snippet"}
+                    {selectedWidget === "availability" && "Date Availability Snippet"}
+                    {selectedWidget === "book" && "Instant Booking Button Snippet"}
+                    {selectedWidget === "reviews" && "Reviews Badge Snippet"}
+                    {selectedWidget === "wishlist" && "Client Wishlist Snippet"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedWidget === "catalog") handleCopySpecific(widgetCatalogSnippet, "Catalog Snippet");
+                      if (selectedWidget === "availability") handleCopySpecific(widgetAvailabilitySnippet, "Availability Snippet");
+                      if (selectedWidget === "book") handleCopySpecific(widgetBookSnippet, "Booking Button Snippet");
+                      if (selectedWidget === "reviews") handleCopySpecific(widgetReviewsSnippet, "Reviews Snippet");
+                      if (selectedWidget === "wishlist") handleCopySpecific(widgetWishlistSnippet, "Wishlist Snippet");
+                    }}
+                    className="px-2.5 py-1 text-xs font-semibold rounded bg-[var(--ee-brand)] text-white hover:opacity-90 flex items-center gap-1 transition-all"
+                  >
+                    {copiedItem ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copiedItem ? "Copied!" : "Copy Code"}
+                  </button>
+                </div>
+
+                <pre className="text-xs font-mono bg-slate-950 p-3 rounded-lg border border-slate-800 overflow-x-auto text-emerald-400">
+                  {selectedWidget === "catalog" && widgetCatalogSnippet}
+                  {selectedWidget === "availability" && widgetAvailabilitySnippet}
+                  {selectedWidget === "book" && widgetBookSnippet}
+                  {selectedWidget === "reviews" && widgetReviewsSnippet}
+                  {selectedWidget === "wishlist" && widgetWishlistSnippet}
+                </pre>
+              </CardContent>
+            </Card>
+
+            {/* Platform Integration Guide Cards */}
+            <div className="p-4 rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] space-y-3">
+              <div className="text-xs font-bold text-[var(--ee-text)] flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[var(--ee-brand)]" />
+                How to Paste on External Platforms:
+              </div>
+              <ul className="text-xs text-[var(--ee-muted)] space-y-2 pl-4 list-disc">
+                <li>
+                  <strong className="text-[var(--ee-text)]">WordPress / Elementor:</strong> Insert a <em>Custom HTML</em> block and paste the snippet directly into the block.
+                </li>
+                <li>
+                  <strong className="text-[var(--ee-text)]">Squarespace:</strong> Add a <em>Code</em> block, ensure Mode is set to <em>HTML</em>, and paste the code.
+                </li>
+                <li>
+                  <strong className="text-[var(--ee-text)]">Wix:</strong> Click <em>Add Elements (+) &rarr; Embed Code &rarr; Embed HTML</em> and paste the snippet.
+                </li>
+                <li>
+                  <strong className="text-[var(--ee-text)]">Shopify / Webflow:</strong> Use a <em>Custom Liquid</em> or <em>Embed Element</em> anywhere on your product or landing page.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
