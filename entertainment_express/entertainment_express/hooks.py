@@ -4,7 +4,7 @@ app_publisher = "Trec-Tor Consulting"
 app_description = "A spec-first multi-tenant vertical SaaS platform for entertainment businesses."
 app_email = "info@trector.com"
 app_license = "mit"
-app_version = "0.0.2"
+app_version = "0.1.0"
 
 required_apps = ["erpnext"]
 
