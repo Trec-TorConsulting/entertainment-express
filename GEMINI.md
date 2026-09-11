@@ -45,4 +45,20 @@ openspec validate --specs
 - Work one task at a time; mark checkboxes in `tasks.md` (`- [ ]` → `- [x]`) as you go.
 - If `openspec/project.md` and a spec disagree, **`openspec/project.md` wins** unless a change proposal explicitly overrides it.
 - Validate with `openspec validate --specs` (baseline specs validation; "no deltas" on individual change validation is expected by design).
-- Run `bench --site <site> run-tests --app entertainment_express` and `python smoke_test.py` before submitting changes.
+- Run `bench --site <site> run-tests --app entertainment_express` and `python3 smoke_test.py` before submitting changes.
+
+---
+
+## Deployment & Cluster Boundary
+
+1. **Authority & Separation**:
+   - **This repo (`EntertainmentExpress`)**: Owns application source, DocTypes, frontend portals, Dockerfile, OpenSpec, and `./scripts/build-push-bench.sh`.
+   - **Sibling repo (`HomeLab-Redo`)**: Owns cluster operations, Helm chart (`entertainment-express/chart`), Traefik Gateway HTTPRoutes, GKE POC (`entertainment-express-gke/`), and image promotion scripts.
+2. **Pre-Cutover Deploy Workflow (`deploy-entx`)**:
+   - Always validate locally first: `python3 smoke_test.py`.
+   - Use the **`deploy-entx`** skill (`.agent/skills/deploy-entx/SKILL.md`):
+     1. Build and dual-push: `./scripts/build-push-bench.sh <tag>` (pushes to both `registry.maddscientist.com` and Artifact Registry).
+     2. Promote in HomeLab: `cd ~/Projects/Personal/HomeLab-Redo && ./entertainment-express/scripts/promote-image.sh <tag> [--apply]`.
+     3. Verify `admin.entx.app` ping and pods.
+   - **Never point production DNS (`*.entx.app`) at GKE.**
+

@@ -1,0 +1,26 @@
+---
+description: Entertainment Express product repo — agent delegation and deploy path
+alwaysApply: true
+---
+
+# Entertainment Express — Cursor Instructions
+
+This is the **Entertainment Express product repo** ([Trec-TorConsulting/entertainment-express](https://github.com/Trec-TorConsulting/entertainment-express)). Application source, product OpenSpec, Dockerfile, and `scripts/build-push-bench.sh` live here.
+
+The sibling **HomeLab-Redo** (`~/Projects/Personal/HomeLab-Redo`, remote `djviruss/k3s-lab`) is the cluster **brain/control plane** — Helm chart, Gateway HTTPRoute, GKE POC folder, `promote-image.sh`.
+
+## Agent delegation
+
+Delegate domain work in this workspace according to the following matrix:
+
+| Agent / skill | Scope / Delegation trigger |
+|---|---|
+| `entx-admin` | Platform operator judgment, architecture boundaries, tenancy provisioning, and dual-cluster alignment |
+| `entx-core` | Frappe backend, DocType models, whitelisted APIs, hooks, MariaDB isolation, and server test suites |
+| `entx-frontend` | Customer Portal, Owner Portal, Crew PWA, Vite/React/Tailwind components, and bundle builds |
+| `deploy-entx` | Mandatory mechanical procedure for dual K3S + GKE bench image build, push, promote, and roll |
+
+## Deploy rule
+
+Pre-cutover production rolls: **always** run `python3 smoke_test.py` first, then follow skill `deploy-entx` (build here → HomeLab promote/apply). Do not treat `scripts/deploy.sh` alone as the dual-cluster path. Do not point production `*.entx.app` at GKE.
+

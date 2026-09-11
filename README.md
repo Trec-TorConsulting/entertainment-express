@@ -100,6 +100,7 @@ smoke_test.py              # Post-change smoke checks
 | `./scripts/build-push-bench.sh <tag>` | Dual-push (maddscientist + Artifact Registry). Needs LAN + `gcloud` auth. |
 | GH workflow **Bench image** | AR-only via Workload Identity Federation |
 | HomeLab `entertainment-express/scripts/promote-image.sh <tag> [--apply]` | Bump tags / optional roll |
+| Skill **`deploy-entx`** (`.cursor/skills/deploy-entx/`, `.agent/skills/deploy-entx/`) | End-to-end dual roll from this repo + HomeLab promote |
 
 ```bash
 ./scripts/build-push-bench.sh 0.0.120-ee
