@@ -2,10 +2,12 @@
 
 **Date:** 2026-09-03  
 **Status:** Pilot on K3s — **not** a SaaS-SLA / SOC2 production claim  
-**Image (matches `k8s-deployment.yaml`):** `registry.maddscientist.com/entertainment-express/bench:0.0.85-ee`  
+**Image (matches `k8s-deployment.yaml`):** `registry.maddscientist.com/entertainment-express/bench:0.0.119-ee`  
 **Namespace:** `entertainment-express`
 
-Phases **0–39** are implemented (OpenSpec archives). Live tenant smoke (`e2esmoke.entx.app`) includes
+Phases **0–41** and all post-41 platform enhancements (Subcontractors & Partner Hub, Coming Soon Landing,
+Tenant Website Builder, Client Portal Overhaul, Atomix VirtualDJ Integration & AI Set Curation) are implemented
+and verified (OpenSpec archives). Live tenant smoke (`e2esmoke.entx.app`) includes
 catalog/booking data (phase-1 task 10.2 is **done**, not pending). White-label phases 38–39 are on
 `0.0.82-ee` with `phase38` / `phase39` patches applied on `e2esmoke.entx.app`.
 

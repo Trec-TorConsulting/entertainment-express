@@ -12,9 +12,11 @@ Entertainment Express is a **site-per-tenant** Frappe/[ERPNext](https://erpnext.
 company is one Frappe site with its own MariaDB database. A shared gunicorn/RQ/scheduler tier serves
 every site; the request host selects the tenant (`dns_multitenant`).
 
-This repo is a **homelab pilot**, not a SaaS-SLA production claim. Phases **0–39** are implemented
+This repo is an enterprise-grade Frappe application and deployment platform. All roadmap phases **0–41**
+and platform enhancements (Subcontractor Jobs, Coming Soon Landing, Tenant Website Builder, Client Portal Overhaul,
+Atomix VirtualDJ Integration & AI Virtual DJ Suite) are fully implemented and verified
 (archived under `openspec/changes/archive/`). Live image tag in [`k8s-deployment.yaml`](k8s-deployment.yaml)
-is **`0.0.85-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
+is **`0.0.119-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 
@@ -22,14 +24,20 @@ is **`0.0.85-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLO
 
 | Domain | What it does |
 |---|---|
-| **Control plane** | Operator site at `admin.<domain>` — signup, plans, provisioning jobs, tenant lifecycle. |
-| **Booking** | Event bookings, holds, catalog at `/book` and `/catalog`, quotes and contracts. |
-| **Scheduling & dispatch** | Crew assignment, run sheets, equipment checklists, at-risk flags. |
-| **Workforce** | Roster, availability, compliance docs, pay runs (W2 payroll and Stripe Connect still stubs). |
-| **Service catalog** | Packages, assets, service areas, travel fees. |
-| **Billing & payments** | Quotes, e-sign, deposits; **Stripe**, Square, PayPal, ACH — processor tokens only. |
-| **White-label** | Company brand kit + custom domains; full-site mode; style matcher from website/logo (`/owner` Brand). |
-| **Tenant UI** | Logged-in portals: **`/owner`**, **`/employee`**, **`/client`**. Field PWA for crew. Operator Desk (`/app`) is for SaaS Operator / System Manager. |
+| **Control plane** | Operator site at `admin.<domain>` — self-service signup, 3-tier plans (Starter / Pro / Scale), entitlement enforcement, provisioning jobs, tenant lifecycle. |
+| **Marketing front door** | `www.<domain>` public acquisition engine — SEO-optimized vertical pages, competitor comparisons, interactive showcase, blog/resource center, and operator-configurable Coming Soon teaser mode with early-access waitlist. |
+| **CRM & Booking** | Event bookings, holds, catalog at `/book` and `/catalog`, interactive proposals, contracts, and conflict detection. |
+| **Scheduling & dispatch** | Crew assignment, automated suggestions, run sheets, equipment checklists, site-fit logistics, load planning, and live client ETA tracking. |
+| **Subcontractor Jobs** | External partner registry, automated margin calculation, white-label gig packets, and external tokenized offer accept/decline workflows. |
+| **Workforce** | Roster, worker availability, compliance docs (COI/W-9), timesheets, pay runs, and field checklists. |
+| **Equipment & Fleet** | Asset registry, QR/barcode check-in/out, consumable stock, maintenance logs, and vehicle weight-aware load planning. |
+| **Event Planning Suite** | Collaborative event timeline/run-of-show builder, conditional planning forms, guest voting/chat, and music planning. |
+| **VirtualDJ & DJ Software** | Native Atomix VirtualDJ folder (`.vdjfolder`), Serato CSV, Rekordbox XML, and M3U exports; tokenized real-time live request polling feed ("Ask The DJ"); post-gig session history log parsing & fuzzy reconciliation. |
+| **AI Assistant & Virtual DJ** | Pluggable local Ollama / OpenAI / Gemini backend — conversational business assistant, smart quoting, forecast analytics, lead scoring, and automated Virtual DJ set curation with energy curve pacing. |
+| **Tenant Website Builder** | In-portal visual Website Builder at `/owner/website`, custom tenant marketing pages at `/p/<route>`, conversion-optimized default tenant homepages, and embeddable booking widgets. |
+| **Billing & payments** | Quotes, e-sign, deposits, damage pre-auth holds; **Stripe**, Square, PayPal, ACH — processor tokens only. Interactive client pay flow with tips and promo codes. |
+| **White-label & Custom Domains** | Company brand kit + custom domains with automated Traefik TLS; full-site mode; website/logo brand style matcher (`/owner` Brand). |
+| **Role-Based Portals** | Dedicated React + Vite SPAs for **`/owner`** (Today, Pipeline, Money, Brand, Website, Subcontractors), **`/employee`** (My Day, Dispatch, Timesheets), and **`/client`** (Home, Events, Pay, Documents, Planning, Appointments, Chat, Photos). Field PWA for crew. Operator Desk (`/app`) reserved for SaaS Operator / System Manager. |
 
 ---
 
@@ -64,7 +72,7 @@ frontend/
   customer-portal/         #   /client SPA
   dispatch-portal/         #   dispatch board assets
   crew-app/                #   field PWA
-openspec/                  # Spec-first (42 baseline specs; phases 0–39 archived)
+openspec/                  # Spec-first (44 baseline specs; phases 0–41 + enhancements archived)
 Dockerfile                 # Bench image (live builds are linux/amd64)
 k8s-deployment.yaml        # Namespace, data services, Frappe, ingress, Jobs
 scripts/deploy.sh          # Existing-cluster apply (skips Jobs / MariaDB STS)

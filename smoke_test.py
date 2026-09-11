@@ -304,6 +304,36 @@ def test_coming_soon_suite():
     return True
 
 
+def test_virtual_dj_suite():
+    """Run VirtualDJ integration, export formats, live request, history log, and AI set tests."""
+    print("✓ Testing Atomix VirtualDJ Integration & AI Set Curation suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_virtual_dj_integration.py",
+            "entertainment_express/entertainment_express/tests/test_phase35_dj_export.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ VirtualDJ integration suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
 
 def test_live_marketing_smoke():
     """
@@ -654,6 +684,7 @@ def main():
         test_phase19_static_suite,
         test_subcontractors_suite,
         test_coming_soon_suite,
+        test_virtual_dj_suite,
         test_phase41_marketing_routes,
         test_phase41_jsonld,
         test_phase41_static_suite,

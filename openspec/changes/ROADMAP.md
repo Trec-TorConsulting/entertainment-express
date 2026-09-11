@@ -377,6 +377,35 @@ entitlement enforcement.
 
 ---
 
+## Post-41 Platform Enhancements ✅
+
+### Subcontractor Jobs & Partner Hub ✅ archived 2026-09-11
+**Goal:** Manage overflow jobs and subcontractor gig dispatch with automated margin calculations, white-label gig packets, and external tokenized offer accept/decline workflows without requiring an EE login.
+**Specs:** `subcontractor-management` (new), `vendor-network`, `owner-portal`.
+**Folder:** [`archive/2026-09-11-subcontractor-jobs/`](archive/2026-09-11-subcontractor-jobs/)
+
+### Coming Soon Landing & Beta Tester Bypass ✅ archived 2026-09-11
+**Goal:** Operator-configurable Coming Soon teaser landing mode for public marketing pages with email waitlist capture and secure passcode bypass for invited beta testers.
+**Specs:** `marketing-website`.
+**Folder:** [`archive/2026-09-11-coming-soon-landing/`](archive/2026-09-11-coming-soon-landing/)
+
+### Tenant Website Builder & Widget Customizer ✅ archived 2026-09-11
+**Goal:** In-portal visual Website Builder at `/owner/website`, custom tenant marketing pages at `/p/<route>`, conversion-optimized default tenant homepages, and embeddable booking widgets.
+**Specs:** `tenant-website`, `owner-portal`.
+**Folder:** [`archive/2026-09-11-tenant-website-builder/`](archive/2026-09-11-tenant-website-builder/)
+
+### Client Portal Modern Overhaul ✅ archived 2026-09-11
+**Goal:** Full modularization of `/client` routes using portal-kit primitives, in-portal e-signature capture, interactive multi-processor payment flow, planning forms, and mobile PQB standard compliance.
+**Specs:** `customer-portal`, `portal-premium-experience`.
+**Folder:** [`archive/2026-09-11-client-portal-overhaul/`](archive/2026-09-11-client-portal-overhaul/)
+
+### Atomix VirtualDJ Integration & AI Virtual DJ Suite ✅ archived 2026-09-11
+**Goal:** Native Atomix VirtualDJ folder (`.vdjfolder`) and M3U exports, real-time live request polling feed ("Ask The DJ") with secure per-booking tokens, post-gig history log parsing and fuzzy reconciliation, and AI Virtual DJ automated set curation with energy curve pacing.
+**Specs:** `music-planning`, `integrations`, `ai-assistant`.
+**Folder:** [`archive/2026-09-11-virtual-dj-integration/`](archive/2026-09-11-virtual-dj-integration/)
+
+---
+
 ## After the roadmap — Production operator readiness ✅ archived 2026-09-02
 Operator docs, safe re-apply on the existing cluster, website cache flush on python start, and MariaDB
 NetworkPolicy. Not a numbered product phase.

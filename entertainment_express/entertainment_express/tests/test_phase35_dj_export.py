@@ -30,6 +30,8 @@ def _install_frappe_stub() -> None:
     utils.cint = lambda x, *a, **k: int(float(x or 0))
     utils.flt = lambda x, *a, **k: float(x or 0)
     utils.fmt_money = lambda x, *a, **k: str(x)
+    utils.now_datetime = lambda: "2026-09-11 12:00:00"
+    utils.get_datetime = lambda v: v
     m.utils = utils
     sys.modules["frappe.utils"] = utils
 
@@ -88,8 +90,76 @@ def test_format_smoke():
     assert "http://" not in m3u and ".mp3" not in m3u
 
 
+def test_virtualdj_folder_export():
+    rows = [
+        {
+            "song": "Earth, Wind & Fire - September",
+            "category": "must_play",
+            "moment": "dancing",
+            "free_text": "",
+            "notes": 'Play "loud" & proud <peak>',
+        },
+        {
+            "song": "",
+            "category": "special_moment",
+            "moment": "first dance",
+            "free_text": "Ed Sheeran - Perfect",
+            "notes": "Bride & Groom",
+        },
+    ]
+    vdj = mx.export_virtualdj_folder(rows)
+    assert '<VirtualFolder Version="8.5">' in vdj
+    assert '</VirtualFolder>' in vdj
+    # Entity escaping checks
+    assert "Earth, Wind &amp; Fire" in vdj
+    assert "September" in vdj
+    assert "&quot;loud&quot;" in vdj
+    assert "&amp; proud" in vdj
+    assert "&lt;peak&gt;" in vdj
+    assert "Ed Sheeran" in vdj
+    assert "Perfect" in vdj
+    # Track count
+    assert vdj.count("<Song ") == 2
+
+
+def test_virtualdj_m3u_export():
+    rows = [
+        {
+            "song": "Earth, Wind & Fire - September",
+            "category": "must_play",
+            "moment": "dancing",
+            "free_text": "",
+            "notes": "high energy",
+        }
+    ]
+    m3u = mx.export_virtualdj_m3u(rows)
+    assert m3u.startswith("#EXTM3U")
+    assert "#EXTINF:-1,Earth, Wind & Fire - September" in m3u
+    assert "#EXTVDJ:<comment>must_play | dancing | high energy</comment>" in m3u
+    assert "#EE-META/" in m3u
+
+
+def test_export_playlist_virtualdj_formats(monkeypatch):
+    fake = _Fake(["EE Tenant Admin"])
+    monkeypatch.setattr(mx, "frappe", fake)
+
+    folder_res = mx.export_playlist("BK-100", "virtualdj_folder")
+    assert folder_res["format"] == "virtualdj_folder"
+    assert folder_res["filename"] == "BK-100-virtualdj_folder.vdjfolder"
+    assert folder_res["content_type"] == "application/xml"
+    assert folder_res["track_count"] == 1
+    assert "<VirtualFolder" in folder_res["content"]
+
+    m3u_res = mx.export_playlist("BK-100", "virtualdj_m3u")
+    assert m3u_res["format"] == "virtualdj_m3u"
+    assert m3u_res["filename"] == "BK-100-virtualdj_m3u.m3u"
+    assert m3u_res["content_type"] == "audio/x-mpegurl"
+    assert m3u_res["track_count"] == 1
+
+
 def test_no_audio_leakage():
     src = inspect.getsource(mx)
     assert "audio" not in src.lower() or "content_type" in src
     assert ".mp3" not in src
     assert "frappe.connect" not in src
+

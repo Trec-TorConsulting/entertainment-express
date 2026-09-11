@@ -400,3 +400,26 @@ feedback. Preview SHALL update within 300 ms of token changes (client-side CSS v
 - **WHEN** an owner changes primary color in Brand
 - **THEN** the preview pane updates immediately; Save persists via existing white-label APIs
 
+### Requirement: Subcontractors Flagship Workspace
+The system SHALL provide a dedicated `/owner/subcontractors` flagship workspace in the Owner Portal featuring a qualified partner directory, active subbed-out jobs list, offer acceptance status tracking, margin analytics, and quick sub-out actions.
+
+#### Scenario: Owner navigates to Subcontractors section
+- **WHEN** an `EE Tenant Admin` navigates to `/owner/subcontractors`
+- **THEN** the workspace renders partner companies, pending and active subbed jobs with profit margins, and quick actions to issue new sub-out requests
+
+#### Scenario: Owner subs out job from booking view
+- **WHEN** an owner reviews a booking in `/owner/pipeline` or `/owner/dispatch` and clicks "Sub Out Job"
+- **THEN** a sub-out modal opens pre-populated with booking date, venue, and service items, prompting for subcontractor selection, agreed payout, and privacy preferences
+
+### Requirement: Visual Website Builder Workspace
+The system SHALL provide a dedicated visual Website Builder workspace at `/owner/website` in the Owner Portal matching the "Today" design system, enabling owners to edit homepage sections, custom pages, and widget embed snippets.
+
+#### Scenario: Owner edits homepage sections
+- **WHEN** an owner navigates to `/owner/website` and edits the hero headline, subhead, and section visibility toggles
+- **THEN** saving the configuration persists changes to `EE Portal Settings` and immediately updates the live public tenant homepage
+
+#### Scenario: Owner manages custom marketing pages
+- **WHEN** an owner creates or publishes a custom page with title and route
+- **THEN** the page is accessible at `/p/<route>` with the tenant's brand styling and header/footer
+
+

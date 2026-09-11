@@ -16,7 +16,7 @@ GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
 STAFF = OWNER_ROLES | {"EE Sales", "EE Dispatcher", "System Manager"}
 CREW = {"EE Crew", "EE Entertainer"}
-FORMATS = ("serato_csv", "rekordbox_xml", "m3u")
+FORMATS = ("serato_csv", "rekordbox_xml", "m3u", "virtualdj_folder", "virtualdj_m3u")
 
 
 def _roles() -> set[str]:
@@ -104,6 +104,46 @@ def export_m3u(rows: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def export_virtualdj_folder(rows: list[dict]) -> str:
+    songs = []
+    for r in rows:
+        artist, title = _parse_song(r.get("song") or r.get("free_text") or "")
+        comment = " | ".join(
+            x for x in [(r.get("category") or ""), (r.get("moment") or ""), (r.get("notes") or "")] if x
+        )
+        safe_label = re.sub(r"[^\w.\-]+", "_", f"{artist} - {title}" if artist else (title or "Untitled"))[:80]
+        file_path = f"EE-META/{safe_label}"
+        songs.append(
+            f'  <Song FilePath="{html.escape(file_path)}" '
+            f'Title="{html.escape(title or "Untitled")}" '
+            f'Artist="{html.escape(artist)}" '
+            f'Comment="{html.escape(comment)}" />'
+        )
+    body = "\n".join(songs)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<VirtualFolder Version="8.5">\n'
+        f'{body}\n'
+        '</VirtualFolder>\n'
+    )
+
+
+def export_virtualdj_m3u(rows: list[dict]) -> str:
+    lines = ["#EXTM3U"]
+    for r in rows:
+        artist, title = _parse_song(r.get("song") or r.get("free_text") or "")
+        label = f"{artist} - {title}" if artist else (title or "Untitled")
+        comment = " | ".join(
+            x for x in [(r.get("category") or ""), (r.get("moment") or ""), (r.get("notes") or "")] if x
+        )
+        lines.append(f"#EXTINF:-1,{label}")
+        if comment:
+            lines.append(f"#EXTVDJ:<comment>{comment}</comment>")
+        safe = re.sub(r"[^\w.\-]+", "_", label)[:80]
+        lines.append(f"#EE-META/{safe}")
+    return "\n".join(lines) + "\n"
+
+
 @frappe.whitelist()
 def export_playlist(booking: str, fmt: str = "serato_csv") -> dict:
     _require_export(booking)
@@ -115,6 +155,10 @@ def export_playlist(booking: str, fmt: str = "serato_csv") -> dict:
         content, mime, ext = export_serato_csv(rows), "text/csv", "csv"
     elif key == "rekordbox_xml":
         content, mime, ext = export_rekordbox_xml(rows), "application/xml", "xml"
+    elif key == "virtualdj_folder":
+        content, mime, ext = export_virtualdj_folder(rows), "application/xml", "vdjfolder"
+    elif key == "virtualdj_m3u":
+        content, mime, ext = export_virtualdj_m3u(rows), "audio/x-mpegurl", "m3u"
     else:
         content, mime, ext = export_m3u(rows), "audio/x-mpegurl", "m3u"
     # Audit
