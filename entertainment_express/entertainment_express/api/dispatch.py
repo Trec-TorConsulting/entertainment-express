@@ -12,6 +12,9 @@ import secrets
 import frappe
 from frappe.utils import cint, flt, now_datetime, get_datetime
 
+from entertainment_express.api.rate_limit import rate_limited
+from entertainment_express.security.site_secrets import get_site_secret
+
 
 # ── Crew assignment ──────────────────────────────────────────────────────────
 
@@ -110,13 +113,14 @@ def assign_crew(booking_name: str, employee_name: str, role_name: str,
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=30)
 def accept_shift(assignment: str = None, token: str = None) -> dict:
     """Crew-facing: accept a shift offer via tokenized link."""
     if not assignment or not token:
         frappe.throw("Invalid request.", frappe.PermissionError)
 
     ca = frappe.get_doc("Crew Assignment", assignment)
-    if token != ca.shift_token:
+    if not hmac.compare_digest(str(token), str(ca.shift_token or "")):
         frappe.throw("Invalid or expired token.", frappe.PermissionError)
     if ca.status != "offered":
         return {"status": ca.status, "message": f"Assignment is already {ca.status}."}
@@ -148,13 +152,14 @@ def accept_shift(assignment: str = None, token: str = None) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=30)
 def decline_shift(assignment: str = None, token: str = None) -> dict:
     """Crew-facing: decline a shift offer."""
     if not assignment or not token:
         frappe.throw("Invalid request.", frappe.PermissionError)
 
     ca = frappe.get_doc("Crew Assignment", assignment)
-    if token != ca.shift_token:
+    if not hmac.compare_digest(str(token), str(ca.shift_token or "")):
         frappe.throw("Invalid or expired token.", frappe.PermissionError)
     if ca.status not in ("offered",):
         return {"status": ca.status}
@@ -744,7 +749,7 @@ def _notify_dispatcher(template_key: str, context: dict) -> None:
 
 
 def _assignment_token(seed: str) -> str:
-    secret = frappe.conf.get("ee_signing_secret") or "CHANGE_ME_IN_SITE_CONFIG"
+    secret = get_site_secret("ee_signing_secret", purpose="dispatch")
     return hmac.new(secret.encode(), seed.encode(), hashlib.sha256).hexdigest()[:32]
 
 

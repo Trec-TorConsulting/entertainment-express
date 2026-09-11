@@ -31,14 +31,9 @@ SCOPE_DISPATCH_WRITE = "dispatch_write"
 
 
 def _secret() -> str:
-    secret = (
-        frappe.conf.get("ee_jwt_secret")
-        or frappe.conf.get("encryption_key")
-        or "CHANGE_ME_IN_SITE_CONFIG"
-    )
-    if secret == "CHANGE_ME_IN_SITE_CONFIG":
-        frappe.logger().warning("ee_jwt_secret is not set — using insecure default")
-    return str(secret)
+    from entertainment_express.security.site_secrets import get_site_secret
+
+    return get_site_secret("ee_jwt_secret", purpose="jwt")
 
 
 def _require_jwt_lib() -> None:

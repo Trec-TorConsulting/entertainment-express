@@ -454,7 +454,26 @@ def process_payout(pay_run_name: str) -> dict:
     for detail in pr.workers:
         acct = (detail.payout_method or "").strip()
         if processor == "stripe_connect" and acct.startswith("acct_"):
-            detail.txn_id = f"STRIPE-{frappe.utils.random_string(12)}"
+            import os
+
+            stripe_key = os.environ.get("EE_STRIPE_SECRET_KEY") or getattr(getattr(frappe, "conf", None), "ee_stripe_secret_key", None)
+            if not stripe_key:
+                frappe.throw("Stripe secret key (EE_STRIPE_SECRET_KEY) is not configured for Stripe Connect payouts.")
+            import stripe
+
+            stripe.api_key = stripe_key
+            try:
+                transfer = stripe.Transfer.create(
+                    amount=int(round(flt(detail.gross_amount) * 100)),
+                    currency="usd",
+                    destination=acct,
+                    description=f"Pay Run {pr.name} payout for {detail.worker}",
+                    metadata={"pay_run": pr.name, "worker": detail.worker, "site": str(getattr(getattr(frappe, "local", None), "site", "site"))},
+                )
+                detail.txn_id = getattr(transfer, "id", None) or transfer.get("id") or f"tr_{frappe.utils.random_string(16)}"
+            except Exception as exc:
+                frappe.log_error(f"Stripe Connect transfer failed for {detail.worker}: {exc}", "Stripe Connect Payout")
+                frappe.throw(f"Stripe Connect transfer failed for {detail.worker}: {exc}")
         else:
             detail.txn_id = f"MANUAL-{frappe.utils.random_string(12)}"
     pr.status = "paid"
@@ -540,3 +559,116 @@ def verify_compliance_document(name: str) -> dict:
     cd.save(ignore_permissions=True)
     frappe.db.commit()
     return {"compliance_document": cd.name, "status": "verified"}
+
+
+@frappe.whitelist()
+def export_pay_run(pay_run_name: str, format: str = "csv") -> dict:
+    """Export finalized or paid Pay Run records for external payroll processors (Gusto / ADP / QuickBooks)."""
+    _check_role(["EE Tenant Admin", "EE Finance", "EE Accounting", "System Manager"])
+    pr = frappe.get_doc("Pay Run", pay_run_name)
+    rows = []
+    for detail in pr.workers:
+        emp = frappe.get_doc("Employee", detail.worker)
+        rows.append({
+            "employee_id": emp.name,
+            "employee_name": emp.employee_name,
+            "employment_type": emp.get("ee_employment_type") or "w2",
+            "event_fees": flt(detail.event_fees),
+            "hourly_pay": flt(detail.hourly_pay),
+            "tips": flt(detail.tips),
+            "gross_amount": flt(detail.gross_amount),
+            "payout_method": detail.payout_method or "",
+            "txn_id": detail.txn_id or "",
+        })
+
+    if (format or "csv").lower() == "json":
+        return {
+            "pay_run": pr.name,
+            "period_from": str(pr.period_from),
+            "period_to": str(pr.period_to),
+            "total_amount": flt(pr.total_amount),
+            "worker_count": len(rows),
+            "workers": rows,
+        }
+
+    # Generate standardized CSV
+    import csv
+    import io
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Employee ID",
+        "Employee Name",
+        "Employment Type",
+        "Event Fees",
+        "Hourly Pay",
+        "Tips",
+        "Total Gross",
+        "Payout Method",
+        "Transaction ID",
+    ])
+    for r in rows:
+        writer.writerow([
+            r["employee_id"],
+            r["employee_name"],
+            r["employment_type"],
+            f"{r['event_fees']:.2f}",
+            f"{r['hourly_pay']:.2f}",
+            f"{r['tips']:.2f}",
+            f"{r['gross_amount']:.2f}",
+            r["payout_method"],
+            r["txn_id"],
+        ])
+    return {
+        "pay_run": pr.name,
+        "format": "csv",
+        "filename": f"pay_run_{pr.name}.csv",
+        "content": output.getvalue(),
+        "worker_count": len(rows),
+        "total_amount": flt(pr.total_amount),
+    }
+
+
+@frappe.whitelist()
+def create_connect_account_link(employee: str, return_url: str = None) -> dict:
+    """Generate Stripe Connect onboarding account link for an employee (crew or talent)."""
+    _check_role(["EE Tenant Admin", "EE HR", "EE Finance", "System Manager"])
+    import os
+
+    stripe_key = os.environ.get("EE_STRIPE_SECRET_KEY") or getattr(getattr(frappe, "conf", None), "ee_stripe_secret_key", None)
+    if not stripe_key:
+        frappe.throw("Stripe secret key (EE_STRIPE_SECRET_KEY) is not configured.")
+
+    emp = frappe.get_doc("Employee", employee)
+    existing_acct = emp.get("ee_payout_account")
+    import stripe
+
+    stripe.api_key = stripe_key
+    if not existing_acct or not existing_acct.startswith("acct_"):
+        acct = stripe.Account.create(
+            type="express",
+            country="US",
+            email=emp.user_id or getattr(emp, "prefered_email", None),
+            capabilities={"transfers": {"requested": True}},
+            business_type="individual",
+            metadata={"employee": employee, "site": str(getattr(getattr(frappe, "local", None), "site", "site"))},
+        )
+        emp.ee_payout_account = acct.id
+        emp.save(ignore_permissions=True)
+        frappe.db.commit()
+        account_id = acct.id
+    else:
+        account_id = existing_acct
+
+    from entertainment_express.white_label.urls import get_public_base_url
+    base = get_public_base_url()
+    ret = return_url or f"{base}/owner/money"
+
+    link = stripe.AccountLink.create(
+        account=account_id,
+        refresh_url=ret,
+        return_url=ret,
+        type="account_onboarding",
+    )
+    return {"account_id": account_id, "url": link.url}

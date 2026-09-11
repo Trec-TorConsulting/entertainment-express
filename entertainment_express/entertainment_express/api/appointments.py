@@ -9,6 +9,7 @@ import frappe
 from frappe.utils import add_days, cint, get_datetime, getdate, now_datetime
 
 from entertainment_express.api.portal_owner import OWNER_ROLES
+from entertainment_express.api.rate_limit import rate_limited
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 STAFF = OWNER_ROLES | {"EE Sales", "System Manager"}
@@ -216,6 +217,7 @@ def list_types() -> list[dict]:
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=60)
 def list_slots(meeting_type: str, from_date: str | None = None, days: int = 14) -> list[dict]:
     if not frappe.db.table_exists("EE Meeting Type"):
         return []
@@ -251,6 +253,7 @@ def list_slots(meeting_type: str, from_date: str | None = None, days: int = 14) 
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=30)
 def book(
     meeting_type: str,
     start: str,
@@ -323,6 +326,7 @@ def book(
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=30)
 def cancel(name: str | None = None, token: str | None = None) -> dict:
     doc = _load_manageable(name, token)
     doc.status = "canceled"
@@ -341,6 +345,7 @@ def cancel(name: str | None = None, token: str | None = None) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=30)
 def reschedule(name: str, start: str, token: str | None = None) -> dict:
     doc = _load_manageable(name, token)
     meeting = frappe.get_doc("EE Meeting Type", doc.meeting_type)

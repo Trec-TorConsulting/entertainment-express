@@ -5,10 +5,13 @@ Guests are denied on mutations and money reads. Amounts use flt / fmt_money.
 
 from __future__ import annotations
 
+import hmac
 import secrets
 
 import frappe
 from frappe.utils import flt, now_datetime
+
+from entertainment_express.api.rate_limit import rate_limited
 
 GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
@@ -37,7 +40,7 @@ def _token_ok(quotation_name: str, token: str | None) -> bool:
     if not token or not frappe.get_meta("Quotation").has_field("ee_proposal_token"):
         return False
     stored = frappe.db.get_value("Quotation", quotation_name, "ee_proposal_token")
-    return bool(stored) and stored == token
+    return bool(stored) and bool(token) and hmac.compare_digest(str(stored), str(token))
 
 
 def _require_client(quotation_name: str, token: str | None = None, allow_token_guest: bool = True) -> None:
@@ -73,6 +76,7 @@ def send_proposal(source: str, name: str) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=60)
 def get_proposal(quotation_name: str | None = None, token: str | None = None, source: str | None = None, name: str | None = None) -> dict:
     if source and name:
         _require_staff()
@@ -98,6 +102,7 @@ def get_proposal(quotation_name: str | None = None, token: str | None = None, so
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=60)
 def record_view(quotation_name: str, token: str | None = None) -> dict:
     _require_client(quotation_name, token)
     quote = frappe.get_doc("Quotation", quotation_name)

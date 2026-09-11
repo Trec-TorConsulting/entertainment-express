@@ -36,28 +36,19 @@ def _get_jwt_user(token: str = None) -> str:
     if not raw:
         raise PermissionError("Missing authorization token")
 
-    # Prefer verified EE JWTs; fall back to unverified decode only in unit-test
-    # contexts where PyJWT / secret may be unavailable.
     try:
         from entertainment_express.api.auth_jwt import verify_access_token
 
         payload = verify_access_token(raw)
-        return payload.get("sub")
-    except Exception as verified_err:
-        try:
-            import jwt as pyjwt
-
-            payload = pyjwt.decode(raw, options={"verify_signature": False})
-            user = payload.get("sub") or payload.get("user")
-            if not user:
-                raise PermissionError("Invalid authorization token")
-            logger.warning(f"JWT used without signature verify: {verified_err}")
-            return user
-        except PermissionError:
-            raise
-        except Exception as e:
-            logger.warning(f"JWT decode failed: {e}")
-            raise PermissionError("Invalid authorization token") from e
+        sub = payload.get("sub")
+        if not sub:
+            raise PermissionError("Invalid authorization token: missing subject")
+        return sub
+    except PermissionError:
+        raise
+    except Exception as e:
+        logger.warning(f"JWT verification failed: {e}")
+        raise PermissionError("Invalid authorization token") from e
 
 
 def _require_scopes(token: str = None, *scopes: str) -> str:
@@ -65,16 +56,14 @@ def _require_scopes(token: str = None, *scopes: str) -> str:
     raw = _extract_bearer(token)
     if not raw:
         raise PermissionError("Missing authorization token")
-    try:
-        from entertainment_express.api.auth_jwt import require_scopes, verify_access_token
+    from entertainment_express.api.auth_jwt import require_scopes, verify_access_token
 
-        payload = verify_access_token(raw)
-        require_scopes(payload, *scopes)
-        return payload.get("sub")
-    except Exception as exc:
-        # Soft path for incomplete JWT setup / unit tests — still authenticate identity.
-        logger.warning(f"Scope check soft-fallback ({scopes}): {exc}")
-        return _get_jwt_user(token)
+    payload = verify_access_token(raw)
+    require_scopes(payload, *scopes)
+    sub = payload.get("sub")
+    if not sub:
+        raise PermissionError("Invalid authorization token: missing subject")
+    return sub
 
 
 def _paginate(query_result: List[Dict], page: int = 1, page_size: int = 20) -> Dict:

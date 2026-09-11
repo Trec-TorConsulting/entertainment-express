@@ -4,10 +4,13 @@ The signing page is www/sign.html?token=<token>.
 """
 
 import hashlib
+import hmac
 import secrets
 import frappe
 from frappe.utils import now_datetime, add_days
 
+from entertainment_express.api.rate_limit import rate_limited
+from entertainment_express.security.site_secrets import get_site_secret
 from entertainment_express.white_label.urls import get_public_base_url
 
 
@@ -78,6 +81,7 @@ def send_contract(contract_name: str) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=30)
 def sign_contract(contract_name: str = None, token: str = None,
                   signature_typed: str = None, signer_name: str = None) -> dict:
     """
@@ -87,7 +91,7 @@ def sign_contract(contract_name: str = None, token: str = None,
     """
     if not contract_name or not token:
         frappe.throw("Invalid request.", frappe.PermissionError)
-    if token != _signing_token(contract_name):
+    if not hmac.compare_digest(str(token), _signing_token(contract_name)):
         frappe.throw("Invalid or expired signing token.", frappe.PermissionError)
 
     contract = frappe.get_doc("EE Contract", contract_name)
@@ -191,12 +195,13 @@ def sign_my_contract(contract_name: str, signer_name: str | None = None, signatu
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=60)
 def view_contract(contract_name: str = None, token: str = None) -> dict:
     """Mark contract as viewed when the signer opens the signing page."""
     if not contract_name or not token:
         frappe.throw("Invalid request.")
-    if token != _signing_token(contract_name):
-        frappe.throw("Invalid token.")
+    if not hmac.compare_digest(str(token), _signing_token(contract_name)):
+        frappe.throw("Invalid token.", frappe.PermissionError)
 
     contract = frappe.get_doc("EE Contract", contract_name)
     if contract.status == "sent":
@@ -212,8 +217,7 @@ def view_contract(contract_name: str = None, token: str = None) -> dict:
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 def _signing_token(contract_name: str) -> str:
-    import hmac, hashlib
-    secret = frappe.conf.get("ee_signing_secret") or "CHANGE_ME_IN_SITE_CONFIG"
+    secret = get_site_secret("ee_signing_secret", purpose="contract")
     return hmac.new(
         secret.encode(), f"sign:{contract_name}".encode(), hashlib.sha256
     ).hexdigest()[:48]

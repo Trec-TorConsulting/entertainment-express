@@ -1682,7 +1682,7 @@ metadata:
     app.kubernetes.io/component: ingress
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
-    traefik.ingress.kubernetes.io/router.middlewares: entertainment-express-entx-site-header@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: "entertainment-express-entx-site-header@kubernetescrd,traefik-redirect-https@kubernetescrd,traefik-gzip-compress@kubernetescrd,traefik-security-headers@kubernetescrd"
 spec:
   ingressClassName: traefik
   rules:

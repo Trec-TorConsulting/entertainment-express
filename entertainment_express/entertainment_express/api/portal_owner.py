@@ -85,8 +85,11 @@ def backfill_field_employees() -> None:
 
 
 def _require_owner() -> None:
-    roles = set(frappe.get_roles(frappe.session.user) or [])
-    if not roles.intersection(OWNER_ROLES):
+    user = getattr(getattr(frappe, "session", None), "user", None)
+    if user == "Administrator":
+        return
+    roles = set(frappe.get_roles(user) or [])
+    if not roles.intersection(OWNER_ROLES | {"System Manager"}):
         frappe.throw("Owner portal access denied.", frappe.PermissionError)
 
 

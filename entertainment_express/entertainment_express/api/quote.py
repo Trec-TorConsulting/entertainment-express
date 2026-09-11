@@ -4,9 +4,14 @@ All functions are whitelisted (callable from portal/front-end via REST).
 Money computations use frappe.utils.flt — never float arithmetic.
 """
 
+import hashlib
+import hmac
 import frappe
 from frappe.utils import flt, now_datetime, add_days, today
 from frappe.model.document import Document
+
+from entertainment_express.api.rate_limit import rate_limited
+from entertainment_express.security.site_secrets import get_site_secret
 
 
 @frappe.whitelist()
@@ -141,19 +146,12 @@ def send_quote(quotation_name: str) -> dict:
         "accept_link": accept_link,
     })
 
-    # Schedule follow-up reminder (7 days)
-    frappe.enqueue(
-        "entertainment_express.api.quote._schedule_followup",
-        quotation_name=quotation_name,
-        after_commit=True,
-        queue="long",
-    )
-
     quote.db_set("status", "Open")
     return {"status": "sent", "quotation": quotation_name}
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limited(limit=30)
 def accept_quote(quotation=None, token=None) -> dict:
     """
     Customer-facing: accept a quote (called via tokenized link).
@@ -161,7 +159,7 @@ def accept_quote(quotation=None, token=None) -> dict:
     """
     if not quotation or not token:
         frappe.throw("Invalid request.", frappe.PermissionError)
-    if token != _quote_token(quotation):
+    if not hmac.compare_digest(str(token), _quote_token(quotation)):
         frappe.throw("Invalid or expired token.", frappe.PermissionError)
 
     quote = frappe.get_doc("Quotation", quotation)
@@ -180,9 +178,7 @@ def accept_quote(quotation=None, token=None) -> dict:
 
 
 def _schedule_followup(quotation_name: str) -> None:
-    """Send a follow-up reminder if quote is still Open after 7 days."""
-    import time as _time
-    _time.sleep(7 * 86400)  # This runs in a long-queue worker; real impl uses scheduler
+    """Send a follow-up reminder if quote is still Open."""
     quote = frappe.get_doc("Quotation", quotation_name)
     if quote.status == "Open":
         customer_email = frappe.db.get_value("Customer", quote.party_name, "email_id") or ""
@@ -195,10 +191,46 @@ def _schedule_followup(quotation_name: str) -> None:
             })
 
 
+def process_quote_followups() -> int:
+    """Daily scheduler task: send follow-up reminder for quotes open 7+ days without prior followup."""
+    from datetime import timedelta
+    from frappe.utils import now_datetime
+
+    now_dt = now_datetime()
+    if isinstance(now_dt, str):
+        from frappe.utils import get_datetime
+        now_dt = get_datetime(now_dt)
+    cutoff = now_dt - timedelta(days=7)
+    open_quotes = frappe.get_all(
+        "Quotation",
+        filters={"status": "Open", "creation": ["<=", cutoff]},
+        fields=["name", "party_name", "ee_event_date"],
+        limit_page_length=50,
+    )
+    sent_count = 0
+    for q in open_quotes:
+        existing = frappe.db.exists(
+            "Comment",
+            {"comment_type": "Comment", "reference_doctype": "Quotation", "reference_name": q["name"], "content": ["like", "%follow-up reminder sent%"]},
+        )
+        if not existing:
+            _schedule_followup(q["name"])
+            frappe.get_doc({
+                "doctype": "Comment",
+                "comment_type": "Comment",
+                "reference_doctype": "Quotation",
+                "reference_name": q["name"],
+                "content": "Quote follow-up reminder sent to customer.",
+            }).insert(ignore_permissions=True)
+            sent_count += 1
+    if sent_count:
+        frappe.db.commit()
+    return sent_count
+
+
 def _quote_token(quotation_name: str) -> str:
     """Deterministic HMAC token for quote accept link (no stored state needed)."""
-    import hmac, hashlib
-    secret = frappe.conf.get("ee_signing_secret") or frappe.generate_hash(length=32)
+    secret = get_site_secret("ee_signing_secret", purpose="quote")
     return hmac.new(
         secret.encode(), quotation_name.encode(), hashlib.sha256
     ).hexdigest()[:32]
