@@ -50,7 +50,9 @@ export const AppointmentsPage: React.FC = () => {
 
   const loadAppointments = async () => {
     try {
-      const res = await call("entertainment_express.api.appointments.my_appointments", {});
+      const res = await call("entertainment_express.api.appointments.my_appointments", {
+        booking: bookingParam || ""
+      });
       setAppointments(res || []);
     } catch {
       setAppointments([]);
@@ -65,17 +67,9 @@ export const AppointmentsPage: React.FC = () => {
       const slots = await call("entertainment_express.api.appointments.available_slots", {
         booking: bookingParam || ""
       });
-      setAvailableSlots(slots || [
-        { id: "SLOT-1", label: "Tomorrow at 2:00 PM EST", start: "14:00" },
-        { id: "SLOT-2", label: "Tomorrow at 4:30 PM EST", start: "16:30" },
-        { id: "SLOT-3", label: "Thursday at 11:00 AM EST", start: "11:00" },
-        { id: "SLOT-4", label: "Friday at 3:00 PM EST", start: "15:00" },
-      ]);
+      setAvailableSlots(slots || []);
     } catch {
-      setAvailableSlots([
-        { id: "SLOT-1", label: "Tomorrow at 2:00 PM EST" },
-        { id: "SLOT-2", label: "Thursday at 11:00 AM EST" },
-      ]);
+      setAvailableSlots([]);
     }
   };
 
@@ -87,7 +81,7 @@ export const AppointmentsPage: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await call("entertainment_express.api.appointments.book_appointment", {
+      const res = await call("entertainment_express.api.appointments.book_appointment", {
         slot: selectedSlot,
         appointment_type: appointmentType,
         notes: notes.trim(),
@@ -95,8 +89,10 @@ export const AppointmentsPage: React.FC = () => {
       });
 
       toast({
-        title: "Consultation Booked",
-        description: "Your session is confirmed on our staff calendar and invite sent.",
+        title: res?.status === "requested" ? "Consultation Requested" : "Consultation Booked",
+        description: res?.status === "requested"
+          ? "Your request has been submitted for owner review and acceptance."
+          : "Your session is confirmed on our staff calendar and invite sent.",
         variant: "success",
       });
       setBookingModalOpen(false);
@@ -105,12 +101,10 @@ export const AppointmentsPage: React.FC = () => {
       await loadAppointments();
     } catch (err: any) {
       toast({
-        title: "Booking Completed",
-        description: "Appointment confirmed and coordinator notified.",
-        variant: "success",
+        title: "Booking Failed",
+        description: err.message || "Could not complete consultation request. Please try again.",
+        variant: "danger",
       });
-      setBookingModalOpen(false);
-      await loadAppointments();
     } finally {
       setSubmitting(false);
     }
@@ -179,10 +173,24 @@ export const AppointmentsPage: React.FC = () => {
             <Card key={appt.name || appt.id} elevated className="p-5 space-y-4 border-[var(--ee-border)]">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant={appt.status === "cancelled" ? "danger" : "success"} size="sm">
-                      {appt.status || "Scheduled"}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge
+                      variant={
+                        appt.status === "cancelled" || appt.status === "canceled"
+                          ? "danger"
+                          : appt.status === "requested"
+                          ? "warning"
+                          : "success"
+                      }
+                      size="sm"
+                    >
+                      {appt.status === "requested" ? "Pending Confirmation" : appt.status === "scheduled" ? "Confirmed" : appt.status || "Scheduled"}
                     </Badge>
+                    {appt.event_booking && (
+                      <Badge variant="outline" size="sm">
+                        {appt.event_booking}
+                      </Badge>
+                    )}
                     <span className="text-xs font-mono text-[var(--ee-muted)]">#{appt.name || appt.id}</span>
                   </div>
                   <h4 className="font-semibold text-base text-[var(--ee-text)]">

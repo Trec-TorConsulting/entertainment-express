@@ -168,6 +168,51 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
     except Exception:
         unread_chat = 0
 
+    consultations = []
+    try:
+        if frappe.db.table_exists("EE Appointment"):
+            appt_fields = ["name", "meeting_type", "staff", "start", "end", "status", "invitee_name"]
+            if frappe.db.has_column("EE Appointment", "event_booking"):
+                appt_fields.append("event_booking")
+            if frappe.db.has_column("EE Appointment", "appointment_type"):
+                appt_fields.append("appointment_type")
+            if frappe.db.has_column("EE Appointment", "notes"):
+                appt_fields.append("notes")
+
+            for row in frappe.get_all(
+                "EE Appointment",
+                filters={"status": ["in", ["requested", "scheduled", "rescheduled"]]},
+                fields=appt_fields,
+                order_by="start asc",
+                limit_page_length=10,
+            ):
+                event_name = ""
+                booking_id = row.get("event_booking") if isinstance(row, dict) else getattr(row, "event_booking", "")
+                if booking_id and frappe.db.table_exists("Event Booking"):
+                    event_name = frappe.db.get_value("Event Booking", booking_id, "event_name") or ""
+                mt_val = row.get("meeting_type") if isinstance(row, dict) else getattr(row, "meeting_type", "")
+                type_name = frappe.db.get_value("EE Meeting Type", mt_val, "type_name") if mt_val else "Planning Session"
+                row_name = row.get("name") if isinstance(row, dict) else getattr(row, "name", "")
+                invitee = row.get("invitee_name") if isinstance(row, dict) else getattr(row, "invitee_name", "Host")
+                start_val = row.get("start") if isinstance(row, dict) else getattr(row, "start", "")
+                status_val = row.get("status") if isinstance(row, dict) else getattr(row, "status", "scheduled")
+                notes_val = row.get("notes") if isinstance(row, dict) else getattr(row, "notes", "")
+                appt_type_val = row.get("appointment_type") if isinstance(row, dict) else getattr(row, "appointment_type", "video")
+                consultations.append({
+                    "id": row_name,
+                    "name": row_name,
+                    "title": type_name or "Planning Consultation",
+                    "who": invitee or "Host",
+                    "start": str(start_val or ""),
+                    "status": status_val,
+                    "event_booking": booking_id,
+                    "event_name": event_name,
+                    "notes": notes_val or "",
+                    "appointment_type": appt_type_val or "video",
+                })
+    except Exception:
+        consultations = []
+
     pack = {}
     try:
         from entertainment_express.api.portal_reports import _owner_snapshot
@@ -185,6 +230,7 @@ def get_owner_dashboard(from_date: str | None = None, to_date: str | None = None
         "outstanding_balance": fmt_money(outstanding_total, currency=currency),
         "unread_chat": unread_chat,
         "jobs": jobs,
+        "consultations": consultations,
         "series": [],
         "from_date": from_date,
         "to_date": to_date,
@@ -268,6 +314,54 @@ def get_approvals() -> list[dict]:
                 )
     except Exception:
         pass
+    try:
+        if frappe.db.table_exists("EE Appointment"):
+            appt_fields = ["name", "meeting_type", "invitee_name", "start", "status"]
+            if frappe.db.has_column("EE Appointment", "event_booking"):
+                appt_fields.append("event_booking")
+            if frappe.db.has_column("EE Appointment", "appointment_type"):
+                appt_fields.append("appointment_type")
+            if frappe.db.has_column("EE Appointment", "notes"):
+                appt_fields.append("notes")
+
+            for row in frappe.get_all(
+                "EE Appointment",
+                filters={"status": "requested"},
+                fields=appt_fields,
+                order_by="start asc",
+                limit_page_length=20,
+            ):
+                event_name = ""
+                booking_id = row.get("event_booking") if isinstance(row, dict) else getattr(row, "event_booking", "")
+                if booking_id and frappe.db.table_exists("Event Booking"):
+                    event_name = frappe.db.get_value("Event Booking", booking_id, "event_name") or ""
+                mt_val = row.get("meeting_type") if isinstance(row, dict) else getattr(row, "meeting_type", "")
+                type_name = frappe.db.get_value("EE Meeting Type", mt_val, "type_name") if mt_val else "Consultation"
+                row_name = row.get("name") if isinstance(row, dict) else getattr(row, "name", "")
+                invitee = row.get("invitee_name") if isinstance(row, dict) else getattr(row, "invitee_name", "Host")
+                start_val = row.get("start") if isinstance(row, dict) else getattr(row, "start", "")
+                notes_val = row.get("notes") if isinstance(row, dict) else getattr(row, "notes", "")
+                appt_type_val = row.get("appointment_type") if isinstance(row, dict) else getattr(row, "appointment_type", "video")
+
+                summary_parts = [f"Consultation Request · {invitee}"]
+                if event_name or booking_id:
+                    summary_parts.append(event_name or booking_id)
+                summary = " · ".join(summary_parts)
+                rows.append(
+                    {
+                        "type": "appointment",
+                        "id": row_name,
+                        "name": row_name,
+                        "doctype": "EE Appointment",
+                        "summary": summary,
+                        "date": str(start_val or ""),
+                        "event": booking_id,
+                        "notes": notes_val or "",
+                        "appointment_type": appt_type_val or "video",
+                    }
+                )
+    except Exception:
+        pass
     return rows
 
 
@@ -291,6 +385,37 @@ def act_on_approval(approval_type: str, doctype: str, name: str, decision: str, 
         doc = frappe.get_doc("EE Field Issue", name)
         doc.status = "acked"
         doc.save(ignore_permissions=True)
+    elif doctype == "EE Appointment":
+        doc = frappe.get_doc("EE Appointment", name)
+        if decision in ("approved", "accept", "confirm", "scheduled"):
+            doc.status = "scheduled"
+            doc.save(ignore_permissions=True)
+            from entertainment_express.api.appointments import _notify, _company_name
+            _notify(
+                "appointment_booked",
+                doc.invitee_email,
+                {
+                    "invitee_name": doc.invitee_name,
+                    "meeting_name": frappe.db.get_value("EE Meeting Type", doc.meeting_type, "type_name") or "Consultation",
+                    "start_label": str(doc.start),
+                    "company_name": _company_name(),
+                    "manage_link": f"/schedule?token={doc.cancel_token}",
+                },
+            )
+        else:
+            doc.status = "canceled"
+            doc.save(ignore_permissions=True)
+            from entertainment_express.api.appointments import _notify, _company_name
+            _notify(
+                "appointment_canceled",
+                doc.invitee_email,
+                {
+                    "invitee_name": doc.invitee_name,
+                    "meeting_name": frappe.db.get_value("EE Meeting Type", doc.meeting_type, "type_name") or "Consultation",
+                    "start_label": str(doc.start),
+                    "company_name": _company_name(),
+                },
+            )
 
     _audit(
         "approval_decision",

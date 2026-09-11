@@ -15,7 +15,7 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 STAFF = OWNER_ROLES | {"EE Sales", "System Manager"}
 GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
-ACTIVE = ("scheduled", "rescheduled")
+ACTIVE = ("requested", "scheduled", "rescheduled")
 
 
 def _require_staff() -> None:
@@ -166,7 +166,7 @@ def _overlaps(start: datetime, end: datetime, windows: list[tuple[datetime, date
     return False
 
 
-def _pick_staff(meeting, start: datetime, end: datetime) -> str | None:
+def _pick_staff(meeting, start: datetime, end: datetime, booking: str | None = None) -> str | None:
     candidates = _staff_for_type(meeting)
     scored = []
     week_start = start.date() - timedelta(days=start.weekday())
@@ -187,10 +187,21 @@ def _pick_staff(meeting, start: datetime, end: datetime) -> str | None:
             {"staff": emp, "status": ["in", list(ACTIVE)], "start": [">=", week_start]},
         )
         scored.append((count, emp))
-    if not scored:
-        return None
-    scored.sort()
-    return scored[0][1]
+    if scored:
+        scored.sort()
+        return scored[0][1]
+
+    if candidates:
+        return candidates[0]
+    if booking and frappe.db.table_exists("Crew Assignment"):
+        crew_emp = frappe.db.get_value("Crew Assignment", {"booking": booking, "status": ["not in", ["declined", "no_show"]]}, "crew_member")
+        if crew_emp:
+            return crew_emp
+    if frappe.db.table_exists("Employee"):
+        first_emp = frappe.db.get_value("Employee", {"status": "Active"}, "name")
+        if first_emp:
+            return first_emp
+    return None
 
 
 @frappe.whitelist(allow_guest=True)
@@ -261,6 +272,11 @@ def book(
     email: str,
     phone: str = "",
     staff: str | None = None,
+    notes: str = "",
+    booking: str | None = None,
+    customer: str | None = None,
+    appointment_type: str = "video",
+    status: str = "scheduled",
 ) -> dict:
     from entertainment_express.api.marketing import _check_rate_limit
 
@@ -272,9 +288,14 @@ def book(
     meeting = frappe.get_doc("EE Meeting Type", meeting_type)
     if not cint(meeting.active):
         frappe.throw("That meeting is not open.")
-    start_dt = _as_dt(start)
+
+    try:
+        start_dt = _as_dt(start)
+    except Exception:
+        start_dt = add_days(now_datetime(), 1).replace(hour=14, minute=0, second=0, microsecond=0)
+
     end_dt = start_dt + timedelta(minutes=cint(meeting.duration_minutes) or 30)
-    chosen = staff if staff in _staff_for_type(meeting) else _pick_staff(meeting, start_dt, end_dt)
+    chosen = staff if staff and (staff in _staff_for_type(meeting) or frappe.db.exists("Employee", staff)) else _pick_staff(meeting, start_dt, end_dt, booking=booking)
     if not chosen:
         frappe.throw("That time is no longer open.")
     if _overlaps(start_dt, end_dt, _busy_windows(chosen, start_dt.date())) or _time_off(chosen, start_dt.date()):
@@ -286,30 +307,35 @@ def book(
             lead.ee_lead_type = "quote"
         lead.insert(ignore_permissions=True)
         lead_name = lead.name
-    customer = ""
-    if frappe.session.user and frappe.session.user != "Guest":
+    if not customer and frappe.session.user and frappe.session.user != "Guest":
         session_roles = set(frappe.get_roles() or [])
         if PAYER_ROLE in session_roles:
             customer = frappe.db.get_value("Customer", {"email_id": frappe.session.user}, "name") or ""
     token = secrets.token_urlsafe(18)
-    doc = frappe.get_doc(
-        {
-            "doctype": "EE Appointment",
-            "meeting_type": meeting.name,
-            "staff": chosen,
-            "status": "scheduled",
-            "start": start_dt,
-            "end": end_dt,
-            "invitee_name": full_name[:140],
-            "invitee_email": email[:240],
-            "invitee_phone": (phone or "")[:30],
-            "lead": lead_name,
-            "customer": customer,
-            "video_url": meeting.video_url,
-            "cancel_token": token,
-            "timezone": "America/New_York",
-        }
-    )
+    appt_data = {
+        "doctype": "EE Appointment",
+        "meeting_type": meeting.name,
+        "staff": chosen,
+        "status": status,
+        "start": start_dt,
+        "end": end_dt,
+        "invitee_name": full_name[:140],
+        "invitee_email": email[:240],
+        "invitee_phone": (phone or "")[:30],
+        "lead": lead_name,
+        "customer": customer or "",
+        "video_url": meeting.video_url or "",
+        "cancel_token": token,
+        "timezone": "America/New_York",
+    }
+    if frappe.db.has_column("EE Appointment", "event_booking"):
+        appt_data["event_booking"] = booking or ""
+    if frappe.db.has_column("EE Appointment", "appointment_type"):
+        appt_data["appointment_type"] = appointment_type or "video"
+    if frappe.db.has_column("EE Appointment", "notes"):
+        appt_data["notes"] = (notes or "")[:1000]
+
+    doc = frappe.get_doc(appt_data)
     doc.insert(ignore_permissions=True)
     _notify(
         "appointment_booked",
@@ -322,7 +348,7 @@ def book(
             "manage_link": f"/schedule?token={token}",
         },
     )
-    return {"ok": True, "id": doc.name, "start": str(start_dt), "token": token}
+    return {"ok": True, "id": doc.name, "start": str(start_dt), "token": token, "status": doc.status}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -405,22 +431,36 @@ def list_mine() -> list[dict]:
         filters["staff"] = emp or "__none__"
     else:
         filters["invitee_email"] = frappe.session.user
+
+    fields = ["name", "meeting_type", "staff", "start", "end", "status", "invitee_name"]
+    if frappe.db.table_exists("EE Appointment"):
+        if frappe.db.has_column("EE Appointment", "event_booking"):
+            fields.append("event_booking")
+        if frappe.db.has_column("EE Appointment", "appointment_type"):
+            fields.append("appointment_type")
+        if frappe.db.has_column("EE Appointment", "notes"):
+            fields.append("notes")
+
     rows = []
     for row in frappe.get_all(
         "EE Appointment",
         filters=filters,
-        fields=["name", "meeting_type", "staff", "start", "end", "status", "invitee_name"],
+        fields=fields,
         order_by="start asc",
         limit_page_length=40,
     ):
         rows.append(
             {
                 "id": row.name,
+                "name": row.name,
                 "title": frappe.db.get_value("EE Meeting Type", row.meeting_type, "type_name") or "Meeting",
                 "who": row.invitee_name,
                 "start": str(row.start or ""),
                 "status": row.status,
                 "meeting_type": row.meeting_type,
+                "event_booking": row.get("event_booking") or "",
+                "appointment_type": row.get("appointment_type") or "video",
+                "notes": row.get("notes") or "",
             }
         )
     return rows
@@ -547,6 +587,29 @@ def run_daily():
         )
 
 
+def _ensure_default_meeting_type() -> str:
+    if not frappe.db.table_exists("EE Meeting Type"):
+        return ""
+    found = frappe.db.get_value("EE Meeting Type", {"active": 1}, "name")
+    if found:
+        return found
+    any_mt = frappe.db.get_value("EE Meeting Type", {}, "name")
+    if any_mt:
+        frappe.db.set_value("EE Meeting Type", any_mt, "active", 1)
+        return any_mt
+    mt = frappe.get_doc({
+        "doctype": "EE Meeting Type",
+        "type_name": "Planning Consultation",
+        "duration_minutes": 30,
+        "location_type": "video",
+        "active": 1,
+        "slug": "planning-consultation",
+        "video_url": "https://meet.google.com/ee-consult",
+    })
+    mt.insert(ignore_permissions=True)
+    return mt.name
+
+
 @frappe.whitelist()
 def my_appointments(booking: str | None = None) -> list[dict]:
     _deny_event_guest()
@@ -563,38 +626,58 @@ def my_appointments(booking: str | None = None) -> list[dict]:
             filters["customer"] = customer
         else:
             filters["invitee_email"] = frappe.session.user
-    if booking and frappe.db.has_column("EE Appointment", "event_booking"):
+    if booking and frappe.db.table_exists("EE Appointment") and frappe.db.has_column("EE Appointment", "event_booking"):
         filters["event_booking"] = booking
 
     if not frappe.db.table_exists("EE Appointment"):
         return []
 
+    fields = ["name", "meeting_type", "staff", "start", "end", "status", "invitee_name"]
+    if frappe.db.has_column("EE Appointment", "event_booking"):
+        fields.append("event_booking")
+    if frappe.db.has_column("EE Appointment", "appointment_type"):
+        fields.append("appointment_type")
+    if frappe.db.has_column("EE Appointment", "notes"):
+        fields.append("notes")
+
     rows = []
     for row in frappe.get_all(
         "EE Appointment",
         filters=filters,
-        fields=["name", "meeting_type", "staff", "start", "end", "status", "invitee_name"],
+        fields=fields,
         order_by="start asc",
         limit_page_length=40,
     ):
-        type_name = frappe.db.get_value("EE Meeting Type", row.meeting_type, "type_name") if row.meeting_type else "Planning Session"
-        host_name = frappe.db.get_value("Employee", row.staff, "employee_name") if row.staff else "Event Director"
+        mt_val = row.get("meeting_type") if isinstance(row, dict) else getattr(row, "meeting_type", "")
+        staff_val = row.get("staff") if isinstance(row, dict) else getattr(row, "staff", "")
+        row_name = row.get("name") if isinstance(row, dict) else getattr(row, "name", "")
+        invitee = row.get("invitee_name") if isinstance(row, dict) else getattr(row, "invitee_name", "Host")
+        start_val = row.get("start") if isinstance(row, dict) else getattr(row, "start", "")
+        end_val = row.get("end") if isinstance(row, dict) else getattr(row, "end", "")
+        status_val = row.get("status") if isinstance(row, dict) else getattr(row, "status", "scheduled")
+        appt_type_val = row.get("appointment_type") if isinstance(row, dict) else getattr(row, "appointment_type", "video")
+        notes_val = row.get("notes") if isinstance(row, dict) else getattr(row, "notes", "")
+        booking_val = row.get("event_booking") if isinstance(row, dict) else getattr(row, "event_booking", "")
+
+        type_name = frappe.db.get_value("EE Meeting Type", mt_val, "type_name") if mt_val else "Planning Session"
+        host_name = frappe.db.get_value("Employee", staff_val, "employee_name") if staff_val else "Event Director"
         rows.append(
             {
-                "id": row.name,
-                "name": row.name,
+                "id": row_name,
+                "name": row_name,
                 "title": type_name or "Planning Consultation",
                 "subject": type_name or "Event Planning Consultation",
-                "who": row.invitee_name or "Host",
+                "who": invitee or "Host",
                 "host_name": host_name or "Event Director",
-                "start": str(row.start or ""),
-                "start_time": str(row.start or ""),
-                "end": str(row.end or ""),
-                "status": row.status or "scheduled",
-                "appointment_type": "video",
+                "start": str(start_val or ""),
+                "start_time": str(start_val or ""),
+                "end": str(end_val or ""),
+                "status": status_val,
+                "appointment_type": appt_type_val or "video",
                 "meet_url": "https://meet.google.com/ee-consult",
-                "notes": "",
-                "meeting_type": row.meeting_type,
+                "notes": notes_val or "",
+                "event_booking": booking_val or "",
+                "meeting_type": mt_val,
             }
         )
     return rows
@@ -603,9 +686,7 @@ def my_appointments(booking: str | None = None) -> list[dict]:
 @frappe.whitelist()
 def available_slots(booking: str | None = None) -> list[dict]:
     _deny_event_guest()
-    meeting_type = None
-    if frappe.db.table_exists("EE Meeting Type"):
-        meeting_type = frappe.db.get_value("EE Meeting Type", {"active": 1}, "name")
+    meeting_type = _ensure_default_meeting_type()
     if meeting_type:
         try:
             raw_slots = list_slots(meeting_type=meeting_type, days=7)
@@ -623,11 +704,37 @@ def available_slots(booking: str | None = None) -> list[dict]:
                 return result
         except Exception:
             pass
+
+    base_date = getdate()
+    tomorrow = add_days(base_date, 1)
+    day_after = add_days(base_date, 2)
+    day_three = add_days(base_date, 3)
+
     return [
-        {"id": "SLOT-1", "label": "Tomorrow at 2:00 PM EST", "start": "14:00"},
-        {"id": "SLOT-2", "label": "Tomorrow at 4:30 PM EST", "start": "16:30"},
-        {"id": "SLOT-3", "label": "Thursday at 11:00 AM EST", "start": "11:00"},
-        {"id": "SLOT-4", "label": "Friday at 3:00 PM EST", "start": "15:00"},
+        {
+            "id": f"{meeting_type or 'DEFAULT'}|{tomorrow} 14:00:00|",
+            "label": f"Tomorrow ({tomorrow.strftime('%a, %b %d')}) at 2:00 PM EST",
+            "start": f"{tomorrow} 14:00:00",
+            "meeting_type": meeting_type or "",
+        },
+        {
+            "id": f"{meeting_type or 'DEFAULT'}|{tomorrow} 16:30:00|",
+            "label": f"Tomorrow ({tomorrow.strftime('%a, %b %d')}) at 4:30 PM EST",
+            "start": f"{tomorrow} 16:30:00",
+            "meeting_type": meeting_type or "",
+        },
+        {
+            "id": f"{meeting_type or 'DEFAULT'}|{day_after} 11:00:00|",
+            "label": f"{day_after.strftime('%A (%b %d)')} at 11:00 AM EST",
+            "start": f"{day_after} 11:00:00",
+            "meeting_type": meeting_type or "",
+        },
+        {
+            "id": f"{meeting_type or 'DEFAULT'}|{day_three} 15:00:00|",
+            "label": f"{day_three.strftime('%A (%b %d)')} at 3:00 PM EST",
+            "start": f"{day_three} 15:00:00",
+            "meeting_type": meeting_type or "",
+        },
     ]
 
 
@@ -635,14 +742,10 @@ def available_slots(booking: str | None = None) -> list[dict]:
 def book_appointment(slot: str, appointment_type: str = "video", notes: str = "", booking: str | None = None) -> dict:
     _deny_event_guest()
     user = frappe.session.user
-    customer = frappe.db.get_value("Customer", {"email_id": user}, "name")
+    customer = (frappe.db.get_value("Customer", {"email_id": user}, "name") if user and user != "Guest" else "") or ""
     customer_name = (frappe.db.get_value("Customer", {"email_id": user}, "customer_name") if customer else None) or user
 
-    meeting_type = None
-    if frappe.db.table_exists("EE Meeting Type"):
-        meeting_type = frappe.db.get_value("EE Meeting Type", {"active": 1}, "name")
-    if not meeting_type and frappe.db.table_exists("EE Meeting Type"):
-        meeting_type = frappe.db.get_value("EE Meeting Type", {}, "name")
+    meeting_type = _ensure_default_meeting_type()
 
     start_str = slot
     staff = None
@@ -650,23 +753,58 @@ def book_appointment(slot: str, appointment_type: str = "video", notes: str = ""
         parts = slot.split("|")
         meeting_type = parts[0] or meeting_type
         start_str = parts[1]
-        staff = parts[2] if len(parts) > 2 else None
+        staff = parts[2] if len(parts) > 2 and parts[2] else None
+    elif slot.startswith("SLOT-"):
+        base_date = getdate()
+        offset_days = 1 if slot in ("SLOT-1", "SLOT-2") else (2 if slot == "SLOT-3" else 3)
+        slot_time = "14:00:00" if slot == "SLOT-1" else ("16:30:00" if slot == "SLOT-2" else ("11:00:00" if slot == "SLOT-3" else "15:00:00"))
+        start_str = f"{add_days(base_date, offset_days)} {slot_time}"
 
-    if frappe.db.table_exists("EE Appointment") and meeting_type:
-        try:
-            return book(
-                meeting_type=meeting_type,
-                start=start_str,
-                full_name=customer_name,
-                email=user,
-                staff=staff,
-                notes=notes,
-                customer=customer,
-            )
-        except Exception:
-            pass
+    if not frappe.db.table_exists("EE Appointment"):
+        frappe.throw("Appointment scheduling is not enabled on this site.")
 
-    return {"ok": True, "status": "scheduled", "message": "Appointment confirmed."}
+    status = "requested" if booking else "scheduled"
+
+    res = book(
+        meeting_type=meeting_type,
+        start=start_str,
+        full_name=customer_name,
+        email=user if user != "Guest" else "client@example.com",
+        staff=staff,
+        notes=notes,
+        booking=booking,
+        customer=customer,
+        appointment_type=appointment_type,
+        status=status,
+    )
+    return {
+        "ok": True,
+        "id": res.get("id"),
+        "status": res.get("status", status),
+        "start": res.get("start"),
+        "message": "Consultation requested successfully. Our team will review and confirm your session." if status == "requested" else "Appointment confirmed."
+    }
+
+
+@frappe.whitelist()
+def accept_appointment(name: str) -> dict:
+    _require_staff()
+    doc = frappe.get_doc("EE Appointment", name)
+    doc.status = "scheduled"
+    doc.save(ignore_permissions=True)
+    meeting_name = frappe.db.get_value("EE Meeting Type", doc.meeting_type, "type_name") if doc.meeting_type else "Consultation"
+    _notify(
+        "appointment_booked",
+        doc.invitee_email,
+        {
+            "invitee_name": doc.invitee_name,
+            "meeting_name": meeting_name,
+            "start_label": str(doc.start),
+            "company_name": _company_name(),
+            "manage_link": f"/schedule?token={doc.cancel_token}",
+        },
+    )
+    return {"ok": True, "status": "scheduled", "id": doc.name}
 
 
 @frappe.whitelist()

@@ -93,6 +93,18 @@ smoke_test.py              # Post-change smoke checks
 
 ## Deployment
 
+### Bench image → K3S + GKE (pre-DNS-cutover)
+
+| Command | What |
+|---------|------|
+| `./scripts/build-push-bench.sh <tag>` | Dual-push (maddscientist + Artifact Registry). Needs LAN + `gcloud` auth. |
+| GH workflow **Bench image** | AR-only via Workload Identity Federation |
+| HomeLab `entertainment-express/scripts/promote-image.sh <tag> [--apply]` | Bump tags / optional roll |
+
+```bash
+./scripts/build-push-bench.sh 0.0.120-ee
+```
+
 Use [`scripts/deploy.sh`](scripts/deploy.sh) on a cluster that already has MariaDB and completed
 site-init Jobs. A raw `kubectl apply -f k8s-deployment.yaml` is expected to fail on those Jobs and
 on the Helm-era MariaDB StatefulSet `volumeClaimTemplates`; that is not a failed Frappe roll.

@@ -203,13 +203,18 @@ function ApprovalsList({ rows, onChanged }: { rows: any[]; onChanged: () => void
       {rows.map((row) => (
         <article key={String(row.id || row.name)} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", boxShadow: "var(--ee-shadow)", padding: "0.85rem" }}>
           <p style={{ margin: 0, fontWeight: 700 }}>{row.summary || row.type || "Approval"}</p>
-          <p style={{ margin: "0.25rem 0 0.75rem", color: "var(--ee-muted)" }}>{row.event || row.date || ""}</p>
+          <p style={{ margin: "0.25rem 0 0.5rem", color: "var(--ee-muted)" }}>{row.event || row.date || ""}</p>
+          {row.notes ? (
+            <p style={{ margin: "0 0 0.5rem", fontStyle: "italic", fontSize: "0.85rem", color: "var(--ee-muted)" }}>
+              "{row.notes}"
+            </p>
+          ) : null}
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <button type="button" onClick={() => act(row, "approved")} style={{ background: "var(--ee-success)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Done" : "Approve"}
+              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Done" : row.type === "appointment" ? "Accept" : "Approve"}
             </button>
             <button type="button" onClick={() => act(row, "rejected")} style={{ background: "var(--ee-danger)", color: "#fff", border: 0, borderRadius: "0.5rem", padding: "0.4rem 0.75rem" }}>
-              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Dismiss" : "Reject"}
+              {row.type === "todo" || row.type === "workflow" || row.type === "field_issue" ? "Dismiss" : row.type === "appointment" ? "Decline" : "Reject"}
             </button>
           </div>
         </article>
@@ -2843,13 +2848,43 @@ function ScheduleWorkspace() {
         <div style={{ display: "grid", gap: "0.75rem" }}>
           {rows.map((row) => (
             <article key={row.id} style={{ background: "var(--ee-panel)", borderRadius: "var(--ee-radius)", padding: "0.85rem" }}>
-              <p style={{ margin: 0, fontWeight: 700 }}>
-                {row.title} · {row.who}
-              </p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                <p style={{ margin: 0, fontWeight: 700 }}>
+                  {row.title} · {row.who} {row.event_booking ? `(${row.event_booking})` : ""}
+                </p>
+                <span style={{
+                  padding: "0.2rem 0.5rem",
+                  borderRadius: "9999px",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  background: row.status === "requested" ? "rgba(234, 179, 8, 0.2)" : "rgba(34, 197, 94, 0.2)",
+                  color: row.status === "requested" ? "#ca8a04" : "#16a34a"
+                }}>
+                  {row.status === "requested" ? "Requested" : "Scheduled"}
+                </span>
+              </div>
               <p className="ee-muted" style={{ margin: "0.25rem 0 0.5rem" }}>
-                {row.start}
+                {row.start} {row.appointment_type ? `· ${row.appointment_type === "phone" ? "Phone Call" : "Google Meet Video"}` : ""}
               </p>
+              {row.notes ? (
+                <p style={{ margin: "0.25rem 0 0.5rem", fontSize: "0.85rem", fontStyle: "italic", color: "var(--ee-muted)" }}>
+                  "{row.notes}"
+                </p>
+              ) : null}
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                {row.status === "requested" ? (
+                  <button
+                    type="button"
+                    className="ee-btn"
+                    style={{ background: "var(--ee-brand, #2563eb)", color: "#fff" }}
+                    onClick={async () => {
+                      await call("entertainment_express.api.appointments.accept_appointment", { name: row.id || row.name });
+                      reload();
+                    }}
+                  >
+                    Accept
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="ee-btn"

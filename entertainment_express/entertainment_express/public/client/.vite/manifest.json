@@ -124,7 +124,7 @@
     ]
   },
   "src/app/routes/appointments/AppointmentsPage.tsx": {
-    "file": "chunks/AppointmentsPage-COKlqAtz.js",
+    "file": "chunks/AppointmentsPage-DGMDQ6FX.js",
     "name": "AppointmentsPage",
     "src": "src/app/routes/appointments/AppointmentsPage.tsx",
     "isDynamicEntry": true,

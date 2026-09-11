@@ -49,9 +49,27 @@ export const TodayPage: React.FC = () => {
   }, []);
 
   const jobs = stats?.jobs || [];
+  const consultations = stats?.consultations || [];
   const atRiskCount = Number(stats?.at_risk_count || 0);
+  const pendingConsults = approvals.filter((a: any) => a.type === "appointment");
+  const otherApprovals = approvals.filter((a: any) => a.type !== "appointment");
   const pendingApprovals = approvals.length || 0;
   const hasActionNeeded = atRiskCount > 0 || pendingApprovals > 0;
+
+  const handleActOnApproval = async (appt: any, decision: string) => {
+    try {
+      await call("entertainment_express.api.portal_owner.act_on_approval", {
+        approval_type: "appointment",
+        doctype: "EE Appointment",
+        name: appt.id || appt.name,
+        decision,
+      });
+      await loadData();
+    } catch {
+      // Reload on failure
+      await loadData();
+    }
+  };
 
   if (loading) {
     return (
@@ -88,8 +106,71 @@ export const TodayPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Left Column: What's Next (Upcoming Gigs) */}
-        <div className="lg:col-span-2 space-y-5">
+        {/* Left Column: What's Next (Upcoming Gigs & Consults) */}
+        <div className="lg:col-span-2 space-y-7">
+          {/* Consultations Card */}
+          {consultations.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-[var(--ee-text)] flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-[var(--ee-brand)]" />
+                  Planning Consultations
+                </h2>
+                <Button variant="ghost" density="ops" size="sm" onClick={() => navigate("/schedule")}>
+                  Manage Schedule
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {consultations.slice(0, 4).map((c: any) => (
+                  <Card key={c.id || c.name} elevated className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-panel">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant={c.status === "requested" ? "warning" : "success"} size="sm">
+                          {c.status === "requested" ? "Requested" : "Confirmed"}
+                        </Badge>
+                        <h4 className="font-semibold text-sm text-[var(--ee-text)]">{c.who || "Client"}</h4>
+                        {c.event_booking && (
+                          <Badge variant="outline" size="sm">
+                            {c.event_booking}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-[var(--ee-muted)] flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {c.start} {c.appointment_type ? `· ${c.appointment_type === "phone" ? "Phone Call" : "Google Meet Video"}` : ""}
+                      </p>
+                      {c.notes && (
+                        <p className="text-[11px] text-[var(--ee-muted)] italic truncate max-w-md">
+                          "{c.notes}"
+                        </p>
+                      )}
+                    </div>
+                    {c.status === "requested" && (
+                      <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+                        <Button
+                          variant="primary"
+                          density="consumer"
+                          size="sm"
+                          onClick={() => handleActOnApproval(c, "approved")}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="outline"
+                          density="consumer"
+                          size="sm"
+                          onClick={() => handleActOnApproval(c, "rejected")}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-[var(--ee-text)] flex items-center gap-2">
               <Calendar className="w-5 h-5 text-[var(--ee-brand)]" />
@@ -181,10 +262,10 @@ export const TodayPage: React.FC = () => {
               <Button
                 variant="secondary"
                 className="flex-col gap-2 h-auto py-4 rounded-xl shadow-ee-sm bg-[var(--ee-surface-raised)]"
-                onClick={() => navigate("/calendar")}
+                onClick={() => navigate("/schedule")}
               >
-                <Calendar className="w-6 h-6 mb-1 text-[var(--ee-brand)]" />
-                Full Calendar
+                <Clock className="w-6 h-6 mb-1 text-[var(--ee-brand)]" />
+                Consults
               </Button>
               <Button
                 variant="secondary"
@@ -213,6 +294,62 @@ export const TodayPage: React.FC = () => {
                 Action Needed
               </h2>
               <div className="space-y-3">
+                {/* Pending Consultation Requests Card */}
+                {pendingConsults.length > 0 && (
+                  <Card className="p-4 border-l-4 border-l-[var(--ee-brand)] bg-[var(--ee-brand-soft)]/20 space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-[var(--ee-text)]">Consultation Requests</h4>
+                        <Badge variant="brand" size="sm">{pendingConsults.length} New</Badge>
+                      </div>
+                      <p className="text-xs text-[var(--ee-muted)] mt-0.5">
+                        {pendingConsults.length} client meeting{pendingConsults.length === 1 ? "" : "s"} awaiting your confirmation.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-[var(--ee-border)]">
+                      {pendingConsults.map((appt: any) => (
+                        <div key={appt.id || appt.name} className="p-2.5 rounded-lg bg-[var(--ee-surface-raised)] space-y-2">
+                          <div className="flex justify-between items-start text-xs">
+                            <div>
+                              <span className="font-semibold text-[var(--ee-text)] block">{appt.summary || "Client Consultation"}</span>
+                              <span className="text-[var(--ee-muted)]">{appt.date}</span>
+                            </div>
+                            {appt.event && (
+                              <Badge variant="outline" size="sm">{appt.event}</Badge>
+                            )}
+                          </div>
+                          {appt.notes && (
+                            <p className="text-[11px] text-[var(--ee-muted)] italic truncate">
+                              "{appt.notes}"
+                            </p>
+                          )}
+                          <div className="flex gap-2 pt-1">
+                            <Button
+                              variant="primary"
+                              density="consumer"
+                              size="sm"
+                              className="w-full text-xs font-semibold"
+                              onClick={() => handleActOnApproval(appt, "approved")}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              variant="outline"
+                              density="consumer"
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => handleActOnApproval(appt, "rejected")}
+                            >
+                              Decline
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+
                 {atRiskCount > 0 && (
                   <Card 
                     interactive 
@@ -227,15 +364,15 @@ export const TodayPage: React.FC = () => {
                   </Card>
                 )}
                 
-                {pendingApprovals > 0 && (
+                {otherApprovals.length > 0 && (
                   <Card 
                     interactive 
                     className="p-4 border-l-4 border-l-[var(--ee-brand)] flex items-center justify-between hover:bg-[var(--ee-surface-inset)]"
                     onClick={() => navigate("/owner")}
                   >
                     <div>
-                      <h4 className="font-bold text-[var(--ee-text)]">Pending Approvals</h4>
-                      <p className="text-sm text-[var(--ee-muted)]">{pendingApprovals} item{pendingApprovals === 1 ? " requires" : "s require"} your review.</p>
+                      <h4 className="font-bold text-[var(--ee-text)]">Other Approvals</h4>
+                      <p className="text-sm text-[var(--ee-muted)]">{otherApprovals.length} item{otherApprovals.length === 1 ? " requires" : "s require"} your review.</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-[var(--ee-muted)]" />
                   </Card>

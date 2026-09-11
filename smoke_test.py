@@ -668,6 +668,33 @@ def test_login_white_label_suite():
     return True
 
 
+def test_appointment_connectivity_suite():
+    """Run tests for client booking to owner approval connectivity."""
+    print("✓ Testing appointment booking & owner acceptance connectivity suite...")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_appointment_connectivity.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Appointment connectivity suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
 def main():
     print("\n" + "="*60)
     print("Entertainment Express — Multi-Phase Smoke Test")
@@ -689,6 +716,7 @@ def main():
         test_phase41_jsonld,
         test_phase41_static_suite,
         test_login_white_label_suite,
+        test_appointment_connectivity_suite,
         test_live_marketing_smoke,
         test_portal_artifacts,
     ]

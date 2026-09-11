@@ -1,12 +1,15 @@
 name: Bench image (dual-registry sync)
 
 # Pushes the Frappe bench image to Artifact Registry for the GKE mirror.
-# Homelab registry (registry.maddscientist.com) is LAN-only — dual-push from:
-#   ./scripts/build-push-bench.sh <tag>
-# or a self-hosted runner with HOMELAB_REGISTRY_* secrets (future).
+# Auth: Workload Identity Federation (no SA JSON keys — org policy).
 #
-# Required GitHub secrets:
-#   GCP_EE_CI_SA_KEY  — JSON key for ee-ci-push@trector-gke-lab.iam.gserviceaccount.com
+# Required GitHub **variables** (not secrets) — set via:
+#   ../HomeLab-Redo/entertainment-express/scripts/setup-github-ar-wif.sh
+#   GCP_WORKLOAD_IDENTITY_PROVIDER
+#   GCP_SERVICE_ACCOUNT  (= ee-ci-push@trector-gke-lab.iam.gserviceaccount.com)
+#
+# Homelab registry is LAN-only — dual-push with:
+#   ./scripts/build-push-bench.sh <tag>
 #
 # Usage:
 #   Actions → Bench image → Run workflow → tag e.g. 0.0.120-ee
@@ -30,6 +33,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   build-push-ar:
@@ -53,7 +57,8 @@ jobs:
 
       - uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_EE_CI_SA_KEY }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/setup-gcloud@v2
 
@@ -76,5 +81,5 @@ jobs:
       - name: Reminder
         run: |
           echo "AR image ready: us-east1-docker.pkg.dev/trector-gke-lab/ee-bench/bench:${{ steps.tag.outputs.tag }}"
-          echo "Dual-push to homelab registry still requires ./scripts/build-push-bench.sh (LAN)."
-          echo "Then in HomeLab-Redo: ./entertainment-express/scripts/promote-image.sh ${{ steps.tag.outputs.tag }} [--apply]"
+          echo "Dual-push to homelab: ./scripts/build-push-bench.sh ${{ steps.tag.outputs.tag }}"
+          echo "Promote tags: HomeLab-Redo ./entertainment-express/scripts/promote-image.sh ${{ steps.tag.outputs.tag }} [--apply]"

@@ -4,11 +4,11 @@
  "creation": "2026-09-01 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": ["meeting_type", "staff", "status", "start", "end", "timezone", "invitee_name", "invitee_email", "invitee_phone", "lead", "customer", "video_url", "cancel_token"],
+ "field_order": ["meeting_type", "staff", "status", "start", "end", "timezone", "invitee_name", "invitee_email", "invitee_phone", "lead", "customer", "event_booking", "appointment_type", "notes", "video_url", "cancel_token"],
  "fields": [
   {"fieldname": "meeting_type", "fieldtype": "Link", "label": "Meeting Type", "options": "EE Meeting Type", "reqd": 1, "in_list_view": 1},
   {"fieldname": "staff", "fieldtype": "Link", "label": "Staff", "options": "Employee", "reqd": 1, "in_list_view": 1},
-  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "scheduled\nrescheduled\ncanceled\ncompleted\nno_show", "default": "scheduled", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "requested\nscheduled\nrescheduled\ncanceled\ncompleted\nno_show", "default": "scheduled", "reqd": 1, "in_list_view": 1},
   {"fieldname": "start", "fieldtype": "Datetime", "label": "Start", "reqd": 1, "in_list_view": 1},
   {"fieldname": "end", "fieldtype": "Datetime", "label": "End", "reqd": 1},
   {"fieldname": "timezone", "fieldtype": "Data", "label": "Timezone", "default": "America/New_York"},
@@ -17,6 +17,9 @@
   {"fieldname": "invitee_phone", "fieldtype": "Data", "label": "Guest phone"},
   {"fieldname": "lead", "fieldtype": "Link", "label": "Inquiry", "options": "Lead"},
   {"fieldname": "customer", "fieldtype": "Link", "label": "Client", "options": "Customer"},
+  {"fieldname": "event_booking", "fieldtype": "Link", "label": "Event Booking", "options": "Event Booking"},
+  {"fieldname": "appointment_type", "fieldtype": "Select", "label": "Format", "options": "video\nphone\nin_person", "default": "video"},
+  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"},
   {"fieldname": "video_url", "fieldtype": "Data", "label": "Video link"},
   {"fieldname": "cancel_token", "fieldtype": "Data", "label": "Cancel token", "hidden": 1}
  ],
