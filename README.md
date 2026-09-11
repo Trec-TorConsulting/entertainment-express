@@ -16,7 +16,7 @@ This repo is an enterprise-grade Frappe application and deployment platform. All
 and platform enhancements (Subcontractor Jobs, Coming Soon Landing, Tenant Website Builder, Client Portal Overhaul,
 Atomix VirtualDJ Integration & AI Virtual DJ Suite) are fully implemented and verified
 (archived under `openspec/changes/archive/`). Live image tag in [`k8s-deployment.yaml`](k8s-deployment.yaml)
-is **`0.0.119-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
+is **`0.1.1-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 

@@ -124,12 +124,14 @@ def apply_spa_context(context, *, title: str, portal: str) -> None:
     context.base_template = None
     context.spa_title = title
     context.spa_portal = portal
-    # Frappe SharedDataMiddleware serves /assets with max-age=43200 and these
-    # files are not content-hashed. A query string is required so browsers and
-    # reverse proxies pick up a new bundle after a deploy.
+    # Frappe SharedDataMiddleware serves /assets with max-age=43200. CSS can safely
+    # use a query string for cache busting. ES module entrypoints (main.js) MUST NOT
+    # have a query parameter because Rollup chunks statically import "../main.js" without
+    # query strings; a query string creates a distinct module specifier in the browser's
+    # module cache, loading duplicate React instances and triggering Minified React error #321.
     ver = _portal_asset_version(portal)
     context.spa_css = f"/assets/entertainment_express/{portal}/assets/main.css?v={ver}"
-    context.spa_js = f"/assets/entertainment_express/{portal}/main.js?v={ver}"
+    context.spa_js = f"/assets/entertainment_express/{portal}/main.js"
     context.portal_bootstrap = portal_bootstrap()
     context.show_ee_badge = context.portal_bootstrap.get("show_ee_badge", 0)
     context.base_domain = context.portal_bootstrap.get("base_domain", "entx.app")

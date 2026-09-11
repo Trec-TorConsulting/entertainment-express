@@ -46,6 +46,7 @@ def _setup_stubs():
         f.get_all = lambda *a, **k: []
         f.get_doc = lambda *a, **k: None
         f.get_list = lambda *a, **k: []
+        f.get_cached_doc = lambda *a, **k: None
         f.session = SimpleNamespace(user="admin@entx.app")
         f.local = SimpleNamespace(site="tenant1.entx.app", response={})
         f.conf = SimpleNamespace(get=lambda k, d=None: None)
@@ -55,6 +56,9 @@ def _setup_stubs():
         )
         f.db = SimpleNamespace(
             get_value=lambda *a, **k: None,
+            get_default=lambda *a, **k: None,
+            get_single_value=lambda *a, **k: None,
+            count=lambda *a, **k: 0,
             exists=lambda *a, **k: False,
             commit=lambda: None,
             set_value=lambda *a, **k: None,
@@ -69,6 +73,14 @@ def _setup_stubs():
         f_mod.get_doc = lambda *a, **k: None
     if not hasattr(f_mod, "get_list"):
         f_mod.get_list = lambda *a, **k: []
+    if not hasattr(f_mod, "get_cached_doc"):
+        f_mod.get_cached_doc = lambda *a, **k: None
+    if not hasattr(f_mod.db, "get_default"):
+        f_mod.db.get_default = lambda *a, **k: None
+    if not hasattr(f_mod.db, "get_single_value"):
+        f_mod.db.get_single_value = lambda *a, **k: None
+    if not hasattr(f_mod.db, "count"):
+        f_mod.db.count = lambda *a, **k: 0
     if not hasattr(f_mod, "enqueue"):
         f_mod.enqueue = lambda *a, **k: None
 
@@ -380,3 +392,19 @@ class TestPortalOwnerErgonomics:
         monkeypatch.setattr(frappe, "get_roles", lambda u: ["EE Crew"])
         with pytest.raises(Exception):
             portal_owner._require_owner()
+
+
+class TestPortalSpaModuleIdentity:
+    def test_spa_js_has_no_query_string_to_prevent_duplicate_react_instance(self, monkeypatch):
+        """Verify apply_spa_context produces clean spa_js without query params to avoid duplicate React module."""
+        from entertainment_express.www.portal_spa import apply_spa_context
+
+        ctx = SimpleNamespace()
+        apply_spa_context(ctx, title="Your events", portal="client")
+        assert ctx.spa_js == "/assets/entertainment_express/client/main.js"
+        assert "?" not in ctx.spa_js
+
+        ctx_emp = SimpleNamespace()
+        apply_spa_context(ctx_emp, title="Staff", portal="employee")
+        assert ctx_emp.spa_js == "/assets/entertainment_express/employee/main.js"
+        assert "?" not in ctx_emp.spa_js

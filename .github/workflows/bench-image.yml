@@ -1,0 +1,80 @@
+name: Bench image (dual-registry sync)
+
+# Pushes the Frappe bench image to Artifact Registry for the GKE mirror.
+# Homelab registry (registry.maddscientist.com) is LAN-only — dual-push from:
+#   ./scripts/build-push-bench.sh <tag>
+# or a self-hosted runner with HOMELAB_REGISTRY_* secrets (future).
+#
+# Required GitHub secrets:
+#   GCP_EE_CI_SA_KEY  — JSON key for ee-ci-push@trector-gke-lab.iam.gserviceaccount.com
+#
+# Usage:
+#   Actions → Bench image → Run workflow → tag e.g. 0.0.120-ee
+#   or: git tag bench-0.0.120-ee && git push origin bench-0.0.120-ee
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag (e.g. 0.0.120-ee)"
+        required: true
+        type: string
+      platforms:
+        description: "buildx platforms"
+        required: false
+        default: "linux/amd64"
+        type: string
+  push:
+    tags:
+      - "bench-*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-push-ar:
+    name: Build & push Artifact Registry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "platforms=${{ inputs.platforms }}" >> "$GITHUB_OUTPUT"
+          else
+            REF="${GITHUB_REF_NAME}"
+            TAG="${REF#bench-}"
+            echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+            echo "platforms=linux/amd64" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_EE_CI_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker us-east1-docker.pkg.dev --quiet
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: ${{ steps.tag.outputs.platforms }}
+          push: true
+          tags: us-east1-docker.pkg.dev/trector-gke-lab/ee-bench/bench:${{ steps.tag.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Reminder
+        run: |
+          echo "AR image ready: us-east1-docker.pkg.dev/trector-gke-lab/ee-bench/bench:${{ steps.tag.outputs.tag }}"
+          echo "Dual-push to homelab registry still requires ./scripts/build-push-bench.sh (LAN)."
+          echo "Then in HomeLab-Redo: ./entertainment-express/scripts/promote-image.sh ${{ steps.tag.outputs.tag }} [--apply]"

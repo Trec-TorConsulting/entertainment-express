@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-03  
 **Status:** Pilot on K3s — **not** a SaaS-SLA / SOC2 production claim  
-**Image (matches `k8s-deployment.yaml`):** `registry.maddscientist.com/entertainment-express/bench:0.0.119-ee`  
+**Image (matches `k8s-deployment.yaml`):** `registry.maddscientist.com/entertainment-express/bench:0.1.1-ee`  
 **Namespace:** `entertainment-express`
 
 Phases **0–41** and all post-41 platform enhancements (Subcontractors & Partner Hub, Coming Soon Landing,
