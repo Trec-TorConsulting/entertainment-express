@@ -539,6 +539,38 @@ CUSTOM_FIELDS = {
             "options": "EE Brand",
             "insert_after": "ee_dispatch_status",
         },
+        {
+            "dt": "Event Booking",
+            "fieldname": "cost_center",
+            "fieldtype": "Link",
+            "label": "Cost Center",
+            "options": "Cost Center",
+            "insert_after": "ee_brand",
+        },
+        {
+            "dt": "Event Booking",
+            "fieldname": "project",
+            "fieldtype": "Link",
+            "label": "Project",
+            "options": "Project",
+            "insert_after": "cost_center",
+        },
+        {
+            "dt": "Event Booking",
+            "fieldname": "cost_sheet",
+            "fieldtype": "Link",
+            "label": "Cost Sheet",
+            "options": "Event Cost Sheet",
+            "insert_after": "project",
+        },
+        {
+            "dt": "Event Booking",
+            "fieldname": "target_margin_percent",
+            "fieldtype": "Percent",
+            "label": "Target Margin %",
+            "default": "40.0",
+            "insert_after": "cost_sheet",
+        },
     ],
 
     # ─── Timesheet Detail → EE fields (phase-3) ────────────────────────────────

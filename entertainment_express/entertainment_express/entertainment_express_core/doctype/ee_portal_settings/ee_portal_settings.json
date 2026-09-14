@@ -38,7 +38,11 @@
   "section_embed",
   "public_embed_key",
   "section_flags",
-  "feature_flags"
+  "premium_ui_enabled",
+  "feature_flags",
+  "section_margin_intelligence",
+  "default_target_margin_percent",
+  "low_margin_warning_threshold"
  ],
  "fields": [
   {
@@ -240,6 +244,25 @@
    "fieldname": "feature_flags",
    "fieldtype": "Small Text",
    "label": "Feature Flags"
+  },
+  {
+   "fieldname": "section_margin_intelligence",
+   "fieldtype": "Section Break",
+   "label": "Margin Intelligence"
+  },
+  {
+   "default": "40.0",
+   "description": "Default target profit margin percentage for event bookings.",
+   "fieldname": "default_target_margin_percent",
+   "fieldtype": "Percent",
+   "label": "Default Target Margin %"
+  },
+  {
+   "default": "25.0",
+   "description": "Margin threshold below which a warning or critical alert is triggered.",
+   "fieldname": "low_margin_warning_threshold",
+   "fieldtype": "Percent",
+   "label": "Low Margin Warning Threshold %"
   }
  ],
  "index_web_pages_for_search": 1,

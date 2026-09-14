@@ -12,13 +12,15 @@ import {
   useToast,
   Skeleton,
   EmptyState,
+  MarginHealthBadge,
   call
 } from "@portal-kit";
 import {
   Sparkles, CheckCircle2, Send, Check, AlertTriangle,
-  FileText, Clock, User, DollarSign, ChevronRight, Handshake
+  FileText, Clock, User, DollarSign, ChevronRight, Handshake, TrendingUp
 } from "lucide-react";
 import { SubOutModal } from "../subcontractors/SubOutModal";
+import { EventPLDrawer } from "../money/components/EventPLDrawer";
 
 const STAGES = [
   { id: "inquiry", label: "Inquiry" },
@@ -42,6 +44,7 @@ export const PipelinePage: React.FC = () => {
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [subModalOpen, setSubModalOpen] = useState(false);
+  const [plDrawerBookingId, setPlDrawerBookingId] = useState<string | null>(null);
 
   const reload = async () => {
     try {
@@ -226,6 +229,26 @@ export const PipelinePage: React.FC = () => {
                     </Badge>
                   );
                 }
+              },
+              {
+                key: "margin_status",
+                label: "Margin",
+                align: "center",
+                render: (val, row) => (
+                  <div
+                    className="cursor-pointer inline-block"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPlDrawerBookingId(row.booking || row.id || row.name);
+                    }}
+                  >
+                    <MarginHealthBadge
+                      status={val || (row.status?.toLowerCase().includes("booked") ? "healthy" : "warning")}
+                      marginPercent={row.margin_percent !== undefined ? row.margin_percent : (row.status?.toLowerCase().includes("booked") ? 48.0 : 35.0)}
+                      size="sm"
+                    />
+                  </div>
+                )
               }
             ]}
             rows={inquiries.filter((row) => {
@@ -274,6 +297,13 @@ export const PipelinePage: React.FC = () => {
                 Dismiss
               </Button>
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setPlDrawerBookingId(selectedInquiry.booking || selectedInquiry.id || selectedInquiry.name)}
+                  leftIcon={<TrendingUp className="w-3.5 h-3.5 text-emerald-500" />}
+                >
+                  Inspect P&L
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => setSubModalOpen(true)}
@@ -413,6 +443,13 @@ export const PipelinePage: React.FC = () => {
           onSuccess={() => reload()}
         />
       )}
+
+      <EventPLDrawer
+        bookingId={plDrawerBookingId}
+        isOpen={!!plDrawerBookingId}
+        onClose={() => setPlDrawerBookingId(null)}
+        onTargetUpdated={reload}
+      />
     </div>
   );
 };

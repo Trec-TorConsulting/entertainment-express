@@ -13,9 +13,7 @@ is the tenant charging *their* customers.)
 - **Payment Method (stored)**: customer (link), processor token/customer_id, brand/last4 (no PAN), default.
 - **Refund**: payment (link), amount, reason, processor_refund_id, status.
 - **Payment Schedule**: booking (link), milestones (deposit due, balance due N days before event).
-
 ## Requirements
-
 ### Requirement: Deposits & Payment Schedules
 The system SHALL support configurable deposits/retainers and milestone payment schedules tied to a booking.
 
@@ -142,3 +140,15 @@ Inbound processor webhooks SHALL verify a signature, ignore duplicates by event 
 #### Scenario: Duplicate event
 - **WHEN** the same processor event is posted twice
 - **THEN** the second call reports already processed and does not create another Payment Entry
+
+### Requirement: Payment Processor Fee Allocation
+The system SHALL capture payment gateway processing fees from Stripe, Square, and PayPal webhook execution payloads, deduct them from gross receipts, and post a fee journal line against the booking's `Cost Center`.
+
+#### Scenario: Stripe webhook fee recording
+- **WHEN** a Stripe `payment_intent.succeeded` or `charge.captured` webhook is processed with fee details
+- **THEN** the system records the exact processing fee amount against the linked booking's `Event Cost Sheet` and posts an ERPNext expense entry to the gateway fees account
+
+#### Scenario: Refund fee handling
+- **WHEN** a partial or full refund is issued through the gateway
+- **THEN** fee adjustments are reflected accurately in the event cost sheet without leaving orphaned fee balances
+

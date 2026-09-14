@@ -212,6 +212,11 @@ def _handle_payment_succeeded(event_data: dict) -> None:
             "deposit_status": "paid",
             "status": "confirmed",
         })
+        try:
+            from entertainment_express.job_costing.cost_engine import recompute_event_cost_sheet
+            recompute_event_cost_sheet(booking_name)
+        except Exception as e:
+            frappe.log_error(f"Job costing update after Stripe payment failed for {booking_name}: {e}", "Stripe Webhook")
 
     frappe.db.commit()
 

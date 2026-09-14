@@ -187,6 +187,7 @@ doc_events = {
             "entertainment_express.event_planning.attach.on_booking_update",
             "entertainment_express.integrations.calendar.on_booking_update",
             "entertainment_express.security.auth_hardening.on_booking_update",
+            "entertainment_express.job_costing.provisioning.ensure_event_cost_center_and_project",
         ],
     },
     "Lead": {
@@ -196,8 +197,24 @@ doc_events = {
         "on_submit": [
             "entertainment_express.integrations.accounting.on_invoice_submit",
             "entertainment_express.security.auth_hardening.on_invoice_submit",
+            "entertainment_express.job_costing.hooks.on_financial_doc_change",
         ],
         "on_update": "entertainment_express.integrations.accounting.on_invoice_update",
+    },
+    "Timesheet": {
+        "on_submit": "entertainment_express.job_costing.hooks.on_financial_doc_change",
+    },
+    "Purchase Invoice": {
+        "on_submit": "entertainment_express.job_costing.hooks.on_financial_doc_change",
+    },
+    "Purchase Order": {
+        "on_submit": "entertainment_express.job_costing.hooks.on_financial_doc_change",
+    },
+    "Stock Entry": {
+        "on_submit": "entertainment_express.job_costing.hooks.on_financial_doc_change",
+    },
+    "Payment Entry": {
+        "on_submit": "entertainment_express.job_costing.hooks.on_financial_doc_change",
     },
     "EE Contract": {
         "on_update": "entertainment_express.security.auth_hardening.on_contract_update",

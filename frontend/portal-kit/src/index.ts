@@ -62,3 +62,4 @@ export * from "./components/RecordWorkspace";
 export * from "./components/DispatchBoard";
 export * from "./components/FieldBoard";
 export * from "./components/ErrorBoundary";
+export * from "./components/MarginHealthBadge";

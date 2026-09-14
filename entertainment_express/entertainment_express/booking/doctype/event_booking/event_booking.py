@@ -42,3 +42,19 @@ class EventBooking(Document):
 				"This month's job limit is reached. Upgrade your plan.",
 			)
 
+		self._ensure_job_costing()
+
+	def on_submit(self):
+		self._ensure_job_costing()
+
+	def on_update(self):
+		if getattr(self, "status", None) in ("confirmed", "in_progress", "completed"):
+			self._ensure_job_costing()
+
+	def _ensure_job_costing(self):
+		try:
+			from entertainment_express.job_costing.provisioning import ensure_event_cost_center_and_project
+			ensure_event_cost_center_and_project(self)
+		except Exception as e:
+			frappe.log_error(f"Job costing provisioning failed for {self.name}: {e}", "Event Booking")
+

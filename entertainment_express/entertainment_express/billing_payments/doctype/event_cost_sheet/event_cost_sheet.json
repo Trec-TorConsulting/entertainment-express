@@ -1,0 +1,198 @@
+{
+ "actions": [],
+ "autoname": "format:ECS-{event_booking}",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "event_booking",
+  "cost_center",
+  "project",
+  "currency",
+  "col1",
+  "margin_status",
+  "margin_percent",
+  "target_margin_percent",
+  "section_financials",
+  "gross_revenue",
+  "total_cogs",
+  "net_profit",
+  "col2",
+  "labor_cost",
+  "subcontractor_cost",
+  "consumable_cost",
+  "equipment_wear_cost",
+  "gateway_fees",
+  "section_details",
+  "details_json",
+  "last_recomputed_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "event_booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Event Booking",
+   "options": "Event Booking",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "default": "USD",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "healthy",
+   "fieldname": "margin_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Margin Status",
+   "options": "healthy\nwarning\ncritical"
+  },
+  {
+   "fieldname": "margin_percent",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Margin %"
+  },
+  {
+   "default": "40.0",
+   "fieldname": "target_margin_percent",
+   "fieldtype": "Percent",
+   "label": "Target Margin %"
+  },
+  {
+   "fieldname": "section_financials",
+   "fieldtype": "Section Break",
+   "label": "P&L Summary"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "gross_revenue",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Gross Revenue"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "total_cogs",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total COGS"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "net_profit",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Profit"
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "labor_cost",
+   "fieldtype": "Currency",
+   "label": "Labor Cost"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "subcontractor_cost",
+   "fieldtype": "Currency",
+   "label": "Subcontractor Cost"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "consumable_cost",
+   "fieldtype": "Currency",
+   "label": "Consumable Cost"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "equipment_wear_cost",
+   "fieldtype": "Currency",
+   "label": "Equipment Wear Cost"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "gateway_fees",
+   "fieldtype": "Currency",
+   "label": "Gateway Fees"
+  },
+  {
+   "fieldname": "section_details",
+   "fieldtype": "Section Break",
+   "label": "Ledger Details"
+  },
+  {
+   "fieldname": "details_json",
+   "fieldtype": "Code",
+   "label": "Details JSON",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "last_recomputed_at",
+   "fieldtype": "Datetime",
+   "label": "Last Recomputed At"
+  }
+ ],
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Billing Payments",
+ "name": "Event Cost Sheet",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Accounting",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Sales"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

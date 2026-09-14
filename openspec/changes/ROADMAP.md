@@ -408,10 +408,10 @@ entitlement enforcement.
 
 ## Enterprise Moats & ERP Core Expansion (Active)
 
-### Job-Level Costing & Margin Intelligence 📝 active
+### Job-Level Costing & Margin Intelligence ✅ archived 2026-09-14
 **Goal:** Real-time event profitability and margin intelligence: auto-provision ERPNext Cost Center and Project per booking, roll up direct crew labor, subcontractor bills, equipment wear amortization, consumable depletion, and payment gateway fees, with an interactive Event P&L drawer on `/owner/money`.
 **Specs:** `job-costing-margin-intelligence` (new), `billing-payments`, `owner-portal`, `reporting-bi`.
-**Folder:** [`job-costing-margin-intelligence/`](job-costing-margin-intelligence/)
+**Folder:** [`archive/2026-09-14-job-costing-margin-intelligence/`](archive/2026-09-14-job-costing-margin-intelligence/)
 
 ### Equipment Lifecycle, Safety Compliance & Maintenance 📝 active
 **Goal:** Serialized equipment usage telemetry (operating hours, gig count, mileage), automated preventative maintenance schedules, safety compliance certificate tracking with hard dispatch locks, and on-site teardown damage quarantine from the mobile Field App PWA.

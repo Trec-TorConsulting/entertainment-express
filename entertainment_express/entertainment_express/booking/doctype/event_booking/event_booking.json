@@ -19,7 +19,7 @@
   "section_weather", "weather_sensitive", "weather_status",
   "section_logistics", "delivery_window_start", "delivery_window_end", "pickup_window_start", "pickup_window_end",
   "site_sq_ft", "site_surface", "site_power_amps", "site_clearance_ft", "site_water_available", "site_fit_status",
-  "section_refs", "quotation", "contract", "calendar_sync_id",
+  "section_refs", "quotation", "contract", "calendar_sync_id", "cost_center", "project", "cost_sheet", "target_margin_percent",
   "section_notes", "notes"
  ],
  "fields": [
@@ -94,6 +94,10 @@
   {"fieldname": "quotation", "fieldtype": "Link", "label": "Quotation", "options": "Quotation"},
   {"fieldname": "contract", "fieldtype": "Link", "label": "Contract", "options": "EE Contract"},
   {"fieldname": "calendar_sync_id", "fieldtype": "Data", "label": "Calendar Sync Id", "read_only": 1},
+  {"fieldname": "cost_center", "fieldtype": "Link", "label": "Cost Center", "options": "Cost Center"},
+  {"fieldname": "project", "fieldtype": "Link", "label": "Project", "options": "Project"},
+  {"fieldname": "cost_sheet", "fieldtype": "Link", "label": "Cost Sheet", "options": "Event Cost Sheet"},
+  {"fieldname": "target_margin_percent", "fieldtype": "Percent", "label": "Target Margin %", "default": "40.0"},
   {"fieldname": "section_notes", "fieldtype": "Section Break", "label": "Notes"},
   {"fieldname": "notes", "fieldtype": "Text Editor", "label": "Notes"}
  ],

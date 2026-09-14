@@ -335,6 +335,36 @@ def test_virtual_dj_suite():
     return True
 
 
+def test_job_costing_suite():
+    """Run Job-Level Costing & Margin Intelligence unit + multi-tenant isolation suite."""
+    print("✓ Testing Job-Level Costing & Margin Intelligence suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_job_costing.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Job costing suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
 def test_live_marketing_smoke():
     """
     Optional live smoke for task 13.3.
@@ -793,6 +823,7 @@ def main():
         test_specs,
         test_phase19_static_suite,
         test_subcontractors_suite,
+        test_job_costing_suite,
         test_coming_soon_suite,
         test_virtual_dj_suite,
         test_phase41_marketing_routes,
