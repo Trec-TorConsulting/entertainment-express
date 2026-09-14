@@ -406,6 +406,30 @@ entitlement enforcement.
 
 ---
 
+## Enterprise Moats & ERP Core Expansion (Active)
+
+### Job-Level Costing & Margin Intelligence 📝 active
+**Goal:** Real-time event profitability and margin intelligence: auto-provision ERPNext Cost Center and Project per booking, roll up direct crew labor, subcontractor bills, equipment wear amortization, consumable depletion, and payment gateway fees, with an interactive Event P&L drawer on `/owner/money`.
+**Specs:** `job-costing-margin-intelligence` (new), `billing-payments`, `owner-portal`, `reporting-bi`.
+**Folder:** [`job-costing-margin-intelligence/`](job-costing-margin-intelligence/)
+
+### Equipment Lifecycle, Safety Compliance & Maintenance 📝 active
+**Goal:** Serialized equipment usage telemetry (operating hours, gig count, mileage), automated preventative maintenance schedules, safety compliance certificate tracking with hard dispatch locks, and on-site teardown damage quarantine from the mobile Field App PWA.
+**Specs:** `asset-lifecycle-safety-maintenance` (new), `equipment-inventory-fleet`, `mobile-field-app`, `owner-portal`.
+**Folder:** [`asset-lifecycle-safety-maintenance/`](asset-lifecycle-safety-maintenance/)
+
+### Logistics, Production BOMs & Van Warehouses 📝 active
+**Goal:** Multi-tier production BOM kitting, "Van-as-a-Warehouse" rolling inventory tracking, barcode scan load-out and check-in, automated missing gear reconciliation, and one-click sub-rental purchase order procurement.
+**Specs:** `logistics-bom-van-warehouses` (new), `equipment-inventory-fleet`, `vendor-network`, `mobile-field-app`, `owner-portal`.
+**Folder:** [`logistics-bom-van-warehouses/`](logistics-bom-van-warehouses/)
+
+### Gig Payroll, Commissions & Digital Tip Splitting 📝 active
+**Goal:** Multi-tiered gig rate cards, automated sales commission engine on invoice payment, digital tip pool aggregation and algorithmic splitting (Equal, Hours-Weighted, Lead-Weighted), and single-click ERPNext payroll batch compilation with worker transparency in `/employee`.
+**Specs:** `gig-payroll-commission-tips` (new), `hr-workforce`, `billing-payments`, `owner-portal`, `employee-portal`.
+**Folder:** [`gig-payroll-commission-tips/`](gig-payroll-commission-tips/)
+
+---
+
 ## After the roadmap — Production operator readiness ✅ archived 2026-09-02
 Operator docs, safe re-apply on the existing cluster, website cache flush on python start, and MariaDB
 NetworkPolicy. Not a numbered product phase.
@@ -415,3 +439,4 @@ NetworkPolicy. Not a numbered product phase.
 ## Traceability
 Every phase proposal MUST list the exact baseline spec **Requirement** names it delivers, and every
 `tasks.md` MUST map tasks back to those requirements so coverage is verifiable at phase close.
+
