@@ -9,7 +9,12 @@ import "../../portal-kit/src/tokens.css";
 const queryClient = new QueryClient();
 
 const isDev = import.meta.env.DEV;
-const basename = isDev ? "/assets/entertainment_express/client" : "/client";
+const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+const basename = isDev
+  ? "/assets/entertainment_express/client"
+  : pathname.startsWith("/client")
+  ? "/client"
+  : "/";
 
 const rootEl = document.getElementById("root");
 if (rootEl) {
