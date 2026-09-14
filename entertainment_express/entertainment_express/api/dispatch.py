@@ -288,6 +288,22 @@ def _build_run_sheet(booking_name: str):
     rs.set("equipment_items", [])
     for asset_row in booking.assigned_assets or []:
         asset = frappe.get_doc("Service Asset", asset_row.asset)
+        if getattr(asset, "condition_status", None) in ("Quarantined", "In Repair"):
+            frappe.throw(
+                f"Cannot build run sheet: Asset '{asset.asset_name}' ({asset.name}) is {asset.condition_status} ({asset.quarantine_reason or ''})!",
+                frappe.ValidationError,
+            )
+        try:
+            from entertainment_express.fleet_maintenance.safety import get_asset_safety_certificate_status
+            cert_st = get_asset_safety_certificate_status(asset.name, on_date=booking.event_date)
+            if not cert_st.get("valid"):
+                frappe.throw(
+                    f"Cannot build run sheet: Asset '{asset.asset_name}' safety gate failed: {cert_st.get('reason')}",
+                    frappe.ValidationError,
+                )
+        except Exception as e:
+            if isinstance(e, frappe.ValidationError):
+                raise e
         rs.append("equipment_items", {
             "asset": asset_row.asset,
             "asset_name": asset.asset_name,

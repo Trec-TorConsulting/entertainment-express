@@ -365,6 +365,36 @@ def test_job_costing_suite():
     return True
 
 
+def test_fleet_maintenance_suite():
+    """Run Equipment Lifecycle, Safety Compliance & Maintenance suite."""
+    print("✓ Testing Equipment Lifecycle, Safety Compliance & Maintenance suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_fleet_maintenance.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Fleet maintenance suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
 def test_live_marketing_smoke():
     """
     Optional live smoke for task 13.3.
@@ -824,6 +854,7 @@ def main():
         test_phase19_static_suite,
         test_subcontractors_suite,
         test_job_costing_suite,
+        test_fleet_maintenance_suite,
         test_coming_soon_suite,
         test_virtual_dj_suite,
         test_phase41_marketing_routes,

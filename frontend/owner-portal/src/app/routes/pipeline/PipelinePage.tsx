@@ -249,6 +249,25 @@ export const PipelinePage: React.FC = () => {
                     />
                   </div>
                 )
+              },
+              {
+                key: "gear_status",
+                label: "Gear Status",
+                align: "center",
+                render: (_, row) => {
+                  if (row.quarantine_risk || row.has_quarantined_asset) {
+                    return (
+                      <Badge variant="danger" size="sm">
+                        Quarantine Alert
+                      </Badge>
+                    );
+                  }
+                  return (
+                    <Badge variant="outline" size="sm">
+                      Gear Ready
+                    </Badge>
+                  );
+                }
               }
             ]}
             rows={inquiries.filter((row) => {
@@ -355,6 +374,16 @@ export const PipelinePage: React.FC = () => {
               })}
             </div>
           </div>
+
+          {/* Quarantine Warning if gear conflict detected */}
+          {(selectedInquiry?.quarantine_risk || selectedInquiry?.has_quarantined_asset) && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2.5 text-xs text-red-600 dark:text-red-400">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-red-500" />
+              <span>
+                <strong>Quarantine Alert:</strong> One or more assigned assets are currently quarantined or pending safety inspection. Replacement equipment needed before dispatch.
+              </span>
+            </div>
+          )}
 
           {/* Proposal Summary Preview */}
           <div className="space-y-4">

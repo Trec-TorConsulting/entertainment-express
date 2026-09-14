@@ -12,7 +12,9 @@
   "section_images", "images",
   "section_meta", "vertical_tag", "notes",
   "section_weather", "weather_sensitive", "wind_mph_max", "precip_inch_hours",
-  "shipping_weight_lb", "require_sanitization_before_book"
+  "shipping_weight_lb", "require_sanitization_before_book",
+  "section_lifecycle", "condition_status", "quarantine_reason", "col_lifecycle",
+  "operating_hours", "event_count", "current_mileage", "last_inspection_date", "next_service_due"
  ],
  "fields": [
   {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-ASSET-.####"},
@@ -51,7 +53,18 @@
   {"fieldname": "shipping_weight_lb", "fieldtype": "Float", "label": "Shipping Weight (lb)",
    "description": "Used for vehicle load planning"},
   {"fieldname": "require_sanitization_before_book", "fieldtype": "Check", "label": "Require Sanitization Before Book",
-   "default": "0", "description": "Block availability until a sanitization log exists after last booking"}
+   "default": "0", "description": "Block availability until a sanitization log exists after last booking"},
+  {"fieldname": "section_lifecycle", "fieldtype": "Section Break", "label": "Lifecycle & Telemetry"},
+  {"fieldname": "condition_status", "fieldtype": "Select", "label": "Condition Status",
+   "options": "Available\nDispatched\nIn Use\nQuarantined\nIn Repair\nPending Inspection", "default": "Available", "in_list_view": 1},
+  {"fieldname": "quarantine_reason", "fieldtype": "Small Text", "label": "Quarantine Reason",
+   "depends_on": "eval:doc.condition_status=='Quarantined'"},
+  {"fieldname": "col_lifecycle", "fieldtype": "Column Break"},
+  {"fieldname": "operating_hours", "fieldtype": "Float", "label": "Operating Hours", "default": "0.0"},
+  {"fieldname": "event_count", "fieldtype": "Int", "label": "Event Count", "default": "0"},
+  {"fieldname": "current_mileage", "fieldtype": "Float", "label": "Current Mileage", "default": "0.0"},
+  {"fieldname": "last_inspection_date", "fieldtype": "Date", "label": "Last Inspection Date"},
+  {"fieldname": "next_service_due", "fieldtype": "Date", "label": "Next Service Due"}
  ],
  "modified": "2024-01-01 00:00:00.000000",
  "modified_by": "Administrator",

@@ -356,7 +356,41 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
                   Site fit: {job.site_fit_status}
                 </p>
               ) : null}
-              {(job.assets || []).length ? <p className="ee-muted">Gear: {job.assets?.join(", ")}</p> : null}
+              {(job as any).has_quarantined_asset ? (
+                <p className="ee-form__error" style={{ fontWeight: 600 }}>
+                  ⚠️ Quarantined gear assigned! Replacement needed.
+                </p>
+              ) : null}
+              {(job.assets || []).length ? (
+                <div className="ee-muted" style={{ display: "flex", flexWrap: "wrap", gap: "4px", alignItems: "center" }}>
+                  <span>Gear:</span>
+                  {(job.assets as any[]).map((a: any, idx: number) => {
+                    const name = typeof a === "string" ? a : (a.asset_name || a.name);
+                    const isQ = typeof a === "object" && a.quarantined;
+                    return (
+                      <span
+                        key={idx}
+                        style={
+                          isQ
+                            ? {
+                                color: "#b91c1c",
+                                backgroundColor: "#fee2e2",
+                                padding: "1px 6px",
+                                borderRadius: "4px",
+                                fontWeight: 600,
+                                fontSize: "0.85em",
+                              }
+                            : undefined
+                        }
+                      >
+                        {name}
+                        {isQ ? " (Quarantined)" : ""}
+                        {idx < job.assets.length - 1 ? "," : ""}
+                      </span>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
             {job.crew.length ? (
               <div className="ee-dispatch__crew">

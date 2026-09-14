@@ -43,3 +43,9 @@ def daily_fleet_alerts():
     ):
         if bal.reorder_level and bal.qty <= bal.reorder_level:
             alert("Low stock", f"{bal.item_code} at {bal.location} is {bal.qty}.")
+
+    try:
+        from entertainment_express.fleet_maintenance.safety import check_expiring_safety_certificates
+        check_expiring_safety_certificates()
+    except Exception:
+        pass

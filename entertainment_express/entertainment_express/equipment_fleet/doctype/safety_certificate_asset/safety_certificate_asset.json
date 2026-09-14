@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "service_asset",
+  "asset_name",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Asset",
+   "options": "Service Asset",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_asset.asset_name",
+   "fieldname": "asset_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Asset Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Safety Certificate Asset",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

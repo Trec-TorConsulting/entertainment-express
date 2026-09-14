@@ -38,6 +38,7 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
         { id: "pipeline", label: "Pipeline", icon: <Sparkles className="w-4 h-4" />, active: currentPath.startsWith("/pipeline"), onClick: () => navigate("/pipeline") },
         { id: "schedule", label: "Consults", icon: <Clock className="w-4 h-4" />, active: currentPath.startsWith("/schedule"), onClick: () => navigate("/schedule") },
         { id: "dispatch", label: "Dispatch", icon: <Truck className="w-4 h-4" />, active: currentPath.startsWith("/dispatch"), onClick: () => navigate("/dispatch") },
+        { id: "fleet", label: "Fleet & Safety", icon: <Shield className="w-4 h-4" />, active: currentPath.startsWith("/fleet"), onClick: () => navigate("/fleet") },
         { id: "event-details", label: "Event details", icon: <FileText className="w-4 h-4" />, active: currentPath.startsWith("/event-details"), onClick: () => navigate("/event-details") },
       ]
     },

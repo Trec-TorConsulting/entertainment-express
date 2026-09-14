@@ -42,7 +42,35 @@ class EventBooking(Document):
 				"This month's job limit is reached. Upgrade your plan.",
 			)
 
+		self._validate_assigned_assets()
 		self._ensure_job_costing()
+
+	def _validate_assigned_assets(self):
+		if (self.status or "") == "canceled":
+			return
+		assigned = getattr(self, "assigned_assets", []) or []
+		for row in assigned:
+			asset_name = getattr(row, "asset", None)
+			if not asset_name or not frappe.db.exists("Service Asset", asset_name):
+				continue
+			asset = frappe.get_doc("Service Asset", asset_name)
+			if getattr(asset, "condition_status", None) in ("Quarantined", "In Repair", "Pending Inspection"):
+				reason = getattr(asset, "quarantine_reason", None) or asset.condition_status
+				frappe.throw(
+					f"Asset '{asset.asset_name}' ({asset.name}) is not available for dispatch: {reason}",
+					frappe.ValidationError,
+				)
+			try:
+				from entertainment_express.fleet_maintenance.safety import get_asset_safety_certificate_status
+				cert_status = get_asset_safety_certificate_status(asset.name, on_date=self.event_date)
+				if not cert_status.get("valid"):
+					frappe.throw(
+						f"Asset '{asset.asset_name}' ({asset.name}) safety gate failed: {cert_status.get('reason')}",
+						frappe.ValidationError,
+					)
+			except Exception as e:
+				if isinstance(e, frappe.ValidationError):
+					raise e
 
 	def on_submit(self):
 		self._ensure_job_costing()
@@ -50,6 +78,15 @@ class EventBooking(Document):
 	def on_update(self):
 		if getattr(self, "status", None) in ("confirmed", "in_progress", "completed"):
 			self._ensure_job_costing()
+		if getattr(self, "status", None) == "completed":
+			self._record_telemetry()
+
+	def _record_telemetry(self):
+		try:
+			from entertainment_express.fleet_maintenance.telemetry import increment_asset_usage
+			increment_asset_usage(self)
+		except Exception as e:
+			frappe.log_error(f"Asset telemetry recording failed for {self.name}: {e}", "Event Booking")
 
 	def _ensure_job_costing(self):
 		try:

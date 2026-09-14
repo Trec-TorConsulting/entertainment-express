@@ -188,6 +188,7 @@ doc_events = {
             "entertainment_express.integrations.calendar.on_booking_update",
             "entertainment_express.security.auth_hardening.on_booking_update",
             "entertainment_express.job_costing.provisioning.ensure_event_cost_center_and_project",
+            "entertainment_express.fleet_maintenance.telemetry.on_booking_update",
         ],
     },
     "Lead": {

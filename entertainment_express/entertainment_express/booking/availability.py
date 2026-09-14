@@ -33,6 +33,29 @@ def check(asset_name: str, event_start: datetime, event_end: datetime) -> dict:
             "conflicts": [],
         }
 
+    if getattr(asset, "condition_status", None) in ("Quarantined", "In Repair", "Pending Inspection"):
+        reason = getattr(asset, "quarantine_reason", None) or f"Condition status is {asset.condition_status}"
+        return {
+            "available": False,
+            "reason": f"Asset {asset_name} is unavailable ({asset.condition_status}): {reason}",
+            "conflicts": [],
+        }
+
+    try:
+        from entertainment_express.fleet_maintenance.safety import get_asset_safety_certificate_status
+        cert_status = get_asset_safety_certificate_status(
+            asset_name,
+            on_date=event_start.date() if hasattr(event_start, "date") else None
+        )
+        if not cert_status.get("valid"):
+            return {
+                "available": False,
+                "reason": cert_status.get("reason") or "Governed safety certificate is expired",
+                "conflicts": [],
+            }
+    except Exception:
+        pass
+
     setup_buf, teardown_buf = _get_buffers(asset)
     window_start = event_start - timedelta(minutes=setup_buf)
     window_end = event_end + timedelta(minutes=teardown_buf)

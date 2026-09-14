@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "autoname": "format:EMS-{rule_name}",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rule_name",
+  "asset_category",
+  "is_active",
+  "col1",
+  "trigger_type",
+  "interval_value",
+  "priority",
+  "section_checklist",
+  "service_checklist"
+ ],
+ "fields": [
+  {
+   "fieldname": "rule_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rule / Task Name",
+   "reqd": 1
+  },
+  {
+   "default": "all",
+   "fieldname": "asset_category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Asset Category",
+   "options": "all\ninflatable\nbooth\ntruck\ndj_rig\ncasino_table\nkaraoke_rig\nprop\nother",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "calendar",
+   "fieldname": "trigger_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Trigger Type",
+   "options": "calendar\noperating_hours\nevent_count\nmileage",
+   "reqd": 1
+  },
+  {
+   "default": "30",
+   "description": "Days for calendar, Hours for operating_hours, Number of gigs for event_count, Miles for mileage",
+   "fieldname": "interval_value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Interval Value",
+   "reqd": 1
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nUrgent"
+  },
+  {
+   "fieldname": "section_checklist",
+   "fieldtype": "Section Break",
+   "label": "Service Checklist"
+  },
+  {
+   "fieldname": "service_checklist",
+   "fieldtype": "Small Text",
+   "label": "Service Checklist (one per line)"
+  }
+ ],
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Equipment Maintenance Schedule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Crew"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

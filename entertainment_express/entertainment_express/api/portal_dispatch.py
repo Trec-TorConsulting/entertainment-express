@@ -115,7 +115,20 @@ def board(day: str | None = None) -> dict:
                 "overweight": bool(job.get("overweight")),
                 "site_fit_status": job.get("site_fit_status") or "",
                 "crew": crew,
-                "assets": [a.get("asset_name") or a.get("asset") for a in (job.get("assets") or [])],
+                "assets": [
+                    {
+                        "name": a.get("asset"),
+                        "asset_name": a.get("asset_name") or a.get("asset"),
+                        "quarantined": bool(frappe.db.get_value("Service Asset", a.get("asset"), "condition_status") in ("Quarantined", "In Repair", "Pending Inspection")),
+                        "quarantine_reason": frappe.db.get_value("Service Asset", a.get("asset"), "quarantine_reason") or "",
+                    }
+                    for a in (job.get("assets") or [])
+                ],
+                "has_quarantined_asset": any(
+                    frappe.db.get_value("Service Asset", a.get("asset"), "condition_status") in ("Quarantined", "In Repair", "Pending Inspection")
+                    for a in (job.get("assets") or [])
+                    if a.get("asset")
+                ),
             }
         )
     route = []

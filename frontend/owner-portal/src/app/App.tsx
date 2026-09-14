@@ -10,6 +10,7 @@ import { MoneyPage } from "./routes/money/MoneyPage";
 import { BrandPage } from "./routes/brand/BrandPage";
 import { SubcontractorsPage } from "./routes/subcontractors/SubcontractorsPage";
 import { WebsitePage } from "./routes/website/WebsitePage";
+import { FleetHealthPage } from "./routes/fleet/FleetHealthPage";
 
 // Statically import Legacy Workspaces to eliminate chunk mismatches
 import LegacyWorkspaces from "../AppLegacy";
@@ -34,6 +35,7 @@ export const OwnerApp: React.FC = () => {
           {/* Flagship Routes */}
           <Route path="/" element={<TodayPage />} />
           <Route path="/pipeline" element={<PipelinePage />} />
+          <Route path="/fleet" element={<FleetHealthPage />} />
           <Route path="/money" element={<MoneyPage />} />
           <Route path="/subcontractors" element={<SubcontractorsPage />} />
           <Route path="/brand" element={<BrandPage />} />

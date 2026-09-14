@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "asset_ref",
+  "booking_ref",
+  "col1",
+  "severity",
+  "resolution_status",
+  "reported_by",
+  "reported_at",
+  "section_description",
+  "defect_description",
+  "photos",
+  "section_resolution",
+  "resolution_notes",
+  "repair_cost",
+  "col2",
+  "resolved_by",
+  "resolved_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "DEFECT-.YYYY.-.####"
+  },
+  {
+   "fieldname": "asset_ref",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Asset",
+   "options": "Service Asset",
+   "reqd": 1
+  },
+  {
+   "fieldname": "booking_ref",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Event Booking Ref",
+   "options": "Event Booking"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Medium",
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Severity",
+   "options": "Low\nMedium\nHigh\nCritical - Take Out of Service",
+   "reqd": 1
+  },
+  {
+   "default": "Reported",
+   "fieldname": "resolution_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Resolution Status",
+   "options": "Reported\nQuarantined\nIn Repair\nResolved\nDiscarded",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reported By",
+   "options": "User"
+  },
+  {
+   "fieldname": "reported_at",
+   "fieldtype": "Datetime",
+   "label": "Reported At"
+  },
+  {
+   "fieldname": "section_description",
+   "fieldtype": "Section Break",
+   "label": "Defect Description & Evidence"
+  },
+  {
+   "fieldname": "defect_description",
+   "fieldtype": "Text",
+   "label": "Defect Description",
+   "reqd": 1
+  },
+  {
+   "description": "Comma-separated URLs or JSON array of photos",
+   "fieldname": "photos",
+   "fieldtype": "Small Text",
+   "label": "Photos"
+  },
+  {
+   "fieldname": "section_resolution",
+   "fieldtype": "Section Break",
+   "label": "Resolution & Repair"
+  },
+  {
+   "fieldname": "resolution_notes",
+   "fieldtype": "Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "repair_cost",
+   "fieldtype": "Currency",
+   "label": "Repair Cost"
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "resolved_by",
+   "fieldtype": "Link",
+   "label": "Resolved By",
+   "options": "User"
+  },
+  {
+   "fieldname": "resolved_at",
+   "fieldtype": "Datetime",
+   "label": "Resolved At"
+  }
+ ],
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Equipment Defect Report",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Crew"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
