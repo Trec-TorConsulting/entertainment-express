@@ -57,6 +57,7 @@
   "odometer",
   "fuel_level",
   "home_location",
+  "linked_warehouse",
   "barcode",
   "registration_expiry",
   "insurance_expiry"
@@ -128,6 +129,13 @@
    "fieldtype": "Link",
    "label": "Home Location",
    "options": "EE Location"
+  },
+  {
+   "fieldname": "linked_warehouse",
+   "fieldtype": "Link",
+   "label": "Linked Van Warehouse",
+   "options": "Warehouse",
+   "read_only": 1
   },
   {
    "fieldname": "barcode",

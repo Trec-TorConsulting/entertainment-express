@@ -765,4 +765,7 @@ const styles = StyleSheet.create({
   },
 });
 
+export { default as ScanToTruckScreen } from './ScanToTruckScreen';
+export { default as CheckinReturnScreen } from './CheckinReturnScreen';
+
 export default ShiftListScreen;

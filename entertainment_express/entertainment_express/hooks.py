@@ -119,6 +119,7 @@ scheduler_events = {
         "entertainment_express.api.portal_reports.run_schedules",
         "entertainment_express.notifications.send_deferred",
         "entertainment_express.equipment_fleet.scheduler.daily_fleet_alerts",
+        "entertainment_express.logistics.sub_rentals.check_sub_rental_deadlines",
         "entertainment_express.control_plane.metering.collect_all_tenants",
     ],
     "cron": {

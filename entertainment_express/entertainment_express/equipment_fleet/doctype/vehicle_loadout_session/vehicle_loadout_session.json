@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "session_type",
+  "vehicle",
+  "booking",
+  "col1",
+  "status",
+  "started_at",
+  "completed_at",
+  "source_warehouse",
+  "target_warehouse",
+  "stock_entry_ref",
+  "section_items",
+  "scanned_items"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "EE-VLS-.YYYY.-.####"
+  },
+  {
+   "default": "loadout",
+   "fieldname": "session_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Session Type",
+   "options": "loadout\nreturn_checkin",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Event Booking",
+   "options": "Event Booking"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "draft\ncommitted\ncanceled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "started_at",
+   "fieldtype": "Datetime",
+   "label": "Started At"
+  },
+  {
+   "fieldname": "completed_at",
+   "fieldtype": "Datetime",
+   "label": "Completed At"
+  },
+  {
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "target_warehouse",
+   "fieldtype": "Link",
+   "label": "Target Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "stock_entry_ref",
+   "fieldtype": "Link",
+   "label": "Stock Entry Reference",
+   "options": "Stock Entry"
+  },
+  {
+   "fieldname": "section_items",
+   "fieldtype": "Section Break",
+   "label": "Scanned Loadout Items"
+  },
+  {
+   "fieldname": "scanned_items",
+   "fieldtype": "Table",
+   "label": "Scanned Items",
+   "options": "Vehicle Loadout Item"
+  }
+ ],
+ "istable": 0,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Vehicle Loadout Session",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Crew",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

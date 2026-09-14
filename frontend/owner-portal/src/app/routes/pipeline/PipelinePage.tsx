@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { SubOutModal } from "../subcontractors/SubOutModal";
 import { EventPLDrawer } from "../money/components/EventPLDrawer";
+import { SubRentalTracker } from "./SubRentalTracker";
 
 const STAGES = [
   { id: "inquiry", label: "Inquiry" },
@@ -170,6 +171,9 @@ export const PipelinePage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Third-Party Vendor Sub-Rental Tracker */}
+      <SubRentalTracker />
 
       <div className="space-y-4">
         <FilterBar

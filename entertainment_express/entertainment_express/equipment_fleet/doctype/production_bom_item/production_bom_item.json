@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "qty",
+  "is_sub_assembly",
+  "is_consumable",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "default": "1.0",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_sub_assembly",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Sub-Assembly Kit"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_consumable",
+   "fieldtype": "Check",
+   "label": "Consumable"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Staging Notes"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Production BOM Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

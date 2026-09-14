@@ -24,7 +24,7 @@
    "fieldname": "kind",
    "fieldtype": "Select",
    "label": "Kind",
-   "options": "asset\nconsumable\nsubrental",
+   "options": "asset\nconsumable\nsubrental\nsubassembly",
    "default": "asset",
    "in_list_view": 1
   },

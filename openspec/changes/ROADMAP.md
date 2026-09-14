@@ -413,10 +413,10 @@ entitlement enforcement.
 **Specs:** `job-costing-margin-intelligence` (new), `billing-payments`, `owner-portal`, `reporting-bi`.
 **Folder:** [`archive/2026-09-14-job-costing-margin-intelligence/`](archive/2026-09-14-job-costing-margin-intelligence/)
 
-### Equipment Lifecycle, Safety Compliance & Maintenance 📝 active
+### Equipment Lifecycle, Safety Compliance & Maintenance ✅ archived 2026-09-14
 **Goal:** Serialized equipment usage telemetry (operating hours, gig count, mileage), automated preventative maintenance schedules, safety compliance certificate tracking with hard dispatch locks, and on-site teardown damage quarantine from the mobile Field App PWA.
 **Specs:** `asset-lifecycle-safety-maintenance` (new), `equipment-inventory-fleet`, `mobile-field-app`, `owner-portal`.
-**Folder:** [`asset-lifecycle-safety-maintenance/`](asset-lifecycle-safety-maintenance/)
+**Folder:** [`archive/2026-09-14-asset-lifecycle-safety-maintenance/`](archive/2026-09-14-asset-lifecycle-safety-maintenance/)
 
 ### Logistics, Production BOMs & Van Warehouses 📝 active
 **Goal:** Multi-tier production BOM kitting, "Van-as-a-Warehouse" rolling inventory tracking, barcode scan load-out and check-in, automated missing gear reconciliation, and one-click sub-rental purchase order procurement.

@@ -1,0 +1,150 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "booking",
+  "vendor",
+  "purchase_order_ref",
+  "col1",
+  "delivery_date",
+  "return_deadline",
+  "total_cost",
+  "markup_percent",
+  "customer_price",
+  "status",
+  "notes",
+  "section_items",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "EE-SRO-.YYYY.-.####"
+  },
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Event Booking",
+   "options": "Event Booking",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vendor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment Vendor / Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "purchase_order_ref",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "ERPNext Purchase Order",
+   "options": "Purchase Order"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Venue Delivery Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "return_deadline",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Vendor Return Deadline",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Sub-Rental Cost"
+  },
+  {
+   "default": "35.0",
+   "fieldname": "markup_percent",
+   "fieldtype": "Percent",
+   "label": "Client Markup %"
+  },
+  {
+   "fieldname": "customer_price",
+   "fieldtype": "Currency",
+   "label": "Billed to Customer"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nOrdered\nDelivered\nReturned\nCanceled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Delivery / Vendor Notes"
+  },
+  {
+   "fieldname": "section_items",
+   "fieldtype": "Section Break",
+   "label": "Sub-Rented Equipment Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Sub Rental Order Item"
+  }
+ ],
+ "istable": 0,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Sub Rental Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Sales"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

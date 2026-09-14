@@ -86,3 +86,11 @@ The system SHALL verify active Certificate of Insurance (COI) and W-9 records wh
 - **WHEN** an owner attempts to assign a subbed job to a vendor whose COI has expired
 - **THEN** the system displays a prominent compliance warning banner requiring explicit owner acknowledgment before issuing the offer
 
+### Requirement: Sub-Rental Vendor Accounting Integration
+The system SHALL link sub-rental `Purchase Order` and `Purchase Invoice` records to the relevant booking project, ensuring vendor payable liabilities flow directly into the event cost sheet.
+
+#### Scenario: Vendor billing linked to event
+- **WHEN** a vendor submits an invoice for dry ice or an LED wall sub-rental
+- **THEN** the invoice is matched against the booking's `Purchase Order` and updates the event's actual sub-rental expenses
+
+

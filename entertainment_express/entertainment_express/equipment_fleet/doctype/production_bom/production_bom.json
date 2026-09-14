@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "bom_name",
+  "parent_item",
+  "vertical",
+  "col1",
+  "is_active",
+  "notes",
+  "section_items",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "EE-BOM-.YYYY.-.####"
+  },
+  {
+   "fieldname": "bom_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "BOM / Kit Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parent_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parent Package / Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vertical",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Vertical",
+   "options": "inflatable\nbooth\ntruck\ndj_rig\ncasino_table\nkaraoke_rig\nprop\nav_production\nother"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Assembly Notes"
+  },
+  {
+   "fieldname": "section_items",
+   "fieldtype": "Section Break",
+   "label": "Bill of Materials Components"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Components",
+   "options": "Production BOM Item"
+  }
+ ],
+ "istable": 0,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "Production BOM",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Crew"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "bom_name",
+ "track_changes": 1
+}
