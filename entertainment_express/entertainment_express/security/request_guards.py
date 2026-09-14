@@ -206,7 +206,9 @@ def enforce_coming_soon() -> None:
 
     path = (getattr(req, "path", "") or "").strip() or "/"
 
-    # Exempt health, auth, assets, api, and coming soon page itself
+    # Exempt health, auth, assets, api, framework website JS, and coming soon itself.
+    # /website_script.js must stay JS — rewriting it to coming_soon returns HTML and
+    # breaks every marketing page that loads the Frappe website base template.
     if (
         _is_health_path(path)
         or path == COMING_SOON_PATH
@@ -216,6 +218,8 @@ def enforce_coming_soon() -> None:
         or path.startswith("/api/")
         or path.startswith("/assets/")
         or path.startswith("/files/")
+        or path == "/website_script.js"
+        or path in {"/robots.txt", "/sitemap.xml", "/favicon.ico"}
     ):
         return
 

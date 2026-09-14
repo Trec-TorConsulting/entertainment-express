@@ -739,13 +739,21 @@ def test_hardening():
     if "add_hr_finance_roles" not in patches_txt:
         errors.append("add_hr_finance_roles patch missing from patches.txt")
 
+    # 6. URL topology: entx.app is main SaaS, no legacy admin.entx.app ingress
+    if 'host: "admin.entx.app"' in k8s or 'host: admin.entx.app' in k8s:
+        errors.append("Legacy host admin.entx.app still defined in k8s-deployment.yaml ingress rules")
+    if "value: entx.app" not in k8s:
+        errors.append("frappe-python probes do not target main SaaS host entx.app")
+
+
     if errors:
         for e in errors:
             print(f"  ✗ {e}")
         return False
 
-    print(f"  ✓ All hardening checks pass (roles, readiness probe, rate-limit, version, patch)")
+    print(f"  ✓ All hardening checks pass (roles, readiness probe, rate-limit, version, patch, URL topology)")
     return True
+
 
 
 def main():

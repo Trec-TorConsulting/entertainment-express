@@ -40,6 +40,7 @@ def test_request_guards_has_coming_soon_logic():
     assert "def get_beta_passcode" in text
     assert "def has_beta_access" in text
     assert "def enforce_coming_soon" in text
+    assert 'path == "/website_script.js"' in text
 
 
 def test_hooks_registers_coming_soon_guard():

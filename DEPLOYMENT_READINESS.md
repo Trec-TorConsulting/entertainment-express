@@ -13,14 +13,34 @@ catalog/booking data (phase-1 task 10.2 is **done**, not pending). White-label p
 
 ---
 
+## Production URL Architecture
+
+The platform uses a clean, two-tier URL model:
+
+1. **`entx.app` (and `www.entx.app`)** — Main PaaS / SaaS Site:
+   - Public marketing homepage, product features, pricing, blog, contact, FAQ
+   - New tenant onboarding & signup registration
+   - Platform operator control plane & management
+2. **`<client>.entx.app` (e.g., `funkytown.entx.app`, `e2esmoke.entx.app`)** — Client Company Site:
+   - Client's customer booking portal (`/book`), equipment catalog (`/catalog`), quote requests
+   - Client's crew & dispatch application (`/dispatch`, `/employee`)
+   - Client's company admin Desk (`/app`) for bookings, inventory, invoicing, and crew management
+
+> [!NOTE]
+> `admin.entx.app`, `base.entx.app`, and `gke-admin.entx.app` have been retired and removed from Ingresses and routes. All platform traffic routes cleanly through `entx.app` (main PaaS) or `<client>.entx.app` (tenant site).
+
+---
+
 ## What is live
 
 - Site-per-tenant Frappe + ERPNext + this app
-- Public: home, `/book`, `/catalog`, `/request-quote`, login; marketing `www.entx.app`
+- Main PaaS / SaaS on `entx.app` and `www.entx.app`
+- Client sites on `*.entx.app` (home, `/book`, `/catalog`, `/request-quote`, login)
 - Logged-in portals: `/owner`, `/employee`, `/client` (login-gated; walkthrough is a human session)
 - Field PWA for crew (not a native React Native store app as the primary client)
 - Payments: Stripe + Square + PayPal paths; **Stripe Connect and W2 payroll remain stubs**
 - Apply path: dual-cluster via `promote-image.sh --apply` in HomeLab-Redo (see deploy-entx skill)
+
 
 ---
 
@@ -139,7 +159,7 @@ bench --site all set-config ee_portal_mode enforce
 Unlike Stripe (K8s Secrets → env vars), Twilio and FCM credentials are configured **through
 the Frappe Desk UI** — they are per-site settings and may differ across tenants.
 
-**Control-plane site (admin.entx.app):**
+**Control-plane site (entx.app):**
 1. Login as SaaS Operator → Frappe Desk → EE Notification Settings
 2. Enter: Twilio Account SID, Auth Token, From Number / WhatsApp Number; FCM Server Key
 

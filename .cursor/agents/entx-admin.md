@@ -18,11 +18,12 @@ Do **not** treat `scripts/deploy.sh` + `k8s-deployment.yaml` as the dual K3S+GKE
 
 ## Domains & sites
 
-- **Public:** `entx.app` only (`admin.entx.app`, `*.entx.app`). Never publish `entertainmentexpress.app` on the public front door.
-- **Internal baseDomain:** `entertainmentexpress.app` (site names on disk/DB).
-- **Control plane:** `https://admin.entx.app`
-- **Tenants:** `https://<slug>.entx.app` — wildcard route already covers them; no per-tenant Ingress.
-- **GKE smoke only:** `gke-admin.entx.app`, `gke-base.entx.app` — do not point production DNS at GKE.
+- **Public:** Two-tier model:
+  - `entx.app` (and `www.entx.app`) — Main PaaS / SaaS site (marketing, signup, control plane).
+  - `<client>.entx.app` — Client sites (customer booking `/book`, catalog, crew dispatch, tenant admin).
+  - `admin.entx.app`, `base.entx.app`, `gke-admin.entx.app` are retired and removed.
+- **Tenants:** `https://<client>.entx.app` — wildcard route covers them; no per-tenant Ingress.
+
 
 ## Tenancy
 

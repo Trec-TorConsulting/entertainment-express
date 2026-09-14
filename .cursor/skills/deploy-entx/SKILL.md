@@ -1,6 +1,6 @@
 ---
 name: deploy-entx
-description: "Build and roll Entertainment Express (EntX) to both K3S and GKE with the same bench image tag. Use when: deploying EntX from this product repo, dual-pushing bench images to maddscientist + Artifact Registry, promote-image in HomeLab-Redo, helm upgrade, entertainment-express-gke apply.sh, pre-cutover code sync, verifying admin.entx.app and gke-admin.entx.app."
+description: "Build and roll Entertainment Express (EntX) to both K3S and GKE with the same bench image tag. Use when: deploying EntX from this product repo, dual-pushing bench images to maddscientist + Artifact Registry, promote-image in HomeLab-Redo, helm upgrade, entertainment-express-gke apply.sh, pre-cutover code sync, verifying entx.app and tenant sites."
 ---
 
 # Deploy Entertainment Express (K3S + GKE)
@@ -22,8 +22,9 @@ Delegate judgment to **`entx-admin`**. Use this skill for the mechanical build �
 ## Hard Rules (do not skip)
 
 1. **Same tag on both registries and both HomeLab values files** during pre-cutover sync.
-2. **Do not point production DNS** (`admin.entx.app`, `*.entx.app`) at GKE load balancers.
+2. **Do not point production DNS** (`entx.app`, `*.entx.app`) at GKE load balancers.
 3. **Do not publish** `entertainmentexpress.app` on the public Gateway.
+
 4. **Secrets never committed**.
 5. **Code ≠ data** — image promote rolls code only.
 6. Prefer the scripts below over hand-edited image fields, ad-hoc `kubectl set image`, or using only `scripts/deploy.sh` for a dual-cluster roll.
@@ -111,13 +112,13 @@ Updates: `chart/values.yaml`, `chart/values-prod.yaml`, `entertainment-express-g
 
 ```bash
 # K3S production
-curl -sS https://admin.entx.app/api/method/ping
+curl -sS https://entx.app/api/method/ping
+curl -sS https://e2esmoke.entx.app/api/method/ping
 kubectl -n entertainment-express get pods
 
 # GKE POC only
 CTX=gke_trector-gke-lab_us-east1_trector
 kubectl --context "$CTX" -n entertainment-express get pods,svc
-curl -sS https://gke-admin.entx.app/api/method/ping
 ```
 
 ## Order of operations
@@ -127,7 +128,7 @@ curl -sS https://gke-admin.entx.app/api/method/ping
     → (in EE) build-push both registries
     → (in HL) promote-image three values files
     → (in HL) promote --apply  OR  helm + apply.sh
-    → ping admin.entx.app + gke-admin.entx.app
+    → ping entx.app + tenant sites
 ```
 
 ## Data path (not every code deploy)
@@ -151,7 +152,6 @@ Re-promote a previous known-good tag through the same path so both clusters stay
 | K3S ImagePullBackOff | Tag missing on maddscientist — dual-push / `HOMELAB_ONLY=1` from LAN |
 | GKE ImagePullBackOff | Tag missing on AR — dual-push / GH Bench image / `AR_ONLY=1` |
 | `apply.sh` refuses context | Needs `gke_*` context |
-| Used only `scripts/deploy.sh` | That is not dual-cluster promote — use this skill |
 | Sites/DB wrong on GKE after code roll | Expected — migrate sync / restore |
 
 ## Agent output checklist
@@ -159,5 +159,6 @@ Re-promote a previous known-good tag through the same path so both clusters stay
 1. Tag used  
 2. Registries pushed  
 3. Whether HomeLab `--apply` ran  
-4. Ping `admin.entx.app` (+ `gke-admin.entx.app` if applied)  
+4. Ping `entx.app` (+ tenant sites)  
 5. DNS/cutover **not** changed  
+
