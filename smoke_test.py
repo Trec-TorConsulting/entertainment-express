@@ -695,6 +695,59 @@ def test_appointment_connectivity_suite():
     return True
 
 
+def test_hardening():
+    """Verify enterprise-hardening items are in place:
+    - EE HR and EE Finance roles in fixture
+    - Readiness probe uses /ready (DB-aware) on frappe-python
+    - Rate-limit middlewares defined in k8s-deployment.yaml
+    - Version strings consistent across hooks.py and k8s-deployment.yaml
+    """
+    print("✓ Testing enterprise hardening checklist...")
+    errors = []
+
+    # 1. Role fixture completeness
+    import json
+    role_fixture = json.loads(
+        Path("entertainment_express/entertainment_express/fixtures/role.json").read_text()
+    )
+    role_names = {r["name"] for r in role_fixture}
+    for required_role in ("EE HR", "EE Finance", "EE Accounting", "EE Dispatcher"):
+        if required_role not in role_names:
+            errors.append(f"Role fixture missing: {required_role}")
+
+    # 2. readinessProbe on frappe-python uses /ready (DB-aware)
+    k8s = Path("k8s-deployment.yaml").read_text()
+    if "entertainment_express.api.health.ready" not in k8s:
+        errors.append("readinessProbe does not use /ready — k8s-deployment.yaml")
+
+    # 3. Rate-limit middlewares present
+    if "ee-public-ratelimit" not in k8s:
+        errors.append("ee-public-ratelimit middleware missing from k8s-deployment.yaml")
+    if "ee-auth-ratelimit" not in k8s:
+        errors.append("ee-auth-ratelimit middleware missing from k8s-deployment.yaml")
+
+    # 4. Version string consistency: hooks.py must match a tag in k8s-deployment.yaml
+    sys.path.insert(0, "entertainment_express/entertainment_express")
+    import hooks
+    app_ver = hooks.app_version  # e.g. "0.1.2"
+    ee_tag = f"{app_ver}-ee"
+    if ee_tag not in k8s:
+        errors.append(f"hooks.app_version ({app_ver}) does not match any image tag in k8s-deployment.yaml (expected {ee_tag})")
+
+    # 5. add_hr_finance_roles patch in patches.txt
+    patches_txt = Path("entertainment_express/entertainment_express/patches.txt").read_text()
+    if "add_hr_finance_roles" not in patches_txt:
+        errors.append("add_hr_finance_roles patch missing from patches.txt")
+
+    if errors:
+        for e in errors:
+            print(f"  ✗ {e}")
+        return False
+
+    print(f"  ✓ All hardening checks pass (roles, readiness probe, rate-limit, version, patch)")
+    return True
+
+
 def main():
     print("\n" + "="*60)
     print("Entertainment Express — Multi-Phase Smoke Test")
@@ -717,6 +770,7 @@ def main():
         test_phase41_static_suite,
         test_login_white_label_suite,
         test_appointment_connectivity_suite,
+        test_hardening,
         test_live_marketing_smoke,
         test_portal_artifacts,
     ]

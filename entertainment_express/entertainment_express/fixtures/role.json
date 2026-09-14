@@ -33,6 +33,22 @@
   },
   {
     "doctype": "Role",
+    "name": "EE HR",
+    "role_name": "EE HR",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
+    "name": "EE Finance",
+    "role_name": "EE Finance",
+    "desk_access": 1,
+    "is_custom": 1,
+    "disabled": 0
+  },
+  {
+    "doctype": "Role",
     "name": "EE Marketing",
     "role_name": "EE Marketing",
     "desk_access": 1,
