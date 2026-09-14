@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "autoname": "format:TIP-{event_booking}-{#####}",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "event_booking",
+  "total_tip_pool",
+  "status",
+  "col1",
+  "allocation_policy",
+  "locked_at",
+  "notes",
+  "section_lines",
+  "allocation_lines"
+ ],
+ "fields": [
+  {
+   "fieldname": "event_booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Event Booking",
+   "options": "Event Booking",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0.0",
+   "fieldname": "total_tip_pool",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Tip Pool ($)",
+   "reqd": 1
+  },
+  {
+   "default": "accruing",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "accruing\nlocked\npaid",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "equal",
+   "fieldname": "allocation_policy",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Allocation Policy",
+   "options": "equal\nhours_weighted\nlead_weighted",
+   "reqd": 1
+  },
+  {
+   "fieldname": "locked_at",
+   "fieldtype": "Datetime",
+   "label": "Locked At"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "section_lines",
+   "fieldtype": "Section Break",
+   "label": "Individual Tip Allocations"
+  },
+  {
+   "fieldname": "allocation_lines",
+   "fieldtype": "Table",
+   "label": "Tip Allocation Lines",
+   "options": "Tip Allocation Line"
+  }
+ ],
+ "istable": 0,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "HR Workforce",
+ "name": "Tip Distribution",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Finance",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "EE Crew"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

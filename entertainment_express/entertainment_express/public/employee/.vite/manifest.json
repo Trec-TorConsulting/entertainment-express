@@ -13,8 +13,15 @@
       "src/main.tsx"
     ]
   },
+  "_sparkles-CsKgCmAz.js": {
+    "file": "chunks/sparkles-CsKgCmAz.js",
+    "name": "sparkles",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
   "src/AppLegacy.tsx": {
-    "file": "chunks/AppLegacy-8Ooz6N9F.js",
+    "file": "chunks/AppLegacy-jM0iDsGV.js",
     "name": "AppLegacy",
     "src": "src/AppLegacy.tsx",
     "isDynamicEntry": true,
@@ -24,14 +31,26 @@
     ]
   },
   "src/app/routes/dispatch/DispatchEmbedPage.tsx": {
-    "file": "chunks/DispatchEmbedPage-DjCqHOan.js",
+    "file": "chunks/DispatchEmbedPage-Dej7OoUC.js",
     "name": "DispatchEmbedPage",
     "src": "src/app/routes/dispatch/DispatchEmbedPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
       "_PageHeader-BM41uyXY.js",
-      "_EmptyState-BpnsgzkI.js"
+      "_EmptyState-BpnsgzkI.js",
+      "_sparkles-CsKgCmAz.js"
+    ]
+  },
+  "src/app/routes/earnings/MyEarningsPage.tsx": {
+    "file": "chunks/MyEarningsPage-CmLjyjTc.js",
+    "name": "MyEarningsPage",
+    "src": "src/app/routes/earnings/MyEarningsPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx",
+      "_PageHeader-BM41uyXY.js",
+      "_sparkles-CsKgCmAz.js"
     ]
   },
   "src/app/routes/today/MyDayPage.tsx": {
@@ -53,6 +72,7 @@
     "dynamicImports": [
       "src/app/routes/today/MyDayPage.tsx",
       "src/app/routes/dispatch/DispatchEmbedPage.tsx",
+      "src/app/routes/earnings/MyEarningsPage.tsx",
       "src/AppLegacy.tsx"
     ],
     "css": [

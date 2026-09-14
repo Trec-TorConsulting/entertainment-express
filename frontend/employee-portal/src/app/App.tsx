@@ -6,6 +6,7 @@ import { Skeleton } from "@portal-kit";
 // Flagship Route Modules - Lazy Loaded
 const MyDayPage = React.lazy(() => import("./routes/today/MyDayPage").then((m) => ({ default: m.MyDayPage })));
 const DispatchEmbedPage = React.lazy(() => import("./routes/dispatch/DispatchEmbedPage").then((m) => ({ default: m.DispatchEmbedPage })));
+const MyEarningsPage = React.lazy(() => import("./routes/earnings/MyEarningsPage").then((m) => ({ default: m.MyEarningsPage })));
 const LegacyEmployeeWorkspaces = React.lazy(() => import("../AppLegacy"));
 
 const RouteFallback = () => (
@@ -27,6 +28,7 @@ export const EmployeeApp: React.FC = () => {
           {/* Flagship Routes */}
           <Route path="/" element={<MyDayPage />} />
           <Route path="/dispatch" element={<DispatchEmbedPage />} />
+          <Route path="/earnings" element={<MyEarningsPage />} />
 
           {/* Operational & Legacy Routes */}
           <Route path="/*" element={<LegacyEmployeeWorkspaces />} />

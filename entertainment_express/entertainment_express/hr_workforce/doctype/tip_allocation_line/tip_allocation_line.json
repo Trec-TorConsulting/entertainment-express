@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "worker",
+  "worker_name",
+  "role",
+  "is_lead",
+  "hours_worked",
+  "split_percentage",
+  "allocated_amount",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "worker",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Worker / Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Worker Name"
+  },
+  {
+   "fieldname": "role",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Event Role"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_lead",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Lead"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "hours_worked",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hours Worked"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "split_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Split %"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated Tip ($)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "HR Workforce",
+ "name": "Tip Allocation Line",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

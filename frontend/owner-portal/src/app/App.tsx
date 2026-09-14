@@ -7,6 +7,7 @@ import { Skeleton, EmptyState, AccountPanel } from "@portal-kit";
 import { TodayPage } from "./routes/today/TodayPage";
 import { PipelinePage } from "./routes/pipeline/PipelinePage";
 import { MoneyPage } from "./routes/money/MoneyPage";
+import { PayrollSettlementPage } from "./routes/money/PayrollSettlementPage";
 import { BrandPage } from "./routes/brand/BrandPage";
 import { SubcontractorsPage } from "./routes/subcontractors/SubcontractorsPage";
 import { WebsitePage } from "./routes/website/WebsitePage";
@@ -39,6 +40,7 @@ export const OwnerApp: React.FC = () => {
           <Route path="/fleet" element={<FleetHealthPage />} />
           <Route path="/fleet/vans" element={<VanManifestPage />} />
           <Route path="/money" element={<MoneyPage />} />
+          <Route path="/money/payroll" element={<PayrollSettlementPage />} />
           <Route path="/subcontractors" element={<SubcontractorsPage />} />
           <Route path="/brand" element={<BrandPage />} />
           <Route path="/website" element={<WebsitePage />} />

@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "autoname": "format:RC-{role}-{event_type}-{#####}",
+ "creation": "2026-09-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rate_card_name",
+  "role",
+  "event_type",
+  "is_active",
+  "col1",
+  "calculation_type",
+  "base_rate",
+  "overtime_rate",
+  "standard_duration_hours",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "rate_card_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rate Card Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "role",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Role",
+   "options": "EE Role",
+   "reqd": 1
+  },
+  {
+   "fieldname": "event_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Event Type",
+   "description": "Leave blank or 'All' for universal rate card"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "flat_fee",
+   "fieldname": "calculation_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Calculation Type",
+   "options": "flat_fee\nhourly\nflat_plus_hourly",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Base Rate ($)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "overtime_rate",
+   "fieldtype": "Currency",
+   "label": "Overtime Rate ($/hr)"
+  },
+  {
+   "default": "4.0",
+   "fieldname": "standard_duration_hours",
+   "fieldtype": "Float",
+   "label": "Standard Duration (Hours)"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "istable": 0,
+ "modified": "2026-09-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "HR Workforce",
+ "name": "Gig Rate Card",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Finance",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "rate_card_name",
+ "track_changes": 1
+}

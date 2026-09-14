@@ -10,9 +10,11 @@ def after_install():
     create_all()
     from entertainment_express.setup.seed_marketing_settings import run as seed_marketing_settings
     from entertainment_express.setup.seed_marketing_pages import run as seed_marketing_pages
+    from entertainment_express.payroll.salary_components import seed_salary_components
 
     seed_marketing_settings()
     seed_marketing_pages()
+    seed_salary_components()
 
 
 def create_all():
