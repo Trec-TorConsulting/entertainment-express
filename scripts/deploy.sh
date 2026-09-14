@@ -63,9 +63,13 @@ wait_http() {
   return 1
 }
 
-echo "Checking https://${TENANT_HOST}/api/method/ping" >&2
+echo "Checking main SaaS https://entx.app/api/method/ping" >&2
+wait_http "https://entx.app/api/method/ping"
+
+echo "Checking client https://${TENANT_HOST}/api/method/ping" >&2
 wait_http "https://${TENANT_HOST}/api/method/ping"
 
-echo "Checking https://${TENANT_HOST}/book" >&2
+echo "Checking client https://${TENANT_HOST}/book" >&2
 wait_http "https://${TENANT_HOST}/book" >/dev/null
 echo "GET /book 200" >&2
+

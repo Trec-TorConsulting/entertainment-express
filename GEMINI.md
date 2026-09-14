@@ -59,6 +59,7 @@ openspec validate --specs
    - Use the **`deploy-entx`** skill (`.agent/skills/deploy-entx/SKILL.md`):
      1. Build and dual-push: `./scripts/build-push-bench.sh <tag>` (pushes to both `registry.maddscientist.com` and Artifact Registry).
      2. Promote in HomeLab: `cd ~/Projects/Personal/HomeLab-Redo && ./entertainment-express/scripts/promote-image.sh <tag> [--apply]`.
-     3. Verify `admin.entx.app` ping and pods.
+     3. Verify `entx.app` ping and pods.
    - **Never point production DNS (`*.entx.app`) at GKE.**
+
 

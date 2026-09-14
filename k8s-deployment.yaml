@@ -271,7 +271,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
@@ -393,7 +393,7 @@ spec:
             port: 8000
             httpHeaders:
             - name: Host
-              value: base.entx.app
+              value: entx.app
           initialDelaySeconds: 60
           periodSeconds: 30
           failureThreshold: 5
@@ -405,7 +405,7 @@ spec:
             port: 8000
             httpHeaders:
             - name: Host
-              value: base.entx.app
+              value: entx.app
           initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 3
@@ -462,7 +462,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
@@ -578,7 +578,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
@@ -691,7 +691,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
@@ -806,7 +806,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
@@ -921,7 +921,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
@@ -1524,7 +1524,7 @@ spec:
           - name: seed-sites
             image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
             imagePullPolicy: Always
-            command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+            command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
             volumeMounts:
             - name: sites
               mountPath: /mnt/sites
@@ -1609,47 +1609,7 @@ spec:
           - name: backup-staging
             emptyDir: {}
 
----
-# Legacy hostname alias — direct access to the control-plane Frappe site (admin.entx.app).
-# Marketing/signup traffic uses entx.app / www.entx.app with the site-header middleware below.
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: entertainment-express-ingress
-  namespace: entertainment-express
-  labels:
-    app.kubernetes.io/name: entertainment-express
-    app.kubernetes.io/instance: ee-prod
-    app.kubernetes.io/managed-by: kubectl
-    helm.sh/chart: entertainment-express-0.1.0
-    app.kubernetes.io/component: ingress
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: "web,websecure"
-    traefik.ingress.kubernetes.io/router.tls.certresolver: "letsencrypt"
-    traefik.ingress.kubernetes.io/router.middlewares: "traefik-redirect-https@kubernetescrd,traefik-gzip-compress@kubernetescrd,traefik-security-headers@kubernetescrd"
-spec:
-  ingressClassName: traefik
-  tls:
-  - hosts:
-    - "admin.entx.app"
-  rules:
-  - host: "admin.entx.app"
-    http:
-      paths:
-      - path: /socket.io
-        pathType: Prefix
-        backend:
-          service:
-            name: frappe-socketio
-            port:
-              number: 9000
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frappe-python
-            port:
-              number: 8000
+
 ---
 # Route the public prod domain (entx.app + www) to the control-plane site. Frappe
 # multi-tenant resolves the site from the X-Frappe-Site-Name header, so Traefik injects
@@ -1667,7 +1627,7 @@ metadata:
 spec:
   headers:
     customRequestHeaders:
-      X-Frappe-Site-Name: admin.entx.app
+      X-Frappe-Site-Name: entx.app
 ---
 # H-3 hardening: Rate-limit middleware for public booking, signup, catalog,
 # marketing lead-capture endpoints. Applied on the tenant ingress and control
@@ -1846,7 +1806,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
@@ -2000,7 +1960,7 @@ spec:
       - name: seed-sites
         image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
         imagePullPolicy: Always
-        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi"]
+        command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
         - name: sites
           mountPath: /mnt/sites
