@@ -2654,7 +2654,8 @@ select:focus-visible {
 
 .ee-form input::placeholder,
 .ee-form textarea::placeholder {
-  color: var(--ee-text-disabled);
+  color: var(--ee-muted);
+  opacity: 1;
 }
 
 .ee-slug-field {
@@ -3255,6 +3256,11 @@ select:focus-visible {
   outline: none;
 }
 
+.ee-blog-newsletter-form input[type="email"]::placeholder {
+  color: var(--ee-rail-muted);
+  opacity: 1;
+}
+
 .ee-blog-newsletter-form input[type="email"]:focus {
   border-color: var(--ee-brand-border);
 }
@@ -3556,7 +3562,7 @@ select:focus-visible {
 }
 
 .ee-waitlist-input::placeholder {
-  color: var(--ee-text-disabled) !important;
+  color: var(--ee-muted) !important;
   opacity: 1 !important;
 }
 

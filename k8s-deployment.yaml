@@ -3,7 +3,7 @@
 #
 # Self-contained, kubectl-appliable deployment for the entertainment-express
 # namespace. Built from this repo's Dockerfile image
-# (registry.maddscientist.com/entertainment-express/bench:0.1.3-ee).
+# (registry.maddscientist.com/entertainment-express/bench:0.1.4-ee).
 #
 # PREREQUISITES — create the two secrets first (never commit real secrets):
 #   see secrets.example.yaml, then:
@@ -269,7 +269,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -286,7 +286,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: link-custom-assets
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command:
         - /bin/sh
@@ -323,7 +323,7 @@ spec:
                 - amd64
       containers:
       - name: frappe-python
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -460,7 +460,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -492,7 +492,7 @@ spec:
                 - amd64
       containers:
       - name: scheduler
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -576,7 +576,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -608,7 +608,7 @@ spec:
                 - amd64
       containers:
       - name: socketio
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["bash", "-c", "cd /home/frappe/frappe-bench && node apps/frappe/socketio.js"]
         env:
@@ -689,7 +689,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -721,7 +721,7 @@ spec:
                 - amd64
       containers:
       - name: worker
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -804,7 +804,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -836,7 +836,7 @@ spec:
                 - amd64
       containers:
       - name: worker
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -919,7 +919,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -951,7 +951,7 @@ spec:
                 - amd64
       containers:
       - name: worker
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         env:
         - name: EE_ADMIN_PASSWORD
@@ -1522,7 +1522,7 @@ spec:
             - name: sites
               mountPath: /mnt/sites
           - name: seed-sites
-            image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+            image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
             imagePullPolicy: Always
             command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
             volumeMounts:
@@ -1541,7 +1541,7 @@ spec:
           # Must finish before upload-to-minio; running them as sibling containers
           # races and fails the Job (BackoffLimitExceeded) when mc copies an empty dir.
           - name: bench-backup
-            image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+            image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
             imagePullPolicy: Always
             command:
             - bash
@@ -1804,7 +1804,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -1836,7 +1836,7 @@ spec:
                 - amd64
       containers:
       - name: admin-site-init
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command:
         - bash
@@ -1958,7 +1958,7 @@ spec:
         - name: sites
           mountPath: /mnt/sites
       - name: seed-sites
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command: ["/bin/sh", "-c", "if [ ! -f /mnt/sites/apps.txt ]; then cp -a /home/frappe/frappe-bench/sites/. /mnt/sites/ || true; fi; if [ -d /mnt/sites/admin.entx.app ] && [ ! -e /mnt/sites/entx.app ]; then ln -sfn admin.entx.app /mnt/sites/entx.app || true; fi"]
         volumeMounts:
@@ -1990,7 +1990,7 @@ spec:
                 - amd64
       containers:
       - name: site-init
-        image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+        image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
         imagePullPolicy: Always
         command:
         - bash
@@ -2265,7 +2265,7 @@ spec:
                     - amd64
           initContainers:
           - name: export-ingress
-            image: registry.maddscientist.com/entertainment-express/bench:0.1.3-ee
+            image: registry.maddscientist.com/entertainment-express/bench:0.1.4-ee
             imagePullPolicy: Always
             command:
             - bash

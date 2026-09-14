@@ -113,3 +113,58 @@ def test_website_context_tenant_white_label(monkeypatch):
     assert "ee-hide-product" in ctx.get("body_class", "")
     assert "--ee-brand:#2563eb" in ctx.get("head_html", "")
     assert ctx.get("footer_text") == "© 2026 Soundwave Elite DJs"
+
+
+def test_auth_dark_mode_contrast_and_inputs():
+    css_content = _read(PUBLIC_CSS / "ee-auth.css")
+    js_content = _read(PUBLIC_JS / "ee-auth.js")
+    login_html = _read(TEMPLATES_DIR / "login.html")
+    update_html = _read(TEMPLATES_DIR / "update_password.html")
+
+    # Tokens and high contrast input styling in CSS
+    assert "--ee-auth-input-text:" in css_content
+    assert "--ee-auth-input-placeholder:" in css_content
+    assert "--ee-auth-input-bg: #1e293b;" in css_content
+    assert "--ee-auth-input-text: #f8fafc;" in css_content
+    assert "::placeholder" in css_content
+    assert "-webkit-autofill" in css_content
+    assert "ee-auth-theme-toggle" in css_content
+
+    # JS theme persistence and sync
+    assert "setupTheme" in js_content
+    assert "ee-auth-theme-toggle" in js_content
+
+    # Theme toggle presence in templates
+    assert "ee-auth-theme-toggle" in login_html
+    assert "ee-auth-theme-toggle" in update_html
+
+
+def test_full_site_dark_mode_contrast():
+    wl_css = _read(PUBLIC_CSS / "ee-white-label.css")
+    tenant_home = _read(ROOT / "www" / "tenant_home.html")
+    marketing_tokens = _read(ROOT / "public" / "marketing" / "marketing-tokens.css")
+    marketing_css = _read(ROOT / "public" / "marketing" / "marketing.css")
+
+    # 1. White-label CSS dark tokens and accessible inputs
+    assert "--ee-bg: #0b0f17;" in wl_css
+    assert "--ee-panel: #111827;" in wl_css
+    assert "--ee-border: #334155;" in wl_css
+    assert "--ee-text: #f8fafc;" in wl_css
+    assert "--ee-input-bg: #1e293b;" in wl_css
+    assert "--ee-input-border: #475569;" in wl_css
+    assert ".form-control" in wl_css
+    assert "prefers-color-scheme: dark" in wl_css
+    assert '[data-theme="dark"]' in wl_css
+
+    # 2. Tenant landing page dark mode
+    assert ".ee-landing-wrapper" in tenant_home
+    assert "[data-theme=\"dark\"] .ee-form-card" in tenant_home
+    assert ".ee-prop-card" in tenant_home
+    assert ".ee-package-card" in tenant_home
+    assert "background-color: #0b0f17;" in tenant_home
+
+    # 3. Marketing dark mode contrast & placeholder WCAG compliance
+    assert "--ee-border: #334155;" in marketing_tokens
+    assert ".ee-form input::placeholder" in marketing_css
+    assert "color: var(--ee-muted);" in marketing_css
+

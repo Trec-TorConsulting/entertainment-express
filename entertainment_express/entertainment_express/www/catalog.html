@@ -7,14 +7,14 @@
 
   <div style="display:grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 2rem;">
     {% for row in packages %}
-    <article class="ee-panel" style="padding:1rem;border:1px solid #e5e7eb;border-radius:12px;">
+    <article class="ee-panel" style="padding:1rem;border:1px solid var(--ee-border, #e5e7eb);border-radius:12px;">
       {% if row.image %}
       <img src="{{ row.image }}" alt="" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:.75rem;">
       {% endif %}
-      <h2 style="margin:0 0 .35rem;font-size:1.1rem;">{{ row.name }}</h2>
-      <p style="margin:0;font-weight:600;">{{ row.rate }}</p>
-      <p style="color:var(--ee-text);opacity:.75;">{{ row.description }}</p>
-      <label style="display:flex;gap:.4rem;align-items:center;margin-top:.5rem;">
+      <h2 style="margin:0 0 .35rem;font-size:1.1rem;color:var(--ee-text);">{{ row.name }}</h2>
+      <p style="margin:0;font-weight:600;color:var(--ee-text);">{{ row.rate }}</p>
+      <p style="color:var(--ee-text-secondary, var(--ee-text));opacity:.85;">{{ row.description }}</p>
+      <label style="display:flex;gap:.4rem;align-items:center;margin-top:.5rem;color:var(--ee-text);">
         <input type="checkbox" class="ee-pkg" value="{{ row.id }}" data-name="{{ row.name }}">
         <span>Include in quote</span>
       </label>
@@ -25,15 +25,15 @@
     {% endfor %}
   </div>
   {% if not packages %}
-  <p>Packages will show here once the company publishes them.</p>
+  <p style="color:var(--ee-text-secondary, var(--ee-text));">Packages will show here once the company publishes them.</p>
   {% endif %}
 
   <form id="ee-quote-form" style="margin-top:2.5rem;display:grid;gap:.75rem;max-width:420px;">
-    <h2 style="margin:0;">Request a quote</h2>
-    <input name="full_name" required placeholder="Your name" style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
-    <input name="email" type="email" required placeholder="Email" style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
-    <input name="phone" placeholder="Phone" style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;">
-    <textarea name="message" rows="3" placeholder="Tell us about the event" style="padding:.6rem;border:1px solid #e5e7eb;border-radius:8px;"></textarea>
+    <h2 style="margin:0;color:var(--ee-text);">Request a quote</h2>
+    <input name="full_name" required placeholder="Your name">
+    <input name="email" type="email" required placeholder="Email">
+    <input name="phone" placeholder="Phone">
+    <textarea name="message" rows="3" placeholder="Tell us about the event"></textarea>
     <button type="submit" class="btn btn-primary">Send request</button>
     <p id="ee-quote-status" style="margin:0;color:var(--ee-text);opacity:.75;"></p>
   </form>

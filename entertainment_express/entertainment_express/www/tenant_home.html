@@ -355,6 +355,230 @@
   .ee-site-footer a:hover {
     color: #ffffff;
   }
+
+  /* Dark Mode Enhancements — Elegant Slate/Obsidian Palette (WCAG AA Compliant, No Clowny Colors) */
+  @media (prefers-color-scheme: dark) {
+    body, .ee-landing-wrapper {
+      background-color: #0b0f17;
+      color: #f8fafc;
+    }
+    .ee-hero-title {
+      color: #f8fafc;
+    }
+    .ee-hero-subtitle {
+      color: #cbd5e1;
+    }
+    .ee-hero-badge {
+      background: rgba(15, 118, 110, 0.2);
+      border-color: rgba(45, 212, 191, 0.3);
+      color: #2dd4bf;
+    }
+    .ee-btn-secondary {
+      background: #1e293b;
+      color: #f8fafc !important;
+      border-color: #334155;
+    }
+    .ee-btn-secondary:hover {
+      background: #334155;
+      border-color: #475569;
+      color: #ffffff !important;
+    }
+    .ee-prop-card {
+      background: #111827;
+      border-color: #1e293b;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .ee-prop-card:hover {
+      border-color: #334155;
+      box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.4);
+    }
+    .ee-prop-card h3 {
+      color: #f8fafc;
+    }
+    .ee-prop-card p {
+      color: #cbd5e1;
+    }
+    .ee-packages-section {
+      background: #0f172a;
+      border-top-color: #1e293b;
+      border-bottom-color: #1e293b;
+    }
+    .ee-section-header h2 {
+      color: #f8fafc;
+    }
+    .ee-section-header p {
+      color: #94a3b8;
+    }
+    .ee-package-card {
+      background: #111827;
+      border-color: #1e293b;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+    .ee-package-card:hover {
+      border-color: #334155;
+      box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5);
+    }
+    .ee-package-card h3 {
+      color: #f8fafc;
+    }
+    .ee-pkg-desc {
+      color: #cbd5e1;
+    }
+    .ee-pkg-sample-badge {
+      background: #312e81;
+      color: #c7d2fe;
+    }
+    .ee-trust-item {
+      color: #f8fafc;
+    }
+    .ee-testimonial-box {
+      background: #111827;
+      border-color: #1e293b;
+    }
+    .ee-testimonial-quote {
+      color: #e2e8f0;
+    }
+    .ee-testimonial-author {
+      color: #cbd5e1;
+    }
+    .ee-contact-section {
+      background: #0b0f17;
+      border-top-color: #1e293b;
+    }
+    .ee-form-card {
+      background: #111827;
+      border-color: #1e293b;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .ee-form-card .form-label {
+      color: #f8fafc;
+    }
+    .ee-form-card .form-control {
+      background-color: #1e293b;
+      border-color: #334155;
+      color: #f8fafc;
+    }
+    .ee-form-card .form-control:focus {
+      background-color: #1e293b;
+      border-color: var(--brand-primary);
+      color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25);
+    }
+    .ee-form-card .form-control::placeholder {
+      color: #94a3b8;
+      opacity: 1;
+    }
+  }
+
+  [data-theme="dark"] .ee-landing-wrapper,
+  html.dark .ee-landing-wrapper,
+  body.dark .ee-landing-wrapper {
+    background-color: #0b0f17;
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-hero-title, html.dark .ee-hero-title, body.dark .ee-hero-title {
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-hero-subtitle, html.dark .ee-hero-subtitle, body.dark .ee-hero-subtitle {
+    color: #cbd5e1;
+  }
+  [data-theme="dark"] .ee-hero-badge, html.dark .ee-hero-badge, body.dark .ee-hero-badge {
+    background: rgba(15, 118, 110, 0.2);
+    border-color: rgba(45, 212, 191, 0.3);
+    color: #2dd4bf;
+  }
+  [data-theme="dark"] .ee-btn-secondary, html.dark .ee-btn-secondary, body.dark .ee-btn-secondary {
+    background: #1e293b;
+    color: #f8fafc !important;
+    border-color: #334155;
+  }
+  [data-theme="dark"] .ee-btn-secondary:hover, html.dark .ee-btn-secondary:hover, body.dark .ee-btn-secondary:hover {
+    background: #334155;
+    border-color: #475569;
+    color: #ffffff !important;
+  }
+  [data-theme="dark"] .ee-prop-card, html.dark .ee-prop-card, body.dark .ee-prop-card {
+    background: #111827;
+    border-color: #1e293b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  [data-theme="dark"] .ee-prop-card:hover, html.dark .ee-prop-card:hover, body.dark .ee-prop-card:hover {
+    border-color: #334155;
+  }
+  [data-theme="dark"] .ee-prop-card h3, html.dark .ee-prop-card h3, body.dark .ee-prop-card h3 {
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-prop-card p, html.dark .ee-prop-card p, body.dark .ee-prop-card p {
+    color: #cbd5e1;
+  }
+  [data-theme="dark"] .ee-packages-section, html.dark .ee-packages-section, body.dark .ee-packages-section {
+    background: #0f172a;
+    border-top-color: #1e293b;
+    border-bottom-color: #1e293b;
+  }
+  [data-theme="dark"] .ee-section-header h2, html.dark .ee-section-header h2, body.dark .ee-section-header h2 {
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-section-header p, html.dark .ee-section-header p, body.dark .ee-section-header p {
+    color: #94a3b8;
+  }
+  [data-theme="dark"] .ee-package-card, html.dark .ee-package-card, body.dark .ee-package-card {
+    background: #111827;
+    border-color: #1e293b;
+  }
+  [data-theme="dark"] .ee-package-card:hover, html.dark .ee-package-card:hover, body.dark .ee-package-card:hover {
+    border-color: #334155;
+  }
+  [data-theme="dark"] .ee-package-card h3, html.dark .ee-package-card h3, body.dark .ee-package-card h3 {
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-pkg-desc, html.dark .ee-pkg-desc, body.dark .ee-pkg-desc {
+    color: #cbd5e1;
+  }
+  [data-theme="dark"] .ee-pkg-sample-badge, html.dark .ee-pkg-sample-badge, body.dark .ee-pkg-sample-badge {
+    background: #312e81;
+    color: #c7d2fe;
+  }
+  [data-theme="dark"] .ee-trust-item, html.dark .ee-trust-item, body.dark .ee-trust-item {
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-testimonial-box, html.dark .ee-testimonial-box, body.dark .ee-testimonial-box {
+    background: #111827;
+    border-color: #1e293b;
+  }
+  [data-theme="dark"] .ee-testimonial-quote, html.dark .ee-testimonial-quote, body.dark .ee-testimonial-quote {
+    color: #e2e8f0;
+  }
+  [data-theme="dark"] .ee-testimonial-author, html.dark .ee-testimonial-author, body.dark .ee-testimonial-author {
+    color: #cbd5e1;
+  }
+  [data-theme="dark"] .ee-contact-section, html.dark .ee-contact-section, body.dark .ee-contact-section {
+    background: #0b0f17;
+    border-top-color: #1e293b;
+  }
+  [data-theme="dark"] .ee-form-card, html.dark .ee-form-card, body.dark .ee-form-card {
+    background: #111827;
+    border-color: #1e293b;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+  [data-theme="dark"] .ee-form-card .form-label, html.dark .ee-form-card .form-label, body.dark .ee-form-card .form-label {
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-form-card .form-control, html.dark .ee-form-card .form-control, body.dark .ee-form-card .form-control {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #f8fafc;
+  }
+  [data-theme="dark"] .ee-form-card .form-control:focus, html.dark .ee-form-card .form-control:focus, body.dark .ee-form-card .form-control:focus {
+    background-color: #1e293b;
+    border-color: var(--brand-primary);
+    color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25);
+  }
+  [data-theme="dark"] .ee-form-card .form-control::placeholder, html.dark .ee-form-card .form-control::placeholder, body.dark .ee-form-card .form-control::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+  }
 </style>
 
 <div class="ee-landing-wrapper">

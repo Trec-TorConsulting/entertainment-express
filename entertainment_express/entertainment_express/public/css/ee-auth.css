@@ -7,42 +7,69 @@
 :root {
   --ee-auth-bg: #f8fafc;
   --ee-auth-panel: #ffffff;
-  --ee-auth-card-bg: rgba(255, 255, 255, 0.88);
+  --ee-auth-card-bg: rgba(255, 255, 255, 0.92);
   --ee-auth-card-border: rgba(226, 232, 240, 0.85);
   --ee-auth-text: #0f172a;
   --ee-auth-text-muted: #64748b;
   --ee-auth-input-bg: #ffffff;
   --ee-auth-input-border: #cbd5e1;
+  --ee-auth-input-text: #0f172a;
+  --ee-auth-input-placeholder: #94a3b8;
+  --ee-auth-input-hover-border: #94a3b8;
+  --ee-auth-input-focus-border: var(--ee-brand, #6d28d9);
+  --ee-auth-input-focus-ring: rgba(109, 40, 217, 0.18);
   --ee-auth-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.08), 0 8px 16px -6px rgba(15, 23, 42, 0.04);
   --ee-auth-glow: radial-gradient(circle at 50% 0%, rgba(109, 40, 217, 0.12) 0%, rgba(255, 255, 255, 0) 65%);
 }
 
 [data-theme="dark"],
-body.dark {
+html[data-theme="dark"],
+body[data-theme="dark"],
+body.dark,
+html.dark,
+.dark {
+  --ee-bg: #0b0f17;
+  --ee-panel: #111827;
+  --ee-text: #f8fafc;
   --ee-auth-bg: #0b0f17;
   --ee-auth-panel: #111827;
-  --ee-auth-card-bg: rgba(17, 24, 39, 0.85);
-  --ee-auth-card-border: rgba(51, 65, 85, 0.7);
+  --ee-auth-card-bg: rgba(17, 24, 39, 0.92);
+  --ee-auth-card-border: rgba(51, 65, 85, 0.85);
   --ee-auth-text: #f8fafc;
   --ee-auth-text-muted: #94a3b8;
-  --ee-auth-input-bg: rgba(15, 23, 42, 0.6);
-  --ee-auth-input-border: #334155;
-  --ee-auth-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
-  --ee-auth-glow: radial-gradient(circle at 50% 0%, rgba(109, 40, 217, 0.22) 0%, rgba(11, 15, 23, 0) 70%);
+  --ee-auth-input-bg: #1e293b;
+  --ee-auth-input-border: #475569;
+  --ee-auth-input-text: #f8fafc;
+  --ee-auth-input-placeholder: #94a3b8;
+  --ee-auth-input-hover-border: #64748b;
+  --ee-auth-input-focus-border: var(--ee-brand, #a78bfa);
+  --ee-auth-input-focus-ring: rgba(167, 139, 250, 0.3);
+  --ee-auth-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+  --ee-auth-glow: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.25) 0%, rgba(11, 15, 23, 0) 70%);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme="light"]),
+  html:not([data-theme="light"]),
+  body:not([data-theme="light"]) {
+    --ee-bg: #0b0f17;
+    --ee-panel: #111827;
+    --ee-text: #f8fafc;
     --ee-auth-bg: #0b0f17;
     --ee-auth-panel: #111827;
-    --ee-auth-card-bg: rgba(17, 24, 39, 0.85);
-    --ee-auth-card-border: rgba(51, 65, 85, 0.7);
+    --ee-auth-card-bg: rgba(17, 24, 39, 0.92);
+    --ee-auth-card-border: rgba(51, 65, 85, 0.85);
     --ee-auth-text: #f8fafc;
     --ee-auth-text-muted: #94a3b8;
-    --ee-auth-input-bg: rgba(15, 23, 42, 0.6);
-    --ee-auth-input-border: #334155;
-    --ee-auth-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
-    --ee-auth-glow: radial-gradient(circle at 50% 0%, rgba(109, 40, 217, 0.22) 0%, rgba(11, 15, 23, 0) 70%);
+    --ee-auth-input-bg: #1e293b;
+    --ee-auth-input-border: #475569;
+    --ee-auth-input-text: #f8fafc;
+    --ee-auth-input-placeholder: #94a3b8;
+    --ee-auth-input-hover-border: #64748b;
+    --ee-auth-input-focus-border: var(--ee-brand, #a78bfa);
+    --ee-auth-input-focus-ring: rgba(167, 139, 250, 0.3);
+    --ee-auth-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+    --ee-auth-glow: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.25) 0%, rgba(11, 15, 23, 0) 70%);
   }
 }
 
@@ -51,10 +78,13 @@ body.ee-auth-page {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background-color: var(--ee-bg, var(--ee-auth-bg));
+  --ee-bg: var(--ee-auth-bg);
+  --ee-text: var(--ee-auth-text);
+  --ee-panel: var(--ee-auth-panel);
+  background-color: var(--ee-auth-bg, #f8fafc);
   background-image: var(--ee-auth-glow);
   background-attachment: fixed;
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text, #0f172a);
   font-family: var(--ee-font, var(--ee-font-body, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif));
   display: flex;
   flex-direction: column;
@@ -121,6 +151,7 @@ body.ee-auth-page #footer-subscribe {
   box-sizing: border-box;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   position: relative;
+  color: var(--ee-auth-text);
 }
 
 @media (max-width: 480px) {
@@ -164,7 +195,7 @@ body.ee-auth-page #footer-subscribe {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text);
   margin: 0 0 0.35rem 0;
 }
 
@@ -201,25 +232,33 @@ body.ee-auth-page #footer-subscribe {
 }
 
 .ee-auth-nav-tab:hover {
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text);
 }
 
 .ee-auth-nav-tab.active {
-  background: var(--ee-panel, #ffffff);
+  background: var(--ee-auth-panel, #ffffff);
   color: var(--ee-brand, #6d28d9);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="dark"] .ee-auth-nav-tab.active,
-body.dark .ee-auth-nav-tab.active {
-  background: rgba(30, 41, 59, 0.95);
+html[data-theme="dark"] .ee-auth-nav-tab.active,
+body[data-theme="dark"] .ee-auth-nav-tab.active,
+body.dark .ee-auth-nav-tab.active,
+html.dark .ee-auth-nav-tab.active,
+.dark .ee-auth-nav-tab.active {
+  background: #1e293b;
   color: #f8fafc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .ee-auth-nav-tab.active {
-    background: rgba(30, 41, 59, 0.95);
+  :root:not([data-theme="light"]) .ee-auth-nav-tab.active,
+  html:not([data-theme="light"]) .ee-auth-nav-tab.active,
+  body:not([data-theme="light"]) .ee-auth-nav-tab.active {
+    background: #1e293b;
     color: #f8fafc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -233,7 +272,7 @@ body.dark .ee-auth-nav-tab.active {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text, #0f172a);
   margin-bottom: 0.4rem;
 }
 
@@ -252,6 +291,18 @@ body.dark .ee-auth-nav-tab.active {
   transition: color 0.15s ease;
 }
 
+[data-theme="dark"] .ee-auth-forgot-link,
+body.dark .ee-auth-forgot-link,
+html.dark .ee-auth-forgot-link {
+  color: var(--ee-brand, #a78bfa);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ee-auth-forgot-link {
+    color: var(--ee-brand, #a78bfa);
+  }
+}
+
 .ee-auth-forgot-link:hover {
   text-decoration: underline;
   color: var(--ee-brand-hover, #5b21b6);
@@ -264,30 +315,64 @@ body.dark .ee-auth-nav-tab.active {
 }
 
 .ee-auth-input,
-.ee-auth-card input.form-control {
+.ee-auth-card input.form-control,
+.ee-auth-card input {
   width: 100%;
   height: 2.875rem;
   padding: 0 1rem;
   font-size: 0.9375rem;
   font-family: inherit;
-  color: var(--ee-text, var(--ee-auth-text));
-  background-color: var(--ee-auth-input-bg);
-  border: 1px solid var(--ee-auth-input-border);
+  color: var(--ee-auth-input-text, var(--ee-auth-text, #0f172a)) !important;
+  background-color: var(--ee-auth-input-bg, #ffffff) !important;
+  border: 1px solid var(--ee-auth-input-border, #cbd5e1) !important;
   border-radius: 0.75rem;
   box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
   outline: none;
 }
 
 .ee-auth-input-wrap .ee-auth-input,
-.ee-auth-input-wrap input.form-control {
+.ee-auth-input-wrap input.form-control,
+.ee-auth-input-wrap input {
   padding-right: 2.75rem;
 }
 
+.ee-auth-input:hover,
+.ee-auth-card input.form-control:hover,
+.ee-auth-card input:hover {
+  border-color: var(--ee-auth-input-hover-border, #94a3b8) !important;
+}
+
 .ee-auth-input:focus,
-.ee-auth-card input.form-control:focus {
-  border-color: var(--ee-brand, #6d28d9);
-  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+.ee-auth-card input.form-control:focus,
+.ee-auth-card input:focus {
+  border-color: var(--ee-auth-input-focus-border, var(--ee-brand, #6d28d9)) !important;
+  box-shadow: 0 0 0 3px var(--ee-auth-input-focus-ring, rgba(109, 40, 217, 0.2)) !important;
+  background-color: var(--ee-auth-input-bg, #ffffff) !important;
+  color: var(--ee-auth-input-text, var(--ee-auth-text, #0f172a)) !important;
+}
+
+/* Explicit Placeholder Styling with WCAG AA compliance and Firefox opacity reset */
+.ee-auth-input::placeholder,
+.ee-auth-card input.form-control::placeholder,
+.ee-auth-card input::placeholder {
+  color: var(--ee-auth-input-placeholder, #94a3b8) !important;
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+/* Cross-browser input autofill correction for dark & light mode */
+.ee-auth-input:-webkit-autofill,
+.ee-auth-input:-webkit-autofill:hover,
+.ee-auth-input:-webkit-autofill:focus,
+.ee-auth-card input.form-control:-webkit-autofill,
+.ee-auth-card input.form-control:-webkit-autofill:hover,
+.ee-auth-card input.form-control:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ee-auth-input-text, var(--ee-auth-text)) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--ee-auth-input-bg) inset !important;
+  box-shadow: 0 0 0px 1000px var(--ee-auth-input-bg) inset !important;
+  caret-color: var(--ee-auth-input-text, var(--ee-auth-text)) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .ee-password-toggle {
@@ -299,15 +384,17 @@ body.dark .ee-auth-nav-tab.active {
   border: none;
   cursor: pointer;
   padding: 0.25rem;
-  color: var(--ee-auth-text-muted);
+  color: var(--ee-auth-text-muted, #94a3b8);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
+  border-radius: 0.375rem;
 }
 
 .ee-password-toggle:hover {
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text, #f8fafc);
+  background: rgba(148, 163, 184, 0.15);
 }
 
 .ee-password-toggle svg {
@@ -360,7 +447,7 @@ body.dark .ee-auth-nav-tab.active {
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text, #0f172a);
   border: 1px solid var(--ee-auth-card-border);
   border-radius: 0.75rem;
   font-size: 0.875rem;
@@ -368,13 +455,14 @@ body.dark .ee-auth-nav-tab.active {
   font-family: inherit;
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   margin-top: 0.75rem;
 }
 
 .ee-auth-btn-secondary:hover {
-  background-color: rgba(148, 163, 184, 0.1);
-  border-color: var(--ee-auth-text-muted);
+  background-color: rgba(148, 163, 184, 0.12);
+  border-color: var(--ee-auth-input-border);
+  color: var(--ee-auth-text, #f8fafc);
 }
 
 /* Alert / Status Messages */
@@ -411,6 +499,27 @@ body.dark .ee-auth-nav-tab.active {
   color: #3b82f6;
 }
 
+/* Social Logins Dark Mode Adaptation */
+.ee-auth-card .social-logins p {
+  color: var(--ee-auth-text-muted);
+}
+
+.ee-auth-card .social-login-buttons .btn {
+  background: var(--ee-auth-input-bg);
+  border: 1px solid var(--ee-auth-input-border);
+  color: var(--ee-auth-text);
+  border-radius: 0.625rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.ee-auth-card .social-login-buttons .btn:hover {
+  border-color: var(--ee-auth-text-muted);
+  background: var(--ee-auth-card-bg);
+  color: var(--ee-auth-text);
+}
+
 /* Password Requirements Checklist */
 .ee-password-rules {
   margin: 1rem 0;
@@ -424,7 +533,7 @@ body.dark .ee-auth-nav-tab.active {
 .ee-password-rules-title {
   font-weight: 600;
   margin-bottom: 0.35rem;
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text, #0f172a);
 }
 
 .ee-password-rule-item {
@@ -464,7 +573,7 @@ body.dark .ee-auth-nav-tab.active {
   font-family: var(--ee-font-display, 'Outfit', sans-serif);
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--ee-text, var(--ee-auth-text));
+  color: var(--ee-auth-text, #0f172a);
   margin: 0 0 0.75rem 0;
 }
 
@@ -487,6 +596,75 @@ body.dark .ee-auth-nav-tab.active {
   width: auto;
   min-width: 160px;
   margin-top: 0;
+}
+
+/* Theme Toggle Button */
+.ee-auth-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: var(--ee-auth-card-bg);
+  border: 1px solid var(--ee-auth-card-border);
+  color: var(--ee-auth-text-muted);
+  box-shadow: var(--ee-auth-shadow);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.ee-auth-theme-toggle:hover {
+  color: var(--ee-auth-text);
+  border-color: var(--ee-auth-input-border);
+  transform: scale(1.05);
+}
+
+.ee-auth-theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.ee-auth-theme-toggle .ee-icon-sun {
+  display: none;
+}
+.ee-auth-theme-toggle .ee-icon-moon {
+  display: block;
+}
+
+[data-theme="dark"] .ee-auth-theme-toggle .ee-icon-sun,
+html[data-theme="dark"] .ee-auth-theme-toggle .ee-icon-sun,
+body[data-theme="dark"] .ee-auth-theme-toggle .ee-icon-sun,
+body.dark .ee-auth-theme-toggle .ee-icon-sun,
+html.dark .ee-auth-theme-toggle .ee-icon-sun,
+.dark .ee-auth-theme-toggle .ee-icon-sun {
+  display: block;
+}
+
+[data-theme="dark"] .ee-auth-theme-toggle .ee-icon-moon,
+html[data-theme="dark"] .ee-auth-theme-toggle .ee-icon-moon,
+body[data-theme="dark"] .ee-auth-theme-toggle .ee-icon-moon,
+body.dark .ee-auth-theme-toggle .ee-icon-moon,
+html.dark .ee-auth-theme-toggle .ee-icon-moon,
+.dark .ee-auth-theme-toggle .ee-icon-moon {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ee-auth-theme-toggle .ee-icon-sun,
+  html:not([data-theme="light"]) .ee-auth-theme-toggle .ee-icon-sun,
+  body:not([data-theme="light"]) .ee-auth-theme-toggle .ee-icon-sun {
+    display: block;
+  }
+  :root:not([data-theme="light"]) .ee-auth-theme-toggle .ee-icon-moon,
+  html:not([data-theme="light"]) .ee-auth-theme-toggle .ee-icon-moon,
+  body:not([data-theme="light"]) .ee-auth-theme-toggle .ee-icon-moon {
+    display: none;
+  }
 }
 
 /* Footer & White-Label Chrome */

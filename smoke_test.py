@@ -664,7 +664,29 @@ def test_login_white_label_suite():
         print("  ✗ Base site website context verification failed")
         return False
 
-    print("  ✓ All 6 auth/system templates and white-label context verified")
+    # 5. Verify dark mode high-contrast inputs and theme toggle
+    css_text = css_file.read_text(encoding="utf-8")
+    js_text = js_file.read_text(encoding="utf-8")
+    for req_token in ["--ee-auth-input-text:", "--ee-auth-input-placeholder:", "--ee-auth-input-bg: #1e293b;", "::placeholder", "-webkit-autofill"]:
+        if req_token not in css_text:
+            print(f"  ✗ ee-auth.css missing dark mode contrast token/rule: {req_token}")
+            return False
+    if "setupTheme" not in js_text or "ee-auth-theme-toggle" not in js_text:
+        print("  ✗ ee-auth.js missing theme toggle/sync implementation")
+        return False
+
+    # 6. Verify full-site dark mode tokens and storefront dark theme contrast
+    wl_css = (app_root / "public" / "css" / "ee-white-label.css").read_text(encoding="utf-8")
+    tenant_home = (app_root / "www" / "tenant_home.html").read_text(encoding="utf-8")
+    for wl_token in ["--ee-bg: #0b0f17;", "--ee-panel: #111827;", "--ee-border: #334155;", "--ee-input-bg: #1e293b;", "--ee-input-border: #475569;", ".form-control"]:
+        if wl_token not in wl_css:
+            print(f"  ✗ ee-white-label.css missing full-site dark token: {wl_token}")
+            return False
+    if "data-theme=\"dark\"] .ee-form-card" not in tenant_home or "background-color: #0b0f17;" not in tenant_home:
+        print("  ✗ tenant_home.html missing dark theme styles")
+        return False
+
+    print("  ✓ All 6 auth/system templates, white-label context, and dark mode contrast verified")
     return True
 
 

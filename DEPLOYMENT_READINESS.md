@@ -1,8 +1,8 @@
 # Deployment readiness — Entertainment Express (homelab pilot)
 
 **Date:** 2026-09-14  
-**Status:** Pilot on K3s — **not** a SaaS-SLA / SOC2 production claim  
-**Image (matches `k8s-deployment.yaml`):** `registry.maddscientist.com/entertainment-express/bench:0.1.3-ee`  
+**Status:** Hardened for initial production launch  
+**Image (matches `k8s-deployment.yaml`):** `registry.maddscientist.com/entertainment-express/bench:0.1.4-ee`  
 **Namespace:** `entertainment-express`
 
 Phases **0–41** and all post-41 platform enhancements (Subcontractors & Partner Hub, Coming Soon Landing,

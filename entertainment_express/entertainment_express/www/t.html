@@ -1,11 +1,11 @@
 {% extends "templates/web.html" %}
 {% block page_content %}
-<div id="ee-track" style="max-width:28rem;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif">
-  <h1 style="margin-top:0">Live ETA</h1>
-  <p id="ee-event" style="color:#555"></p>
-  <p id="ee-eta" style="font-size:2rem;font-weight:700;margin:0.5rem 0"></p>
-  <p id="ee-status" style="color:#57534e"></p>
-  <p id="ee-error" style="color:#b91c1c"></p>
+<div id="ee-track" style="max-width:28rem;margin:2rem auto;padding:1.5rem;font-family:system-ui,-apple-system,sans-serif;background:var(--ee-panel,#ffffff);border:1px solid var(--ee-border,#e2e8f0);border-radius:12px;color:var(--ee-text,#0f172a);box-shadow:0 4px 12px rgba(0,0,0,0.05)">
+  <h1 style="margin-top:0;color:var(--ee-text,#0f172a)">Live ETA</h1>
+  <p id="ee-event" style="color:var(--ee-text-secondary,#475569)"></p>
+  <p id="ee-eta" style="font-size:2rem;font-weight:700;margin:0.5rem 0;color:var(--ee-brand,#0f766e)"></p>
+  <p id="ee-status" style="color:var(--ee-muted,#64748b)"></p>
+  <p id="ee-error" style="color:var(--ee-danger,#b91c1c)"></p>
 </div>
 <script>
 (function(){
