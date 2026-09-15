@@ -25,9 +25,11 @@ import {
 import {
   DollarSign, TrendingUp, CreditCard, ArrowDownRight,
   Download, Send, RotateCcw, Plus, CheckCircle2, Shield,
-  Sliders, AlertTriangle, PieChart
+  Sliders, AlertTriangle, PieChart, Receipt
 } from "lucide-react";
 import { EventPLDrawer } from "./components/EventPLDrawer";
+import { ReceiptScannerDrawer } from "./components/ReceiptScannerDrawer";
+import { DunningReviewDrawer } from "./components/DunningReviewDrawer";
 
 export const MoneyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -42,6 +44,8 @@ export const MoneyPage: React.FC = () => {
 
   // Job costing drawer state
   const [plDrawerBookingId, setPlDrawerBookingId] = useState<string | null>(null);
+  const [receiptScannerOpen, setReceiptScannerOpen] = useState(false);
+  const [dunningDrawerOpen, setDunningDrawerOpen] = useState(false);
 
   // Pay run builder state
   const [fromDate, setFromDate] = useState("");
@@ -514,7 +518,23 @@ export const MoneyPage: React.FC = () => {
             Track cashflow, manage client invoices, run talent payroll, and review deposits.
           </p>
         </div>
-        <div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            density="cockpit"
+            onClick={() => setReceiptScannerOpen(true)}
+            leftIcon={<Receipt className="w-3.5 h-3.5 text-[var(--ee-brand)]" />}
+          >
+            Scan Receipt
+          </Button>
+          <Button
+            variant="secondary"
+            density="cockpit"
+            onClick={() => setDunningDrawerOpen(true)}
+            leftIcon={<Send className="w-3.5 h-3.5 text-[var(--ee-brand)]" />}
+          >
+            AR Dunning Agent
+          </Button>
           <Button
             variant="primary"
             density="cockpit"
@@ -543,6 +563,17 @@ export const MoneyPage: React.FC = () => {
         isOpen={!!plDrawerBookingId}
         onClose={() => setPlDrawerBookingId(null)}
         onTargetUpdated={loadData}
+      />
+
+      <ReceiptScannerDrawer
+        isOpen={receiptScannerOpen}
+        onClose={() => setReceiptScannerOpen(false)}
+        onClaimCreated={loadData}
+      />
+
+      <DunningReviewDrawer
+        isOpen={dunningDrawerOpen}
+        onClose={() => setDunningDrawerOpen(false)}
       />
     </div>
   );

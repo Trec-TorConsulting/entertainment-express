@@ -20,9 +20,10 @@ import {
 import {
   Clock, MapPin, Play, Square,
   AlertTriangle, MessageSquare, ExternalLink, Calendar,
-  ChevronRight, Briefcase, CreditCard
+  ChevronRight, Briefcase, CreditCard, Camera
 } from "lucide-react";
 import { PosCheckoutDrawer } from "./PosCheckoutDrawer";
+import { VanInspectionModal } from "./VanInspectionModal";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -51,6 +52,7 @@ export const MyDayPage: React.FC = () => {
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [posDrawerOpen, setPosDrawerOpen] = useState(false);
   const [selectedPosJob, setSelectedPosJob] = useState<any>(null);
+  const [vanModalOpen, setVanModalOpen] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -291,6 +293,16 @@ export const MyDayPage: React.FC = () => {
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 type="button"
+                onClick={() => setVanModalOpen(true)}
+                className="h-14 sm:h-12 px-4 rounded-xl border border-[var(--ee-brand)]/30 bg-[var(--ee-brand)]/10 text-[var(--ee-brand)] hover:bg-[var(--ee-brand)]/20 font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm"
+              >
+                <Camera className="w-4 h-4" />
+                Van Eye
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
                 onClick={() => toast({ title: "Incident Reporter", description: "Form loaded. Field supervisors alerted.", variant: "default" })}
                 className="h-14 sm:h-12 px-4 rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface-base)] text-[var(--ee-text)] hover:bg-[var(--ee-surface-inset)] hover:border-[var(--ee-border-strong)] font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
@@ -396,6 +408,13 @@ export const MyDayPage: React.FC = () => {
         onClose={() => setPosDrawerOpen(false)}
         booking={selectedPosJob || nextAssignment}
         onPaymentComplete={loadData}
+      />
+
+      <VanInspectionModal
+        isOpen={vanModalOpen}
+        onClose={() => setVanModalOpen(false)}
+        bookingId={nextAssignment?.booking || "BK-2026-00042"}
+        eventName={nextAssignment?.event_name || "Active Event Job"}
       />
     </motion.div>
   );
