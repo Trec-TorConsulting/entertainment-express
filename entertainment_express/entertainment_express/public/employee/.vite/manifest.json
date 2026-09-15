@@ -6,22 +6,15 @@
       "src/main.tsx"
     ]
   },
-  "_PageHeader-BM41uyXY.js": {
-    "file": "chunks/PageHeader-BM41uyXY.js",
-    "name": "PageHeader",
-    "imports": [
-      "src/main.tsx"
-    ]
-  },
-  "_sparkles-CsKgCmAz.js": {
-    "file": "chunks/sparkles-CsKgCmAz.js",
+  "_sparkles-CiWIWp5z.js": {
+    "file": "chunks/sparkles-CiWIWp5z.js",
     "name": "sparkles",
     "imports": [
       "src/main.tsx"
     ]
   },
   "src/AppLegacy.tsx": {
-    "file": "chunks/AppLegacy-jM0iDsGV.js",
+    "file": "chunks/AppLegacy-D1m0FeCO.js",
     "name": "AppLegacy",
     "src": "src/AppLegacy.tsx",
     "isDynamicEntry": true,
@@ -31,36 +24,34 @@
     ]
   },
   "src/app/routes/dispatch/DispatchEmbedPage.tsx": {
-    "file": "chunks/DispatchEmbedPage-Dej7OoUC.js",
+    "file": "chunks/DispatchEmbedPage-BxyekGOG.js",
     "name": "DispatchEmbedPage",
     "src": "src/app/routes/dispatch/DispatchEmbedPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_PageHeader-BM41uyXY.js",
-      "_EmptyState-BpnsgzkI.js",
-      "_sparkles-CsKgCmAz.js"
+      "_sparkles-CiWIWp5z.js",
+      "_EmptyState-BpnsgzkI.js"
     ]
   },
   "src/app/routes/earnings/MyEarningsPage.tsx": {
-    "file": "chunks/MyEarningsPage-CmLjyjTc.js",
+    "file": "chunks/MyEarningsPage-DTaTOeUk.js",
     "name": "MyEarningsPage",
     "src": "src/app/routes/earnings/MyEarningsPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_PageHeader-BM41uyXY.js",
-      "_sparkles-CsKgCmAz.js"
+      "_sparkles-CiWIWp5z.js"
     ]
   },
   "src/app/routes/today/MyDayPage.tsx": {
-    "file": "chunks/MyDayPage-BEo5Dp-T.js",
+    "file": "chunks/MyDayPage-C9ly5x_d.js",
     "name": "MyDayPage",
     "src": "src/app/routes/today/MyDayPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_PageHeader-BM41uyXY.js",
+      "_sparkles-CiWIWp5z.js",
       "_EmptyState-BpnsgzkI.js"
     ]
   },
