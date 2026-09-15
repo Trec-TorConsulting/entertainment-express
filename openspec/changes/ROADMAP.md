@@ -418,15 +418,15 @@ entitlement enforcement.
 **Specs:** `asset-lifecycle-safety-maintenance` (new), `equipment-inventory-fleet`, `mobile-field-app`, `owner-portal`.
 **Folder:** [`archive/2026-09-14-asset-lifecycle-safety-maintenance/`](archive/2026-09-14-asset-lifecycle-safety-maintenance/)
 
-### Logistics, Production BOMs & Van Warehouses 📝 active
+### Logistics, Production BOMs & Van Warehouses ✅ archived 2026-09-14
 **Goal:** Multi-tier production BOM kitting, "Van-as-a-Warehouse" rolling inventory tracking, barcode scan load-out and check-in, automated missing gear reconciliation, and one-click sub-rental purchase order procurement.
 **Specs:** `logistics-bom-van-warehouses` (new), `equipment-inventory-fleet`, `vendor-network`, `mobile-field-app`, `owner-portal`.
-**Folder:** [`logistics-bom-van-warehouses/`](logistics-bom-van-warehouses/)
+**Folder:** [`archive/2026-09-14-logistics-bom-van-warehouses/`](archive/2026-09-14-logistics-bom-van-warehouses/)
 
-### Gig Payroll, Commissions & Digital Tip Splitting 📝 active
+### Gig Payroll, Commissions & Digital Tip Splitting ✅ archived 2026-09-14
 **Goal:** Multi-tiered gig rate cards, automated sales commission engine on invoice payment, digital tip pool aggregation and algorithmic splitting (Equal, Hours-Weighted, Lead-Weighted), and single-click ERPNext payroll batch compilation with worker transparency in `/employee`.
 **Specs:** `gig-payroll-commission-tips` (new), `hr-workforce`, `billing-payments`, `owner-portal`, `employee-portal`.
-**Folder:** [`gig-payroll-commission-tips/`](gig-payroll-commission-tips/)
+**Folder:** [`archive/2026-09-14-gig-payroll-commission-tips/`](archive/2026-09-14-gig-payroll-commission-tips/)
 
 ---
 

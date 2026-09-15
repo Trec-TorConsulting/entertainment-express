@@ -22,6 +22,8 @@ import {
 import { SubOutModal } from "../subcontractors/SubOutModal";
 import { EventPLDrawer } from "../money/components/EventPLDrawer";
 import { SubRentalTracker } from "./SubRentalTracker";
+import { SmartQuoteModal } from "./SmartQuoteModal";
+import { Zap } from "lucide-react";
 
 const STAGES = [
   { id: "inquiry", label: "Inquiry" },
@@ -46,6 +48,7 @@ export const PipelinePage: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [plDrawerBookingId, setPlDrawerBookingId] = useState<string | null>(null);
+  const [smartQuoteOpen, setSmartQuoteOpen] = useState(false);
 
   const reload = async () => {
     try {
@@ -161,6 +164,14 @@ export const PipelinePage: React.FC = () => {
           <Badge variant="brand" size="sm">
             {inquiries.length} Active Deals
           </Badge>
+          <Button
+            variant="secondary"
+            density="cockpit"
+            onClick={() => setSmartQuoteOpen(true)}
+            leftIcon={<Zap className="w-3.5 h-3.5 text-[var(--ee-brand)]" />}
+          >
+            AI Smart Quote
+          </Button>
           <Button
             variant="primary"
             density="cockpit"
@@ -482,6 +493,13 @@ export const PipelinePage: React.FC = () => {
         isOpen={!!plDrawerBookingId}
         onClose={() => setPlDrawerBookingId(null)}
         onTargetUpdated={reload}
+      />
+      <SmartQuoteModal
+        isOpen={smartQuoteOpen}
+        onClose={() => setSmartQuoteOpen(false)}
+        defaultCustomer={selectedInquiry?.client_name || selectedInquiry?.party || ""}
+        defaultInquiryText={selectedInquiry?.notes || selectedInquiry?.description || ""}
+        onQuoteDispatched={reload}
       />
     </div>
   );

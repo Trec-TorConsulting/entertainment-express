@@ -1,0 +1,129 @@
+{
+  "actions": [],
+  "creation": "2026-09-15 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "reader_name",
+    "stripe_reader_id",
+    "device_type",
+    "connection_type",
+    "status",
+    "column_break_1",
+    "serial_number",
+    "assigned_crew",
+    "assigned_vehicle",
+    "location_id",
+    "battery_level"
+  ],
+  "fields": [
+    {
+      "fieldname": "reader_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Reader Name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "stripe_reader_id",
+      "fieldtype": "Data",
+      "label": "Stripe Reader ID"
+    },
+    {
+      "default": "stripe_reader_m2",
+      "fieldname": "device_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Device Type",
+      "options": "stripe_reader_m2\nbbpos_wisepos_e\nbbpos_chipper_2x\nother"
+    },
+    {
+      "default": "Bluetooth",
+      "fieldname": "connection_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Connection Type",
+      "options": "Bluetooth\nCloud/WiFi"
+    },
+    {
+      "default": "Offline",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "Offline\nOnline\nIn Use"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "serial_number",
+      "fieldtype": "Data",
+      "label": "Serial Number"
+    },
+    {
+      "fieldname": "assigned_crew",
+      "fieldtype": "Link",
+      "label": "Assigned Crew",
+      "options": "Employee"
+    },
+    {
+      "fieldname": "assigned_vehicle",
+      "fieldtype": "Link",
+      "label": "Assigned Vehicle",
+      "options": "Vehicle"
+    },
+    {
+      "fieldname": "location_id",
+      "fieldtype": "Data",
+      "label": "Stripe Location ID"
+    },
+    {
+      "fieldname": "battery_level",
+      "fieldtype": "Percent",
+      "label": "Battery Level"
+    }
+  ],
+  "istable": 0,
+  "modified": "2026-09-15 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Billing Payments",
+  "name": "EE Terminal Reader",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "export": 1,
+      "read": 1,
+      "role": "EE Tenant Admin",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "export": 1,
+      "read": 1,
+      "role": "System Manager",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "role": "EE Dispatcher",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "role": "EE Crew",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "role": "EE Accounting",
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}

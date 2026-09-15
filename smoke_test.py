@@ -130,6 +130,18 @@ def test_api_imports():
         "api.dispatch",
         "api.hr_workforce",
         "api.portal_hr",
+        "api.company_setup",
+        "api.owner_admin",
+        "api.owner_overrides",
+        "api.ai_expense_scanner",
+        "api.ai_dunning",
+        "api.ai_smart_quote",
+        "api.ai_bank_recon",
+        "api.emergency_dispatch",
+        "api.vision_van_inspection",
+        "api.voice_receptionist",
+        "api.dynamic_pricing",
+        "api.review_interceptor",
     ]
     
     for mod in modules:
@@ -446,6 +458,126 @@ def test_gig_payroll_suite():
             print("  ⊘ Skipped (pytest not installed in this interpreter)")
             return True
         print("  ✗ Gig payroll suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+def test_terminal_pos_suite():
+    """Run Stripe Terminal POS hardware & in-person payment unit tests."""
+    print("✓ Testing Stripe Terminal POS & In-Person Payments suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_terminal_pos.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Terminal POS suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+def test_owner_portal_parity_suite():
+    """Run Owner Portal Complete Parity unit tests (Company Studio, Master Explorer, Overrides)."""
+    print("✓ Testing Owner Portal Complete Parity suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_owner_portal_parity.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Owner Portal Parity suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+def test_ai_owner_in_the_box_suite():
+    """Run AI Owner In-The-Box (ERP Intelligence) unit tests."""
+    print("✓ Testing AI Owner In-The-Box (ERP Intelligence) suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_ai_owner_in_the_box.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ AI Owner In-The-Box suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+def test_ai_owner_out_of_the_box_suite():
+    """Run AI Owner Out-Of-The-Box (Autonomous Operations) unit tests."""
+    print("✓ Testing AI Owner Out-Of-The-Box (Autonomous Operations) suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_ai_owner_out_of_the_box.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ AI Owner Out-Of-The-Box suite failed")
         print((result.stdout or "").strip())
         print((result.stderr or "").strip())
         return False
@@ -917,6 +1049,10 @@ def main():
         test_fleet_maintenance_suite,
         test_van_logistics_suite,
         test_gig_payroll_suite,
+        test_terminal_pos_suite,
+        test_owner_portal_parity_suite,
+        test_ai_owner_in_the_box_suite,
+        test_ai_owner_out_of_the_box_suite,
         test_coming_soon_suite,
         test_virtual_dj_suite,
         test_phase41_marketing_routes,

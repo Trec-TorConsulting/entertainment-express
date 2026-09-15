@@ -20,8 +20,10 @@ import {
 import {
   Clock, MapPin, Play, Square,
   AlertTriangle, MessageSquare, ExternalLink, Calendar,
-  ChevronRight, Briefcase
+  ChevronRight, Briefcase, CreditCard, Camera
 } from "lucide-react";
+import { PosCheckoutDrawer } from "./PosCheckoutDrawer";
+import { VanInspectionModal } from "./VanInspectionModal";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,6 +50,9 @@ export const MyDayPage: React.FC = () => {
   const [clockInTime, setClockInTime] = useState<Date | null>(null);
   const [shiftElapsed, setShiftElapsed] = useState("00:00:00");
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [posDrawerOpen, setPosDrawerOpen] = useState(false);
+  const [selectedPosJob, setSelectedPosJob] = useState<any>(null);
+  const [vanModalOpen, setVanModalOpen] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -248,7 +253,7 @@ export const MyDayPage: React.FC = () => {
             </div>
 
             {/* Huge, Thumb-Friendly Shift Action Buttons for Mobile */}
-            <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="pt-2 grid grid-cols-2 sm:grid-cols-4 gap-3">
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 type="button"
@@ -262,7 +267,7 @@ export const MyDayPage: React.FC = () => {
                 {clockedIn ? (
                   <>
                     <Square className="w-5 h-5 fill-current" />
-                    Clock Out Now
+                    Clock Out
                   </>
                 ) : (
                   <>
@@ -275,11 +280,34 @@ export const MyDayPage: React.FC = () => {
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 type="button"
+                onClick={() => {
+                  setSelectedPosJob(nextAssignment);
+                  setPosDrawerOpen(true);
+                }}
+                className="h-14 sm:h-12 px-4 rounded-xl border border-emerald-500/30 bg-emerald-950/30 text-emerald-400 hover:bg-emerald-950/50 hover:border-emerald-500/60 font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm"
+              >
+                <CreditCard className="w-4 h-4 text-emerald-400" />
+                POS Pay
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => setVanModalOpen(true)}
+                className="h-14 sm:h-12 px-4 rounded-xl border border-[var(--ee-brand)]/30 bg-[var(--ee-brand)]/10 text-[var(--ee-brand)] hover:bg-[var(--ee-brand)]/20 font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm"
+              >
+                <Camera className="w-4 h-4" />
+                Van Eye
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
                 onClick={() => toast({ title: "Incident Reporter", description: "Form loaded. Field supervisors alerted.", variant: "default" })}
                 className="h-14 sm:h-12 px-4 rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface-base)] text-[var(--ee-text)] hover:bg-[var(--ee-surface-inset)] hover:border-[var(--ee-border-strong)] font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
                 <AlertTriangle className="w-4 h-4 text-[var(--ee-warning)]" />
-                Incident Log
+                Incident
               </motion.button>
 
               <motion.button
@@ -289,7 +317,7 @@ export const MyDayPage: React.FC = () => {
                 className="h-14 sm:h-12 px-4 rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface-base)] text-[var(--ee-text)] hover:bg-[var(--ee-surface-inset)] hover:border-[var(--ee-border-strong)] font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
                 <MessageSquare className="w-4 h-4 text-[var(--ee-brand)]" />
-                Crew Chat
+                Chat
               </motion.button>
             </div>
           </CardContent>
@@ -374,6 +402,20 @@ export const MyDayPage: React.FC = () => {
           <EmptyState title="No Shifts Assigned" description="You have no assigned shifts for today. Check the dispatch board for open roles." />
         )}
       </motion.div>
+
+      <PosCheckoutDrawer
+        isOpen={posDrawerOpen}
+        onClose={() => setPosDrawerOpen(false)}
+        booking={selectedPosJob || nextAssignment}
+        onPaymentComplete={loadData}
+      />
+
+      <VanInspectionModal
+        isOpen={vanModalOpen}
+        onClose={() => setVanModalOpen(false)}
+        bookingId={nextAssignment?.booking || "BK-2026-00042"}
+        eventName={nextAssignment?.event_name || "Active Event Job"}
+      />
     </motion.div>
   );
 };
