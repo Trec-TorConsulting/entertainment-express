@@ -44,6 +44,14 @@ FAQ_ITEMS = [
         "question": "How does data migration work?",
         "answer": "We offer 1-click automated import presets for Inflatable Office, Goodshuffle Pro, DJ Event Planner, and standard CSV spreadsheets. On the Scale tier, our team provides white-glove concierge migration.",
     },
+    {
+        "question": "What card readers work with the PWA Mobile POS?",
+        "answer": "Entertainment Express pairs natively with Stripe Terminal hardware, including the Stripe Reader M2 (Bluetooth) and WisePOS E (WiFi/smart reader). Field crew can accept chip, tap, Apple Pay, and Google Pay directly on their phones with automatic tip pooling and instant digital receipts.",
+    },
+    {
+        "question": "How do AI Financial Intelligence and Autonomous Operations work?",
+        "answer": "On Pro and Scale, our In-The-Box AI handles receipt photo OCR expense claims, 60-second instant lead quotes, and autonomous overdue AR dunning. On Scale, our Out-Of-The-Box engine adds emergency dispatch copilot broadcasts, computer vision Smart Van Eye truck inspections, and 24/7 Twilio Voice phone reception.",
+    },
 ]
 
 FEATURE_MATRIX = [
@@ -65,11 +73,26 @@ FEATURE_MATRIX = [
         ],
     },
     {
-        "category": "Automation & Tools",
+        "category": "Payments & Field Hardware",
+        "features": [
+            {"label": "Direct Stripe & Online Invoicing", "key": "online_invoicing", "starter": "Yes", "pro": "Yes", "scale": "Yes"},
+            {"label": "PWA Mobile POS & Card Readers", "key": "stripe_pos", "starter": "Online only", "pro": "Yes (Stripe Terminal)", "scale": "Yes (Unlimited Readers)"},
+            {"label": "Digital Tip Splitting & Payroll Pool", "key": "tip_pooling", "starter": "Basic", "pro": "Yes", "scale": "Yes"},
+            {"label": "Company Studio & Full Owner Parity", "key": "owner_parity", "starter": "Yes", "pro": "Yes", "scale": "Yes (Full Parity)"},
+        ],
+    },
+    {
+        "category": "Automation & Intelligence",
         "features": [
             {"label": "Weather Risk & Rain-Dates", "key": "weather_risk", "starter": "No", "pro": "Yes", "scale": "Yes"},
+            {"label": "Autonomous AR Dunning Agent", "key": "ar_dunning", "starter": "No", "pro": "Yes", "scale": "Yes"},
+            {"label": "Multimodal Receipt OCR Expenses", "key": "receipt_ocr", "starter": "No", "pro": "Yes", "scale": "Yes"},
+            {"label": "60-Second Instant Quoting AI", "key": "instant_quoting", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "SMS Client & Crew Reminders", "key": "sms_enabled", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Serato & Rekordbox DJ Export", "key": "playlist_export", "starter": "No", "pro": "Yes", "scale": "Yes"},
+            {"label": "Autonomous Emergency Dispatch Copilot", "key": "dispatch_copilot", "starter": "No", "pro": "No", "scale": "Yes"},
+            {"label": "Computer Vision Smart Van Eye", "key": "smart_van_eye", "starter": "No", "pro": "No", "scale": "Yes"},
+            {"label": "24/7 AI Voice Phone Receptionist", "key": "voice_receptionist", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "Smart Operations Assistant", "key": "ai_assistant", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "Partner Overflow Exchange", "key": "overflow_exchange", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "Concierge Onboarding & Migration", "key": "concierge_migration", "starter": "Self-serve", "pro": "Self-serve", "scale": "Dedicated Agent"},
@@ -98,7 +121,7 @@ PLAN_DETAILS = {
             {"title": "3 Active Rolling Bookings", "desc": "Keep upcoming weekend contracts active"},
             {"title": "Self-Service Client Portal", "desc": "Clients sign contracts & pay deposits online 24/7"},
             {"title": "Direct Stripe Payments", "desc": "Card & ACH deposits straight to your bank account"},
-            {"title": "Digital Contracts & Waivers", "desc": "Legally protect your gear with signature audit logs"},
+            {"title": "Company Studio Parity", "desc": "Full /owner tax rules, ledgers & master data with zero backend menus"},
             {"title": "Mobile Run Sheets", "desc": "Check load lists & gig details right on your phone"},
         ],
     },
@@ -125,11 +148,13 @@ PLAN_DETAILS = {
         "key_benefits": [
             {"title": "Up to 5 Crew & Staff Accounts", "desc": "Dedicated logins for lead DJs, drivers & setup techs"},
             {"title": "Unlimited Bookings & Calendar", "desc": "Say yes to every Saturday gig without hitting limits"},
+            {"title": "PWA Stripe Terminal POS", "desc": "In-person chip, tap, and Apple Pay on crew phones with tip pooling"},
             {"title": "Drag & Drop Crew Dispatch", "desc": "Visual truck load planning with conflict alerts"},
             {"title": "Smart Weather & Rain-Date Alerts", "desc": "Automated radar warnings & rain reschedule links"},
+            {"title": "Autonomous AR Dunning & AI OCR", "desc": "Multi-channel overdue reminder links & receipt photo expense claims"},
+            {"title": "60-Second Instant Lead Quoting", "desc": "Convert high-value inquiries into signed bookings in 1 minute"},
             {"title": "White-Label & Custom Domain", "desc": "Your logo, your custom URL (e.g. portal.yourbrand.com)"},
             {"title": "Serato & Rekordbox DJ Export", "desc": "1-click playlist sync from client song requests"},
-            {"title": "Automated SMS Reminders", "desc": "Zero client no-shows and automatic balance payment chasing"},
             {"title": "15 GB Cloud Storage", "desc": "Event photos, signed waivers, insurance COIs, and riders"},
         ],
     },
@@ -140,7 +165,7 @@ PLAN_DETAILS = {
         "icon": "🚀",
         "badge_text": "Enterprise Production",
         "badge_variant": "scale",
-        "summary": "Enterprise-grade logistics with AI dispatch optimization, partner overflow exchange, and dedicated concierge onboarding.",
+        "summary": "Enterprise-grade logistics with autonomous dispatch optimization, Smart Van Eye computer vision, 24/7 voice AI, and dedicated concierge onboarding.",
         "cta_label": "Start 14-Day Free Scale Trial",
         "cta_subtext": "Full enterprise access • White-glove concierge migration",
         "monthly_subtext": "Billed monthly • Priority support included",
@@ -154,11 +179,14 @@ PLAN_DETAILS = {
         },
         "key_benefits": [
             {"title": "Unlimited Staff, Crew & Trucks", "desc": "Never pay per-seat penalties as your team expands"},
-            {"title": "Smart Operations Assistant", "desc": "Smart email drafting, venue rule summaries & schedule buffering"},
+            {"title": "Autonomous Dispatch Copilot", "desc": "Self-healing emergency shift broadcasts and 1-click crew replacements"},
+            {"title": "Computer Vision Smart Van Eye", "desc": "Camera load verification and automated return damage quarantine"},
+            {"title": "24/7 AI Voice Phone Receptionist", "desc": "Twilio Voice AI answers inbound inquiries and quotes packages"},
+            {"title": "Dynamic Surge & Yield Pricing", "desc": "Automated pricing rules that capture peak-date weekend premiums"},
+            {"title": "AI Review Interceptor", "desc": "Directs happy guests to Google Reviews while capturing issues privately"},
             {"title": "Partner Overflow Exchange", "desc": "Pass overflow gigs to vetted peer partners & earn booking fees"},
             {"title": "White-Glove Concierge Migration", "desc": "Our team imports your data from Goodshuffle, IO, or DJEP"},
             {"title": "100 GB Cloud Storage", "desc": "High-resolution media, inspection checklists, and archival data"},
-            {"title": "Dedicated Priority Ops Agent", "desc": "Direct phone & Slack bridge with our engineering team"},
         ],
     },
 }

@@ -12,11 +12,12 @@ Entertainment Express is a **site-per-tenant** Frappe/[ERPNext](https://erpnext.
 company is one Frappe site with its own MariaDB database. A shared gunicorn/RQ/scheduler tier serves
 every site; the request host selects the tenant (`dns_multitenant`).
 
-This repo is an enterprise-grade Frappe application and deployment platform. All roadmap phases **0–41**
-and platform enhancements (Subcontractor Jobs, Coming Soon Landing, Tenant Website Builder, Client Portal Overhaul,
-Atomix VirtualDJ Integration & AI Virtual DJ Suite) are fully implemented and verified
-(archived under `openspec/changes/archive/`). Live image tag in [`k8s-deployment.yaml`](k8s-deployment.yaml)
-is **`0.1.4-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
+This repo is an enterprise-grade Frappe application and deployment platform. All roadmap phases **0–41**,
+platform enhancements (Subcontractor Jobs, Coming Soon Landing, Tenant Website Builder, Client Portal Overhaul,
+Atomix VirtualDJ Integration & AI Virtual DJ Suite), and flagship modules (PWA Stripe Terminal POS Hardware,
+Complete Owner Portal Parity, AI Financial Intelligence In-The-Box, and Autonomous Event Operations Out-Of-The-Box)
+are fully implemented and verified (archived under `openspec/changes/archive/`). Live image tag in
+[`k8s-deployment.yaml`](k8s-deployment.yaml) is **`0.1.8-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 
@@ -26,8 +27,12 @@ is **`0.1.4-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOY
 |---|---|
 | **Control plane** | Operator site at `admin.<domain>` — self-service signup, 3-tier plans (Starter / Pro / Scale), entitlement enforcement, provisioning jobs, tenant lifecycle. |
 | **Marketing front door** | `www.<domain>` public acquisition engine — SEO-optimized vertical pages, competitor comparisons, interactive showcase, blog/resource center, and operator-configurable Coming Soon teaser mode with early-access waitlist. |
-| **CRM & Booking** | Event bookings, holds, catalog at `/book` and `/catalog`, interactive proposals, contracts, and conflict detection. |
+| **CRM & Booking** | Event bookings, holds, catalog at `/book` and `/catalog`, interactive proposals, contracts, conflict detection, and 60-second AI instant quoting. |
+| **PWA Mobile POS & Hardware** | Stripe Terminal Bluetooth/network reader pairing (Stripe Reader M2 / WisePOS E) on crew phones — in-person chip/tap/swipe/Apple Pay, on-site overtime add-ons, digital tip splitting, automated payroll tip pool compiler, and instant SMS receipts. |
 | **Scheduling & dispatch** | Crew assignment, automated suggestions, run sheets, equipment checklists, site-fit logistics, load planning, and live client ETA tracking. |
+| **Autonomous Operations (Out-Of-The-Box)** | Autonomous Emergency Dispatch Copilot (1-click replacement finding & SMS shift broadcasts), Computer Vision Smart Van Eye (dock/van load verification & damage quarantine), 24/7 AI Voice Phone Receptionist (Twilio Voice agent), dynamic surge pricing, and AI review interception. |
+| **AI Financial Intelligence (In-The-Box)** | Multimodal receipt OCR expense claims linked to event Cost Centers, Autonomous AR Dunning Agent with 1-click Stripe payment links, automated bank payout reconciliation, and job-level gross margin tracking. |
+| **Owner Portal Parity & Company Studio** | 100% ERPNext parity at `/owner` without needing backend `/app`: Company Studio (tax templates, Chart of Accounts mappings, company defaults), Schema-Driven Master Data Explorer across 12 core business entities, and Emergency Override Center with strict audit logging. |
 | **Subcontractor Jobs** | External partner registry, automated margin calculation, white-label gig packets, and external tokenized offer accept/decline workflows. |
 | **Workforce** | Roster, worker availability, compliance docs (COI/W-9), timesheets, pay runs, and field checklists. |
 | **Equipment & Fleet** | Asset registry, QR/barcode check-in/out, consumable stock, maintenance logs, and vehicle weight-aware load planning. |
@@ -37,7 +42,7 @@ is **`0.1.4-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOY
 | **Tenant Website Builder** | In-portal visual Website Builder at `/owner/website`, custom tenant marketing pages at `/p/<route>`, conversion-optimized default tenant homepages, and embeddable booking widgets. |
 | **Billing & payments** | Quotes, e-sign, deposits, damage pre-auth holds; **Stripe**, Square, PayPal, ACH — processor tokens only. Interactive client pay flow with tips and promo codes. |
 | **White-label & Custom Domains** | Company brand kit + custom domains with automated Traefik TLS; full-site mode; website/logo brand style matcher (`/owner` Brand). |
-| **Role-Based Portals** | Dedicated React + Vite SPAs for **`/owner`** (Today, Pipeline, Money, Brand, Website, Subcontractors), **`/employee`** (My Day, Dispatch, Timesheets), and **`/client`** (Home, Events, Pay, Documents, Planning, Appointments, Chat, Photos). Field PWA for crew. Operator Desk (`/app`) reserved for SaaS Operator / System Manager. |
+| **Role-Based Portals** | Dedicated React + Vite SPAs for **`/owner`** (Today, Pipeline, Money, Studio, Data Explorer, Overrides, Brand, Website, Subcontractors), **`/employee`** (My Day, Dispatch, Timesheets), and **`/client`** (Home, Events, Pay, Documents, Planning, Appointments, Chat, Photos). Field PWA for crew with Stripe Terminal POS. Operator Desk (`/app`) reserved for SaaS Operator / System Manager. |
 
 ---
 

@@ -785,6 +785,11 @@ def test_phase41_marketing_routes():
 
         from entertainment_express.www.feature_page import FEATURES
         assert "weather-risk" in FEATURES
+        assert "pwa-stripe-pos" in FEATURES
+        assert "owner-studio-parity" in FEATURES
+        assert "ai-financial-intelligence" in FEATURES
+        assert "ai-autonomous-operations" in FEATURES
+        assert len(FEATURES) >= 10
 
         print("  ✓ Marketing route rules and dictionaries verified")
         return True

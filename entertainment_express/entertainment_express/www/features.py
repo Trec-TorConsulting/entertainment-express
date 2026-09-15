@@ -17,7 +17,7 @@ def get_context(context):
         context,
         settings,
         "Platform Features | Entertainment Express",
-        "Explore weather risk automation, visual dispatch, playlist exports, client portals, white-label branding, and smart operations tools.",
+        "Explore mobile Stripe POS hardware, Company Studio, AI financial intelligence, autonomous dispatch copilot, weather risk automation, and client portals.",
         "/features",
         breadcrumbs=breadcrumbs,
     )
