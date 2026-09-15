@@ -130,6 +130,9 @@ def test_api_imports():
         "api.dispatch",
         "api.hr_workforce",
         "api.portal_hr",
+        "api.company_setup",
+        "api.owner_admin",
+        "api.owner_overrides",
     ]
     
     for mod in modules:
@@ -476,6 +479,36 @@ def test_terminal_pos_suite():
             print("  ⊘ Skipped (pytest not installed in this interpreter)")
             return True
         print("  ✗ Terminal POS suite failed")
+        print((result.stdout or "").strip())
+        print((result.stderr or "").strip())
+        return False
+
+    summary = (result.stdout or "").strip().splitlines()[-1] if (result.stdout or "").strip() else "passed"
+    print(f"  ✓ {summary}")
+    return True
+
+
+def test_owner_portal_parity_suite():
+    """Run Owner Portal Complete Parity unit tests (Company Studio, Master Explorer, Overrides)."""
+    print("✓ Testing Owner Portal Complete Parity suite...")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "entertainment_express/entertainment_express/tests/test_owner_portal_parity.py",
+            "-q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        if "No module named pytest" in (result.stderr or ""):
+            print("  ⊘ Skipped (pytest not installed in this interpreter)")
+            return True
+        print("  ✗ Owner Portal Parity suite failed")
         print((result.stdout or "").strip())
         print((result.stderr or "").strip())
         return False
@@ -948,6 +981,7 @@ def main():
         test_van_logistics_suite,
         test_gig_payroll_suite,
         test_terminal_pos_suite,
+        test_owner_portal_parity_suite,
         test_coming_soon_suite,
         test_virtual_dj_suite,
         test_phase41_marketing_routes,

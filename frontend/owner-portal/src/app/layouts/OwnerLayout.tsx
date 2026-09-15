@@ -12,7 +12,7 @@ import {
   LayoutDashboard, Calendar, Sparkles, Clock, Truck, FileText,
   Tag, Briefcase, Users, MapPin, Handshake, DollarSign,
   BarChart3, Bot, Compass, Bell, TrendingUp, Globe,
-  Shield, Move, Palette, Key, Lock
+  Shield, Move, Palette, Key, Lock, Building2, Database, AlertTriangle
 } from "lucide-react";
 
 export interface OwnerLayoutProps {
@@ -39,6 +39,7 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
         { id: "schedule", label: "Consults", icon: <Clock className="w-4 h-4" />, active: currentPath.startsWith("/schedule"), onClick: () => navigate("/schedule") },
         { id: "dispatch", label: "Dispatch", icon: <Truck className="w-4 h-4" />, active: currentPath.startsWith("/dispatch"), onClick: () => navigate("/dispatch") },
         { id: "fleet", label: "Fleet & Safety", icon: <Shield className="w-4 h-4" />, active: currentPath.startsWith("/fleet"), onClick: () => navigate("/fleet") },
+        { id: "overrides", label: "Emergency Overrides", icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, active: currentPath.startsWith("/operations/overrides"), onClick: () => navigate("/operations/overrides") },
         { id: "event-details", label: "Event details", icon: <FileText className="w-4 h-4" />, active: currentPath.startsWith("/event-details"), onClick: () => navigate("/event-details") },
       ]
     },
@@ -71,6 +72,8 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
       id: "settings",
       label: "Settings",
       items: [
+        { id: "company-studio", label: "Company Studio", icon: <Building2 className="w-4 h-4 text-indigo-400" />, active: currentPath.startsWith("/settings/studio"), onClick: () => navigate("/settings/studio") },
+        { id: "master-data", label: "Master Data Explorer", icon: <Database className="w-4 h-4 text-emerald-400" />, active: currentPath.startsWith("/admin/data"), onClick: () => navigate("/admin/data") },
         { id: "brand", label: "Brand", icon: <Palette className="w-4 h-4" />, active: currentPath.startsWith("/brand"), onClick: () => navigate("/brand") },
         { id: "website", label: "Website", icon: <Globe className="w-4 h-4" />, active: currentPath.startsWith("/website"), onClick: () => navigate("/website") },
         { id: "coverage", label: "Coverage", icon: <Shield className="w-4 h-4" />, active: currentPath.startsWith("/coverage"), onClick: () => navigate("/coverage") },
