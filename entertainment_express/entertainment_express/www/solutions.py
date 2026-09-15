@@ -26,6 +26,10 @@ SOLUTIONS = {
                 "desc": "Export approved guest requests and must-play lists directly into native DJ software crate files with one click.",
             },
             {
+                "title": "PWA Mobile POS & Tip Splitting",
+                "desc": "Connect Bluetooth card readers to crew phones for on-site overtime payments and digital tip collection with automated payroll pooling.",
+            },
+            {
                 "title": "Collaborative Event Timelines",
                 "desc": "Real-time timeline builder shared between couples, planners, MCs, and lighting techs with instant sync.",
             },
@@ -34,18 +38,19 @@ SOLUTIONS = {
                 "desc": "Give couples a personalized, mobile-friendly link where guests request and upvote songs ahead of time.",
             },
             {
-                "title": "Instant Quotes & Automated E-Sign",
-                "desc": "Send interactive proposals with packages, contracts, and deposit collection in a seamless 90-second flow.",
+                "title": "60-Second Instant Quoting AI",
+                "desc": "AI parses incoming event inquiries and generates customized packages, contracts, and Stripe deposit links in under 60 seconds.",
             },
         ],
         "entitlements": [
             "Unlimited DJ packages and custom add-ons",
             "Multi-crate Serato and Rekordbox XML exports",
+            "PWA mobile POS Stripe Terminal card reader integration",
             "Interactive client timeline & music planning forms",
-            "Automatic deposit collection and payment reminders",
+            "Autonomous AR dunning & payment reminder sequences",
             "Mobile crew run sheets for assistant DJs and lighting techs",
         ],
-        "keywords": ["mobile DJ booking software", "DJ contract app", "wedding DJ planning", "Serato playlist export"],
+        "keywords": ["mobile DJ booking software", "DJ contract app", "wedding DJ planning", "Serato playlist export", "DJ credit card reader"],
         "app_category": "EntertainmentApplication",
     },
     "rentals": {
@@ -65,6 +70,10 @@ SOLUTIONS = {
                 "desc": "Continuous wind speed and rain forecast monitoring with automatic alerts and 1-click rain-date rebooking.",
             },
             {
+                "title": "Computer Vision Smart Van Eye",
+                "desc": "Verify truck loading checklists with camera inspections and automatically quarantine damaged units upon warehouse return.",
+            },
+            {
                 "title": "Buffer & Turnaround Automation",
                 "desc": "Automated cleaning and setup buffer calculation to guarantee gear is never double-scheduled across tight windows.",
             },
@@ -73,18 +82,19 @@ SOLUTIONS = {
                 "desc": "Assign inflatables, generators, and stakes to specific delivery vehicles with digital load checklists.",
             },
             {
-                "title": "Online Booking & Waiver E-Sign",
-                "desc": "Customers choose bounce houses, select delivery windows, sign safety liability waivers, and pay deposits online.",
+                "title": "Autonomous Emergency Dispatch Copilot",
+                "desc": "Instantly find available replacement drivers and broadcast open shifts via SMS when weekend call-outs occur.",
             },
         ],
         "entitlements": [
             "Real-time unit availability and buffer management",
+            "Computer vision load-out verification and damage quarantine",
             "Wind and rain threshold weather radar integration",
             "Digital delivery run sheets with GPS turn-by-turn",
+            "Autonomous emergency dispatch replacement finder",
             "Liability waiver capture and safety checklist confirmation",
-            "Custom delivery fees by radius, zip code, or drive time",
         ],
-        "keywords": ["bounce house rental software", "inflatable rental software", "party rental inventory management", "weather alert rental software"],
+        "keywords": ["bounce house rental software", "inflatable rental software", "party rental inventory management", "weather alert rental software", "smart van eye"],
         "app_category": "BusinessApplication",
     },
     "photo-booths": {
@@ -104,12 +114,16 @@ SOLUTIONS = {
                 "desc": "Upload photo strip and 360 overlay designs for 1-click client approval with versioned comments.",
             },
             {
+                "title": "PWA Stripe Terminal Mobile POS",
+                "desc": "Attendants take card-present chip, tap, and Apple Pay on their phones for extra hours, extra prints, and tips.",
+            },
+            {
                 "title": "Backdrop & Enclosure Inventory",
                 "desc": "Track fabric backdrops, LED enclosures, and printer media stock with conflict prevention.",
             },
             {
-                "title": "Attendant Mobile Run Sheets",
-                "desc": "Give booth operators exact arrival times, venue load-in dock instructions, and on-site contact names.",
+                "title": "Autonomous AR Dunning Agent",
+                "desc": "Automatically chase unpaid event balances with multi-channel SMS/email reminders and 1-click Stripe pay links.",
             },
             {
                 "title": "Custom Add-On Upsells",
@@ -118,12 +132,13 @@ SOLUTIONS = {
         ],
         "entitlements": [
             "Digital template proofing and sign-off portal",
+            "PWA mobile POS hardware support on crew phones",
             "Attendant dispatch and equipment checklist sync",
-            "Automated payment reminders and gratuity collection",
+            "Autonomous payment dunning and gratuity collection",
             "Branded white-label client experience",
             "Post-event review collection workflows",
         ],
-        "keywords": ["photo booth management software", "360 photo booth booking app", "photo booth CRM", "photo booth template approval"],
+        "keywords": ["photo booth management software", "360 photo booth booking app", "photo booth CRM", "photo booth template approval", "photo booth POS"],
         "app_category": "BusinessApplication",
     },
     "game-trucks": {
@@ -139,6 +154,10 @@ SOLUTIONS = {
         ],
         "features": [
             {
+                "title": "24/7 AI Voice Phone Receptionist",
+                "desc": "Conversational AI answers incoming phone calls via Twilio Voice, answers party questions, and books leads while you drive.",
+            },
+            {
                 "title": "Smart Route & Travel Windows",
                 "desc": "Automated drive-time calculation and zip code routing to ensure your trailers arrive on time every time.",
             },
@@ -147,22 +166,19 @@ SOLUTIONS = {
                 "desc": "Collect street parking permissions, driveway incline notes, and power outlet locations before dispatch.",
             },
             {
-                "title": "Game Coach Crew Dispatch",
-                "desc": "Assign coaches to vehicles with pre-flight checklist verification directly on their mobile phones.",
-            },
-            {
-                "title": "Instant Online Party Packages",
-                "desc": "Let parents select gaming party packages, add laser tag or VR, and pay deposits 24/7 without phone calls.",
+                "title": "PWA Mobile POS Curb Checkout",
+                "desc": "Coaches take card-present payments right at the truck for overtime gaming, VR add-ons, or gratuities.",
             },
         ],
         "entitlements": [
+            "24/7 AI Voice Phone Receptionist powered by Twilio",
+            "PWA mobile POS Stripe Terminal curb checkout",
             "Multi-truck calendar dispatch with route clustering",
             "Automatic travel fee calculation by distance",
             "Pre-party site condition and power questionnaires",
             "Mobile coach run sheets with emergency client contacts",
-            "Automated party preparation tips sent to parents",
         ],
-        "keywords": ["game truck booking software", "mobile video game truck software", "laser tag scheduling app", "game truck route dispatch"],
+        "keywords": ["game truck booking software", "mobile video game truck software", "laser tag scheduling app", "game truck route dispatch", "AI voice receptionist"],
         "app_category": "BusinessApplication",
     },
     "casino": {
@@ -178,8 +194,12 @@ SOLUTIONS = {
         ],
         "features": [
             {
-                "title": "Talent & Dealer Rostering",
-                "desc": "Broadcast available casino shifts to your dealer network and confirm shifts via SMS with 1 click.",
+                "title": "Autonomous Emergency Shift Dispatch",
+                "desc": "Broadcast open dealer shifts across your roster with 1-click SMS confirmation when last-minute replacements are needed.",
+            },
+            {
+                "title": "Company Studio & Owner ERP Parity",
+                "desc": "Manage multi-entity accounting, sales tax rules, and Chart of Accounts mappings 100% inside /owner.",
             },
             {
                 "title": "Casino Table Inventory Logistics",
@@ -189,19 +209,15 @@ SOLUTIONS = {
                 "title": "Corporate Invoicing & PO Workflows",
                 "desc": "Support purchase orders, multi-milestone billing, net-30 terms, and corporate credit cards.",
             },
-            {
-                "title": "Master Event Run Sheets",
-                "desc": "Provide event pit bosses with detailed timing, dealer shift rotations, and client VIP notes.",
-            },
         ],
         "entitlements": [
-            "Shift broadcast and confirmation for dealer rosters",
+            "Emergency dispatch shift broadcast for dealer rosters",
+            "Full Company Studio accounting and tax rule parity",
             "Multi-table bundle logistics and tracking",
             "Corporate invoicing with custom payment schedules",
             "Pit boss digital run sheet with shift rotation management",
-            "Customizable insurance and liability contract clauses",
         ],
-        "keywords": ["casino party booking software", "dealer scheduling app", "casino night entertainment CRM", "event talent management"],
+        "keywords": ["casino party booking software", "dealer scheduling app", "casino night entertainment CRM", "event talent management", "owner ERP parity"],
         "app_category": "BusinessApplication",
     },
     "performers": {
@@ -221,26 +237,27 @@ SOLUTIONS = {
                 "desc": "Filter talent by vocal range, character role, specialty skill (e.g., stilt-walking, balloon art), and zip code.",
             },
             {
+                "title": "PWA Mobile POS for Tips & Merch",
+                "desc": "Performers take card-present tips and merchandise payments on their phones with automatic payroll pooling.",
+            },
+            {
+                "title": "60-Second Instant Lead Quoter",
+                "desc": "AI converts client booking requests into custom character packages and contracts in under one minute.",
+            },
+            {
                 "title": "Costume & Prop Asset Tracking",
                 "desc": "Check out character suits, wigs, and props to talent with photo condition verification upon return.",
-            },
-            {
-                "title": "Confidential Performer Briefs",
-                "desc": "Share birthday child details, performance cues, and venue arrival rules without exposing client financial info.",
-            },
-            {
-                "title": "Seamless Payout Calculations",
-                "desc": "Automatically compute talent pay, travel stipends, and company margin per booking with zero spreadsheet math.",
             },
         ],
         "entitlements": [
             "Character and role taxonomy with skill tags",
+            "PWA mobile POS card reader checkout for tips & merchandise",
+            "60-second AI lead quoting assistant",
             "Costume inventory checkout with condition photos",
             "Private talent portal with role briefs and maps",
-            "Automated contract and liability protection",
             "Performer payout statements and financial reporting",
         ],
-        "keywords": ["performer booking software", "character talent agency software", "entertainer scheduling app", "talent roster CRM"],
+        "keywords": ["performer booking software", "character talent agency software", "entertainer scheduling app", "talent roster CRM", "performer tip POS"],
         "app_category": "EntertainmentApplication",
     },
 }
