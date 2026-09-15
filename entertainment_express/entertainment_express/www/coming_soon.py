@@ -24,9 +24,24 @@ def get_context(context):
     # Feature preview cards highlighting major differentiators
     context.features_preview = [
         {
-            "icon": "📅",
-            "title": "Conflict-Free Booking",
-            "description": "Real-time calendar availability, automatic travel buffers, instant quotes, and deposit checkout tailored to entertainment workflows.",
+            "icon": "💳",
+            "title": "PWA Mobile POS & Hardware",
+            "description": "Stripe Terminal Bluetooth card readers on crew phones: in-person chip, contactless tap, Apple Pay, digital tip splitting, and instant SMS receipts.",
+        },
+        {
+            "icon": "🚀",
+            "title": "Autonomous Event Operations",
+            "description": "Emergency dispatch copilot, computer vision Smart Van Eye truck load inspections, 24/7 AI voice phone receptionist, and dynamic surge pricing.",
+        },
+        {
+            "icon": "🤖",
+            "title": "AI Financial Intelligence",
+            "description": "Multimodal receipt OCR expense claims, autonomous overdue AR dunning agent with 1-click Stripe pay links, and bank reconciliation.",
+        },
+        {
+            "icon": "🏢",
+            "title": "Company Studio & Owner Parity",
+            "description": "Complete ERPNext parity inside /owner: single-pane Chart of Accounts, tax templates, Master Data Explorer across 12 entities, and emergency overrides.",
         },
         {
             "icon": "🚚",
@@ -34,14 +49,9 @@ def get_context(context):
             "description": "Run sheets, equipment loading checklists, vehicle assignments, and automated mobile schedules delivered straight to crew phones.",
         },
         {
-            "icon": "⚡",
-            "title": "Automated Contracts & Billing",
-            "description": "Integrated e-signatures, automated installment schedules, card-on-file balance auto-charges, and quick gratuity processing.",
-        },
-        {
-            "icon": "👥",
-            "title": "Client & Performer Portals",
-            "description": "Branded client hub for song requests, timelines, and forms, alongside staff portals for run sheets, tips, and shift swaps.",
+            "icon": "📱",
+            "title": "Client Hub & E-Sign",
+            "description": "Branded client hub for contract e-signing, online deposits, guest song requests, timelines, and collaborative planning forms.",
         },
     ]
 
