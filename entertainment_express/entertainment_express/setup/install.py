@@ -33,7 +33,12 @@ def create_all():
                         setattr(cf, k, v)
                 cf.save()
             else:
-                cf = frappe.get_doc({"doctype": "Custom Field", **field_def})
-                cf.insert(ignore_permissions=True)
+                try:
+                    if frappe.get_meta(doctype).has_field(fieldname):
+                        continue
+                    cf = frappe.get_doc({"doctype": "Custom Field", **field_def})
+                    cf.insert(ignore_permissions=True)
+                except Exception:
+                    pass
 
     frappe.db.commit()
