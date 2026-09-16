@@ -1,14 +1,25 @@
 {% set kit = ee_brand_kit or {} %}
 {% set brand = app_name or kit.get('brand_name') or 'Entertainment Express' %}
-{% set logo = kit.get('brand_logo') or '' %}
+{% set raw_logo = kit.get('brand_logo') or '' %}
+{% set logo = '' %}
+{% if raw_logo and 'trector' not in raw_logo|lower and 'trec-tor' not in raw_logo|lower %}
+  {% set logo = raw_logo %}
+{% endif %}
 
 <nav class="navbar navbar-expand-lg ee-web-navbar">
   <div class="container">
-    <a class="navbar-brand ee-navbar-brand" href="/">
+    <a class="navbar-brand ee-navbar-brand d-flex align-items-center" href="/">
       {% if logo %}
         <img src="{{ logo }}" alt="{{ brand }}" class="ee-navbar-logo" style="max-height: 40px; width: auto;">
       {% else %}
-        <span class="ee-navbar-brand-name">{{ brand }}</span>
+        <span class="ee-navbar-brand-name">
+          {% if brand == 'Entertainment Express' %}
+            <span class="ee-brand-title">Entertainment</span>
+            <span class="ee-brand-accent">Express</span>
+          {% else %}
+            <span>{{ brand }}</span>
+          {% endif %}
+        </span>
       {% endif %}
     </a>
 

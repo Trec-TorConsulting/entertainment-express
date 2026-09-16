@@ -147,6 +147,10 @@ def kit_dict(settings: Any = None, *, overrides: dict | None = None) -> dict:
         for k, v in overrides.items():
             if k in out and v is not None and v != "":
                 out[k] = v
+    if out.get("brand_logo"):
+        logo_lower = str(out["brand_logo"]).lower()
+        if "trector" in logo_lower or "trec-tor" in logo_lower:
+            out["brand_logo"] = ""
     return out
 
 
