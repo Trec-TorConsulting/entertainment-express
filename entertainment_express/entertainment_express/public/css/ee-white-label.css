@@ -256,6 +256,76 @@ body.dark .card {
   text-decoration: none;
 }
 
+/* Dark Mode Contrast Overrides */
+body.dark .web-header,
+[data-theme="dark"] .web-header,
+html[data-theme="dark"] .web-header,
+body.dark .ee-web-navbar,
+[data-theme="dark"] .ee-web-navbar,
+html[data-theme="dark"] .ee-web-navbar {
+  background: var(--ee-panel, #0f172a) !important;
+  border-bottom-color: var(--ee-border, #1e293b) !important;
+}
+
+body.dark .ee-navbar-brand-name,
+[data-theme="dark"] .ee-navbar-brand-name,
+html[data-theme="dark"] .ee-navbar-brand-name {
+  color: var(--ee-text, #f8fafc) !important;
+}
+
+body.dark .ee-web-navbar .nav-link,
+[data-theme="dark"] .ee-web-navbar .nav-link,
+html[data-theme="dark"] .ee-web-navbar .nav-link {
+  color: var(--ee-text-secondary, #cbd5e1) !important;
+}
+
+body.dark .ee-web-navbar .nav-link:hover,
+[data-theme="dark"] .ee-web-navbar .nav-link:hover,
+html[data-theme="dark"] .ee-web-navbar .nav-link:hover {
+  color: var(--ee-brand, #2dd4bf) !important;
+}
+
+body.dark .ee-web-navbar .ee-nav-login,
+[data-theme="dark"] .ee-web-navbar .ee-nav-login,
+html[data-theme="dark"] .ee-web-navbar .ee-nav-login {
+  color: var(--ee-text, #f8fafc) !important;
+}
+
+body.dark .ee-web-navbar .navbar-toggler-icon,
+[data-theme="dark"] .ee-web-navbar .navbar-toggler-icon,
+html[data-theme="dark"] .ee-web-navbar .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+body.dark .web-footer,
+[data-theme="dark"] .web-footer,
+html[data-theme="dark"] .web-footer,
+body.dark .ee-web-footer,
+[data-theme="dark"] .ee-web-footer,
+html[data-theme="dark"] .ee-web-footer {
+  background: var(--ee-panel, #0f172a) !important;
+  border-top-color: var(--ee-border, #1e293b) !important;
+  color: var(--ee-text, #f8fafc) !important;
+}
+
+body.dark .ee-footer-brand-title,
+[data-theme="dark"] .ee-footer-brand-title,
+html[data-theme="dark"] .ee-footer-brand-title {
+  color: var(--ee-text, #f8fafc) !important;
+}
+
+body.dark .ee-footer-nav a,
+[data-theme="dark"] .ee-footer-nav a,
+html[data-theme="dark"] .ee-footer-nav a {
+  color: var(--ee-text-secondary, #cbd5e1) !important;
+}
+
+body.dark .ee-footer-nav a:hover,
+[data-theme="dark"] .ee-footer-nav a:hover,
+html[data-theme="dark"] .ee-footer-nav a:hover {
+  color: var(--ee-brand, #2dd4bf) !important;
+}
+
 /* Force hiding Frappe default subscription & powered-by elements on all EE web pages */
 #footer-subscribe,
 .footer-subscribe,

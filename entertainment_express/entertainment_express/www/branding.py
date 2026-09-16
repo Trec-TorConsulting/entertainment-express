@@ -39,7 +39,7 @@ def update_website_context(context):
         full = False
         kit = {
             "brand_name": "Entertainment Express",
-            "brand_logo": "/assets/entertainment_express/marketing/img/logo.svg",
+            "brand_logo": "",
             "brand_color": "#6d28d9",
             "brand_color_secondary": "#4f46e5",
             "brand_color_bg": "#f8fafc",
