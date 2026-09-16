@@ -199,3 +199,14 @@ def set_event_margin_target(booking_name: str, target_percent: float) -> dict:
         "target_margin_percent": target,
         "margin_status": new_status,
     }
+
+
+@frappe.whitelist(methods=["GET", "POST"])
+def simulate_quote_margin(**kwargs):
+    """
+    Whitelisted proxy for pre-quote margin simulation.
+    """
+    _check_access()
+    from entertainment_express.job_costing.margin_simulator import simulate_quote_margin as _sim
+    return _sim(**kwargs)
+

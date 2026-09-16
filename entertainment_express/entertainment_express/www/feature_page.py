@@ -179,6 +179,23 @@ FEATURES = {
         "keywords": ["autonomous event dispatch", "computer vision event equipment", "AI voice receptionist party rental", "dynamic event pricing", "event reputation management"],
         "icon": "🚀",
     },
+    "predictive-margin-guardrails": {
+        "name": "Predictive Margin Guardrails & Settlement",
+        "headline": "Lock In Event Profitability Before You Quote and After You Settle",
+        "summary": "Real-time pre-quote margin simulator, live cost drift warnings, automated 35% margin floor enforcement, and 1-click post-event P&L ledger settlement.",
+        "meta_description": "Predictive margin guardrails and post-event settlement for event entertainment companies. Real-time quote margin simulation, live drift alerts, and 1-click cost center lock.",
+        "problem": "Event operators often quote prices based on gut feeling, only to watch profit margins evaporate due to unexpected travel costs, overtime crew wages, payment gateway fees, or scope creep during setup.",
+        "solution": "Predictive Margin Guardrails calculate live gross profit margin percentages before any proposal is delivered to a client. If projected margins dip below your 35% company floor, quotes are flagged immediately. During execution, live cost drift detection alerts managers when labor or gear expenses exceed baseline targets by 5%, and 1-click post-event settlement locks ledgers against unauthorized adjustments.",
+        "highlights": [
+            "Pre-Quote Margin Simulator: real-time margin calculation factoring labor, gear, mileage, and payment fees",
+            "Minimum Margin Floor Enforcement: customizable policy floor (default 35%) with manager approval bypass",
+            "Live Margin Drift Monitor: automated alerts when active event labor or equipment costs drift over 5%",
+            "Post-Event 1-Click Settlement: automated 7-day cost center lock, variance tracking, and final ledger freeze",
+            "Event P&L Drawer: complete margin drill-down visualizer directly inside your owner financial portal",
+        ],
+        "keywords": ["event margin calculator", "predictive job costing", "event profitability software", "post event settlement", "gross margin guardrails"],
+        "icon": "📊",
+    },
 }
 
 

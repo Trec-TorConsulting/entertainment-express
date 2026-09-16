@@ -15,9 +15,9 @@ every site; the request host selects the tenant (`dns_multitenant`).
 This repo is an enterprise-grade Frappe application and deployment platform. All roadmap phases **0–41**,
 platform enhancements (Subcontractor Jobs, Coming Soon Landing, Tenant Website Builder, Client Portal Overhaul,
 Atomix VirtualDJ Integration & AI Virtual DJ Suite), and flagship modules (PWA Stripe Terminal POS Hardware,
-Complete Owner Portal Parity, AI Financial Intelligence In-The-Box, and Autonomous Event Operations Out-Of-The-Box)
+Complete Owner Portal Parity, AI Financial Intelligence In-The-Box, Autonomous Event Operations Out-Of-The-Box, and Predictive Margin Guardrails)
 are fully implemented and verified (archived under `openspec/changes/archive/`). Live image tag in
-[`k8s-deployment.yaml`](k8s-deployment.yaml) is **`0.1.8-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
+[`k8s-deployment.yaml`](k8s-deployment.yaml) is **`0.1.9-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 
@@ -27,6 +27,7 @@ are fully implemented and verified (archived under `openspec/changes/archive/`).
 |---|---|
 | **Control plane** | Operator site at `admin.<domain>` — self-service signup, 3-tier plans (Starter / Pro / Scale), entitlement enforcement, provisioning jobs, tenant lifecycle. |
 | **Marketing front door** | `www.<domain>` public acquisition engine — SEO-optimized vertical pages, competitor comparisons, interactive showcase, blog/resource center, and operator-configurable Coming Soon teaser mode with early-access waitlist. |
+| **Predictive Margin Guardrails** | Pre-quote gross margin simulator, automated minimum margin floor enforcement (35%), live cost drift monitor with 5% threshold alerts, and 1-click post-event ledger settlement. |
 | **CRM & Booking** | Event bookings, holds, catalog at `/book` and `/catalog`, interactive proposals, contracts, conflict detection, and 60-second AI instant quoting. |
 | **PWA Mobile POS & Hardware** | Stripe Terminal Bluetooth/network reader pairing (Stripe Reader M2 / WisePOS E) on crew phones — in-person chip/tap/swipe/Apple Pay, on-site overtime add-ons, digital tip splitting, automated payroll tip pool compiler, and instant SMS receipts. |
 | **Scheduling & dispatch** | Crew assignment, automated suggestions, run sheets, equipment checklists, site-fit logistics, load planning, and live client ETA tracking. |

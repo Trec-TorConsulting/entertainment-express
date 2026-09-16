@@ -43,6 +43,31 @@ export const EventPLDrawer: React.FC<EventPLDrawerProps> = ({
   const [editingTarget, setEditingTarget] = useState(false);
   const [targetInput, setTargetInput] = useState("40");
   const [savingTarget, setSavingTarget] = useState(false);
+  const [settling, setSettling] = useState(false);
+
+  const handleSettle = async () => {
+    if (!bookingId) return;
+    setSettling(true);
+    try {
+      const res = await call("entertainment_express.job_costing.settlement.settle_event_cost_center", {
+        booking_name: bookingId,
+      });
+      toast({
+        title: "Ledger Settled & Locked",
+        description: `Cost center locked. Final margin: ${res.final_margin?.toFixed(1) || 0}%`,
+        variant: "success",
+      });
+      fetchPL(true);
+    } catch (err: any) {
+      toast({
+        title: "Settlement Failed",
+        description: err.message || "Could not lock cost center.",
+        variant: "danger",
+      });
+    } finally {
+      setSettling(false);
+    }
+  };
 
   const fetchPL = async (isRefresh = false) => {
     if (!bookingId) return;
@@ -254,6 +279,37 @@ export const EventPLDrawer: React.FC<EventPLDrawerProps> = ({
                 </div>
               )}
 
+              {/* Margin Drift & Anomaly Inspector */}
+              {(data.margin_drift_percent > 0 || data.is_ledger_locked) && (
+                <div className={`p-4 rounded-xl border ${
+                  data.margin_drift_percent > 5
+                    ? "border-amber-500/50 bg-amber-500/10 text-amber-200"
+                    : "border-slate-700 bg-slate-800/40 text-slate-300"
+                } flex items-center justify-between gap-4 text-xs`}>
+                  <div>
+                    <div className="font-semibold text-sm flex items-center gap-1.5 mb-1">
+                      <AlertCircle size={15} className={data.margin_drift_percent > 5 ? "text-amber-400" : "text-slate-400"} />
+                      Margin Drift Inspector
+                    </div>
+                    <p>
+                      Projected Margin: <strong>{data.projected_margin_percent?.toFixed(1) || "40.0"}%</strong> → Actual Margin: <strong>{margin.toFixed(1)}%</strong>
+                    </p>
+                    <p className="mt-0.5 opacity-80">
+                      Drift Degradation: <strong>{data.margin_drift_percent?.toFixed(1) || "0.0"}%</strong> {data.margin_drift_percent > 5 ? "(Exceeds 5% tolerance threshold)" : "(Within tolerance)"}
+                    </p>
+                  </div>
+                  {data.is_ledger_locked ? (
+                    <Badge variant="outline" className="border-emerald-500/40 text-emerald-300 bg-emerald-950/40 px-3 py-1 text-xs">
+                      🔒 Ledger Locked
+                    </Badge>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={handleSettle} disabled={settling}>
+                      {settling ? "Locking..." : "1-Click Settle & Lock"}
+                    </Button>
+                  )}
+                </div>
+              )}
+
               {/* Stacked COGS Visualizer */}
               <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
                 <div className="flex items-center justify-between text-xs">
@@ -388,9 +444,16 @@ export const EventPLDrawer: React.FC<EventPLDrawerProps> = ({
           <span className="text-xs text-slate-500 font-mono">
             Linked Project: {data?.project || "Auto-managed"}
           </span>
-          <Button variant="outline" size="sm" onClick={onClose}>
-            Close
-          </Button>
+          <div className="flex items-center gap-2">
+            {data && !data.is_ledger_locked && (
+              <Button size="sm" variant="primary" onClick={handleSettle} disabled={settling}>
+                {settling ? "Locking..." : "Lock Ledger & Settle Cost Center"}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={onClose}>
+              Close
+            </Button>
+          </div>
         </div>
       </div>
     </div>

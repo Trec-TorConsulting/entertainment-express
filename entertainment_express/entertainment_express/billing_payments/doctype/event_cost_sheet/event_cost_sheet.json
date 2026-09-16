@@ -13,6 +13,18 @@
   "margin_status",
   "margin_percent",
   "target_margin_percent",
+  "margin_drift_percent",
+  "section_projections",
+  "projected_gross_revenue",
+  "projected_total_cogs",
+  "projected_net_profit",
+  "projected_margin_percent",
+  "col_proj",
+  "projected_labor_cost",
+  "projected_subcontractor_cost",
+  "projected_consumable_cost",
+  "projected_equipment_wear",
+  "projected_gateway_fees",
   "section_financials",
   "gross_revenue",
   "total_cogs",
@@ -23,6 +35,12 @@
   "consumable_cost",
   "equipment_wear_cost",
   "gateway_fees",
+  "section_settlement",
+  "is_ledger_locked",
+  "locked_at",
+  "col_settle",
+  "locked_by",
+  "settlement_journal_entry",
   "section_details",
   "details_json",
   "last_recomputed_at"
@@ -83,6 +101,76 @@
    "label": "Target Margin %"
   },
   {
+   "default": "0.0",
+   "fieldname": "margin_drift_percent",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Margin Drift %"
+  },
+  {
+   "fieldname": "section_projections",
+   "fieldtype": "Section Break",
+   "label": "Projected Pre-Quote Financials"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_gross_revenue",
+   "fieldtype": "Currency",
+   "label": "Projected Gross Revenue"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_total_cogs",
+   "fieldtype": "Currency",
+   "label": "Projected Total COGS"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_net_profit",
+   "fieldtype": "Currency",
+   "label": "Projected Net Profit"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "projected_margin_percent",
+   "fieldtype": "Percent",
+   "label": "Projected Margin %"
+  },
+  {
+   "fieldname": "col_proj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_labor_cost",
+   "fieldtype": "Currency",
+   "label": "Projected Labor Cost"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_subcontractor_cost",
+   "fieldtype": "Currency",
+   "label": "Projected Subcontractor Cost"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_consumable_cost",
+   "fieldtype": "Currency",
+   "label": "Projected Consumable Cost"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_equipment_wear",
+   "fieldtype": "Currency",
+   "label": "Projected Equipment Wear"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "projected_gateway_fees",
+   "fieldtype": "Currency",
+   "label": "Projected Gateway Fees"
+  },
+  {
    "fieldname": "section_financials",
    "fieldtype": "Section Break",
    "label": "P&L Summary"
@@ -141,6 +229,39 @@
    "fieldname": "gateway_fees",
    "fieldtype": "Currency",
    "label": "Gateway Fees"
+  },
+  {
+   "fieldname": "section_settlement",
+   "fieldtype": "Section Break",
+   "label": "Settlement & Cost Center Lock"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_ledger_locked",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Ledger Locked"
+  },
+  {
+   "fieldname": "locked_at",
+   "fieldtype": "Datetime",
+   "label": "Locked At"
+  },
+  {
+   "fieldname": "col_settle",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "locked_by",
+   "fieldtype": "Link",
+   "label": "Locked By",
+   "options": "User"
+  },
+  {
+   "fieldname": "settlement_journal_entry",
+   "fieldtype": "Link",
+   "label": "Settlement Journal Entry",
+   "options": "Journal Entry"
   },
   {
    "fieldname": "section_details",

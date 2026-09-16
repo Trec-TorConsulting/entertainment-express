@@ -330,5 +330,13 @@
     "subject": "Rain date offer for {{ event_name }}",
     "active": 1,
     "body_html": "<p>Hi,</p><p>Due to weather risk for <b>{{ event_name }}</b> (originally {{ event_date }}), we can move you to <b>{{ candidate_start }}</b>.</p><p><a href='{{ accept_link }}'>Review and accept in your portal</a></p>"
+  },
+  {
+    "doctype": "Notification Template",
+    "name": "margin_drift_alert",
+    "template_key": "margin_drift_alert",
+    "subject": "⚠️ Margin Drift Alert: Booking {{ booking_name }} drifted by {{ drift_percent }}%",
+    "active": 1,
+    "body_html": "<p>Hi Admin,</p><p>An event booking <b>{{ booking_name }}</b> experienced cost margin drift exceeding tolerance thresholds.</p><p><b>Drift Degraded:</b> {{ drift_percent }}%</p><p><b>Details:</b> {{ variance_details }}</p><p>Please review the cost sheet <b>{{ cost_sheet_name }}</b> in your Owner Portal Money drawer.</p>"
   }
 ]

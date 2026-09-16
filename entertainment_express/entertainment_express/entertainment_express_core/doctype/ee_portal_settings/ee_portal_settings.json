@@ -42,7 +42,10 @@
   "feature_flags",
   "section_margin_intelligence",
   "default_target_margin_percent",
-  "low_margin_warning_threshold"
+  "low_margin_warning_threshold",
+  "minimum_margin_floor_percent",
+  "margin_drift_warning_threshold",
+  "auto_lock_cost_center_days"
  ],
  "fields": [
   {
@@ -263,6 +266,27 @@
    "fieldname": "low_margin_warning_threshold",
    "fieldtype": "Percent",
    "label": "Low Margin Warning Threshold %"
+  },
+  {
+   "default": "35.0",
+   "description": "Hard margin floor below which proposals require explicit owner override.",
+   "fieldname": "minimum_margin_floor_percent",
+   "fieldtype": "Percent",
+   "label": "Minimum Margin Floor %"
+  },
+  {
+   "default": "5.0",
+   "description": "Allowed margin degradation between quoted projection and actuals before alerting.",
+   "fieldname": "margin_drift_warning_threshold",
+   "fieldtype": "Percent",
+   "label": "Margin Drift Warning Threshold %"
+  },
+  {
+   "default": "7",
+   "description": "Days following event completion before cost center is automatically settled and locked.",
+   "fieldname": "auto_lock_cost_center_days",
+   "fieldtype": "Int",
+   "label": "Auto Lock Cost Center Days"
   }
  ],
  "index_web_pages_for_search": 1,

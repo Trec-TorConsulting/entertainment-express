@@ -79,8 +79,45 @@ def test_doctypes():
         except Exception as e:
             print(f"  ✗ {dt_path}: {e}")
             return False
-    
-    print(f"  ✓ All {len(doctype_jsons)} DocType JSONs are valid")
+
+    # Validate predictive margin guardrail fields in Event Cost Sheet
+    cost_sheet_path = app_root / "billing_payments/doctype/event_cost_sheet/event_cost_sheet.json"
+    if cost_sheet_path.exists():
+        with open(cost_sheet_path) as f:
+            cs_data = json.load(f)
+        cs_fields = {f.get("fieldname") for f in cs_data.get("fields", [])}
+        for req_field in [
+            "projected_gross_revenue",
+            "projected_total_cogs",
+            "projected_net_profit",
+            "projected_margin_percent",
+            "projected_labor_cost",
+            "projected_subcontractor_cost",
+            "projected_consumable_cost",
+            "projected_equipment_wear",
+            "projected_gateway_fees",
+            "margin_drift_percent",
+            "is_ledger_locked",
+            "locked_at",
+            "locked_by",
+            "settlement_journal_entry",
+        ]:
+            assert req_field in cs_fields, f"Event Cost Sheet missing field: {req_field}"
+
+    # Validate guardrail threshold fields in EE Portal Settings
+    settings_path = app_root / "entertainment_express_core/doctype/ee_portal_settings/ee_portal_settings.json"
+    if settings_path.exists():
+        with open(settings_path) as f:
+            ps_data = json.load(f)
+        ps_fields = {f.get("fieldname") for f in ps_data.get("fields", [])}
+        for req_field in [
+            "minimum_margin_floor_percent",
+            "margin_drift_warning_threshold",
+            "auto_lock_cost_center_days",
+        ]:
+            assert req_field in ps_fields, f"EE Portal Settings missing field: {req_field}"
+
+    print(f"  ✓ All {len(doctype_jsons)} DocType JSONs are valid (including predictive margin guardrails)")
     return True
 
 
@@ -357,6 +394,9 @@ def test_job_costing_suite():
             "-m",
             "pytest",
             "entertainment_express/entertainment_express/tests/test_job_costing.py",
+            "entertainment_express/entertainment_express/tests/test_margin_simulator.py",
+            "entertainment_express/entertainment_express/tests/test_drift_monitor.py",
+            "entertainment_express/entertainment_express/tests/test_settlement.py",
             "-q",
         ],
         capture_output=True,

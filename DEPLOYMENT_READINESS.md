@@ -6,7 +6,7 @@
 **Namespace:** `entertainment-express`
 
 Phases **0–41** and all post-41 platform enhancements (Subcontractors & Partner Hub, Coming Soon Landing,
-Tenant Website Builder, Client Portal Overhaul, Atomix VirtualDJ Integration & AI Set Curation) are implemented
+Tenant Website Builder, Client Portal Overhaul, Atomix VirtualDJ Integration & AI Set Curation, and Predictive Margin Guardrails) are implemented
 and verified (OpenSpec archives). Live tenant smoke (`e2esmoke.entx.app`) includes
 catalog/booking data (phase-1 task 10.2 is **done**, not pending). White-label phases 38–39 are on
 `0.0.82-ee` with `phase38` / `phase39` patches applied on `e2esmoke.entx.app`.

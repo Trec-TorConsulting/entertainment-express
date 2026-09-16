@@ -87,6 +87,7 @@ FEATURE_MATRIX = [
             {"label": "Weather Risk & Rain-Dates", "key": "weather_risk", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Autonomous AR Dunning Agent", "key": "ar_dunning", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Multimodal Receipt OCR Expenses", "key": "receipt_ocr", "starter": "No", "pro": "Yes", "scale": "Yes"},
+            {"label": "Predictive Margin Guardrails & Settlement", "key": "margin_guardrails", "starter": "Basic", "pro": "Yes", "scale": "Yes (Advanced)"},
             {"label": "60-Second Instant Quoting AI", "key": "instant_quoting", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "SMS Client & Crew Reminders", "key": "sms_enabled", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Serato & Rekordbox DJ Export", "key": "playlist_export", "starter": "No", "pro": "Yes", "scale": "Yes"},

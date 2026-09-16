@@ -3,14 +3,21 @@
 
 import frappe
 from entertainment_express.job_costing.cost_engine import recompute_event_cost_sheet
+from entertainment_express.job_costing.settlement import validate_expense_against_locked_ledger
+from entertainment_express.job_costing.drift_monitor import evaluate_booking_margin_drift
 
 
 def on_financial_doc_change(doc, method=None):
     """
     Background or synchronous hook listening to financial document submissions:
     Timesheet, Purchase Invoice, Purchase Order, Stock Entry, Payment Entry, Sales Invoice.
-    Extracts the linked Event Booking or Project and triggers recompute_event_cost_sheet.
+    1. Validates cost center lock state (raises error if ledger locked)
+    2. Recomputes Event Cost Sheet
+    3. Evaluates margin drift & fires alerts if threshold breached
     """
+    # 1. Enforce ledger lock validation first
+    validate_expense_against_locked_ledger(doc, method)
+
     booking_name = None
 
     # Direct booking reference
@@ -49,5 +56,7 @@ def on_financial_doc_change(doc, method=None):
     if booking_name:
         try:
             recompute_event_cost_sheet(booking_name)
+            evaluate_booking_margin_drift(booking_name)
         except Exception as e:
-            frappe.log_error(f"Failed to sync cost sheet on {doc.doctype} {doc.name}: {e}", "Job Costing Sync")
+            frappe.log_error(f"Failed to sync cost sheet on {doc.doctype} {getattr(doc, 'name', '')}: {e}", "Job Costing Sync")
+

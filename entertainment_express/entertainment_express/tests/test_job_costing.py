@@ -22,6 +22,8 @@ if "frappe" not in sys.modules:
     mock_utils.flt = lambda v, p=2: round(float(v or 0), p) if p else float(v or 0)
     mock_utils.fmt_money = lambda v, currency="USD": f"${float(v or 0):,.2f}"
     mock_utils.now_datetime = lambda: "2026-09-14 12:00:00"
+    mock_utils.get_datetime = lambda v=None: "2026-09-14 12:00:00"
+    mock_utils.add_days = lambda dt, d: "2026-09-07 12:00:00"
 
     mock_doc_module = ModuleType("frappe.model.document")
     class Document:

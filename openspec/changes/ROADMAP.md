@@ -430,6 +430,40 @@ entitlement enforcement.
 
 ---
 
+## Category-Dominant Innovation Track (Active Changes)
+
+### 1. Predictive Margin Guardrails & Leakage Defense
+**Goal:** Pre-quote live direct COGS & margin simulation in `/owner/pipeline`, dynamic margin floor guardrails, real-time margin drift detection (overtime, extra dispatched gear), and automated post-event ERPNext Journal Entry reconciliation and Cost Center lock.
+**Specs:** `predictive-margin-guardrails` (new), `job-costing-margin-intelligence`, `owner-portal`.
+**Folder:** [`predictive-margin-guardrails/`](predictive-margin-guardrails/)
+
+### 2. Live Event Flight Deck & Dynamic Timeline Pacing
+**Goal:** Real-time mission control on `/owner/flight-deck` with vehicle GPS tracking, geofenced crew milestone progression (`dispatched` → `en_route` → `on_site` → `rigging` → `live` → `teardown` → `cleared`), hardware fault telemetry, and dynamic 1-click timeline delay cascading across `/employee` and `/client`.
+**Specs:** `live-event-flight-deck` (new), `event-timeline`, `owner-portal`, `employee-portal`, `customer-portal`.
+**Folder:** [`live-event-flight-deck/`](live-event-flight-deck/)
+
+### 3. Crew Instant Payouts & Micro-Incentives
+**Goal:** Stripe Connect Instant Payouts to worker debit cards within 30 minutes of damage-free teardown verification, automated tip pool splitting on event checkout, and an algorithmic 4-vector crew Reliability Score (Punctuality, Checklist, Damage, CSAT) with dispatch priority weighting.
+**Specs:** `instant-crew-payouts` (new), `gig-payroll-commission-tips`, `scheduling-dispatch`, `employee-portal`, `owner-portal`.
+**Folder:** [`instant-crew-payouts/`](instant-crew-payouts/)
+
+### 4. B2B Overflow & Sub-Rental Gear Exchange
+**Goal:** Central Control Plane mediated liquidity network for peer operators to broadcast and accept overflow bookings and gear sub-rentals with automated margin escrow, automated partner COI/insurance verification, white-label client packets, and strict multi-tenant isolation.
+**Specs:** `b2b-overflow-exchange` (new), `vendor-network`, `insurance-compliance`, `owner-portal`, `platform-multitenancy`.
+**Folder:** [`b2b-overflow-exchange/`](b2b-overflow-exchange/)
+
+### 5. Autonomous Event Copilot & Agentic Ops
+**Goal:** Automated minute-by-minute run-of-show timeline synthesis from client questionnaires with astronomical sunset and curfew awareness, emergency sick-call replacement ladder with 1-click SMS token dispatch, and technical rider/contract PDF extraction into structured booking records.
+**Specs:** `autonomous-event-copilot` (new), `event-timeline`, `scheduling-dispatch`, `ai-assistant`, `owner-portal`.
+**Folder:** [`autonomous-event-copilot/`](autonomous-event-copilot/)
+
+### 6. Zero-Signal Offline-First Field Hardening
+**Goal:** True local-first IndexedDB architecture for `/employee` PWA, enabling offline barcode scanning, packing list validation, digital signature capture, and damage photo uploads in cellular dead-zones, with background sync and deterministic conflict resolution.
+**Specs:** `zero-signal-field-sync` (new), `mobile-field-app`, `equipment-inventory-fleet`, `employee-portal`.
+**Folder:** [`zero-signal-field-sync/`](zero-signal-field-sync/)
+
+---
+
 ## After the roadmap — Production operator readiness ✅ archived 2026-09-02
 Operator docs, safe re-apply on the existing cluster, website cache flush on python start, and MariaDB
 NetworkPolicy. Not a numbered product phase.

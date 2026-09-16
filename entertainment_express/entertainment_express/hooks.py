@@ -4,7 +4,7 @@ app_publisher = "Trec-Tor Consulting"
 app_description = "A spec-first multi-tenant vertical SaaS platform for entertainment businesses."
 app_email = "info@trector.com"
 app_license = "mit"
-app_version = "0.1.8"
+app_version = "0.1.9"
 
 required_apps = ["erpnext"]
 
@@ -117,6 +117,7 @@ scheduler_events = {
         "entertainment_express.api.compliance.run_daily",
         "entertainment_express.api.engagement.run_lifecycle",
         "entertainment_express.api.portal_reports.run_schedules",
+        "entertainment_express.job_costing.settlement.auto_settle_completed_bookings",
         "entertainment_express.notifications.send_deferred",
         "entertainment_express.equipment_fleet.scheduler.daily_fleet_alerts",
         "entertainment_express.logistics.sub_rentals.check_sub_rental_deadlines",
