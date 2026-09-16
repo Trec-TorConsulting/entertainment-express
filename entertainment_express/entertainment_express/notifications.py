@@ -273,10 +273,16 @@ def _deliver_channel(channel, recipient, subject, body, text, from_name: str | N
                 pass
         try:
             frappe.sendmail(**kwargs)
+            return True, "", "", "frappe"
         except TypeError:
             # Older frappe without sender_name
-            frappe.sendmail(recipients=[recipient], subject=subject, message=body, now=True)
-        return True, "", "", "frappe"
+            try:
+                frappe.sendmail(recipients=[recipient], subject=subject, message=body, now=True)
+                return True, "", "", "frappe"
+            except Exception as exc:
+                return False, str(exc)[:180], "", "frappe"
+        except Exception as exc:
+            return False, str(exc)[:180], "", "frappe"
     if channel in ("sms", "whatsapp"):
         return _twilio(channel, recipient, text)
     if channel == "push":

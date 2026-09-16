@@ -9,9 +9,13 @@
 <meta name="theme-color" content="#6d28d9">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="preload" href="/assets/entertainment_express/marketing/marketing.css?v=41.7" as="style">
-<link rel="stylesheet" href="/assets/entertainment_express/marketing/marketing.css?v=41.7">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" as="style">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" media="print" onload="this.media='all'">
+<noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap">
+</noscript>
+<link rel="preload" href="/assets/entertainment_express/marketing/marketing.css?v=41.8" as="style">
+<link rel="stylesheet" href="/assets/entertainment_express/marketing/marketing.css?v=41.8">
 {% endblock %}
 
 {%- block navbar -%}{%- endblock -%}
@@ -29,3 +33,12 @@
 {% include "entertainment_express/templates/marketing/analytics.html" %}
 <script defer src="/assets/entertainment_express/marketing/marketing.js?v=41.1"></script>
 {% endblock %}
+
+{% block base_scripts %}
+<script>
+	frappe.boot = {{ boot | json }};
+	frappe.sys_defaults = frappe.boot.sysdefaults;
+</script>
+<script defer src="{{ bundled_asset('frappe-web.bundle.js') }}"></script>
+{% endblock %}
+

@@ -12,8 +12,10 @@ the control-plane job's frappe context):
         entertainment_express.control_plane.bootstrap.run_bootstrap --kwargs '{...}'
 """
 
+import os
+
 import frappe
-from frappe.utils import now_datetime
+from frappe.utils import cint, now_datetime
 
 from entertainment_express.setup.fiscal_year import ensure_active_fiscal_year
 
@@ -510,12 +512,13 @@ def _ensure_tenant_admin(tenant_doc) -> None:
         user.save(ignore_permissions=True)
         return
 
+    has_smtp = bool(frappe.conf.get("mail_server") or os.environ.get("EE_SMTP_LOGIN"))
     user = frappe.get_doc({
         "doctype": "User",
         "email": email,
         "first_name": tenant_doc.primary_contact or email.split("@")[0],
         "enabled": 1,
-        "send_welcome_email": 0,
+        "send_welcome_email": 1 if has_smtp else 0,
         # Land staff straight on the EE workspace (not the ERPNext "Home" desk).
         "default_workspace": "Entertainment Express",
         "roles": [{"role": "EE Tenant Admin"}],
@@ -524,8 +527,48 @@ def _ensure_tenant_admin(tenant_doc) -> None:
 
 
 def _ensure_email_defaults() -> None:
-    """Placeholder — SMTP is configured via K8s secret / site config in later steps."""
-    pass
+    """Ensure default outgoing Email Account exists using site/common config or env vars."""
+    smtp_server = frappe.conf.get("mail_server") or os.environ.get("EE_SMTP_SERVER") or "smtp-relay.brevo.com"
+    smtp_login = frappe.conf.get("mail_login") or os.environ.get("EE_SMTP_LOGIN")
+    smtp_password = frappe.conf.get("mail_password") or os.environ.get("EE_SMTP_PASSWORD")
+    auto_email_id = frappe.conf.get("auto_email_id") or os.environ.get("EE_SMTP_FROM") or "info@entx.app"
+    smtp_port = cint(frappe.conf.get("mail_port") or os.environ.get("EE_SMTP_PORT") or 587)
+    use_tls = cint(frappe.conf.get("use_tls") or os.environ.get("EE_SMTP_TLS") or 1)
+
+    if not (smtp_login and smtp_password):
+        return
+
+    account_name = "Notifications"
+    if not frappe.db.exists("Email Account", account_name):
+        doc = frappe.get_doc({
+            "doctype": "Email Account",
+            "email_account_name": account_name,
+            "email_id": auto_email_id,
+            "login_id_is_different": 1 if smtp_login != auto_email_id else 0,
+            "login_id": smtp_login,
+            "password": smtp_password,
+            "smtp_server": smtp_server,
+            "smtp_port": smtp_port,
+            "use_tls": use_tls,
+            "enable_outgoing": 1,
+            "default_outgoing": 1,
+            "enable_incoming": 0,
+            "add_signature": 0,
+            "track_email_status": 1,
+        })
+        doc.insert(ignore_permissions=True)
+    else:
+        doc = frappe.get_doc("Email Account", account_name)
+        doc.email_id = auto_email_id
+        doc.login_id_is_different = 1 if smtp_login != auto_email_id else 0
+        doc.login_id = smtp_login
+        doc.password = smtp_password
+        doc.smtp_server = smtp_server
+        doc.smtp_port = smtp_port
+        doc.use_tls = use_tls
+        doc.enable_outgoing = 1
+        doc.default_outgoing = 1
+        doc.save(ignore_permissions=True)
 
 
 def tenant_password_setup_link(email: str = "") -> str:
@@ -535,7 +578,8 @@ def tenant_password_setup_link(email: str = "") -> str:
         return ""
     user = frappe.get_doc("User", email)
     try:
-        return user.reset_password(send_email=False) or ""
+        has_smtp = bool(frappe.conf.get("mail_server") or frappe.db.exists("Email Account", {"default_outgoing": 1, "enable_outgoing": 1}))
+        return user.reset_password(send_email=has_smtp) or ""
     except Exception:
         frappe.log_error(title="EE bootstrap password link")
         return ""

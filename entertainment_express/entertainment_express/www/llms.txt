@@ -1,0 +1,18 @@
+# Entertainment Express
+
+> The complete operating system engineered specifically for mobile entertainment businesses.
+
+Entertainment Express (EntX) provides an end-to-end platform for DJs, party rentals, photo booths, game trucks, and entertainment professionals with bookings, crew scheduling, contracts, dispatch, and client management.
+
+## Core Services & Portals
+
+- [Client Portal](https://entx.app/client): Customer event hub, contract e-signing, online payments, timeline management, and song requests.
+- [Owner Portal](https://entx.app/owner): Master company dashboard, financials, live calendar, dispatch, and fleet management.
+- [Pricing & Plans](https://entx.app/pricing): Transparent pricing tiers for single operators, multi-op companies, and enterprise fleets.
+- [Supported Solutions](https://entx.app/solutions): Tailored workflows for DJs & Emcees, Inflatables & Party Rentals, Photo Booths, Game Trucks, and Performers.
+- [About Entertainment Express](https://entx.app/about): Company mission, enterprise capabilities, and multi-tenant infrastructure.
+
+## Optional Resources
+
+- [Terms of Service](https://entx.app/legal/terms): Platform usage terms and legal agreements.
+- [Privacy Policy](https://entx.app/legal/privacy): Data protection, telemetry, and privacy commitments.

@@ -65,3 +65,4 @@ def get_context(context):
         ("performers", "Performers & Musicians"),
         ("multi", "Multi-Service Entertainment"),
     ]
+    context.no_cache = 1
