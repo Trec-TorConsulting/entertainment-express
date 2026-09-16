@@ -14,7 +14,7 @@ def get_default_company():
     )
 
 
-def ensure_event_cost_center_and_project(booking):
+def ensure_event_cost_center_and_project(booking, method=None, *args, **kwargs):
     """
     Ensure an isolated ERPNext Cost Center and Project exist for a confirmed/active Event Booking.
     Links the Cost Center, Project, and Event Cost Sheet back to the booking record.
