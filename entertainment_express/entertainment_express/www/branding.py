@@ -147,7 +147,16 @@ def update_website_context(context):
     except Exception:
         pass
 
-    styles += "<style>.footer-powered{display:none!important}</style>\n"
+    styles += (
+        "<style>"
+        ".web-header,header.web-header,.ee-web-navbar,nav.ee-web-navbar,nav.navbar{background:#ffffff !important;background-color:#ffffff !important;border-bottom:1px solid #e2e8f0 !important;}"
+        ".ee-web-navbar .nav-link,.navbar-nav .nav-link,.navbar-center-links .nav-link,.nav-link{color:#1e293b !important;font-weight:600 !important;}"
+        ".ee-web-navbar .nav-link:hover,.navbar-nav .nav-link:hover{color:#0f766e !important;background-color:#f1f5f9 !important;border-radius:6px;}"
+        ".ee-navbar-brand-name,.ee-web-navbar .ee-brand-title,.navbar-brand{color:#0f172a !important;font-weight:700 !important;}"
+        ".ee-web-navbar .ee-nav-login{color:#0f172a !important;font-weight:600 !important;}"
+        ".footer-powered{display:none!important}"
+        "</style>\n"
+    )
     if hide or full:
         styles += "<style>.powered-by,.powered-by-frappe{display:none!important}</style>\n"
         try:
