@@ -38,7 +38,7 @@ if [[ "${AMD64_ONLY}" -eq 1 ]]; then
   PLATFORMS="linux/amd64"
 fi
 
-HOMELAB_ONLY="${HOMELAB_ONLY:-0}"
+HOMELAB_ONLY="${HOMELAB_ONLY:-1}"
 AR_ONLY="${AR_ONLY:-0}"
 
 TAGS=()
