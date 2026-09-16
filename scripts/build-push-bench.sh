@@ -60,6 +60,7 @@ echo "Building platforms=${PLATFORMS} tag=${TAG}"
 echo "Targets: ${TAGS[*]}"
 
 docker buildx build \
+  --no-cache \
   --platform "${PLATFORMS}" \
   "${TAGS[@]}" \
   --push \
