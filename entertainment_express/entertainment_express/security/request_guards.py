@@ -219,7 +219,7 @@ def enforce_coming_soon() -> None:
         or path.startswith("/assets/")
         or path.startswith("/files/")
         or path == "/website_script.js"
-        or path in {"/robots.txt", "/sitemap.xml", "/favicon.ico"}
+        or path in {"/robots.txt", "/sitemap.xml", "/favicon.ico", "/llms.txt"}
     ):
         return
 
