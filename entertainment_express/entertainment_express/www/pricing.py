@@ -77,6 +77,8 @@ FEATURE_MATRIX = [
         "features": [
             {"label": "Direct Stripe & Online Invoicing", "key": "online_invoicing", "starter": "Yes", "pro": "Yes", "scale": "Yes"},
             {"label": "PWA Mobile POS & Card Readers", "key": "stripe_pos", "starter": "Online only", "pro": "Yes (Stripe Terminal)", "scale": "Yes (Unlimited Readers)"},
+            {"label": "Zero-Signal Offline Field Sync", "key": "zero_signal_sync", "starter": "Yes", "pro": "Yes", "scale": "Yes"},
+            {"label": "Instant Crew Payouts (Stripe Connect)", "key": "instant_payouts", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Digital Tip Splitting & Payroll Pool", "key": "tip_pooling", "starter": "Basic", "pro": "Yes", "scale": "Yes"},
             {"label": "Company Studio & Full Owner Parity", "key": "owner_parity", "starter": "Yes", "pro": "Yes", "scale": "Yes (Full Parity)"},
         ],
@@ -85,6 +87,7 @@ FEATURE_MATRIX = [
         "category": "Automation & Intelligence",
         "features": [
             {"label": "Weather Risk & Rain-Dates", "key": "weather_risk", "starter": "No", "pro": "Yes", "scale": "Yes"},
+            {"label": "Live Event Flight Deck & Mission Control", "key": "live_flight_deck", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Autonomous AR Dunning Agent", "key": "ar_dunning", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Multimodal Receipt OCR Expenses", "key": "receipt_ocr", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Predictive Margin Guardrails & Settlement", "key": "margin_guardrails", "starter": "Basic", "pro": "Yes", "scale": "Yes (Advanced)"},

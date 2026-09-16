@@ -1,0 +1,28 @@
+{
+ "actions": [],
+ "autoname": "format:EE-EXT-{#####}",
+ "creation": "2026-09-16 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["exchange_listing", "partner_tenant_id", "escrow_amount", "escrow_status", "white_label_packet_url", "completion_signoff_origin", "completion_signoff_partner"],
+ "fields": [
+  {"fieldname": "exchange_listing", "fieldtype": "Link", "label": "Exchange Listing", "options": "EE Exchange Listing", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "partner_tenant_id", "fieldtype": "Data", "label": "Partner Tenant ID", "in_list_view": 1},
+  {"fieldname": "escrow_amount", "fieldtype": "Currency", "label": "Escrow Amount", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "escrow_status", "fieldtype": "Select", "label": "Escrow Status", "options": "Pledged\nHeld\nDisbursed\nDisputed", "default": "Pledged", "in_list_view": 1},
+  {"fieldname": "white_label_packet_url", "fieldtype": "Data", "label": "White Label Packet URL"},
+  {"fieldname": "completion_signoff_origin", "fieldtype": "Check", "label": "Origin Signoff", "default": "0"},
+  {"fieldname": "completion_signoff_partner", "fieldtype": "Check", "label": "Partner Signoff", "default": "0"}
+ ],
+ "modified": "2026-09-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Exchange Transaction",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 0}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

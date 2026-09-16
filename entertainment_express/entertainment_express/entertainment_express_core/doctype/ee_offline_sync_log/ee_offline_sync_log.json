@@ -1,0 +1,29 @@
+{
+ "actions": [],
+ "autoname": "format:EE-OSL-{#####}",
+ "creation": "2026-09-16 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["client_uuid", "worker", "booking", "action_type", "processed_at", "status", "error_message"],
+ "fields": [
+  {"fieldname": "client_uuid", "fieldtype": "Data", "label": "Client UUID", "reqd": 1, "unique": 1, "in_list_view": 1},
+  {"fieldname": "worker", "fieldtype": "Link", "label": "Worker", "options": "User", "in_list_view": 1},
+  {"fieldname": "booking", "fieldtype": "Link", "label": "Booking", "options": "Event Booking", "in_list_view": 1},
+  {"fieldname": "action_type", "fieldtype": "Data", "label": "Action Type", "in_list_view": 1},
+  {"fieldname": "processed_at", "fieldtype": "Datetime", "label": "Processed At", "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Success\nMerged\nRejected", "default": "Success", "in_list_view": 1},
+  {"fieldname": "error_message", "fieldtype": "Small Text", "label": "Error Message"}
+ ],
+ "modified": "2026-09-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Offline Sync Log",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "EE Crew Member", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 0}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

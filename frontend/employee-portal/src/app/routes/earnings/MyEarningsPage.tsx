@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { InstantPayoutCard } from "../../components/InstantPayoutCard";
+import { ReliabilityScorecard } from "../../components/ReliabilityScorecard";
 import {
   PageHeader,
   Card,
@@ -77,6 +79,12 @@ export const MyEarningsPage: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* Instant Payout & Reliability Scorecard Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InstantPayoutCard />
+            <ReliabilityScorecard />
+          </div>
+
           {/* Top Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Card className="p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">

@@ -6,15 +6,22 @@
       "src/main.tsx"
     ]
   },
-  "_sparkles-Cz3j7nb-.js": {
-    "file": "chunks/sparkles-Cz3j7nb-.js",
+  "_shield-check-CM3nQSy7.js": {
+    "file": "chunks/shield-check-CM3nQSy7.js",
+    "name": "shield-check",
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "_sparkles-1b11mNsy.js": {
+    "file": "chunks/sparkles-1b11mNsy.js",
     "name": "sparkles",
     "imports": [
       "src/main.tsx"
     ]
   },
   "src/AppLegacy.tsx": {
-    "file": "chunks/AppLegacy-DtJT7jK9.js",
+    "file": "chunks/AppLegacy-Dn0b12O7.js",
     "name": "AppLegacy",
     "src": "src/AppLegacy.tsx",
     "isDynamicEntry": true,
@@ -24,35 +31,37 @@
     ]
   },
   "src/app/routes/dispatch/DispatchEmbedPage.tsx": {
-    "file": "chunks/DispatchEmbedPage-xMsU1_OZ.js",
+    "file": "chunks/DispatchEmbedPage-D7gI21Tb.js",
     "name": "DispatchEmbedPage",
     "src": "src/app/routes/dispatch/DispatchEmbedPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_sparkles-Cz3j7nb-.js",
+      "_sparkles-1b11mNsy.js",
       "_EmptyState-BpnsgzkI.js"
     ]
   },
   "src/app/routes/earnings/MyEarningsPage.tsx": {
-    "file": "chunks/MyEarningsPage-H4DtclcG.js",
+    "file": "chunks/MyEarningsPage-Cqac0SnR.js",
     "name": "MyEarningsPage",
     "src": "src/app/routes/earnings/MyEarningsPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_sparkles-Cz3j7nb-.js"
+      "_shield-check-CM3nQSy7.js",
+      "_sparkles-1b11mNsy.js"
     ]
   },
   "src/app/routes/today/MyDayPage.tsx": {
-    "file": "chunks/MyDayPage-CqZ1EeJx.js",
+    "file": "chunks/MyDayPage-Bxk9K6Qc.js",
     "name": "MyDayPage",
     "src": "src/app/routes/today/MyDayPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_sparkles-Cz3j7nb-.js",
-      "_EmptyState-BpnsgzkI.js"
+      "_sparkles-1b11mNsy.js",
+      "_EmptyState-BpnsgzkI.js",
+      "_shield-check-CM3nQSy7.js"
     ]
   },
   "src/main.tsx": {

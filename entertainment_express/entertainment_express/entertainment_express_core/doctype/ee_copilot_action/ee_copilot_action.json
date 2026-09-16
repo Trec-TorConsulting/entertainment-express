@@ -1,0 +1,28 @@
+{
+ "actions": [],
+ "autoname": "format:EE-CPA-{#####}",
+ "creation": "2026-09-16 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["event_booking", "action_type", "status", "confidence_score", "reviewed_by", "prompt_context", "output_payload"],
+ "fields": [
+  {"fieldname": "event_booking", "fieldtype": "Link", "label": "Event Booking", "options": "Event Booking", "in_list_view": 1},
+  {"fieldname": "action_type", "fieldtype": "Select", "label": "Action Type", "options": "Timeline Generation\nEmergency Staffing\nDocument Ingestion\nConflict Warning", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Proposed\nAccepted\nRejected\nExpired", "default": "Proposed", "in_list_view": 1},
+  {"fieldname": "confidence_score", "fieldtype": "Float", "label": "Confidence Score", "default": "0.95", "in_list_view": 1},
+  {"fieldname": "reviewed_by", "fieldtype": "Link", "label": "Reviewed By", "options": "User"},
+  {"fieldname": "prompt_context", "fieldtype": "Long Text", "label": "Prompt Context"},
+  {"fieldname": "output_payload", "fieldtype": "Code", "label": "Output Payload", "options": "JSON"}
+ ],
+ "modified": "2026-09-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Copilot Action",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 0}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

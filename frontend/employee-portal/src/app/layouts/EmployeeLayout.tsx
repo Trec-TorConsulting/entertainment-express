@@ -13,6 +13,9 @@ import {
   BarChart3, User, WifiOff, FileText, CheckSquare
 } from "lucide-react";
 
+import { SyncStatusPill } from "../components/SyncStatusPill";
+import { OfflineInspectorDrawer } from "../components/OfflineInspectorDrawer";
+
 export interface EmployeeLayoutProps {
   children: React.ReactNode;
 }
@@ -23,6 +26,7 @@ export const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
   const bootstrap = getSessionBootstrap();
   const roles = bootstrap.roles || [];
 
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
 
   useEffect(() => {
@@ -67,41 +71,42 @@ export const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <AppShell
-      title="Staff Operations"
-      portal="employee"
-      density="ops"
-      sidebar={
-        <SidebarNav
-          groups={[
-            {
-              id: "staff-nav",
-              label: "Workspaces",
-              items: navItems
-            }
-          ]}
-        />
-      }
-      bottom={<BottomNav items={bottomItems} />}
-      headerExtra={
-        !isOnline ? (
-          <Badge variant="warning" dot size="sm" className="flex items-center gap-1">
-            <WifiOff className="w-3.5 h-3.5" />
-            Offline Mode
-          </Badge>
-        ) : undefined
-      }
-    >
-      {!isOnline && (
-        <div className="mb-4 p-2.5 rounded-lg bg-[var(--ee-warning-soft)] border border-[var(--ee-warning-border)] text-xs font-medium text-[var(--ee-warning-text)] flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <WifiOff className="w-4 h-4 shrink-0" />
-            You are working offline. Roster and assignment details are served from local cache.
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-wider">Cached Roster</span>
-        </div>
-      )}
-      {children}
-    </AppShell>
+    <>
+      <AppShell
+        title="Staff Operations"
+        portal="employee"
+        density="ops"
+        sidebar={
+          <SidebarNav
+            groups={[
+              {
+                id: "staff-nav",
+                label: "Workspaces",
+                items: navItems
+              }
+            ]}
+          />
+        }
+        bottom={<BottomNav items={bottomItems} />}
+        headerExtra={
+          <SyncStatusPill onOpenInspector={() => setIsInspectorOpen(true)} />
+        }
+      >
+        {!isOnline && (
+          <div className="mb-4 p-2.5 rounded-lg bg-[var(--ee-warning-soft)] border border-[var(--ee-warning-border)] text-xs font-medium text-[var(--ee-warning-text)] flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <WifiOff className="w-4 h-4 shrink-0" />
+              You are working offline. Roster and assignment details are served from local cache.
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-wider">Cached Roster</span>
+          </div>
+        )}
+        {children}
+      </AppShell>
+      <OfflineInspectorDrawer
+        isOpen={isInspectorOpen}
+        onClose={() => setIsInspectorOpen(false)}
+      />
+    </>
   );
 };

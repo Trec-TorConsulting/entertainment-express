@@ -17,7 +17,7 @@ platform enhancements (Subcontractor Jobs, Coming Soon Landing, Tenant Website B
 Atomix VirtualDJ Integration & AI Virtual DJ Suite), and flagship modules (PWA Stripe Terminal POS Hardware,
 Complete Owner Portal Parity, AI Financial Intelligence In-The-Box, Autonomous Event Operations Out-Of-The-Box, and Predictive Margin Guardrails)
 are fully implemented and verified (archived under `openspec/changes/archive/`). Live image tag in
-[`k8s-deployment.yaml`](k8s-deployment.yaml) is **`0.1.9-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
+[`k8s-deployment.yaml`](k8s-deployment.yaml) is **`0.1.10-ee`**. Honest operator checklist: [`DEPLOYMENT_READINESS.md`](DEPLOYMENT_READINESS.md).
 
 ---
 
@@ -27,6 +27,11 @@ are fully implemented and verified (archived under `openspec/changes/archive/`).
 |---|---|
 | **Control plane** | Operator site at `admin.<domain>` — self-service signup, 3-tier plans (Starter / Pro / Scale), entitlement enforcement, provisioning jobs, tenant lifecycle. |
 | **Marketing front door** | `www.<domain>` public acquisition engine — SEO-optimized vertical pages, competitor comparisons, interactive showcase, blog/resource center, and operator-configurable Coming Soon teaser mode with early-access waitlist. |
+| **Zero-Signal Field Sync** | IndexedDB local-first PWA queue, sub-millisecond offline barcode validation, offline client signature capture, and deterministic background sync engine. |
+| **Autonomous Event Copilot** | Solar/golden-hour run-of-show synthesis, 1-click emergency replacement ladder SMS dispatch, technical rider PDF parser, and venue noise curfew compliance. |
+| **B2B Overflow Exchange** | Control-plane mediated peer gig network, automated COI verification, margin escrow settlement, and non-solicitation white-label gig packets. |
+| **Instant Crew Payouts** | Stripe Connect instant debit card transfers 30m post-teardown, damage checklist gates, and 0-100 reliability scoring with priority dispatch tiering. |
+| **Live Event Flight Deck** | Real-time mission control map, 500m geofenced milestone check-ins, 1-tap (+15m/+30m) dynamic timeline offset shifter, and hardware fault escalation. |
 | **Predictive Margin Guardrails** | Pre-quote gross margin simulator, automated minimum margin floor enforcement (35%), live cost drift monitor with 5% threshold alerts, and 1-click post-event ledger settlement. |
 | **CRM & Booking** | Event bookings, holds, catalog at `/book` and `/catalog`, interactive proposals, contracts, conflict detection, and 60-second AI instant quoting. |
 | **PWA Mobile POS & Hardware** | Stripe Terminal Bluetooth/network reader pairing (Stripe Reader M2 / WisePOS E) on crew phones — in-person chip/tap/swipe/Apple Pay, on-site overtime add-ons, digital tip splitting, automated payroll tip pool compiler, and instant SMS receipts. |

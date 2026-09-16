@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "autoname": "format:EE-IPO-{#####}",
+ "creation": "2026-09-16 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["worker", "event_booking", "amount", "fee_deducted", "net_payout", "stripe_payout_id", "status", "failure_reason", "payout_timestamp"],
+ "fields": [
+  {"fieldname": "worker", "fieldtype": "Link", "label": "Worker", "options": "User", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "event_booking", "fieldtype": "Link", "label": "Event Booking", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "amount", "fieldtype": "Currency", "label": "Gross Amount", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "fee_deducted", "fieldtype": "Currency", "label": "Fee Deducted", "default": "0"},
+  {"fieldname": "net_payout", "fieldtype": "Currency", "label": "Net Payout", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "stripe_payout_id", "fieldtype": "Data", "label": "Stripe Payout ID"},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Pending\nProcessing\nPaid\nFailed\nBlocked", "default": "Pending", "in_list_view": 1},
+  {"fieldname": "failure_reason", "fieldtype": "Small Text", "label": "Failure Reason"},
+  {"fieldname": "payout_timestamp", "fieldtype": "Datetime", "label": "Payout Timestamp"}
+ ],
+ "modified": "2026-09-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Instant Payout",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "EE Crew Member", "read": 1, "write": 0, "create": 1, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 0}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

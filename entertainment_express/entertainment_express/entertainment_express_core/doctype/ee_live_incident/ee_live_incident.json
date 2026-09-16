@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "autoname": "format:EE-INC-{#####}",
+ "creation": "2026-09-16 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["event_booking", "reported_by", "incident_time", "severity", "category", "asset", "description", "status", "resolution_notes"],
+ "fields": [
+  {"fieldname": "event_booking", "fieldtype": "Link", "label": "Event Booking", "options": "Event Booking", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "reported_by", "fieldtype": "Link", "label": "Reported By", "options": "User", "in_list_view": 1},
+  {"fieldname": "incident_time", "fieldtype": "Datetime", "label": "Incident Time", "in_list_view": 1},
+  {"fieldname": "severity", "fieldtype": "Select", "label": "Severity", "options": "Minor\nMajor\nCritical", "default": "Minor", "in_list_view": 1},
+  {"fieldname": "category", "fieldtype": "Select", "label": "Category", "options": "Audio/Visual Equipment\nVehicle/Transit\nPower/Venue\nStaffing/Talent\nClient/Guest Issue", "default": "Audio/Visual Equipment", "in_list_view": 1},
+  {"fieldname": "asset", "fieldtype": "Data", "label": "Asset Reference"},
+  {"fieldname": "description", "fieldtype": "Small Text", "label": "Description", "reqd": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Open\nAcknowledged\nResolving\nResolved", "default": "Open", "in_list_view": 1},
+  {"fieldname": "resolution_notes", "fieldtype": "Small Text", "label": "Resolution Notes"}
+ ],
+ "modified": "2026-09-16 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Entertainment Express Core",
+ "name": "EE Live Incident",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "EE Tenant Admin", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "EE Crew Member", "read": 1, "write": 1, "create": 1, "delete": 0},
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 0}
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}
