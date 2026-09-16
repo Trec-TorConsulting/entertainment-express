@@ -1,0 +1,60 @@
+{% set kit = ee_brand_kit or {} %}
+{% set brand = app_name or kit.get('brand_name') or 'Entertainment Express' %}
+{% set logo = kit.get('brand_logo') or '' %}
+{% set text = footer_text or kit.get('footer_text') or '' %}
+{% set hide_product = hide_product_chrome or (kit.get('white_label_mode') == 'full') %}
+
+<footer class="ee-web-footer" role="contentinfo">
+  <div class="container">
+    <div class="row ee-footer-main py-5">
+      <div class="col-lg-5 col-md-6 mb-4 mb-md-0">
+        <div class="ee-footer-brand mb-3">
+          {% if logo %}
+            <img src="{{ logo }}" alt="{{ brand }}" class="ee-footer-logo" style="max-height: 36px; width: auto;">
+          {% else %}
+            <h5 class="ee-footer-brand-title font-weight-bold mb-0">{{ brand }}</h5>
+          {% endif %}
+        </div>
+        {% if text %}
+          <p class="ee-footer-desc text-muted mb-3">{{ text }}</p>
+        {% else %}
+          <p class="ee-footer-desc text-muted mb-3">Professional live entertainment, event production, and booking services.</p>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4 mb-md-0 ml-auto">
+        <h6 class="text-uppercase font-weight-bold text-muted mb-3" style="letter-spacing: 0.05em; font-size: 0.8rem;">Quick Links</h6>
+        <ul class="list-unstyled ee-footer-nav">
+          <li class="mb-2"><a href="/" class="text-muted">Home</a></li>
+          <li class="mb-2"><a href="/catalog" class="text-muted">Event Catalog</a></li>
+          <li class="mb-2"><a href="/request-quote" class="text-muted">Request a Quote</a></li>
+          <li class="mb-2"><a href="/client" class="text-muted">Customer Portal</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+        <h6 class="text-uppercase font-weight-bold text-muted mb-3" style="letter-spacing: 0.05em; font-size: 0.8rem;">Account & Access</h6>
+        <ul class="list-unstyled ee-footer-nav">
+          {% if frappe.session.user and frappe.session.user != 'Guest' %}
+            <li class="mb-2"><a href="/client" class="text-muted">My Account</a></li>
+            <li class="mb-2"><a href="/logout" class="text-muted">Sign Out</a></li>
+          {% else %}
+            <li class="mb-2"><a href="/login" class="text-muted">Client Login</a></li>
+            <li class="mb-2"><a href="/signup" class="text-muted">Create Account</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="ee-footer-bottom border-top py-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
+      <p class="mb-2 mb-md-0 text-muted small">
+        &copy; {{ frappe.utils.now_datetime().year }} {{ brand }}. All rights reserved.
+      </p>
+      {% if show_ee_badge and not hide_product %}
+        <p class="mb-0 text-muted small">
+          Powered by <a href="https://{{ base_domain or 'entx.app' }}" target="_blank" rel="noopener noreferrer" class="text-muted font-weight-bold">Entertainment Express</a>
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</footer>

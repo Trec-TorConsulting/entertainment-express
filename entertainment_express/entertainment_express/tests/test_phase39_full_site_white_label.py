@@ -244,8 +244,9 @@ def test_control_plane_skips_tenant_kit(monkeypatch):
     monkeypatch.setattr(wl_kit, "skip_tenant_kit", lambda: True)
     ctx = {"head_html": ""}
     branding.update_website_context(ctx)
-    assert "ee-white-label.css" not in (ctx.get("head_html") or "")
-    assert ctx.get("brand_html") is None
+    assert ctx.get("brand_html") == "Entertainment Express"
+    assert ctx.get("ee_brand_kit", {}).get("brand_name") == "Entertainment Express"
+
 
 
 def test_email_wrapper_uses_kit():
@@ -326,3 +327,22 @@ def test_css_variables_emit_extended_tokens():
     assert "--ee-accent:#333333" in css
     assert "--ee-bg:#fafafa" in css
     assert "--ee-font-display:" in css
+
+
+def test_web_navbar_and_footer_templates_exist():
+    import os
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    nav_path = os.path.join(base_dir, "templates", "includes", "navbar", "navbar.html")
+    ftr_path = os.path.join(base_dir, "templates", "includes", "footer", "footer.html")
+    assert os.path.exists(nav_path)
+    assert os.path.exists(ftr_path)
+    with open(nav_path, "r", encoding="utf-8") as f:
+        nav_content = f.read()
+    with open(ftr_path, "r", encoding="utf-8") as f:
+        ftr_content = f.read()
+
+    assert "ee-web-navbar" in nav_content
+    assert "ee-web-footer" in ftr_content
+    assert "footer-subscribe" not in ftr_content
+    assert "Get updates" not in ftr_content
+
