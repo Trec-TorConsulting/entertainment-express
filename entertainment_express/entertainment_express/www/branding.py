@@ -154,6 +154,11 @@ def update_website_context(context):
         ".ee-web-navbar .nav-link:hover,.navbar-nav .nav-link:hover{color:#0f766e !important;background-color:#f1f5f9 !important;border-radius:6px;}"
         ".ee-navbar-brand-name,.ee-web-navbar .ee-brand-title,.navbar-brand{color:#0f172a !important;font-weight:700 !important;}"
         ".ee-web-navbar .ee-nav-login{color:#0f172a !important;font-weight:600 !important;}"
+        ".web-footer,header.web-footer,.ee-web-footer,footer.ee-web-footer,.ee-site-footer,footer.ee-site-footer{background:#ffffff !important;background-color:#ffffff !important;border-top:1px solid #e2e8f0 !important;color:#0f172a !important;}"
+        ".ee-footer-brand-title,.ee-web-footer .ee-footer-brand-title,.ee-site-footer strong{color:#0f172a !important;font-weight:700 !important;}"
+        ".ee-footer-nav a,.ee-web-footer a,.ee-site-footer a,.ee-web-footer a.text-muted{color:#1e293b !important;font-weight:600 !important;}"
+        ".ee-footer-nav a:hover,.ee-web-footer a:hover,.ee-site-footer a:hover{color:#0f766e !important;text-decoration:underline !important;}"
+        ".ee-web-footer .text-muted,.ee-web-footer h6,.ee-web-footer p,.ee-web-footer small,.ee-site-footer,.ee-site-footer div{color:#475569 !important;}"
         ".footer-powered{display:none!important}"
         "</style>\n"
     )

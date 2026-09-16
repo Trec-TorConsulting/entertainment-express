@@ -300,33 +300,74 @@ html[data-theme="dark"] .ee-web-navbar .navbar-toggler-icon {
   filter: none !important;
 }
 
+.web-footer,
+footer.web-footer,
+.ee-web-footer,
+footer.ee-web-footer,
+.ee-site-footer,
+footer.ee-site-footer,
+body .web-footer,
+html .web-footer,
+body .ee-web-footer,
+html .ee-web-footer,
 body.dark .web-footer,
 [data-theme="dark"] .web-footer,
 html[data-theme="dark"] .web-footer,
 body.dark .ee-web-footer,
 [data-theme="dark"] .ee-web-footer,
-html[data-theme="dark"] .ee-web-footer {
-  background: #0f172a !important;
-  border-top-color: #1e293b !important;
-  color: #f8fafc !important;
+html[data-theme="dark"] .ee-web-footer,
+body.dark .ee-site-footer,
+[data-theme="dark"] .ee-site-footer,
+html[data-theme="dark"] .ee-site-footer {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-top: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
 }
 
+.ee-footer-brand-title,
+.ee-web-footer .ee-footer-brand-title,
+.ee-site-footer strong,
 body.dark .ee-footer-brand-title,
 [data-theme="dark"] .ee-footer-brand-title,
 html[data-theme="dark"] .ee-footer-brand-title {
-  color: #f8fafc !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
 }
 
+.ee-web-footer .text-muted,
+.ee-web-footer h6,
+.ee-web-footer p,
+.ee-web-footer small,
+.ee-site-footer,
+.ee-site-footer div,
+body.dark .ee-web-footer .text-muted,
+[data-theme="dark"] .ee-web-footer .text-muted,
+html[data-theme="dark"] .ee-web-footer .text-muted {
+  color: #475569 !important;
+}
+
+.ee-footer-nav a,
+.ee-web-footer a,
+.ee-site-footer a,
+.ee-web-footer a.text-muted,
 body.dark .ee-footer-nav a,
 [data-theme="dark"] .ee-footer-nav a,
-html[data-theme="dark"] .ee-footer-nav a {
-  color: #cbd5e1 !important;
+html[data-theme="dark"] .ee-footer-nav a,
+body.dark .ee-site-footer a,
+[data-theme="dark"] .ee-site-footer a {
+  color: #1e293b !important;
+  font-weight: 600 !important;
 }
 
+.ee-footer-nav a:hover,
+.ee-web-footer a:hover,
+.ee-site-footer a:hover,
 body.dark .ee-footer-nav a:hover,
 [data-theme="dark"] .ee-footer-nav a:hover,
 html[data-theme="dark"] .ee-footer-nav a:hover {
-  color: #a78bfa !important;
+  color: #0f766e !important;
+  text-decoration: underline !important;
 }
 
 /* Force hiding Frappe default subscription & powered-by elements on all EE web pages */
