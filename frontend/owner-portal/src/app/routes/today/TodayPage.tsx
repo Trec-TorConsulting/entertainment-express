@@ -14,7 +14,7 @@ import {
   getSessionBootstrap
 } from "@portal-kit";
 import {
-  Calendar, CheckCircle2, MapPin, AlertTriangle, ArrowRight, PlusCircle, Inbox, DollarSign, Clock
+  Calendar, CheckCircle2, MapPin, AlertTriangle, ArrowRight, PlusCircle, Inbox, DollarSign, Clock, Sparkles
 } from "lucide-react";
 
 export const TodayPage: React.FC = () => {
@@ -90,9 +90,9 @@ export const TodayPage: React.FC = () => {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in-50 duration-300">
-      {/* Friendly Hero Header */}
-      <div>
-        <div className="flex flex-col gap-2">
+      {/* Friendly Hero Header with Quick Action CTAs */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)]">
             {greeting}, {firstName}!
           </h1>
@@ -102,6 +102,24 @@ export const TodayPage: React.FC = () => {
               : "Your schedule is clear right now."}
             {hasActionNeeded && " There are a few things that need your attention."}
           </p>
+        </div>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <Button
+            variant="outline"
+            density="cockpit"
+            onClick={() => navigate("/pipeline?new=1")}
+            leftIcon={<Sparkles className="w-3.5 h-3.5 text-[var(--ee-brand)]" />}
+          >
+            + New Inquiry
+          </Button>
+          <Button
+            variant="primary"
+            density="cockpit"
+            onClick={() => navigate("/calendar/new")}
+            leftIcon={<Calendar className="w-3.5 h-3.5" />}
+          >
+            + New Booking
+          </Button>
         </div>
       </div>
 

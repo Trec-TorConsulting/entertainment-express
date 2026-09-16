@@ -214,3 +214,14 @@ def field_vendors(booking: str) -> list[dict]:
         {"name": row["vendor"], "role": row["role"], "phone": row["phone"]}
         for row in _assignments_for(booking)
     ]
+
+
+@frappe.whitelist()
+def delete_vendor(name: str) -> dict:
+    _require_staff()
+    if not frappe.db.exists("EE Vendor", name):
+        frappe.throw(f"Vendor {name} not found.", frappe.DoesNotExistError)
+    frappe.delete_doc("EE Vendor", name, ignore_permissions=True)
+    frappe.db.commit()
+    return {"ok": True, "name": name}
+

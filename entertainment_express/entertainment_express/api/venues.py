@@ -170,3 +170,14 @@ def venue_jobs(name: str) -> list[dict]:
             }
         )
     return rows
+
+
+@frappe.whitelist()
+def delete_venue(name: str) -> dict:
+    _require_staff()
+    if not frappe.db.exists("EE Venue", name):
+        frappe.throw(f"Venue {name} not found.", frappe.DoesNotExistError)
+    frappe.delete_doc("EE Venue", name, ignore_permissions=True)
+    frappe.db.commit()
+    return {"ok": True, "name": name}
+

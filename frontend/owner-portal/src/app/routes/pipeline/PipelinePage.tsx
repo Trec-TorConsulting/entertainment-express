@@ -13,17 +13,20 @@ import {
   Skeleton,
   EmptyState,
   MarginHealthBadge,
+  Input,
+  Textarea,
+  FormField,
   call
 } from "@portal-kit";
 import {
   Sparkles, CheckCircle2, Send, Check, AlertTriangle,
-  FileText, Clock, User, DollarSign, ChevronRight, Handshake, TrendingUp
+  FileText, Clock, User, DollarSign, ChevronRight, Handshake, TrendingUp,
+  Edit, Trash2, Plus, Zap
 } from "lucide-react";
 import { SubOutModal } from "../subcontractors/SubOutModal";
 import { EventPLDrawer } from "../money/components/EventPLDrawer";
 import { SubRentalTracker } from "./SubRentalTracker";
 import { SmartQuoteModal } from "./SmartQuoteModal";
-import { Zap } from "lucide-react";
 
 const STAGES = [
   { id: "inquiry", label: "Inquiry" },
@@ -50,6 +53,19 @@ export const PipelinePage: React.FC = () => {
   const [plDrawerBookingId, setPlDrawerBookingId] = useState<string | null>(null);
   const [smartQuoteOpen, setSmartQuoteOpen] = useState(false);
 
+  // Full CRUD Inquiry Modal State
+  const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({
+    id: "",
+    contact_name: "",
+    email: "",
+    phone: "",
+    status: "New",
+    notes: ""
+  });
+  const [savingInquiry, setSavingInquiry] = useState(false);
+  const [deletingInquiry, setDeletingInquiry] = useState(false);
+
   const reload = async () => {
     try {
       const res = await call("entertainment_express.api.portal_crud.list_records", { kind: "inquiry" });
@@ -71,6 +87,95 @@ export const PipelinePage: React.FC = () => {
   useEffect(() => {
     reload();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      handleOpenNewInquiry();
+    }
+  }, [searchParams]);
+
+  const handleOpenNewInquiry = () => {
+    setInquiryForm({
+      id: "",
+      contact_name: "",
+      email: "",
+      phone: "",
+      status: "New",
+      notes: ""
+    });
+    setInquiryModalOpen(true);
+  };
+
+  const handleOpenEditInquiry = (inq: any) => {
+    setInquiryForm({
+      id: inq.id || inq.name,
+      contact_name: inq.contact_name || inq.client_name || inq.party || "",
+      email: inq.email || "",
+      phone: inq.phone || "",
+      status: inq.status || "New",
+      notes: inq.notes || ""
+    });
+    setInquiryModalOpen(true);
+  };
+
+  const handleSaveInquiry = async () => {
+    if (!inquiryForm.contact_name.trim()) {
+      toast({ title: "Name Required", description: "Please enter a client or contact name.", variant: "warning" });
+      return;
+    }
+    setSavingInquiry(true);
+    try {
+      await call("entertainment_express.api.portal_crud.save_record", {
+        kind: "inquiry",
+        name: inquiryForm.id || null,
+        values: inquiryForm
+      });
+      toast({
+        title: inquiryForm.id ? "Inquiry Updated" : "Inquiry Created",
+        description: `Successfully saved ${inquiryForm.contact_name}.`,
+        variant: "success"
+      });
+      setInquiryModalOpen(false);
+      await reload();
+    } catch (err: any) {
+      toast({
+        title: "Save Failed",
+        description: err?.message || "Could not save inquiry.",
+        variant: "danger"
+      });
+    } finally {
+      setSavingInquiry(false);
+    }
+  };
+
+  const handleDeleteInquiry = async (inqId: string) => {
+    if (!window.confirm("Are you sure you want to delete this deal from your pipeline?")) return;
+    setDeletingInquiry(true);
+    try {
+      await call("entertainment_express.api.portal_crud.delete_record", {
+        kind: "inquiry",
+        name: inqId
+      });
+      toast({
+        title: "Inquiry Removed",
+        description: "Deal has been removed from the pipeline.",
+        variant: "success"
+      });
+      if (selectedInquiry?.id === inqId) {
+        setDrawerOpen(false);
+        setSelectedInquiry(null);
+      }
+      await reload();
+    } catch (err: any) {
+      toast({
+        title: "Delete Failed",
+        description: err?.message || "Could not delete inquiry.",
+        variant: "danger"
+      });
+    } finally {
+      setDeletingInquiry(false);
+    }
+  };
 
   const openInquiryDetail = async (inquiry: any) => {
     setSelectedInquiry(inquiry);
@@ -175,7 +280,7 @@ export const PipelinePage: React.FC = () => {
           <Button
             variant="primary"
             density="cockpit"
-            onClick={() => navigate("/pipeline/new")}
+            onClick={handleOpenNewInquiry}
             leftIcon={<Sparkles className="w-3.5 h-3.5" />}
           >
             + New Inquiry
@@ -347,6 +452,22 @@ export const PipelinePage: React.FC = () => {
                 </Button>
                 <Button
                   variant="outline"
+                  onClick={() => handleOpenEditInquiry(selectedInquiry)}
+                  leftIcon={<Edit className="w-3.5 h-3.5" />}
+                >
+                  Edit Deal
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-red-500 hover:text-red-600 border-red-200 dark:border-red-900/40"
+                  onClick={() => handleDeleteInquiry(selectedInquiry.id)}
+                  leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                  disabled={deletingInquiry}
+                >
+                  Delete
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => navigate(`/pipeline/${encodeURIComponent(selectedInquiry.id)}/proposal`)}
                 >
                   Full Editor
@@ -501,6 +622,71 @@ export const PipelinePage: React.FC = () => {
         defaultInquiryText={selectedInquiry?.notes || selectedInquiry?.description || ""}
         onQuoteDispatched={reload}
       />
+
+      {/* Create / Edit Inquiry Modal */}
+      <Dialog
+        open={inquiryModalOpen}
+        onOpenChange={setInquiryModalOpen}
+        title={inquiryForm.id ? "Edit Pipeline Deal" : "New Client Inquiry"}
+        description="Enter client contact information and notes to track this inquiry through your sales pipeline."
+      >
+        <div className="py-4 space-y-4 text-sm">
+          <FormField label="Client / Contact Name" required>
+            <Input
+              value={inquiryForm.contact_name}
+              onChange={(e) => setInquiryForm({ ...inquiryForm, contact_name: e.target.value })}
+              placeholder="e.g. Sarah Jenkins or Wayne Enterprises"
+            />
+          </FormField>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField label="Email Address">
+              <Input
+                type="email"
+                value={inquiryForm.email}
+                onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
+                placeholder="client@example.com"
+              />
+            </FormField>
+            <FormField label="Phone Number">
+              <Input
+                type="tel"
+                value={inquiryForm.phone}
+                onChange={(e) => setInquiryForm({ ...inquiryForm, phone: e.target.value })}
+                placeholder="(555) 123-4567"
+              />
+            </FormField>
+          </div>
+          <FormField label="Pipeline Status">
+            <select
+              value={inquiryForm.status}
+              onChange={(e) => setInquiryForm({ ...inquiryForm, status: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl bg-[var(--ee-surface)] border border-[var(--ee-border)] text-sm text-[var(--ee-text)] focus:outline-none focus:border-[var(--ee-brand)]"
+            >
+              <option value="New">New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Quote">Quote</option>
+              <option value="Booked">Booked</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </FormField>
+          <FormField label="Notes & Event Requirements">
+            <Textarea
+              rows={3}
+              value={inquiryForm.notes}
+              onChange={(e) => setInquiryForm({ ...inquiryForm, notes: e.target.value })}
+              placeholder="Event date, venue, requested packages, music preferences..."
+            />
+          </FormField>
+        </div>
+        <div className="flex justify-end gap-2.5 pt-3 border-t border-[var(--ee-border-subtle)]">
+          <Button variant="secondary" onClick={() => setInquiryModalOpen(false)} disabled={savingInquiry}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveInquiry} loading={savingInquiry}>
+            {inquiryForm.id ? "Save Changes" : "Create Deal"}
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 };

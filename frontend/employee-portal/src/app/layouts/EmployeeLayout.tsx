@@ -50,6 +50,7 @@ export const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
     ...(isField ? [{ id: "field", label: "Field Board", icon: <CheckSquare className="w-4 h-4" />, active: currentPath.startsWith("/field"), onClick: () => navigate("/field") }] : []),
     ...(isSales ? [{ id: "sales", label: "Sales Pipeline", icon: <FileText className="w-4 h-4" />, active: currentPath.startsWith("/sales"), onClick: () => navigate("/sales") }] : []),
     ...(isAccounting ? [{ id: "accounting", label: "Accounting", icon: <DollarSign className="w-4 h-4" />, active: currentPath.startsWith("/accounting"), onClick: () => navigate("/accounting") }] : []),
+    { id: "earnings", label: "My Earnings", icon: <DollarSign className="w-4 h-4" />, active: currentPath.startsWith("/earnings"), onClick: () => navigate("/earnings") },
     { id: "reports", label: "Reports", icon: <BarChart3 className="w-4 h-4" />, active: currentPath.startsWith("/reports"), onClick: () => navigate("/reports") },
     { id: "me", label: "My Profile", icon: <User className="w-4 h-4" />, active: currentPath.startsWith("/me"), onClick: () => navigate("/me") },
   ];
@@ -61,6 +62,7 @@ export const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
       : isField
       ? [{ id: "field", label: "Field", icon: <CheckSquare className="w-5 h-5" />, active: currentPath.startsWith("/field"), onClick: () => navigate("/field") }]
       : [{ id: "sales", label: "Sales", icon: <FileText className="w-5 h-5" />, active: currentPath.startsWith("/sales"), onClick: () => navigate("/sales") }]),
+    { id: "earnings", label: "Pay", icon: <DollarSign className="w-5 h-5" />, active: currentPath.startsWith("/earnings"), onClick: () => navigate("/earnings") },
     { id: "me", label: "Profile", icon: <User className="w-5 h-5" />, active: currentPath.startsWith("/me"), onClick: () => navigate("/me") }
   ];
 

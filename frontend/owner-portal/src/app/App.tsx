@@ -40,6 +40,9 @@ export const OwnerApp: React.FC = () => {
           {/* Flagship Routes */}
           <Route path="/" element={<TodayPage />} />
           <Route path="/pipeline" element={<PipelinePage />} />
+          <Route path="/pipeline/new" element={<Navigate to="/pipeline?new=1" replace />} />
+          <Route path="/pipeline/:id/proposal" element={<LegacyWorkspaces />} />
+          <Route path="/pipeline/:id" element={<LegacyWorkspaces />} />
           <Route path="/fleet" element={<FleetHealthPage />} />
           <Route path="/fleet/vans" element={<VanManifestPage />} />
           <Route path="/money" element={<MoneyPage />} />

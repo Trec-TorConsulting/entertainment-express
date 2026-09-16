@@ -2186,6 +2186,7 @@ function ReportsWorkspace() {
 
 function PlacesWorkspace() {
   const [rows, setRows] = React.useState<any[]>([]);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
   const [name, setName] = React.useState("");
   const [address, setAddress] = React.useState("");
   const [loadIn, setLoadIn] = React.useState("");
@@ -2201,6 +2202,35 @@ function PlacesWorkspace() {
     reload();
   }, []);
 
+  const resetForm = () => {
+    setEditingId(null);
+    setName("");
+    setAddress("");
+    setLoadIn("");
+    setCoi(false);
+    setError("");
+  };
+
+  const handleEdit = (row: any) => {
+    setEditingId(row.id);
+    setName(row.name || "");
+    setAddress(row.address || "");
+    setLoadIn(row.load_in || "");
+    setCoi(Boolean(row.coi_required));
+    setError("");
+  };
+
+  const handleDelete = async (venueId: string) => {
+    if (!window.confirm("Are you sure you want to remove this venue?")) return;
+    try {
+      await call("entertainment_express.api.venues.delete_venue", { name: venueId });
+      if (editingId === venueId) resetForm();
+      reload();
+    } catch (err: any) {
+      setError(err.message || "Could not delete this place.");
+    }
+  };
+
   return (
     <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
       <header>
@@ -2213,11 +2243,11 @@ function PlacesWorkspace() {
           event.preventDefault();
           setError("");
           try {
-            await call("entertainment_express.api.venues.save_venue", { values: { name, address, load_in: loadIn, coi_required: coi ? 1 : 0 } });
-            setName("");
-            setAddress("");
-            setLoadIn("");
-            setCoi(false);
+            await call("entertainment_express.api.venues.save_venue", {
+              values: { name, address, load_in: loadIn, coi_required: coi ? 1 : 0 },
+              name: editingId || undefined
+            });
+            resetForm();
             reload();
           } catch (err: any) {
             setError(err.message || "Could not save that place.");
@@ -2238,17 +2268,34 @@ function PlacesWorkspace() {
           Certificate of insurance required
         </label>
         {error ? <p className="ee-form__error">{error}</p> : null}
-        <button type="submit" className="ee-btn">
-          Save place
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="submit" className="ee-btn">
+            {editingId ? "Update place" : "Save place"}
+          </button>
+          {editingId ? (
+            <button type="button" className="ee-btn" style={{ background: "transparent", border: "1px solid var(--ee-border)" }} onClick={resetForm}>
+              Cancel
+            </button>
+          ) : null}
+        </div>
       </form>
       {rows.length ? (
-        <ul>
+        <ul style={{ display: "grid", gap: "0.5rem", listStyle: "none", padding: 0 }}>
           {rows.map((row) => (
-            <li key={row.id}>
-              {row.name}
-              {row.coi_required ? " · certificate required" : ""}
-              {row.address ? ` · ${row.address}` : ""}
+            <li key={row.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0.75rem", border: "1px solid var(--ee-border)", borderRadius: "6px" }}>
+              <div>
+                <strong>{row.name}</strong>
+                {row.coi_required ? " · certificate required" : ""}
+                {row.address ? ` · ${row.address}` : ""}
+              </div>
+              <div style={{ display: "flex", gap: "0.35rem" }}>
+                <button type="button" className="ee-btn" style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }} onClick={() => handleEdit(row)}>
+                  Edit
+                </button>
+                <button type="button" className="ee-btn" style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", color: "var(--ee-danger)", border: "1px solid var(--ee-danger)", background: "transparent" }} onClick={() => handleDelete(row.id)}>
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -2262,6 +2309,7 @@ function PlacesWorkspace() {
 function PartnersWorkspace() {
   const [rows, setRows] = React.useState<any[]>([]);
   const [referrals, setReferrals] = React.useState<any[]>([]);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
   const [name, setName] = React.useState("");
   const [category, setCategory] = React.useState("Photographer");
   const [error, setError] = React.useState("");
@@ -2278,6 +2326,31 @@ function PartnersWorkspace() {
     reload();
   }, []);
 
+  const resetForm = () => {
+    setEditingId(null);
+    setName("");
+    setCategory("Photographer");
+    setError("");
+  };
+
+  const handleEdit = (row: any) => {
+    setEditingId(row.id);
+    setName(row.name || "");
+    setCategory(row.category || "Photographer");
+    setError("");
+  };
+
+  const handleDelete = async (vendorId: string) => {
+    if (!window.confirm("Are you sure you want to remove this partner?")) return;
+    try {
+      await call("entertainment_express.api.vendors.delete_vendor", { name: vendorId });
+      if (editingId === vendorId) resetForm();
+      reload();
+    } catch (err: any) {
+      setError(err.message || "Could not delete this partner.");
+    }
+  };
+
   return (
     <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
       <header>
@@ -2290,8 +2363,11 @@ function PartnersWorkspace() {
           event.preventDefault();
           setError("");
           try {
-            await call("entertainment_express.api.vendors.save_vendor", { values: { name, category, preferred: 1 } });
-            setName("");
+            await call("entertainment_express.api.vendors.save_vendor", {
+              values: { name, category, preferred: 1 },
+              name: editingId || undefined
+            });
+            resetForm();
             reload();
           } catch (err: any) {
             setError(err.message || "Could not save that partner.");
@@ -2305,15 +2381,32 @@ function PartnersWorkspace() {
           <input value={category} onChange={(e) => setCategory(e.target.value)} />
         </FormField>
         {error ? <p className="ee-form__error">{error}</p> : null}
-        <button type="submit" className="ee-btn">
-          Save partner
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="submit" className="ee-btn">
+            {editingId ? "Update partner" : "Save partner"}
+          </button>
+          {editingId ? (
+            <button type="button" className="ee-btn" style={{ background: "transparent", border: "1px solid var(--ee-border)" }} onClick={resetForm}>
+              Cancel
+            </button>
+          ) : null}
+        </div>
       </form>
       {rows.length ? (
-        <ul>
+        <ul style={{ display: "grid", gap: "0.5rem", listStyle: "none", padding: 0 }}>
           {rows.map((row) => (
-            <li key={row.id}>
-              {row.name} · {row.category}
+            <li key={row.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0.75rem", border: "1px solid var(--ee-border)", borderRadius: "6px" }}>
+              <div>
+                <strong>{row.name}</strong> · {row.category}
+              </div>
+              <div style={{ display: "flex", gap: "0.35rem" }}>
+                <button type="button" className="ee-btn" style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem" }} onClick={() => handleEdit(row)}>
+                  Edit
+                </button>
+                <button type="button" className="ee-btn" style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", color: "var(--ee-danger)", border: "1px solid var(--ee-danger)", background: "transparent" }} onClick={() => handleDelete(row.id)}>
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -4556,6 +4649,9 @@ export default function LegacyWorkspaces() {
       <Route path="/calendar/new" element={<CrudEditor kind="job" basePath="/calendar" />} />
       <Route path="/calendar/:id/proposal" element={<ProposalWorkspace />} />
       <Route path="/calendar/:id" element={<CrudEditor kind="job" basePath="/calendar" />} />
+      <Route path="/pipeline/new" element={<CrudEditor kind="inquiry" basePath="/pipeline" />} />
+      <Route path="/pipeline/:id/proposal" element={<ProposalWorkspace />} />
+      <Route path="/pipeline/:id" element={<CrudEditor kind="inquiry" basePath="/pipeline" />} />
       <Route path="/schedule" element={<ScheduleWorkspace />} />
       <Route path="/places" element={<PlacesWorkspace />} />
       <Route path="/partners" element={<PartnersWorkspace />} />
