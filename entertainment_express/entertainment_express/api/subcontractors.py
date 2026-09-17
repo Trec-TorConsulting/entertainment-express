@@ -478,3 +478,89 @@ def _notify_owner_of_subcontract_response(doc, action: str) -> None:
                 }).insert(ignore_permissions=True)
     except Exception:
         pass
+
+
+@frappe.whitelist()
+def get_b2b_opt_in_status() -> dict:
+    """Return B2B network exchange opt-in status for this tenant company."""
+    _require_staff()
+    opt_in = False
+    try:
+        if frappe.db.table_exists("EE Portal Settings"):
+            s = frappe.get_single("EE Portal Settings")
+            opt_in = bool(cint(getattr(s, "b2b_exchange_opt_in", 0)))
+    except Exception:
+        pass
+    return {"b2b_exchange_opt_in": opt_in}
+
+
+@frappe.whitelist()
+def toggle_b2b_opt_in(opt_in: bool | int | str = True) -> dict:
+    """Toggle B2B network exchange opt-in preference."""
+    _require_staff()
+    val = 1 if cint(opt_in) or str(opt_in).lower() in ("true", "1") else 0
+    try:
+        if frappe.db.table_exists("EE Portal Settings"):
+            s = frappe.get_single("EE Portal Settings")
+            if hasattr(s, "b2b_exchange_opt_in"):
+                s.b2b_exchange_opt_in = val
+                s.save(ignore_permissions=True)
+            else:
+                # Store in feature_flags JSON if field does not exist in schema
+                flags = frappe.parse_json(getattr(s, "feature_flags", "{}") or "{}") or {}
+                flags["b2b_exchange_opt_in"] = val
+                frappe.db.set_single_value("EE Portal Settings", "feature_flags", frappe.as_json(flags))
+    except Exception:
+        pass
+    return {"b2b_exchange_opt_in": bool(val)}
+
+
+@frappe.whitelist()
+def list_job_board(visibility: str | None = None) -> list[dict]:
+    """List open overflow jobs posted to the Job Board or B2B Exchange."""
+    _require_staff()
+    if not frappe.db.table_exists("EE Subcontract Job"):
+        return []
+
+    filters = {"status": ["in", ["board_listed", "offered", "draft"]]}
+    if visibility:
+        filters["scope_type"] = visibility
+
+    jobs = frappe.get_all(
+        "EE Subcontract Job",
+        filters=filters,
+        fields=["name"],
+        order_by="modified desc",
+        limit_page_length=200,
+    )
+    return [_serialize_job(frappe.get_doc("EE Subcontract Job", row.name)) for row in jobs]
+
+
+@frappe.whitelist()
+def claim_job_board_listing(job_id: str, vendor_id: str | None = None) -> dict:
+    """Subcontractor / peer claims a posted job listing with automated COI verification."""
+    _require_staff()
+    if not frappe.db.exists("EE Subcontract Job", job_id):
+        frappe.throw(f"Job listing {job_id} not found", frappe.DoesNotExistError)
+
+    doc = frappe.get_doc("EE Subcontract Job", job_id)
+    target_vendor = vendor_id or doc.vendor
+
+    # Automated COI Compliance Gate
+    if target_vendor and frappe.db.exists("EE Vendor", target_vendor):
+        vendor_doc = frappe.get_doc("EE Vendor", target_vendor)
+        if not getattr(vendor_doc, "coi_on_file", 0):
+            frappe.throw(
+                f"Compliance Gate: Partner '{getattr(vendor_doc, 'vendor_name', target_vendor)}' must have an active Certificate of Insurance (COI) on file to claim network jobs.",
+                frappe.ValidationError,
+            )
+
+    if target_vendor:
+        doc.vendor = target_vendor
+    doc.status = "accepted"
+    doc.response_at = now_datetime()
+    doc.save(ignore_permissions=True)
+
+    _notify_owner_of_subcontract_response(doc, "accept")
+    return _serialize_job(doc)
+

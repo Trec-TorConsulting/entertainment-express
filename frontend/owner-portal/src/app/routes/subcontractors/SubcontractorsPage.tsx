@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { SubOutModal } from "./SubOutModal";
 import { AddSubcontractorModal } from "./AddSubcontractorModal";
+import { B2BOptInCard } from "./B2BOptInCard";
+import { PostJobModal } from "./PostJobModal";
 
 export const SubcontractorsPage: React.FC = () => {
   const { toast } = useToast();
@@ -42,6 +44,7 @@ export const SubcontractorsPage: React.FC = () => {
   const [selectedPartnerForSub, setSelectedPartnerForSub] = useState<any>(null);
   const [subModalOpen, setSubModalOpen] = useState(false);
   const [addPartnerModalOpen, setAddPartnerModalOpen] = useState(false);
+  const [postJobModalOpen, setPostJobModalOpen] = useState(false);
   const [actingJobId, setActingJobId] = useState<string | null>(null);
 
   const loadData = async () => {
@@ -408,6 +411,14 @@ export const SubcontractorsPage: React.FC = () => {
           <Button
             variant="outline"
             density="cockpit"
+            onClick={() => setPostJobModalOpen(true)}
+            leftIcon={<Handshake className="w-3.5 h-3.5 text-purple-400" />}
+          >
+            + Post Job to Board
+          </Button>
+          <Button
+            variant="outline"
+            density="cockpit"
             onClick={() => setAddPartnerModalOpen(true)}
             leftIcon={<Plus className="w-3.5 h-3.5 text-[var(--ee-brand)]" />}
           >
@@ -426,6 +437,9 @@ export const SubcontractorsPage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* B2B Exchange Opt-In Banner */}
+      <B2BOptInCard />
 
       {/* Top Margin & Performance Metric Cards */}
       <StatGrid columns={4}>
@@ -480,6 +494,16 @@ export const SubcontractorsPage: React.FC = () => {
         onOpenChange={setAddPartnerModalOpen}
         onSuccess={() => {
           setActiveTab("directory");
+          loadData();
+        }}
+      />
+
+      {/* Post Overflow Job Modal */}
+      <PostJobModal
+        open={postJobModalOpen}
+        onOpenChange={setPostJobModalOpen}
+        onSuccess={() => {
+          setActiveTab("jobs");
           loadData();
         }}
       />

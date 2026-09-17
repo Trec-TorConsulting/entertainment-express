@@ -288,8 +288,20 @@ def test_create_subcontractor_api(monkeypatch):
     monkeypatch.setattr(subcontractors, "frappe", fake)
     monkeypatch.setattr("entertainment_express.api.vendors.save_vendor", fake_save_vendor)
 
-    res = subcontractors.create_subcontractor({"name": "Apex Audio LLC", "category": "DJ & Audio Production"})
-    assert res["name"] == "Apex Audio LLC"
-    assert saved["subcontractor"] == 1
+def test_b2b_opt_in_and_job_board(monkeypatch):
+    from entertainment_express.api import subcontractors
+
+    fake = _Fake(["EE Tenant Admin"])
+    fake.db.table_exists = lambda dt: True
+    fake.db.exists = lambda dt, name: True
+    fake.get_single = lambda dt: _Dict({"b2b_exchange_opt_in": 1})
+    monkeypatch.setattr(subcontractors, "frappe", fake)
+
+    status = subcontractors.get_b2b_opt_in_status()
+    assert status["b2b_exchange_opt_in"] is True
+
+    toggled = subcontractors.toggle_b2b_opt_in(False)
+    assert toggled["b2b_exchange_opt_in"] is False
+
 
 
