@@ -34,7 +34,7 @@ def secrets(provider: str) -> dict:
     if not frappe.db.exists("Integration Config", provider):
         return {}
     doc = frappe.get_doc("Integration Config", provider)
-    if not int(doc.enabled or 0):
+    if not int(getattr(doc, "enabled", 0) or 0):
         return {}
     try:
         raw = doc.get_password("credentials") if hasattr(doc, "get_password") else (doc.credentials or "")

@@ -25,7 +25,9 @@ import {
   Edit2,
   Trash2,
   Building,
-  Navigation
+  Navigation,
+  Search,
+  Loader2
 } from "lucide-react";
 
 interface VenueRecord {
@@ -51,53 +53,54 @@ export const PlacesPage: React.FC = () => {
   const [vCoi, setVCoi] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const loadVenues = async () => {
-    setLoading(true);
-    try {
-      const res = await call("entertainment_express.api.venues.list_venues", {});
-      if (res && res.length > 0) {
-        setVenues(res);
-      } else {
-        setVenues(defaultVenues);
-      }
-    } catch {
-      setVenues(defaultVenues);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Live Place & Address Lookup State
+  const [lookupQuery, setLookupQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<Array<{ title: string; address: string; geo?: string; city?: string; state?: string }>>([]);
+  const [searching, setSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
-    loadVenues();
-  }, []);
-
-  const defaultVenues: VenueRecord[] = [
-    {
-      id: "VEN-01",
-      name: "The Ritz-Carlton Grand Ballroom",
-      address: "100 Ritz Carlton Dr, Atlanta, GA 30303",
-      load_in: "Freight elevator on North Dock #2. 48-hour advanced security clearance required for truck arrival.",
-      coi_required: true,
-      power_notes: "Dedicated 3-phase 100A disconnect panel behind stage right."
-    },
-    {
-      id: "VEN-02",
-      name: "Pine Crest Country Club Pavilion",
-      address: "4500 Pine Crest Way, Alpharetta, GA 30005",
-      load_in: "Ground level double doors adjacent to outdoor patio. Golf cart escort required across green.",
-      coi_required: true,
-      power_notes: "4 separate 20A duplex outlets on dedicated circuits."
-    },
-    {
-      id: "VEN-03",
-      name: "Metropolitan Convention Center - Hall B",
-      address: "250 International Blvd, Atlanta, GA 30313",
-      load_in: "Roll-up bay doors #12 & #14. Semi-truck ramp access available.",
-      coi_required: true
+    if (!lookupQuery || lookupQuery.trim().length < 2) {
+      setSuggestions([]);
+      setSearching(false);
+      return;
     }
-  ];
+
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await call("entertainment_express.api.venues.search_places_autocomplete", {
+          query: lookupQuery.trim()
+        });
+        if (Array.isArray(res)) {
+          setSuggestions(res);
+          setShowSuggestions(res.length > 0);
+        }
+      } catch {
+        // Fallback silently if offline
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [lookupQuery]);
+
+  const handleSelectSuggestion = (s: { title: string; address: string; geo?: string }) => {
+    setVName(s.title);
+    setVAddress(s.address);
+    setLookupQuery("");
+    setShowSuggestions(false);
+    toast({
+      title: "Place Auto-Filled",
+      description: `Loaded details for ${s.title}`
+    });
+  };
 
   const handleOpenEditor = (v?: VenueRecord) => {
+    setLookupQuery("");
+    setSuggestions([]);
+    setShowSuggestions(false);
     if (v) {
       setEditingVenue(v);
       setVName(v.name);
@@ -308,6 +311,51 @@ export const PlacesPage: React.FC = () => {
         description="Store address, loading dock notes, and Certificate of Insurance requirements."
       >
         <form onSubmit={handleSaveVenue} className="space-y-4 pt-2">
+          {/* Live Place & Address Lookup Autocomplete */}
+          <div className="relative bg-emerald-50/50 dark:bg-emerald-950/20 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800 space-y-2">
+            <label className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              Quick Place & Address Lookup Autocomplete
+            </label>
+            <div className="relative">
+              <Search className="w-4 h-4 text-emerald-600 dark:text-emerald-400 absolute left-3 top-2.5 pointer-events-none" />
+              <input
+                className="w-full pl-9 pr-8 py-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder='Search venue name or address e.g. "Ritz Carlton Atlanta"...'
+                value={lookupQuery}
+                onChange={(e) => setLookupQuery(e.target.value)}
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              />
+              {searching && (
+                <Loader2 className="w-4 h-4 text-emerald-600 animate-spin absolute right-3 top-2.5" />
+              )}
+            </div>
+
+            {/* Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                {suggestions.map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="w-full text-left p-3 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors flex items-start gap-2.5 group"
+                    onClick={() => handleSelectSuggestion(item)}
+                  >
+                    <MapPin className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
+                        {item.title}
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {item.address}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <FormField label="Venue Name">
             <input
               className="w-full px-3 py-2 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-sm"

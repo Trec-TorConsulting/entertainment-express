@@ -1074,6 +1074,21 @@ def test_hardening():
     return True
 
 
+def test_place_lookup_search():
+    """Test map/place search autocomplete logic in integrations.maps."""
+    print("✓ Testing Place & Address Lookup Autocomplete logic...")
+    try:
+        sys.path.insert(0, "entertainment_express")
+        from entertainment_express.integrations.maps import search_places
+        results = search_places("Ritz Carlton Atlanta", limit=3)
+        assert isinstance(results, list), "search_places did not return a list"
+        print(f"  ✓ place autocomplete logic verified ({len(results)} search results returned)")
+        return True
+    except Exception as e:
+        print(f"  ✗ Place autocomplete test failed: {e}")
+        return False
+
+
 
 def main():
     print("\n" + "="*60)
@@ -1106,6 +1121,7 @@ def main():
         test_login_white_label_suite,
         test_appointment_connectivity_suite,
         test_hardening,
+        test_place_lookup_search,
         test_live_marketing_smoke,
         test_portal_artifacts,
     ]

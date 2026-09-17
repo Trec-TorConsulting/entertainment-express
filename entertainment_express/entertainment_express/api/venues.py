@@ -181,3 +181,13 @@ def delete_venue(name: str) -> dict:
     frappe.db.commit()
     return {"ok": True, "name": name}
 
+
+@frappe.whitelist()
+def search_places_autocomplete(query: str = "") -> list[dict]:
+    """Search for venue names and street addresses for live autocomplete."""
+    _require_staff()
+    from entertainment_express.integrations.maps import search_places
+
+    return search_places(query, limit=6)
+
+
