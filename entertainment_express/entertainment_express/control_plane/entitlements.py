@@ -148,4 +148,9 @@ def push_plan_to_site(tenant_name: str, extra: dict | None = None) -> None:
         flags.update(extra)
     from entertainment_express.control_plane.lifecycle import update_site_flags
 
-    update_site_flags(tenant.site_name, flags)
+    if tenant.site_name:
+        update_site_flags(tenant.site_name, flags)
+    current_site = getattr(getattr(frappe, "local", None), "site", None)
+    if current_site and current_site != tenant.site_name:
+        update_site_flags(current_site, flags)
+

@@ -174,6 +174,51 @@ def create_subscription_checkout(tenant_name: str | None = None, interval: str =
 def my_plan() -> dict:
     _deny_crew()
     require_roles(*OWNER, *OPS)
+
+    slug = (frappe.conf.get("ee_tenant_slug") or "").strip()
+    site = getattr(getattr(frappe, "local", None), "site", "") or ""
+
+    tenant_name = None
+    if frappe.db.exists("DocType", "Tenant"):
+        if slug:
+            tenant_name = frappe.db.get_value("Tenant", {"tenant_slug": slug}, "name")
+        if not tenant_name and site:
+            tenant_name = frappe.db.get_value("Tenant", {"site_name": site}, "name") or frappe.db.get_value("Tenant", site.split(".")[0], "name")
+        if not tenant_name and slug:
+            tenant_name = frappe.db.get_value("Tenant", slug, "name")
+
+    if tenant_name:
+        try:
+            push_plan_to_site(tenant_name)
+        except Exception:
+            pass
+
+    if tenant_name:
+        try:
+            tenant_doc = frappe.get_doc("Tenant", tenant_name)
+            plan_doc = frappe.get_doc("Plan", tenant_doc.plan)
+            plan_name = plan_doc.plan_name or plan_doc.name
+            currency = plan_doc.currency or "USD"
+            price_display = frappe.utils.fmt_money(frappe.utils.flt(plan_doc.price_monthly), currency=currency)
+            sub = frappe.db.get_value(
+                "Subscription",
+                {"tenant": tenant_name},
+                ["status", "current_period_end", "cancel_at_period_end"],
+                as_dict=True,
+            ) or {}
+            conf = frappe.conf or {}
+            return {
+                "plan": plan_name,
+                "status": sub.get("status") or (tenant_doc.status if tenant_doc.status == "suspended" else "active"),
+                "period_end": str(sub.get("current_period_end") or conf.get("ee_period_end") or ""),
+                "price": price_display,
+                "cancel_at_period_end": int(sub.get("cancel_at_period_end") or 0),
+                "cancel_requested": int(conf.get("ee_cancel_requested") or 0),
+                "suspended": 1 if tenant_doc.status == "suspended" else 0,
+            }
+        except Exception:
+            pass
+
     conf = frappe.conf or {}
     status = conf.get("ee_subscription_status") or "trialing"
     return {
@@ -185,6 +230,7 @@ def my_plan() -> dict:
         "cancel_requested": int(conf.get("ee_cancel_requested") or 0),
         "suspended": int(conf.get("ee_suspended") or 0),
     }
+
 
 
 @frappe.whitelist()
