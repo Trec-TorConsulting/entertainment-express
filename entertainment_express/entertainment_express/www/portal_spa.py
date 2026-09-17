@@ -131,7 +131,7 @@ def apply_spa_context(context, *, title: str, portal: str) -> None:
     # module cache, loading duplicate React instances and triggering Minified React error #321.
     ver = _portal_asset_version(portal)
     context.spa_css = f"/assets/entertainment_express/{portal}/assets/main.css?v={ver}"
-    context.spa_js = f"/assets/entertainment_express/{portal}/main.js"
+    context.spa_js = f"/assets/entertainment_express/{portal}/main.js?v={ver}"
     context.portal_bootstrap = portal_bootstrap()
     context.show_ee_badge = context.portal_bootstrap.get("show_ee_badge", 0)
     context.base_domain = context.portal_bootstrap.get("base_domain", "entx.app")

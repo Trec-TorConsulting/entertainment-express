@@ -52,7 +52,7 @@ const OWNER_NAV = [
       { to: "/grow", label: "Grow" },
       { to: "/website", label: "Website" },
       { to: "/coverage", label: "Coverage" },
-      { to: "/move", label: "Move" },
+      { to: "/import", label: "Import" },
       { to: "/brand", label: "Brand" },
       { to: "/connections", label: "Connections" },
       { to: "/security", label: "Security" },
@@ -2695,11 +2695,11 @@ function MoveWorkspace() {
   return (
     <section className="ee-records" style={{ display: "grid", gap: "1rem" }}>
       <header>
-        <h1 style={{ margin: 0 }}>Move</h1>
+        <h1 style={{ margin: 0 }}>Import</h1>
         <p className="ee-muted">Bring lists in from a spreadsheet, preview first, then commit. Download what is already here anytime.</p>
       </header>
       <form className="ee-form" onSubmit={(event) => event.preventDefault()}>
-        <FormField label="What to move">
+        <FormField label="What to import">
           <select value={target} onChange={(e) => setTarget(e.target.value)}>
             {MOVE_TARGETS.map((row) => (
               <option key={row.id} value={row.id}>
@@ -4656,7 +4656,8 @@ export default function LegacyWorkspaces() {
       <Route path="/places" element={<PlacesWorkspace />} />
       <Route path="/partners" element={<PartnersWorkspace />} />
       <Route path="/coverage" element={<CoverageWorkspace />} />
-      <Route path="/move" element={<MoveWorkspace />} />
+      <Route path="/import" element={<MoveWorkspace />} />
+      <Route path="/move" element={<Navigate to="/import" replace />} />
       <Route path="/dispatch" element={<DispatchWorkspace />} />
       <Route path="/event-details" element={<EventPlanningWorkspace />} />
       <Route path="/catalog" element={<CatalogWorkspace />} />
