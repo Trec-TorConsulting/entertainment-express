@@ -44,6 +44,41 @@ def _default_value_props(company_name: str) -> list[dict]:
     ]
 
 
+def _default_entertainers() -> list[dict]:
+    return [
+        {
+            "id": "ent-1",
+            "name": "Marcus Vance",
+            "stage_name": "DJ Marcus 'BeatDrop' Vance",
+            "role": "Lead DJ & Master of Ceremonies",
+            "photo_url": "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb1?w=500&auto=format&fit=crop&q=80",
+            "bio": "10+ years spinning high-energy wedding receptions, corporate galas, and festival mainstages. Specializes in multi-genre crowd reading, seamless transitions, and bilingual MCing.",
+            "specialties": ["High-Energy MC", "Open-Format DJ", "Corporate Galas", "Weddings"],
+            "show_on_website": 1,
+        },
+        {
+            "id": "ent-2",
+            "name": "Elena Rostova",
+            "stage_name": "Elena Rostova — Electric Strings",
+            "role": "Electric Violinist & Solo Performer",
+            "photo_url": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80",
+            "bio": "Conservatory-trained virtuoso performing contemporary pop covers, classical fusion, and ambient cocktail hour sets. Creates captivating visual and acoustic atmospheres.",
+            "specialties": ["Electric Violin", "Cocktail Hour", "Classical Fusion", "Ceremony Music"],
+            "show_on_website": 1,
+        },
+        {
+            "id": "ent-3",
+            "name": "David Sterling",
+            "stage_name": "David Sterling Magic & MC",
+            "role": "Event Host & Strolling Magician",
+            "photo_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80",
+            "bio": "Engaging close-up illusionist and interactive host who keeps guests amazed during cocktail hours and VIP receptions.",
+            "specialties": ["Strolling Magic", "VIP Hospitality", "Interactive Hosting"],
+            "show_on_website": 1,
+        },
+    ]
+
+
 @frappe.whitelist()
 def get_website_config() -> dict:
     """Retrieve complete website builder settings and status."""
@@ -61,6 +96,13 @@ def get_website_config() -> dict:
         value_props = json.loads(raw_props) if raw_props else _default_value_props(company)
     except Exception:
         value_props = _default_value_props(company)
+
+    # Entertainers Bios
+    raw_entertainers = settings.get("entertainers_json") or ""
+    try:
+        entertainers = json.loads(raw_entertainers) if raw_entertainers else _default_entertainers()
+    except Exception:
+        entertainers = _default_entertainers()
 
     # Pages count
     pages_count = 0
@@ -92,7 +134,9 @@ def get_website_config() -> dict:
         "show_packages": cint(settings.get("show_packages")) if settings.get("show_packages") is not None else 1,
         "show_reviews": cint(settings.get("show_reviews")) if settings.get("show_reviews") is not None else 1,
         "show_contact": cint(settings.get("show_contact")) if settings.get("show_contact") is not None else 1,
+        "show_entertainers": cint(settings.get("show_entertainers")) if settings.get("show_entertainers") is not None else 1,
         "value_props": value_props,
+        "entertainers": entertainers,
         "public_embed_key": settings.get("public_embed_key") or "",
         "review_url": settings.get("review_url") or "",
         "pages_count": pages_count,
@@ -127,7 +171,7 @@ def save_website_config(values: dict | str | None = None) -> dict:
         if field in values:
             setattr(settings, field, values[field])
 
-    for bool_field in ["show_packages", "show_reviews", "show_contact"]:
+    for bool_field in ["show_packages", "show_reviews", "show_contact", "show_entertainers"]:
         if bool_field in values:
             setattr(settings, bool_field, 1 if cint(values[bool_field]) else 0)
 
@@ -137,6 +181,13 @@ def save_website_config(values: dict | str | None = None) -> dict:
             settings.value_props_json = json.dumps(vprops)
         elif isinstance(vprops, str):
             settings.value_props_json = vprops
+
+    if "entertainers" in values:
+        ents = values["entertainers"]
+        if isinstance(ents, list):
+            settings.entertainers_json = json.dumps(ents)
+        elif isinstance(ents, str):
+            settings.entertainers_json = ents
 
     settings.save(ignore_permissions=True)
 

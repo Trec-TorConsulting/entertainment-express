@@ -84,7 +84,7 @@ def get_embed_settings() -> dict:
         "public_embed_key": key,
         "snippet": snippet,
         "script_url": f"{base}/assets/entertainment_express/embed.js",
-        "widgets": ["availability", "catalog", "wishlist", "book", "reviews"],
+        "widgets": ["availability", "catalog", "wishlist", "book", "reviews", "entertainers"],
     }
 
 
@@ -189,7 +189,7 @@ def bootstrap(key: str | None = None) -> dict:
         "ok": True,
         "brand": brand,
         "book_url": f"{frappe.utils.get_url()}/book",
-        "widgets": ["availability", "catalog", "wishlist", "book", "reviews"],
+        "widgets": ["availability", "catalog", "wishlist", "book", "reviews", "entertainers"],
     }
 
 
@@ -264,3 +264,20 @@ def reviews(key: str | None = None) -> dict:
         "label": "See our reviews",
         "brand": brand,
     }
+
+
+@frappe.whitelist(allow_guest=True)
+def entertainers(key: str | None = None) -> dict:
+    _cors()
+    embed_key = _assert_embed_key(key)
+    _rate_limit(embed_key)
+    from entertainment_express.api.portal_website import get_website_config
+
+    config = get_website_config()
+    all_ents = config.get("entertainers") or []
+    public_ents = [e for e in all_ents if e.get("show_on_website")]
+    return {
+        "entertainers": public_ents,
+        "brand": _brand(),
+    }
+

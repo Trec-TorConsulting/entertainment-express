@@ -37,7 +37,17 @@ import {
   Bookmark,
   MousePointerClick,
   Laptop,
-  CheckCircle2
+  CheckCircle2,
+  Users,
+  UserCheck,
+  Camera,
+  MessageSquare,
+  Share2,
+  Trash2,
+  Edit3,
+  PlusCircle,
+  Music,
+  Mic
 } from "lucide-react";
 import { PageModal } from "./PageModal";
 
@@ -58,8 +68,10 @@ export const WebsitePage: React.FC = () => {
   const [showPackages, setShowPackages] = useState(true);
   const [showReviews, setShowReviews] = useState(true);
   const [showContact, setShowContact] = useState(true);
+  const [showEntertainers, setShowEntertainers] = useState(true);
   const [reviewUrl, setReviewUrl] = useState("");
   const [valueProps, setValueProps] = useState<any[]>([]);
+  const [entertainers, setEntertainers] = useState<any[]>([]);
   const [packagesCount, setPackagesCount] = useState(0);
 
   // Custom Pages
@@ -71,7 +83,7 @@ export const WebsitePage: React.FC = () => {
   const [embedKey, setEmbedKey] = useState("");
   const [embedSnippet, setEmbedSnippet] = useState("");
   const [rotatingKey, setRotatingKey] = useState(false);
-  const [selectedWidget, setSelectedWidget] = useState<"catalog" | "availability" | "book" | "reviews" | "wishlist">("catalog");
+  const [selectedWidget, setSelectedWidget] = useState<"catalog" | "availability" | "book" | "reviews" | "wishlist" | "entertainers">("catalog");
   const [previewDate, setPreviewDate] = useState("2026-10-24");
   const [previewBookLabel, setPreviewBookLabel] = useState("Book Your Event Now");
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
@@ -96,8 +108,10 @@ export const WebsitePage: React.FC = () => {
         setShowPackages(c.show_packages === 1);
         setShowReviews(c.show_reviews === 1);
         setShowContact(c.show_contact === 1);
+        setShowEntertainers(c.show_entertainers === 1);
         setReviewUrl(c.review_url || "");
         setValueProps(c.value_props || []);
+        setEntertainers(c.entertainers || []);
         setPackagesCount(c.packages_count || 0);
       }
 
@@ -133,13 +147,15 @@ export const WebsitePage: React.FC = () => {
           show_packages: showPackages ? 1 : 0,
           show_reviews: showReviews ? 1 : 0,
           show_contact: showContact ? 1 : 0,
+          show_entertainers: showEntertainers ? 1 : 0,
           review_url: reviewUrl,
-          value_props: valueProps
+          value_props: valueProps,
+          entertainers: entertainers
         }
       });
       toast({
         title: "Website Published",
-        description: "Landing page messaging and section visibility have been updated.",
+        description: "Landing page messaging, section visibility, and entertainer bios have been updated.",
         variant: "success"
       });
     } catch (err: any) {
@@ -197,6 +213,51 @@ export const WebsitePage: React.FC = () => {
       updated[index] = { ...updated[index], [field]: val };
       setValueProps(updated);
     }
+  };
+
+  const handleAddEntertainer = () => {
+    const newEnt = {
+      id: "ent-" + Date.now(),
+      name: "New Performer",
+      stage_name: "Stage / Artist Name",
+      role: "Lead DJ / MC",
+      photo_url: "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb1?w=500&auto=format&fit=crop&q=80",
+      bio: "Enter performer biography, experience, music style, and event background here...",
+      specialties: ["Weddings", "Corporate Galas"],
+      show_on_website: 1
+    };
+    setEntertainers([...entertainers, newEnt]);
+    toast({
+      title: "Entertainer Profile Drafted",
+      description: "New performer profile added. Edit bio details and click 'Save Changes'.",
+      variant: "success"
+    });
+  };
+
+  const handleUpdateEntertainer = (id: string, field: string, value: any) => {
+    setEntertainers(
+      entertainers.map((ent) => (ent.id === id ? { ...ent, [field]: value } : ent))
+    );
+  };
+
+  const handleDeleteEntertainer = (id: string) => {
+    setEntertainers(entertainers.filter((ent) => ent.id !== id));
+    toast({
+      title: "Entertainer Removed",
+      description: "Profile removed from roster.",
+      variant: "neutral"
+    });
+  };
+
+  const handleCopyChatCard = (ent: any) => {
+    const specs = Array.isArray(ent.specialties) ? ent.specialties.join(", ") : ent.specialties || "";
+    const text = `📸 ${ent.stage_name || ent.name} — ${ent.role}\nPhoto: ${ent.photo_url || "No image"}\nBio: ${ent.bio || ""}\nSpecialties: ${specs}`;
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Chat Bio Card Copied!",
+      description: "Entertainer photo & bio snippet copied to clipboard for client chats.",
+      variant: "success"
+    });
   };
 
   if (loading) {
@@ -396,6 +457,27 @@ export const WebsitePage: React.FC = () => {
               <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--ee-brand)]"></div>
             </label>
           </div>
+
+          <div className="flex items-center justify-between p-3.5 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)]">
+            <div>
+              <div className="text-sm font-semibold text-[var(--ee-text)] flex items-center gap-2">
+                <Users className="w-4 h-4 text-[var(--ee-brand)]" />
+                "Meet Our Entertainers" Showcase Grid
+              </div>
+              <div className="text-xs text-[var(--ee-muted)] mt-0.5">
+                Displays entertainer bios, stage photos, and specialty skill badges ({entertainers.filter(e => e.show_on_website).length} active)
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showEntertainers}
+                onChange={(e) => setShowEntertainers(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--ee-brand)]"></div>
+            </label>
+          </div>
         </CardContent>
       </Card>
 
@@ -431,6 +513,243 @@ export const WebsitePage: React.FC = () => {
               </div>
             </div>
           ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // --- TAB 2: ENTERTAINERS & BIOS ---
+  const entertainersTab = (
+    <div className="space-y-6">
+      {/* Overview & Global Visibility Toggle */}
+      <Card elevated>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <Users className="w-5 h-5 text-[var(--ee-brand)]" />
+              Public Entertainer Roster & Bios Studio
+            </CardTitle>
+            <p className="text-xs text-[var(--ee-muted)] mt-1">
+              List your DJs, MCs, musicians, and performers with high-res bio photos, stage names, and specialties. Photos and bio snippets can be shared directly in client chats.
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            density="cockpit"
+            onClick={handleAddEntertainer}
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add Entertainer Profile
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-3.5 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)]">
+            <div>
+              <div className="text-sm font-semibold text-[var(--ee-text)] flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-[var(--ee-brand)]" />
+                Show "Meet Our Entertainers" Section on Website
+              </div>
+              <div className="text-xs text-[var(--ee-muted)] mt-0.5">
+                Displays the public team roster on your landing page ({entertainers.filter((e) => e.show_on_website).length} active)
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showEntertainers}
+                onChange={(e) => setShowEntertainers(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--ee-brand)]"></div>
+            </label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Entertainer Bio Cards Editor List */}
+      <div className="space-y-4">
+        {entertainers.map((ent, idx) => (
+          <Card key={ent.id || idx} elevated className="overflow-hidden border border-[var(--ee-border)]">
+            <CardHeader className="bg-[var(--ee-surface-inset)]/50 py-3 border-b border-[var(--ee-border)] flex flex-row items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img
+                  src={ent.photo_url || "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb1?w=100&auto=format&fit=crop&q=80"}
+                  alt={ent.name}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-[var(--ee-brand)] shrink-0"
+                />
+                <div>
+                  <h4 className="font-bold text-sm text-[var(--ee-text)]">{ent.stage_name || ent.name || "Unnamed Performer"}</h4>
+                  <p className="text-xs text-[var(--ee-muted)]">{ent.role || "Entertainer / Staff"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  density="compact"
+                  onClick={() => handleCopyChatCard(ent)}
+                  title="Copy Bio Pic & Summary for Client Chat"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 mr-1 text-[var(--ee-brand)]" />
+                  Copy Chat Bio Card
+                </Button>
+                <Button
+                  variant="danger"
+                  density="compact"
+                  onClick={() => handleDeleteEntertainer(ent.id)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField label="Real / Full Name *">
+                  <Input
+                    type="text"
+                    value={ent.name || ""}
+                    placeholder="e.g. Marcus Vance"
+                    onChange={(e) => handleUpdateEntertainer(ent.id, "name", e.target.value)}
+                  />
+                </FormField>
+                <FormField label="Stage / Artist Name *">
+                  <Input
+                    type="text"
+                    value={ent.stage_name || ""}
+                    placeholder="e.g. DJ Marcus 'BeatDrop' Vance"
+                    onChange={(e) => handleUpdateEntertainer(ent.id, "stage_name", e.target.value)}
+                  />
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField label="Primary Role / Title *">
+                  <Input
+                    type="text"
+                    value={ent.role || ""}
+                    placeholder="e.g. Lead DJ & Master of Ceremonies"
+                    onChange={(e) => handleUpdateEntertainer(ent.id, "role", e.target.value)}
+                  />
+                </FormField>
+                <FormField label="High-Res Bio Photo URL *">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      value={ent.photo_url || ""}
+                      placeholder="https://images.unsplash.com/..."
+                      onChange={(e) => handleUpdateEntertainer(ent.id, "photo_url", e.target.value)}
+                    />
+                    {ent.photo_url && (
+                      <a
+                        href={ent.photo_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 border rounded-md text-[var(--ee-brand)] hover:bg-[var(--ee-surface-inset)]"
+                        title="View photo"
+                      >
+                        <Camera className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </FormField>
+              </div>
+
+              <FormField label="Public Bio & Profile Summary">
+                <textarea
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm border rounded-md bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] focus:outline-none focus:ring-1 focus:ring-[var(--ee-brand)]"
+                  placeholder="Describe experience, energy, performance style, crowd engagement, background..."
+                  value={ent.bio || ""}
+                  onChange={(e) => handleUpdateEntertainer(ent.id, "bio", e.target.value)}
+                />
+              </FormField>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                <FormField label="Specialties & Key Skills (Comma separated)">
+                  <Input
+                    type="text"
+                    value={Array.isArray(ent.specialties) ? ent.specialties.join(", ") : ent.specialties || ""}
+                    placeholder="Weddings, Corporate Galas, Open Format, Bilingual MC"
+                    onChange={(e) =>
+                      handleUpdateEntertainer(
+                        ent.id,
+                        "specialties",
+                        e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean)
+                      )
+                    }
+                  />
+                </FormField>
+
+                <div className="flex items-center justify-between sm:justify-end gap-3 pt-4">
+                  <span className="text-xs text-[var(--ee-muted)] font-medium">Show on Website:</span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={ent.show_on_website === 1 || ent.show_on_website === true}
+                      onChange={(e) => handleUpdateEntertainer(ent.id, "show_on_website", e.target.checked ? 1 : 0)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--ee-brand)]"></div>
+                  </label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Live Website Team Showcase Preview Box */}
+      <Card elevated className="border-2 border-[var(--ee-brand)]/20 bg-gradient-to-b from-[var(--ee-surface-inset)] to-[var(--ee-surface)]">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-[var(--ee-border)]">
+          <div className="flex items-center gap-2">
+            <Eye className="w-4 h-4 text-[var(--ee-brand)]" />
+            <CardTitle className="text-sm font-bold uppercase tracking-wider text-[var(--ee-muted)]">
+              Live "Meet Our Entertainers" Website Section Preview
+            </CardTitle>
+          </div>
+          <Badge variant="brand" size="sm">Client View Simulation</Badge>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="text-center max-w-xl mx-auto mb-8">
+            <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-[var(--ee-brand)]/10 text-[var(--ee-brand)] mb-2">
+              ✨ World-Class Talent Roster
+            </span>
+            <h3 className="text-xl font-extrabold text-[var(--ee-text)]">Meet Your Entertainers</h3>
+            <p className="text-xs text-[var(--ee-muted)] mt-1">
+              Handcrafted performances, insured professionals, and unforgettable energy for your celebration.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {entertainers.filter((e) => e.show_on_website).map((ent, i) => (
+              <div key={ent.id || i} className="bg-[var(--ee-surface)] rounded-xl border border-[var(--ee-border)] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="h-48 overflow-hidden relative bg-slate-200">
+                  <img
+                    src={ent.photo_url || "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb1?w=500&auto=format&fit=crop&q=80"}
+                    alt={ent.stage_name || ent.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-3.5">
+                    <div>
+                      <h4 className="font-bold text-white text-base leading-tight">{ent.stage_name || ent.name}</h4>
+                      <p className="text-xs text-amber-300 font-medium mt-0.5">{ent.role}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 space-y-3">
+                  <p className="text-xs text-[var(--ee-muted)] line-clamp-3 leading-relaxed">
+                    {ent.bio}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {(Array.isArray(ent.specialties) ? ent.specialties : []).slice(0, 3).map((spec: string, sIdx: number) => (
+                      <span key={sIdx} className="px-2 py-0.5 text-[10px] font-semibold rounded bg-[var(--ee-brand)]/10 text-[var(--ee-brand)]">
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -542,6 +861,7 @@ export const WebsitePage: React.FC = () => {
   const widgetBookSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="book" data-ee-key="${embedKey || "YOUR_KEY"}" data-ee-label="${previewBookLabel}"></div>`;
   const widgetReviewsSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="reviews" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`;
   const widgetWishlistSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="wishlist" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`;
+  const widgetEntertainersSnippet = `<script src="/assets/entertainment_express/embed.js" async></script>\n<div data-ee-widget="entertainers" data-ee-key="${embedKey || "YOUR_KEY"}"></div>`;
 
   const embedsTab = (
     <div className="space-y-8">
@@ -554,7 +874,7 @@ export const WebsitePage: React.FC = () => {
               Embed Widgets on Any External Website
             </CardTitle>
             <p className="text-xs text-[var(--ee-muted)] mt-1">
-              Already have a website on WordPress, Squarespace, Wix, or Shopify? Embed live booking calendars, package menus, and review badges with two lines of code.
+              Already have a website on WordPress, Squarespace, Wix, or Shopify? Embed live booking calendars, package menus, entertainer roster bios, and review badges with two lines of code.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -657,6 +977,18 @@ export const WebsitePage: React.FC = () => {
           >
             <Bookmark className="w-3.5 h-3.5" />
             5. Saved Wishlist
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedWidget("entertainers")}
+            className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 whitespace-nowrap ${
+              selectedWidget === "entertainers"
+                ? "bg-[var(--ee-brand)] text-white border-[var(--ee-brand)] shadow-sm"
+                : "bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] hover:bg-[var(--ee-surface-inset)]"
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            6. Entertainers Roster
           </button>
         </div>
 
@@ -903,6 +1235,50 @@ export const WebsitePage: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                {/* 6. ENTERTAINERS ROSTER WIDGET PREVIEW */}
+                {selectedWidget === "entertainers" && (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4 max-w-lg mx-auto">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                          <Users className="w-4 h-4 text-[var(--ee-brand)]" />
+                          Featured Entertainers & Talent Roster
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Live roster widget embeddable on any external website</p>
+                      </div>
+                      <Badge variant="brand" size="sm">{entertainers.filter(e => e.show_on_website).length} Performers</Badge>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {entertainers.filter(e => e.show_on_website).slice(0, 2).map((ent, idx) => (
+                        <div key={idx} className="rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-800/50">
+                          <img
+                            src={ent.photo_url || "https://images.unsplash.com/photo-1571266028243-e4733b0f0bb1?w=300&auto=format&fit=crop&q=80"}
+                            alt={ent.stage_name}
+                            className="w-full h-24 object-cover"
+                          />
+                          <div className="p-2.5">
+                            <div className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">{ent.stage_name || ent.name}</div>
+                            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate">{ent.role}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="text-center pt-1">
+                      <a
+                        href="/book"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block py-2 px-4 text-xs font-bold rounded-lg text-white shadow-sm"
+                        style={{ backgroundColor: brandColor }}
+                      >
+                        Inquire / Reserve Performer For Event &rarr;
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -922,6 +1298,7 @@ export const WebsitePage: React.FC = () => {
                     {selectedWidget === "book" && "Instant Booking Button Snippet"}
                     {selectedWidget === "reviews" && "Reviews Badge Snippet"}
                     {selectedWidget === "wishlist" && "Client Wishlist Snippet"}
+                    {selectedWidget === "entertainers" && "Entertainers Roster Snippet"}
                   </span>
                   <button
                     type="button"
@@ -931,6 +1308,7 @@ export const WebsitePage: React.FC = () => {
                       if (selectedWidget === "book") handleCopySpecific(widgetBookSnippet, "Booking Button Snippet");
                       if (selectedWidget === "reviews") handleCopySpecific(widgetReviewsSnippet, "Reviews Snippet");
                       if (selectedWidget === "wishlist") handleCopySpecific(widgetWishlistSnippet, "Wishlist Snippet");
+                      if (selectedWidget === "entertainers") handleCopySpecific(widgetEntertainersSnippet, "Entertainers Roster Snippet");
                     }}
                     className="px-2.5 py-1 text-xs font-semibold rounded bg-[var(--ee-brand)] text-white hover:opacity-90 flex items-center gap-1 transition-all"
                   >
@@ -945,6 +1323,7 @@ export const WebsitePage: React.FC = () => {
                   {selectedWidget === "book" && widgetBookSnippet}
                   {selectedWidget === "reviews" && widgetReviewsSnippet}
                   {selectedWidget === "wishlist" && widgetWishlistSnippet}
+                  {selectedWidget === "entertainers" && widgetEntertainersSnippet}
                 </pre>
               </CardContent>
             </Card>
@@ -985,7 +1364,7 @@ export const WebsitePage: React.FC = () => {
             Website Builder & Storefront
           </h1>
           <p className="text-base text-[var(--ee-muted)]">
-            Customize your live customer landing page, manage standalone pages, and embed widgets.
+            Customize your live customer landing page, manage entertainer bios & photos, standalone pages, and embed widgets.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -1019,6 +1398,12 @@ export const WebsitePage: React.FC = () => {
           sparkline={<Globe className="w-4 h-4 text-[var(--ee-brand)]" />}
         />
         <MetricCard
+          title="Entertainer Bios"
+          value={entertainers.length}
+          subtitle={`${entertainers.filter(e => e.show_on_website).length} visible on site`}
+          sparkline={<Users className="w-4 h-4 text-emerald-500" />}
+        />
+        <MetricCard
           title="Packages Displayed"
           value={packagesCount}
           subtitle="From Catalog items"
@@ -1030,12 +1415,6 @@ export const WebsitePage: React.FC = () => {
           subtitle="Standalone /p/* pages"
           sparkline={<FileText className="w-4 h-4 text-purple-500" />}
         />
-        <MetricCard
-          title="Embed Widgets"
-          value="Enabled"
-          subtitle="Cross-domain active"
-          sparkline={<Code className="w-4 h-4 text-emerald-500" />}
-        />
       </StatGrid>
 
       {/* Workspace Navigation Tabs */}
@@ -1044,6 +1423,7 @@ export const WebsitePage: React.FC = () => {
         onValueChange={setActiveTab}
         tabs={[
           { id: "homepage", label: "Homepage & Hero Editor", content: homepageTab },
+          { id: "entertainers", label: `Entertainers & Bios (${entertainers.length})`, content: entertainersTab },
           { id: "pages", label: `Custom Pages (${pages.length})`, content: pagesTab },
           { id: "embeds", label: "Embeds & External Sites", content: embedsTab }
         ]}

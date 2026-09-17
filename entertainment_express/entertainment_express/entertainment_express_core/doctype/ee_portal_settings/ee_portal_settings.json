@@ -37,7 +37,9 @@
   "show_packages",
   "show_reviews",
   "show_contact",
+  "show_entertainers",
   "value_props_json",
+  "entertainers_json",
   "section_embed",
   "public_embed_key",
   "section_flags",
@@ -233,9 +235,21 @@
    "label": "Show Quick Quote Form"
   },
   {
+   "default": "1",
+   "fieldname": "show_entertainers",
+   "fieldtype": "Check",
+   "label": "Show Entertainers Showcase"
+  },
+  {
    "fieldname": "value_props_json",
    "fieldtype": "Small Text",
    "label": "Value Props JSON"
+  },
+  {
+   "fieldname": "entertainers_json",
+   "fieldtype": "Code",
+   "options": "JSON",
+   "label": "Entertainers JSON"
   },
   {
    "fieldname": "section_embed",
