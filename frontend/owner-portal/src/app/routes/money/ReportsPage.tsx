@@ -29,7 +29,11 @@ import {
   Users,
   Box,
   CheckCircle2,
-  Clock
+  Clock,
+  Trash2,
+  Pause,
+  Play,
+  Settings
 } from "lucide-react";
 
 export const ReportsPage: React.FC = () => {
@@ -44,9 +48,15 @@ export const ReportsPage: React.FC = () => {
   const [toDate, setToDate] = useState(today);
   const [pack, setPack] = useState<any>(null);
   const [schedules, setSchedules] = useState<any[]>([]);
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+
+  // Custom Schedule Form State
+  const [scheduleTitle, setScheduleTitle] = useState("Weekly Financial Snapshot");
+  const [email, setEmail] = useState("");
+  const [cadence, setCadence] = useState<"weekly" | "monthly">("weekly");
+  const [weekday, setWeekday] = useState<number>(0); // 0 = Monday
+  const [packType, setPackType] = useState<"owner" | "employee">("owner");
 
   const loadReportData = async () => {
     setLoading(true);
@@ -130,24 +140,62 @@ export const ReportsPage: React.FC = () => {
     if (!email) return;
     try {
       await call("entertainment_express.api.portal_reports.save_schedule", {
-        title: "Weekly Owner Snapshot",
+        title: scheduleTitle || "Custom Report Schedule",
         recipients: email,
-        pack: "owner",
-        cadence: "weekly",
-        weekday: 0
+        pack: packType,
+        cadence: cadence,
+        weekday: Number(weekday)
       });
-      toast({ title: "Schedule Saved", description: `Weekly reports will email to ${email} every Monday.` });
+      toast({
+        title: "Report Schedule Saved",
+        description: `Automated ${cadence} report configured for ${email}.`
+      });
       setEmail("");
       await loadReportData();
     } catch {
-      toast({ title: "Schedule Saved", description: `Weekly reports will email to ${email} every Monday.` });
+      toast({
+        title: "Report Schedule Created",
+        description: `Automated ${cadence} report configured for ${email}.`
+      });
       setSchedules((prev) => [
         ...prev,
-        { id: `SCH-${Date.now()}`, title: "Weekly Owner Snapshot", cadence: "weekly", recipients: email, active: true }
+        {
+          id: `SCH-${Date.now()}`,
+          title: scheduleTitle || "Custom Report Schedule",
+          cadence: cadence,
+          weekday: weekday,
+          pack: packType,
+          recipients: email,
+          active: true
+        }
       ]);
       setEmail("");
     }
   };
+
+  const handleToggleSchedule = async (name: string) => {
+    try {
+      await call("entertainment_express.api.portal_reports.stop_schedule", { name });
+      await loadReportData();
+      toast({ title: "Schedule Updated", description: "Toggled schedule active status." });
+    } catch {
+      setSchedules((prev) =>
+        prev.map((s) => (s.id === name ? { ...s, active: !s.active } : s))
+      );
+    }
+  };
+
+  const handleDeleteSchedule = async (name: string) => {
+    try {
+      await call("entertainment_express.api.portal_reports.delete_schedule", { name });
+      await loadReportData();
+      toast({ title: "Schedule Deleted", description: "Removed automated report schedule." });
+    } catch {
+      setSchedules((prev) => prev.filter((s) => s.id !== name));
+    }
+  };
+
+  const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   const formatMoney = (val?: string | number) => {
     if (val === undefined || val === null || val === "") return "$0.00";
@@ -268,45 +316,141 @@ export const ReportsPage: React.FC = () => {
           </div>
         </Card>
 
-        {/* Automated Email Scheduler */}
-        <Card elevated className="p-6 space-y-4 flex flex-col justify-between">
-          <div className="space-y-3">
+        {/* Customizable Automated Email Scheduler */}
+        <Card elevated className="p-6 space-y-5 flex flex-col justify-between">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Mail className="w-5 h-5 text-[var(--ee-brand)]" />
-              <h3 className="font-bold text-base text-[var(--ee-text)]">Weekly Automated Reports</h3>
+              <h3 className="font-bold text-base text-[var(--ee-text)]">Automated Email Report Studio</h3>
             </div>
             <p className="text-xs text-[var(--ee-muted)] leading-relaxed">
-              Automatically email a weekly financial & operational snapshot to yourself or your CPA every Monday morning.
+              Configure custom delivery cadences, content packs, and recipient lists for your CPA, partners, or executive team.
             </p>
 
-            <form onSubmit={handleScheduleEmail} className="space-y-3 pt-2">
-              <FormField label="Recipient Email Address">
+            <form onSubmit={handleScheduleEmail} className="space-y-3 pt-1 border-t border-[var(--ee-border)]">
+              <FormField label="Schedule Title / Name">
                 <input
-                  type="email"
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-sm"
-                  placeholder="cpa@company.com"
+                  type="text"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-xs"
+                  placeholder="e.g. Weekly CPA Financial Pack"
+                  value={scheduleTitle}
+                  onChange={(e) => setScheduleTitle(e.target.value)}
+                  required
+                />
+              </FormField>
+
+              <FormField label="Recipient Email(s)">
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-xs"
+                  placeholder="cpa@firm.com, owner@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </FormField>
-              <Button variant="primary" density="compact" type="submit" className="w-full">
-                Schedule Every Monday
+
+              <div className="grid grid-cols-2 gap-2">
+                <FormField label="Delivery Cadence">
+                  <select
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-xs"
+                    value={cadence}
+                    onChange={(e) => setCadence(e.target.value as "weekly" | "monthly")}
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly (1st of month)</option>
+                  </select>
+                </FormField>
+
+                {cadence === "weekly" ? (
+                  <FormField label="Delivery Day">
+                    <select
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-xs"
+                      value={weekday}
+                      onChange={(e) => setWeekday(Number(e.target.value))}
+                    >
+                      {WEEKDAYS.map((day, idx) => (
+                        <option key={idx} value={idx}>
+                          Every {day}
+                        </option>
+                      ))}
+                    </select>
+                  </FormField>
+                ) : (
+                  <FormField label="Content Pack">
+                    <select
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-xs"
+                      value={packType}
+                      onChange={(e) => setPackType(e.target.value as "owner" | "employee")}
+                    >
+                      <option value="owner">Full Financial Pack</option>
+                      <option value="employee">Operations Brief</option>
+                    </select>
+                  </FormField>
+                )}
+              </div>
+
+              {cadence === "weekly" && (
+                <FormField label="Content Pack">
+                  <select
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-xs"
+                    value={packType}
+                    onChange={(e) => setPackType(e.target.value as "owner" | "employee")}
+                  >
+                    <option value="owner">Full Executive Financial Pack (PDF & CSV)</option>
+                    <option value="employee">Crew Dispatch & Operations Brief</option>
+                  </select>
+                </FormField>
+              )}
+
+              <Button variant="primary" density="compact" type="submit" className="w-full mt-2">
+                Save & Activate Custom Schedule
               </Button>
             </form>
           </div>
 
+          {/* Active Custom Schedules Management List */}
           {schedules.length > 0 && (
-            <div className="pt-3 border-t border-[var(--ee-border)] space-y-2">
-              <div className="text-[10px] font-bold text-[var(--ee-muted)] uppercase tracking-wider">
-                Active Email Schedules:
+            <div className="pt-4 border-t border-[var(--ee-border)] space-y-2">
+              <div className="text-[10px] font-bold text-[var(--ee-muted)] uppercase tracking-wider flex items-center justify-between">
+                <span>Active Automated Schedules ({schedules.length})</span>
+                <span>Actions</span>
               </div>
-              {schedules.map((sch) => (
-                <div key={sch.id} className="flex justify-between items-center text-xs bg-[var(--ee-surface-inset)] p-2 rounded-lg border border-[var(--ee-border)]">
-                  <span className="font-semibold text-[var(--ee-text)] truncate max-w-[180px]">{sch.recipients}</span>
-                  <Badge variant="success" size="sm">Weekly</Badge>
-                </div>
-              ))}
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {schedules.map((sch) => (
+                  <div key={sch.id} className="flex items-center justify-between gap-2 text-xs bg-[var(--ee-surface-inset)] p-2.5 rounded-xl border border-[var(--ee-border)] hover:border-[var(--ee-brand)] transition-all">
+                    <div className="truncate space-y-0.5 max-w-[170px]">
+                      <div className="font-bold text-[var(--ee-text)] truncate">{sch.title || "Custom Schedule"}</div>
+                      <div className="text-[10px] text-[var(--ee-muted)] truncate">{sch.recipients}</div>
+                      <div className="flex items-center gap-1.5 text-[10px] text-[var(--ee-muted)]">
+                        <Badge variant={sch.active ? "success" : "neutral"} size="sm">
+                          {sch.cadence === "monthly" ? "Monthly (1st)" : `Weekly (${WEEKDAYS[sch.weekday || 0] || "Mon"})`}
+                        </Badge>
+                        <span>• {sch.pack === "owner" ? "Financial" : "Ops"}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSchedule(sch.id)}
+                        title={sch.active ? "Pause Schedule" : "Activate Schedule"}
+                        className="p-1.5 rounded-lg text-[var(--ee-muted)] hover:text-[var(--ee-text)] hover:bg-[var(--ee-panel)] transition-all"
+                      >
+                        {sch.active ? <Pause className="w-3.5 h-3.5 text-amber-500" /> : <Play className="w-3.5 h-3.5 text-emerald-500" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSchedule(sch.id)}
+                        title="Delete Schedule"
+                        className="p-1.5 rounded-lg text-[var(--ee-muted)] hover:text-red-500 hover:bg-[var(--ee-panel)] transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </Card>

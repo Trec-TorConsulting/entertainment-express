@@ -490,9 +490,17 @@ def save_schedule(title: str, recipients: str, pack: str = "owner", cadence: str
 def stop_schedule(name: str) -> dict:
     _require_owner()
     doc = frappe.get_doc("EE Report Schedule", name)
-    doc.active = 0
+    doc.active = 0 if doc.active else 1
     doc.save(ignore_permissions=True)
     return _schedule_payload(doc)
+
+
+@frappe.whitelist()
+def delete_schedule(name: str) -> dict:
+    _require_owner()
+    if frappe.db.exists("EE Report Schedule", name):
+        frappe.delete_doc("EE Report Schedule", name, ignore_permissions=True)
+    return {"ok": True, "name": name}
 
 
 def _ensure_templates() -> None:
