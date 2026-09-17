@@ -27,8 +27,8 @@ import { ReportsPage } from "./routes/money/ReportsPage";
 import { AssistantPage } from "./routes/settings/AssistantPage";
 import { PlanPage } from "./routes/settings/PlanPage";
 import { AutomationsPage } from "./routes/settings/AutomationsPage";
-import { GrowPage } from "./routes/brand/GrowPage";
 import { CoveragePage } from "./routes/operations/CoveragePage";
+import { PeoplePage } from "./routes/operations/PeoplePage";
 import { MovePage } from "./routes/admin/MovePage";
 import { ConnectionsPage } from "./routes/settings/ConnectionsPage";
 import { SecurityPage } from "./routes/admin/SecurityPage";
@@ -67,6 +67,8 @@ export const OwnerApp: React.FC = () => {
           <Route path="/automations" element={<AutomationsPage />} />
           <Route path="/grow" element={<GrowPage />} />
           <Route path="/coverage" element={<CoveragePage />} />
+          <Route path="/people" element={<PeoplePage />} />
+          <Route path="/team" element={<Navigate to="/people" replace />} />
           <Route path="/import" element={<MovePage />} />
           <Route path="/move" element={<Navigate to="/import" replace />} />
           <Route path="/connections" element={<ConnectionsPage />} />
