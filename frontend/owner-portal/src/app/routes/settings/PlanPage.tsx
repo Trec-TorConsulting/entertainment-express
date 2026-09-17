@@ -45,9 +45,9 @@ export const PlanPage: React.FC = () => {
   }, []);
 
   const defaultInfo = {
-    plan: "Entertainment Express Enterprise Owner Suite",
+    plan: "Starter",
     status: "active",
-    price: "$149 / month",
+    price: "$49.00 / month",
     period_end: new Date(Date.now() + 86400000 * 25).toISOString().slice(0, 10),
     cancel_requested: false
   };
@@ -100,19 +100,19 @@ export const PlanPage: React.FC = () => {
       <StatGrid columns={3}>
         <MetricCard
           title="Current Plan"
-          value={info?.plan ? "Enterprise" : "Standard"}
-          subtitle="Unlimited events & verticals"
+          value={info?.plan || "Starter"}
+          subtitle={info?.plan?.toLowerCase().includes("enterprise") ? "Unlimited events & verticals" : "Essential event & booking suite"}
           sparkline={<Zap className="w-4 h-4 text-[var(--ee-brand)]" />}
         />
         <MetricCard
           title="Subscription Status"
-          value={info?.status === "active" ? "Active" : "Trial"}
+          value={info?.status ? info.status.charAt(0).toUpperCase() + info.status.slice(1).replace("_", " ") : "Active"}
           subtitle={`Renews ${info?.period_end || "End of Month"}`}
           sparkline={<ShieldCheck className="w-4 h-4 text-[var(--ee-success)]" />}
         />
         <MetricCard
           title="Monthly Ticket"
-          value={info?.price || "$149.00"}
+          value={info?.price || "$49.00"}
           subtitle="Platform license fee"
           sparkline={<CreditCard className="w-4 h-4 text-purple-500" />}
         />
