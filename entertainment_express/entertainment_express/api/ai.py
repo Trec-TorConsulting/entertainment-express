@@ -203,20 +203,36 @@ def ask(message: str, conversation: str | None = None) -> dict:
     _require(ASK_ROLES)
     if CREW_ROLES.intersection(_roles()) and not _roles().intersection(OWNER_ROLES | {"EE Dispatcher", "EE Sales", "EE Office"}):
         frappe.throw("Not allowed.", frappe.PermissionError)
+
+    clean_msg = (message or "").strip()
+    if not clean_msg:
+        return {"available": True, "message": "Please enter a question for the AI Assistant.", "jobs": [], "cached": False}
+
+    site_name = getattr(frappe.local, "site", "base.app.entx.app") or "base"
+    cache_key = f"ee_ai_ask:{site_name}:{hashlib.sha256(clean_msg.lower().encode()).hexdigest()}"
+    try:
+        cached_payload = frappe.cache().get_value(cache_key)
+        if cached_payload and isinstance(cached_payload, dict):
+            cached_payload["jobs"] = _weekend_jobs()
+            cached_payload["cached"] = True
+            return cached_payload
+    except Exception:
+        pass
+
     started = time.time()
     facts = _facts_blob()
     knowledge = _platform_knowledge_context()
     prompt = (
         f"{knowledge}\n\n"
         f"CURRENT OPERATIONAL CONTEXT:\n{facts}\n\n"
-        f"User Question: {message or ''}"
+        f"User Question: {clean_msg}"
     )
     prose = complete(prompt)
     elapsed = int((time.time() - started) * 1000)
     available = bool(prose)
     _log("ask", "ok" if available else "unavailable", prompt, elapsed)
     if not available:
-        msg_lower = (message or "").lower()
+        msg_lower = clean_msg.lower()
         if any(w in msg_lower for w in ("contract", "deposit", "policy", "agreement")):
             prose = (
                 "Here is a recommended **Standard Event Performance Contract & Deposit Policy** for your company:\n\n"
@@ -246,18 +262,26 @@ def ask(message: str, conversation: str | None = None) -> dict:
             )
         else:
             prose = (
-                f"Copilot Operational Synthesis for: \"{message}\"\n\n"
+                f"Copilot Operational Synthesis for: \"{clean_msg}\"\n\n"
                 "All company core modules are active. Manage your pipeline, catalog, and fleet settings using the navigation shortcuts below.\n\n"
                 "[Open Quotes & Contracts](/pipeline) • [View Service Catalog](/catalog) • [Manage Connections](/connections)"
             )
         available = True
 
-    return {
+    result = {
         "available": available,
         "message": prose,
         "jobs": _weekend_jobs(),
         "draft": None,
+        "cached": False,
     }
+
+    try:
+        frappe.cache().set_value(cache_key, result, expires_in_sec=86400)
+    except Exception:
+        pass
+
+    return result
 
 
 
