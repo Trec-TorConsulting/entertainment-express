@@ -236,21 +236,24 @@ def my_plan() -> dict:
 
     if frappe.db.table_exists("EE Portal Settings") or frappe.db.exists("DocType", "EE Portal Settings"):
         try:
-            s_plan = frappe.db.get_single_value("EE Portal Settings", "subscription_plan")
-            s_price = frappe.db.get_single_value("EE Portal Settings", "subscription_price")
-            s_status = frappe.db.get_single_value("EE Portal Settings", "subscription_status")
-            if s_plan:
-                return {
-                    "plan": s_plan,
-                    "status": s_status or conf.get("ee_subscription_status") or "active",
-                    "period_end": str(conf.get("ee_period_end") or ""),
-                    "price": s_price or conf.get("ee_price_display") or "$149.00 / month",
-                    "cancel_at_period_end": int(conf.get("ee_cancel_at_period_end") or 0),
-                    "cancel_requested": int(conf.get("ee_cancel_requested") or 0),
-                    "suspended": int(conf.get("ee_suspended") or 0),
-                }
+            raw_flags = frappe.db.get_single_value("EE Portal Settings", "feature_flags")
+            if raw_flags:
+                import json
+
+                ff = json.loads(raw_flags) if isinstance(raw_flags, str) else raw_flags
+                if isinstance(ff, dict) and ff.get("plan_name"):
+                    return {
+                        "plan": ff.get("plan_name"),
+                        "status": ff.get("subscription_status") or conf.get("ee_subscription_status") or "active",
+                        "period_end": str(conf.get("ee_period_end") or ""),
+                        "price": ff.get("price_display") or conf.get("ee_price_display") or "$149.00 / month",
+                        "cancel_at_period_end": int(conf.get("ee_cancel_at_period_end") or 0),
+                        "cancel_requested": int(conf.get("ee_cancel_requested") or 0),
+                        "suspended": int(conf.get("ee_suspended") or 0),
+                    }
         except Exception:
             pass
+
 
     status = conf.get("ee_subscription_status") or "trialing"
     return {

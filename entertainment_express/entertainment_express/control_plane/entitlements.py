@@ -158,11 +158,13 @@ def push_plan_to_site(tenant_name: str, extra: dict | None = None) -> None:
         try:
             if not frappe.db.exists("EE Portal Settings", "EE Portal Settings"):
                 frappe.get_doc({"doctype": "EE Portal Settings"}).insert(ignore_permissions=True)
-            frappe.db.set_single_value("EE Portal Settings", "subscription_plan", plan.plan_name or plan.name)
-            frappe.db.set_single_value("EE Portal Settings", "subscription_price", flags.get("ee_price_display") or "$149.00 / month")
-            frappe.db.set_single_value("EE Portal Settings", "subscription_status", flags.get("ee_subscription_status") or "active")
-            frappe.db.set_single_value("EE Portal Settings", "feature_flags", frappe.as_json(ents))
+            flags_dict = dict(ents or {})
+            flags_dict["plan_name"] = plan.plan_name or plan.name
+            flags_dict["price_display"] = flags.get("ee_price_display") or "$149.00 / month"
+            flags_dict["subscription_status"] = flags.get("ee_subscription_status") or "active"
+            frappe.db.set_single_value("EE Portal Settings", "feature_flags", frappe.as_json(flags_dict))
         except Exception as e:
             frappe.log_error(title="push_plan_to_site EE Portal Settings error", message=str(e))
+
 
 
