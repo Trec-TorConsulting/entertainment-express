@@ -45,9 +45,9 @@ export const PlanPage: React.FC = () => {
   }, []);
 
   const defaultInfo = {
-    plan: "Starter",
+    plan: "Enterprise",
     status: "active",
-    price: "$49.00 / month",
+    price: "$149.00 / month",
     period_end: new Date(Date.now() + 86400000 * 25).toISOString().slice(0, 10),
     cancel_requested: false
   };

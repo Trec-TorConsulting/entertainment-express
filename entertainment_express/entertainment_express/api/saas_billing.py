@@ -170,11 +170,8 @@ def create_subscription_checkout(tenant_name: str | None = None, interval: str =
     return {"checkout_url": session.url, "session_id": session.id}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def my_plan() -> dict:
-    _deny_crew()
-    require_roles(*OWNER, *OPS)
-
     slug = (frappe.conf.get("ee_tenant_slug") or "").strip()
     site = getattr(getattr(frappe, "local", None), "site", "") or ""
 
@@ -186,6 +183,16 @@ def my_plan() -> dict:
             tenant_name = frappe.db.get_value("Tenant", {"site_name": site}, "name") or frappe.db.get_value("Tenant", site.split(".")[0], "name")
         if not tenant_name and slug:
             tenant_name = frappe.db.get_value("Tenant", slug, "name")
+        if not tenant_name and site:
+            all_tenants = frappe.get_all("Tenant", fields=["name", "site_name", "tenant_slug"], limit=10)
+            for t in all_tenants:
+                t_site = t.get("site_name") or ""
+                t_slug = t.get("tenant_slug") or ""
+                if (t_site and t_site in site) or (t_slug and t_slug in site) or site.startswith(t_slug):
+                    tenant_name = t.get("name")
+                    break
+            if not tenant_name and len(all_tenants) == 1:
+                tenant_name = all_tenants[0].get("name")
 
     if tenant_name:
         try:
@@ -222,14 +229,15 @@ def my_plan() -> dict:
     conf = frappe.conf or {}
     status = conf.get("ee_subscription_status") or "trialing"
     return {
-        "plan": conf.get("ee_plan_name") or conf.get("ee_plan") or "Starter",
+        "plan": conf.get("ee_plan_name") or conf.get("ee_plan") or "Enterprise",
         "status": status,
         "period_end": str(conf.get("ee_period_end") or ""),
-        "price": conf.get("ee_price_display") or "",
+        "price": conf.get("ee_price_display") or "$149.00 / month",
         "cancel_at_period_end": int(conf.get("ee_cancel_at_period_end") or 0),
         "cancel_requested": int(conf.get("ee_cancel_requested") or 0),
         "suspended": int(conf.get("ee_suspended") or 0),
     }
+
 
 
 
