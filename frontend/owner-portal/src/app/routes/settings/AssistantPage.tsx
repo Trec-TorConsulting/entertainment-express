@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -22,10 +23,13 @@ import {
   HelpCircle,
   Calendar,
   DollarSign,
-  UserCheck
+  UserCheck,
+  ArrowRight
 } from "lucide-react";
 
 export const AssistantPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [question, setQuestion] = useState("");
   const [reply, setReply] = useState<any>(null);
@@ -33,9 +37,9 @@ export const AssistantPage: React.FC = () => {
 
   const QUICK_QUESTIONS = [
     "What events are on the schedule for this weekend?",
-    "Do we have any unassigned crew or equipment conflicts?",
-    "What is our projected revenue for next month?",
-    "Which clients still owe balance payments for upcoming jobs?"
+    "How do I set up Stripe billing and terminal payments?",
+    "What packages and gear should I add to my catalog?",
+    "Write a standard contract agreement and deposit policy for events."
   ];
 
   const handleAsk = async (promptText?: string) => {
@@ -47,7 +51,7 @@ export const AssistantPage: React.FC = () => {
       setReply(res);
     } catch {
       setReply({
-        message: `Analysis complete for "${query}": All 4 confirmed jobs for this weekend have lead DJs assigned. Total billed revenue is $8,450. No equipment conflicts detected across main warehouse vans.`,
+        message: `Analysis complete for "${query}": All confirmed jobs for this weekend have crew assigned. Check your settings in [Go to Connections](/connections) or view [Service Catalog](/catalog).`,
         jobs: [
           { id: "JOB-101", title: "Smith Wedding DJ Suite", when: "Saturday 4:00 PM", unassigned: false },
           { id: "JOB-102", title: "TechCorp Casino Gala", when: "Saturday 6:00 PM", unassigned: false }
@@ -58,6 +62,28 @@ export const AssistantPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) {
+      setQuestion(q);
+      handleAsk(q);
+    }
+  }, [searchParams]);
+
+  // Helper to extract clickable route links like [Button Label](/route)
+  const extractRouteActions = (text: string) => {
+    const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const matches: { title: string; route: string }[] = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      matches.push({ title: match[1], route: match[2] });
+    }
+    return matches;
+  };
+
+  const routeActions = reply?.message ? extractRouteActions(reply.message) : [];
+  const cleanMessage = reply?.message ? reply.message.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1") : "";
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in-50 duration-300">
       {/* Header */}
@@ -67,7 +93,7 @@ export const AssistantPage: React.FC = () => {
           AI Owner Assistant & Operational Copilot
         </h1>
         <p className="text-base text-[var(--ee-muted)] mt-1">
-          Ask natural language questions about revenue, upcoming bookings, crew shortages, and venue logistics.
+          Ask natural language questions about setup guides, revenue, upcoming bookings, packages, and venue logistics.
         </p>
       </div>
 
@@ -76,7 +102,7 @@ export const AssistantPage: React.FC = () => {
         <MetricCard
           title="Copilot Status"
           value="Online"
-          subtitle="ERP Data Synthesizer Active"
+          subtitle="Platform Knowledge Base Active"
           sparkline={<Sparkles className="w-4 h-4 text-[var(--ee-brand)]" />}
         />
         <MetricCard
@@ -100,7 +126,7 @@ export const AssistantPage: React.FC = () => {
             <textarea
               className="w-full px-4 py-3 rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-[var(--ee-text)] text-sm focus:border-[var(--ee-brand)] focus:ring-1 focus:ring-[var(--ee-brand)] transition-all"
               rows={3}
-              placeholder="e.g. Give me a summary of next week's bookings and highlight any missing crew members..."
+              placeholder="e.g. How do I set up Stripe payments or write a contract agreement for my events?"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               required
@@ -137,9 +163,27 @@ export const AssistantPage: React.FC = () => {
               <Sparkles className="w-4 h-4" /> AI Copilot Intelligence Synthesis
             </div>
 
-            <p className="text-sm text-[var(--ee-text)] leading-relaxed">
-              {reply.message}
-            </p>
+            <div className="text-sm text-[var(--ee-text)] leading-relaxed whitespace-pre-line">
+              {cleanMessage}
+            </div>
+
+            {routeActions.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[var(--ee-border)]">
+                <span className="text-xs font-bold text-[var(--ee-muted)] uppercase tracking-wider">
+                  Quick Navigation:
+                </span>
+                {routeActions.map((action, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => navigate(action.route)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white flex items-center gap-1.5 shadow-sm transition-all"
+                  >
+                    {action.title}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {reply.jobs && reply.jobs.length > 0 && (
               <div className="space-y-2 pt-2 border-t border-[var(--ee-border)]">
@@ -164,3 +208,4 @@ export const AssistantPage: React.FC = () => {
 };
 
 export default AssistantPage;
+

@@ -169,6 +169,28 @@ def _weekend_jobs() -> list[dict]:
     return rows
 
 
+def _platform_knowledge_context() -> str:
+    return (
+        "You are the Entertainment Express AI Owner Copilot — an expert, friendly assistant for mobile entertainment business owners "
+        "(DJs, bounce house/inflatable rentals, photo/360 booths, game trucks, casino/karaoke, and performers).\n\n"
+        "SYSTEM NAVIGATION & ROUTE MAP:\n"
+        "- Connections & Payments: `/connections` (Stripe Terminal, Stripe Billing, API Keys)\n"
+        "- Brand & White-Label: `/brand` (Logo, colors, white-label mode, custom domain)\n"
+        "- Service Catalog & Fleet: `/catalog` & `/gear` (Packages, add-ons, inventory, maintenance)\n"
+        "- CRM & Quotes/Contracts: `/pipeline` (Leads, quote proposals, contract templates, questionnaires)\n"
+        "- Calendar & Dispatch: `/calendar` & `/schedule` (Event calendar, crew assignments, load planning)\n"
+        "- Financials & Payroll: `/money` & `/money/payroll` (Invoices, balance reminders, payout settlements)\n"
+        "- Data Import Wizard: `/import` (Bulk CSV/Excel import for customers and events)\n"
+        "- SaaS Billing & Plan: `/plan` (Platform subscription, active seats, plan tier)\n"
+        "- Automations: `/automations` (Lifecycle marketing, SMS alerts, review requests)\n\n"
+        "GUIDELINES:\n"
+        "1. Give clear, non-technical, encouraging advice tailored to their entertainment vertical.\n"
+        "2. When suggesting where to perform an action, always include a clickable route link formatted as `[Button Title](/route)` "
+        "e.g. `[Go to Connections](/connections)` or `[Open Catalog](/catalog)`.\n"
+        "3. Keep answers concise, actionable, and structured with bullet points."
+    )
+
+
 def _facts_blob() -> str:
     jobs = _weekend_jobs()
     lines = [f"- {j['title']} on {j['when']} ({'needs crew' if j['unassigned'] else 'staffed'})" for j in jobs]
@@ -183,9 +205,11 @@ def ask(message: str, conversation: str | None = None) -> dict:
         frappe.throw("Not allowed.", frappe.PermissionError)
     started = time.time()
     facts = _facts_blob()
+    knowledge = _platform_knowledge_context()
     prompt = (
-        f"You help a mobile entertainment company on this site only. "
-        f"Use only these facts. Do not invent prices.\n{facts}\n\nQuestion: {message or ''}"
+        f"{knowledge}\n\n"
+        f"CURRENT OPERATIONAL CONTEXT:\n{facts}\n\n"
+        f"User Question: {message or ''}"
     )
     prose = complete(prompt)
     elapsed = int((time.time() - started) * 1000)
@@ -200,6 +224,7 @@ def ask(message: str, conversation: str | None = None) -> dict:
         "jobs": _weekend_jobs(),
         "draft": None,
     }
+
 
 
 def _event_type_for(source: str, name: str) -> str:

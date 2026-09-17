@@ -17,6 +17,8 @@ import {
   Calendar, CheckCircle2, MapPin, AlertTriangle, ArrowRight, PlusCircle, Inbox, DollarSign, Clock, Sparkles
 } from "lucide-react";
 
+import { LaunchpadWidget } from "../../components/LaunchpadWidget";
+
 export const TodayPage: React.FC = () => {
   const navigate = useNavigate();
   const person = getSessionBootstrap().person;
@@ -122,6 +124,9 @@ export const TodayPage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Gamified Onboarding Launchpad */}
+      <LaunchpadWidget />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Column: What's Next (Upcoming Gigs & Consults) */}

@@ -234,3 +234,30 @@ def test_has_entitlement_site_name_is_ignored():
     src = inspect.getsource(entitlements.has_entitlement)
     assert "frappe.init" not in src
     assert "frappe.connect" not in src
+
+
+def test_get_onboarding_status(monkeypatch):
+    from entertainment_express.api import portal_owner
+
+    fake = _Fake(["EE Tenant Admin"])
+    fake.db.table_exists = lambda dt: True
+    fake.db.count = lambda dt, *args, **kwargs: 2
+    fake.get_single = lambda dt: _Dict({"brand_name": "Test Co", "stripe_connect_account_id": "acct_123"})
+    monkeypatch.setattr(portal_owner, "frappe", fake)
+
+    status = portal_owner.get_onboarding_status()
+    assert "progress" in status
+    assert status["total_quests"] == 5
+    assert status["completed_count"] >= 3
+    assert len(status["quests"]) == 5
+
+
+def test_ai_platform_knowledge_context():
+    from entertainment_express.api import ai
+
+    knowledge = ai._platform_knowledge_context()
+    assert "/connections" in knowledge
+    assert "/catalog" in knowledge
+    assert "/brand" in knowledge
+    assert "/import" in knowledge
+

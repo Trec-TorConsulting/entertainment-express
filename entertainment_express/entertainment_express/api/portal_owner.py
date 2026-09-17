@@ -671,3 +671,122 @@ def save_brand(
         },
     )
     return {"ok": True}
+
+
+@frappe.whitelist()
+def get_onboarding_status() -> dict:
+    """Return gamified onboarding checklist status for the tenant owner."""
+    _require_owner()
+
+    # 1. Connect Payments quest
+    payments_done = False
+    try:
+        conf = getattr(frappe, "conf", None) or {}
+        if conf.get("stripe_publishable_key") or conf.get("stripe_secret_key"):
+            payments_done = True
+        elif frappe.db.table_exists("Payment Entry") and frappe.db.count("Payment Entry") > 0:
+            payments_done = True
+        elif frappe.db.table_exists("EE Portal Settings"):
+            s = frappe.get_single("EE Portal Settings")
+            if getattr(s, "stripe_connect_account_id", None):
+                payments_done = True
+    except Exception:
+        pass
+
+    # 2. Brand & Site quest
+    brand_done = False
+    try:
+        s = frappe.get_single("EE Portal Settings")
+        if getattr(s, "brand_name", None) or getattr(s, "brand_logo", None) or getattr(s, "primary_color", None):
+            brand_done = True
+    except Exception:
+        pass
+
+    # 3. Catalog & Gear quest
+    catalog_done = False
+    try:
+        if frappe.db.table_exists("Service Asset") and frappe.db.count("Service Asset") > 0:
+            catalog_done = True
+        elif frappe.db.table_exists("Item") and frappe.db.count("Item", {"is_sales_item": 1}) > 0:
+            catalog_done = True
+    except Exception:
+        pass
+
+    # 4. Contracts & Forms quest
+    contracts_done = False
+    try:
+        if frappe.db.table_exists("Terms and Conditions") and frappe.db.count("Terms and Conditions") > 0:
+            contracts_done = True
+        elif frappe.db.table_exists("Contract") and frappe.db.count("Contract") > 0:
+            contracts_done = True
+        elif frappe.db.table_exists("EE Booking Site Config"):
+            b = frappe.get_single("EE Booking Site Config")
+            if getattr(b, "contract_terms", None) or getattr(b, "require_deposit", None):
+                contracts_done = True
+    except Exception:
+        pass
+
+    # 5. Import Data quest
+    import_done = False
+    try:
+        if frappe.db.table_exists("Customer") and frappe.db.count("Customer") > 0:
+            import_done = True
+        elif frappe.db.table_exists("Event Booking") and frappe.db.count("Event Booking") > 0:
+            import_done = True
+    except Exception:
+        pass
+
+    quests = [
+        {
+            "id": "payments",
+            "title": "Connect Payments",
+            "description": "Link Stripe Terminal & Billing to accept online deposits and credit cards.",
+            "route": "/connections",
+            "completed": payments_done,
+            "ai_prompt": "How do I set up Stripe billing and terminal payments for my entertainment company?",
+        },
+        {
+            "id": "brand",
+            "title": "Brand & White-Label Site",
+            "description": "Upload your logo, pick theme colors, and configure white-label branding.",
+            "route": "/brand",
+            "completed": brand_done,
+            "ai_prompt": "What are best practices for white-label branding and custom domain setup?",
+        },
+        {
+            "id": "catalog",
+            "title": "Build Service Catalog & Fleet",
+            "description": "Add packages, hourly add-ons, and equipment inventory items.",
+            "route": "/catalog",
+            "completed": catalog_done,
+            "ai_prompt": "What packages and equipment items should I add to my catalog?",
+        },
+        {
+            "id": "contracts",
+            "title": "Set Up Contracts & Forms",
+            "description": "Define deposit terms, contract templates, and client questionnaires.",
+            "route": "/pipeline",
+            "completed": contracts_done,
+            "ai_prompt": "Write a standard contract agreement and deposit policy for events.",
+        },
+        {
+            "id": "import",
+            "title": "Import Customers & Events",
+            "description": "Bulk import legacy customer lists and past bookings via CSV/Excel.",
+            "route": "/import",
+            "completed": import_done,
+            "ai_prompt": "How do I format my CSV spreadsheet to import customer lists and past bookings?",
+        },
+    ]
+
+    completed_count = sum(1 for q in quests if q["completed"])
+    progress = int(round((completed_count / len(quests)) * 100))
+
+    return {
+        "progress": progress,
+        "completed_count": completed_count,
+        "total_quests": len(quests),
+        "is_fully_launched": completed_count == len(quests),
+        "quests": quests,
+    }
+
