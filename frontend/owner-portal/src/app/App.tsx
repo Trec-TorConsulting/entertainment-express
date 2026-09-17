@@ -27,6 +27,7 @@ import { ReportsPage } from "./routes/money/ReportsPage";
 import { AssistantPage } from "./routes/settings/AssistantPage";
 import { PlanPage } from "./routes/settings/PlanPage";
 import { AutomationsPage } from "./routes/settings/AutomationsPage";
+import { GrowPage } from "./routes/brand/GrowPage";
 import { CoveragePage } from "./routes/operations/CoveragePage";
 import { PeoplePage } from "./routes/operations/PeoplePage";
 import { MovePage } from "./routes/admin/MovePage";
