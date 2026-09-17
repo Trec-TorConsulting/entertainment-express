@@ -174,15 +174,19 @@ def create_subscription_checkout(tenant_name: str | None = None, interval: str =
 def my_plan() -> dict:
     slug = (frappe.conf.get("ee_tenant_slug") or "").strip()
     site = getattr(getattr(frappe, "local", None), "site", "") or ""
+    host_prefix = site.split(".")[0] if site else ""
 
     tenant_name = None
     if frappe.db.exists("DocType", "Tenant"):
         if slug:
-            tenant_name = frappe.db.get_value("Tenant", {"tenant_slug": slug}, "name")
-        if not tenant_name and site:
-            tenant_name = frappe.db.get_value("Tenant", {"site_name": site}, "name") or frappe.db.get_value("Tenant", site.split(".")[0], "name")
-        if not tenant_name and slug:
-            tenant_name = frappe.db.get_value("Tenant", slug, "name")
+            tenant_name = frappe.db.get_value("Tenant", {"tenant_slug": slug}, "name") or (frappe.db.exists("Tenant", slug) and slug)
+        if not tenant_name and host_prefix:
+            tenant_name = (
+                frappe.db.get_value("Tenant", {"tenant_slug": host_prefix}, "name")
+                or frappe.db.get_value("Tenant", {"site_name": host_prefix}, "name")
+                or frappe.db.get_value("Tenant", {"site_name": site}, "name")
+                or (frappe.db.exists("Tenant", host_prefix) and host_prefix)
+            )
         if not tenant_name and site:
             all_tenants = frappe.get_all("Tenant", fields=["name", "site_name", "tenant_slug"], limit=10)
             for t in all_tenants:
@@ -193,6 +197,7 @@ def my_plan() -> dict:
                     break
             if not tenant_name and len(all_tenants) == 1:
                 tenant_name = all_tenants[0].get("name")
+
 
     if tenant_name:
         try:
