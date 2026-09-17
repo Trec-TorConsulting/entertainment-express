@@ -34,6 +34,7 @@ export const AssistantPage: React.FC = () => {
   const [question, setQuestion] = useState("");
   const [reply, setReply] = useState<any>(null);
   const [busy, setBusy] = useState(false);
+  const processedQueryRef = React.useRef<string | null>(null);
 
   const QUICK_QUESTIONS = [
     "What events are on the schedule for this weekend?",
@@ -43,7 +44,7 @@ export const AssistantPage: React.FC = () => {
   ];
 
   const handleAsk = async (promptText?: string) => {
-    const query = promptText || question;
+    const query = (promptText !== undefined ? promptText : question).trim();
     if (!query) return;
     setBusy(true);
     try {
@@ -64,7 +65,8 @@ export const AssistantPage: React.FC = () => {
 
   useEffect(() => {
     const q = searchParams.get("q");
-    if (q) {
+    if (q && processedQueryRef.current !== q) {
+      processedQueryRef.current = q;
       setQuestion(q);
       handleAsk(q);
     }
