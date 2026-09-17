@@ -135,12 +135,19 @@ export const MoneyPage: React.FC = () => {
     );
   }
 
+  const formatMoney = (val?: string | number) => {
+    if (val === undefined || val === null || val === "") return "$0.00";
+    const s = String(val).trim();
+    if (s.startsWith("$")) return s;
+    return `$${s}`;
+  };
+
   const overviewTab = (
     <div className="space-y-6">
       <StatGrid columns={3}>
         <MetricCard
           title="Revenue (30d)"
-          value={`$${stats?.revenue || "0.00"}`}
+          value={formatMoney(stats?.revenue)}
           subtitle="Processed and settled"
           trend="+8.5%"
           trendDirection="up"
@@ -148,7 +155,7 @@ export const MoneyPage: React.FC = () => {
         />
         <MetricCard
           title="Outstanding Balances"
-          value={`$${stats?.outstanding_balance || "0.00"}`}
+          value={formatMoney(stats?.outstanding_balance)}
           subtitle="Pending customer invoices"
           trend={Number(stats?.outstanding_balance) > 0 ? "Due now" : "Zero balance"}
           trendDirection={Number(stats?.outstanding_balance) > 0 ? "down" : "neutral"}
@@ -156,7 +163,7 @@ export const MoneyPage: React.FC = () => {
         />
         <MetricCard
           title="Pipeline Quotes"
-          value={`$${stats?.pipeline_value || "0.00"}`}
+          value={formatMoney(stats?.pipeline_value)}
           subtitle="Proposals awaiting signature"
           trend="+3 quotes"
           trendDirection="up"

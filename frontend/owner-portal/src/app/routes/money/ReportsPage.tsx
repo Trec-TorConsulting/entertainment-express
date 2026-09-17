@@ -149,6 +149,13 @@ export const ReportsPage: React.FC = () => {
     }
   };
 
+  const formatMoney = (val?: string | number) => {
+    if (val === undefined || val === null || val === "") return "$0.00";
+    const s = String(val).trim();
+    if (s.startsWith("$")) return s;
+    return `$${s}`;
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto animate-in fade-in-50 duration-300">
       {/* Header & Date Controls */}
@@ -186,25 +193,25 @@ export const ReportsPage: React.FC = () => {
       <StatGrid columns={4}>
         <MetricCard
           title="Total Revenue Billed"
-          value={`$${pack?.revenue || "0.00"}`}
+          value={formatMoney(pack?.revenue)}
           subtitle={`${pack?.jobs || 0} jobs completed`}
           sparkline={<DollarSign className="w-4 h-4 text-[var(--ee-success)]" />}
         />
         <MetricCard
           title="Outstanding Balances"
-          value={`$${pack?.outstanding || "0.00"}`}
+          value={formatMoney(pack?.outstanding)}
           subtitle="Customer payments due"
           sparkline={<Clock className="w-4 h-4 text-amber-500" />}
         />
         <MetricCard
           title="Deposits Held"
-          value={`$${pack?.deposits_held || "0.00"}`}
+          value={formatMoney(pack?.deposits_held)}
           subtitle="Locked date security"
           sparkline={<Receipt className="w-4 h-4 text-[var(--ee-brand)]" />}
         />
         <MetricCard
           title="Average Job Ticket"
-          value={`$${pack?.avg_deal || "0.00"}`}
+          value={formatMoney(pack?.avg_deal)}
           subtitle={`${pack?.pipeline_conversion || "65%"} quote conversion`}
           sparkline={<TrendingUp className="w-4 h-4 text-purple-500" />}
         />
