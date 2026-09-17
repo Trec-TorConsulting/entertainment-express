@@ -25,6 +25,9 @@
   "email_from_name",
   "primary_custom_domain",
   "review_url",
+  "subscription_plan",
+  "subscription_price",
+  "subscription_status",
   "section_website",
   "hero_headline",
   "hero_subtitle",
@@ -163,6 +166,21 @@
    "fieldname": "review_url",
    "fieldtype": "Data",
    "label": "Review link"
+  },
+  {
+   "fieldname": "subscription_plan",
+   "fieldtype": "Data",
+   "label": "Subscription Plan"
+  },
+  {
+   "fieldname": "subscription_price",
+   "fieldtype": "Data",
+   "label": "Subscription Price"
+  },
+  {
+   "fieldname": "subscription_status",
+   "fieldtype": "Data",
+   "label": "Subscription Status"
   },
   {
    "fieldname": "section_website",

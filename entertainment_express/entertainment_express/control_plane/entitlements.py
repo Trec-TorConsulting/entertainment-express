@@ -154,3 +154,15 @@ def push_plan_to_site(tenant_name: str, extra: dict | None = None) -> None:
     if current_site and current_site != tenant.site_name:
         update_site_flags(current_site, flags)
 
+    if frappe.db.table_exists("EE Portal Settings") or frappe.db.exists("DocType", "EE Portal Settings"):
+        try:
+            if not frappe.db.exists("EE Portal Settings", "EE Portal Settings"):
+                frappe.get_doc({"doctype": "EE Portal Settings"}).insert(ignore_permissions=True)
+            frappe.db.set_single_value("EE Portal Settings", "subscription_plan", plan.plan_name or plan.name)
+            frappe.db.set_single_value("EE Portal Settings", "subscription_price", flags.get("ee_price_display") or "$149.00 / month")
+            frappe.db.set_single_value("EE Portal Settings", "subscription_status", flags.get("ee_subscription_status") or "active")
+            frappe.db.set_single_value("EE Portal Settings", "feature_flags", frappe.as_json(ents))
+        except Exception as e:
+            frappe.log_error(title="push_plan_to_site EE Portal Settings error", message=str(e))
+
+

@@ -177,26 +177,27 @@ def my_plan() -> dict:
     host_prefix = site.split(".")[0] if site else ""
 
     tenant_name = None
-    if frappe.db.exists("DocType", "Tenant"):
-        if slug:
-            tenant_name = frappe.db.get_value("Tenant", {"tenant_slug": slug}, "name") or (frappe.db.exists("Tenant", slug) and slug)
-        if not tenant_name and host_prefix:
-            tenant_name = (
-                frappe.db.get_value("Tenant", {"tenant_slug": host_prefix}, "name")
-                or frappe.db.get_value("Tenant", {"site_name": host_prefix}, "name")
-                or frappe.db.get_value("Tenant", {"site_name": site}, "name")
-                or (frappe.db.exists("Tenant", host_prefix) and host_prefix)
-            )
-        if not tenant_name and site:
-            all_tenants = frappe.get_all("Tenant", fields=["name", "site_name", "tenant_slug"], limit=10)
+    try:
+        if frappe.db.table_exists("tabTenant") or frappe.db.exists("DocType", "Tenant"):
+            all_tenants = frappe.get_all("Tenant", fields=["name", "site_name", "tenant_slug", "plan"], limit=20)
             for t in all_tenants:
-                t_site = t.get("site_name") or ""
+                t_name = t.get("name") or ""
                 t_slug = t.get("tenant_slug") or ""
-                if (t_site and t_site in site) or (t_slug and t_slug in site) or site.startswith(t_slug):
-                    tenant_name = t.get("name")
+                t_site = t.get("site_name") or ""
+                if (
+                    t_name == host_prefix
+                    or t_slug == host_prefix
+                    or (slug and (t_name == slug or t_slug == slug))
+                    or (host_prefix and host_prefix in t_name)
+                    or (t_site and t_site in site)
+                ):
+                    tenant_name = t_name
                     break
             if not tenant_name and len(all_tenants) == 1:
                 tenant_name = all_tenants[0].get("name")
+    except Exception:
+        pass
+
 
 
     if tenant_name:
@@ -232,6 +233,25 @@ def my_plan() -> dict:
             pass
 
     conf = frappe.conf or {}
+
+    if frappe.db.table_exists("EE Portal Settings") or frappe.db.exists("DocType", "EE Portal Settings"):
+        try:
+            s_plan = frappe.db.get_single_value("EE Portal Settings", "subscription_plan")
+            s_price = frappe.db.get_single_value("EE Portal Settings", "subscription_price")
+            s_status = frappe.db.get_single_value("EE Portal Settings", "subscription_status")
+            if s_plan:
+                return {
+                    "plan": s_plan,
+                    "status": s_status or conf.get("ee_subscription_status") or "active",
+                    "period_end": str(conf.get("ee_period_end") or ""),
+                    "price": s_price or conf.get("ee_price_display") or "$149.00 / month",
+                    "cancel_at_period_end": int(conf.get("ee_cancel_at_period_end") or 0),
+                    "cancel_requested": int(conf.get("ee_cancel_requested") or 0),
+                    "suspended": int(conf.get("ee_suspended") or 0),
+                }
+        except Exception:
+            pass
+
     status = conf.get("ee_subscription_status") or "trialing"
     return {
         "plan": conf.get("ee_plan_name") or conf.get("ee_plan") or "Enterprise",
