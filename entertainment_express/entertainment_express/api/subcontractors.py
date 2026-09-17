@@ -106,6 +106,20 @@ def _serialize_job(doc) -> dict:
 
 
 @frappe.whitelist()
+def create_subcontractor(values: dict | str | None = None) -> dict:
+    """Create or update a subcontractor partner vendor."""
+    _require_staff()
+    from entertainment_express.api.vendors import save_vendor
+
+    if isinstance(values, str):
+        values = frappe.parse_json(values) or {}
+    values = dict(values or {})
+    values["subcontractor"] = 1
+    doc = save_vendor(values=values)
+    return _serialize_subcontractor(frappe.get_doc("EE Vendor", doc.get("id") or doc.get("name")))
+
+
+@frappe.whitelist()
 def list_subcontractors() -> list[dict]:
     """Returns active subcontractor partner companies, rating, and COI/W-9 status."""
     _require_staff()

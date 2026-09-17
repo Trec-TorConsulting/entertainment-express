@@ -261,3 +261,35 @@ def test_ai_platform_knowledge_context():
     assert "/brand" in knowledge
     assert "/import" in knowledge
 
+
+def test_create_subcontractor_api(monkeypatch):
+    from entertainment_express.api import subcontractors
+
+    saved = {}
+
+    def fake_save_vendor(values):
+        saved.update(values)
+        return {"id": "VEND-101", "name": values.get("name")}
+
+    fake = _Fake(["EE Tenant Admin"])
+    fake.get_doc = lambda dt, name: _Dict({
+        "name": "VEND-101",
+        "vendor_name": "Apex Audio LLC",
+        "category": "DJ & Audio Production",
+        "preferred": 1,
+        "subcontractor": 1,
+        "rating": 5.0,
+        "w9_on_file": 1,
+        "coi_on_file": 1,
+        "default_pay_terms": "Net 15",
+        "notes": "Top partner",
+        "contacts": [],
+    })
+    monkeypatch.setattr(subcontractors, "frappe", fake)
+    monkeypatch.setattr("entertainment_express.api.vendors.save_vendor", fake_save_vendor)
+
+    res = subcontractors.create_subcontractor({"name": "Apex Audio LLC", "category": "DJ & Audio Production"})
+    assert res["name"] == "Apex Audio LLC"
+    assert saved["subcontractor"] == 1
+
+

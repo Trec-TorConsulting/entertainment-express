@@ -31,6 +31,7 @@ import {
   Clock
 } from "lucide-react";
 import { SubOutModal } from "./SubOutModal";
+import { AddSubcontractorModal } from "./AddSubcontractorModal";
 
 export const SubcontractorsPage: React.FC = () => {
   const { toast } = useToast();
@@ -40,6 +41,7 @@ export const SubcontractorsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPartnerForSub, setSelectedPartnerForSub] = useState<any>(null);
   const [subModalOpen, setSubModalOpen] = useState(false);
+  const [addPartnerModalOpen, setAddPartnerModalOpen] = useState(false);
   const [actingJobId, setActingJobId] = useState<string | null>(null);
 
   const loadData = async () => {
@@ -271,6 +273,16 @@ export const SubcontractorsPage: React.FC = () => {
                 icon={<Handshake className="w-10 h-10 text-[var(--ee-muted)]" />}
                 title="No Subcontractor Partners Qualified"
                 description="Register partner entertainment companies and mark them as overflow subcontractors in your vendor network."
+                action={
+                  <Button
+                    variant="primary"
+                    density="cockpit"
+                    onClick={() => setAddPartnerModalOpen(true)}
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-1.5" />
+                    Add Subcontractor Partner
+                  </Button>
+                }
               />
             </CardContent>
           </Card>
@@ -392,10 +404,15 @@ export const SubcontractorsPage: React.FC = () => {
             Manage partner entertainment companies, issue sub-out work orders, and track profit margins.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge variant="brand" size="sm">
-            {jobs.length} Subcontracts
-          </Badge>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            density="cockpit"
+            onClick={() => setAddPartnerModalOpen(true)}
+            leftIcon={<Plus className="w-3.5 h-3.5 text-[var(--ee-brand)]" />}
+          >
+            + Add Subcontractor Partner
+          </Button>
           <Button
             variant="primary"
             density="cockpit"
@@ -456,7 +473,18 @@ export const SubcontractorsPage: React.FC = () => {
         booking={null}
         onSuccess={() => loadData()}
       />
+
+      {/* Add Subcontractor Partner Modal */}
+      <AddSubcontractorModal
+        open={addPartnerModalOpen}
+        onOpenChange={setAddPartnerModalOpen}
+        onSuccess={() => {
+          setActiveTab("directory");
+          loadData();
+        }}
+      />
     </div>
   );
 };
 export default SubcontractorsPage;
+
