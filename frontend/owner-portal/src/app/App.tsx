@@ -67,7 +67,8 @@ export const OwnerApp: React.FC = () => {
           <Route path="/automations" element={<AutomationsPage />} />
           <Route path="/grow" element={<GrowPage />} />
           <Route path="/coverage" element={<CoveragePage />} />
-          <Route path="/move" element={<MovePage />} />
+          <Route path="/import" element={<MovePage />} />
+          <Route path="/move" element={<Navigate to="/import" replace />} />
           <Route path="/connections" element={<ConnectionsPage />} />
           <Route path="/security" element={<SecurityPage />} />
           <Route path="/pipeline" element={<PipelinePage />} />

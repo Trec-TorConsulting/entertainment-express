@@ -12,7 +12,7 @@ import {
   LayoutDashboard, Calendar, Sparkles, Clock, Truck, FileText,
   Tag, Briefcase, Users, MapPin, Handshake, DollarSign,
   BarChart3, Bot, Compass, Bell, TrendingUp, Globe,
-  Shield, Move, Palette, Key, Lock, Building2, Database, AlertTriangle
+  Shield, Move, Download, Palette, Key, Lock, Building2, Database, AlertTriangle
 } from "lucide-react";
 
 export interface OwnerLayoutProps {
@@ -33,10 +33,10 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
       id: "operations",
       label: "Operations",
       items: [
-        { id: "today", label: "Today", icon: <LayoutDashboard className="w-4 h-4" />, active: currentPath === "/", onClick: () => navigate("/") },
+        { id: "today", label: "Today", icon: <LayoutDashboard className="w-4 h-4" />, active: currentPath === "/" || currentPath === "/today", onClick: () => navigate("/") },
         { id: "calendar", label: "Calendar", icon: <Calendar className="w-4 h-4" />, active: currentPath.startsWith("/calendar"), onClick: () => navigate("/calendar") },
+        { id: "schedule", label: "Schedule", icon: <Clock className="w-4 h-4" />, active: currentPath.startsWith("/schedule"), onClick: () => navigate("/schedule") },
         { id: "pipeline", label: "Pipeline", icon: <Sparkles className="w-4 h-4" />, active: currentPath.startsWith("/pipeline"), onClick: () => navigate("/pipeline") },
-        { id: "schedule", label: "Consults", icon: <Clock className="w-4 h-4" />, active: currentPath.startsWith("/schedule"), onClick: () => navigate("/schedule") },
         { id: "dispatch", label: "Dispatch", icon: <Truck className="w-4 h-4" />, active: currentPath.startsWith("/dispatch"), onClick: () => navigate("/dispatch") },
         { id: "fleet", label: "Fleet & Safety", icon: <Shield className="w-4 h-4" />, active: currentPath.startsWith("/fleet"), onClick: () => navigate("/fleet") },
         { id: "overrides", label: "Emergency Overrides", icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, active: currentPath.startsWith("/operations/overrides"), onClick: () => navigate("/operations/overrides") },
@@ -65,7 +65,7 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
         { id: "plan", label: "Plan", icon: <Compass className="w-4 h-4" />, active: currentPath.startsWith("/plan"), onClick: () => navigate("/plan") },
         { id: "automations", label: "Reminders", icon: <Bell className="w-4 h-4" />, active: currentPath.startsWith("/automations"), onClick: () => navigate("/automations") },
         { id: "grow", label: "Grow", icon: <TrendingUp className="w-4 h-4" />, active: currentPath.startsWith("/grow"), onClick: () => navigate("/grow") },
-        { id: "move", label: "Move", icon: <Move className="w-4 h-4" />, active: currentPath.startsWith("/move"), onClick: () => navigate("/move") },
+        { id: "import", label: "Import", icon: <Download className="w-4 h-4" />, active: currentPath.startsWith("/import") || currentPath.startsWith("/move"), onClick: () => navigate("/import") },
       ]
     },
     {

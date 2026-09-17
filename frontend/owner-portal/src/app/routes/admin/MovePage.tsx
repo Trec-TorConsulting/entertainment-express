@@ -88,11 +88,11 @@ export const MovePage: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)] flex items-center gap-2.5">
-          <ArrowUpRight className="w-8 h-8 text-[var(--ee-brand)]" />
-          Data Migration & CSV Import Studio
+          <Download className="w-8 h-8 text-[var(--ee-brand)]" />
+          Data Import Studio
         </h1>
         <p className="text-base text-[var(--ee-muted)] mt-1">
-          Import client lists, bookings, and gear assets from HoneyBook, DJ Event Planner, Check Cherry, or Booqable.
+          Import client lists, bookings, catalog items, and gear assets from HoneyBook, DJ Event Planner, Check Cherry, or Booqable.
         </p>
       </div>
 
