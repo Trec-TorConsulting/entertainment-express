@@ -58,6 +58,7 @@ export const PlacesPage: React.FC = () => {
   const [lookupQuery, setLookupQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Array<{ title: string; address: string; geo?: string; city?: string; state?: string }>>([]);
   const [searching, setSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const defaultVenues: VenueRecord[] = [
     {
       id: "VEN-01",
