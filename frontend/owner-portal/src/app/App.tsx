@@ -16,6 +16,7 @@ import { VanManifestPage } from "./routes/fleet/VanManifestPage";
 import { CompanyStudioPage } from "./routes/settings/CompanyStudioPage";
 import { MasterDataPage } from "./routes/admin/MasterDataPage";
 import { EmergencyOverridesPage } from "./routes/operations/EmergencyOverridesPage";
+import { EventDetailsPage } from "./routes/operations/EventDetailsPage";
 
 // Statically import Legacy Workspaces to eliminate chunk mismatches
 import LegacyWorkspaces from "../AppLegacy";
@@ -50,6 +51,8 @@ export const OwnerApp: React.FC = () => {
           <Route path="/subcontractors" element={<SubcontractorsPage />} />
           <Route path="/brand" element={<BrandPage />} />
           <Route path="/website" element={<WebsitePage />} />
+          <Route path="/event-details" element={<EventDetailsPage />} />
+          <Route path="/operations/event-details" element={<EventDetailsPage />} />
           <Route path="/settings/website" element={<WebsitePage />} />
           <Route path="/settings/studio" element={<CompanyStudioPage />} />
           <Route path="/settings" element={<Navigate to="/settings/studio" replace />} />

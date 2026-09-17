@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import flt, fmt_money
 
-OWNER_ROLES = {"EE Tenant Admin"}
+OWNER_ROLES = {"EE Tenant Admin", "EE Manager"}
 DISALLOWED_ESCALATION_ROLES = {"System Manager", "SaaS Operator"}
 STAFF_ROLE_LABELS = {
     "EE Sales": "Sales",

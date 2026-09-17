@@ -182,6 +182,67 @@ def _schema(kind: str) -> dict:
                 {"key": "remarks", "label": "Notes", "type": "textarea"},
             ],
         },
+        "safety_certificate": {
+            "kind": "safety_certificate",
+            "title": "Safety Certificates",
+            "singular": "Safety Certificate",
+            "can_create": True,
+            "can_delete": True,
+            "empty": "No safety certificates logged yet. Add compliance certificates to enforce dispatch safety gates.",
+            "columns": [
+                {"key": "certificate_name", "label": "Certificate"},
+                {"key": "issuing_body", "label": "Authority"},
+                {"key": "expiry_date", "label": "Expiry"},
+                {"key": "status", "label": "Status"},
+            ],
+            "fields": [
+                {"key": "certificate_name", "label": "Certificate Name", "type": "text", "required": True},
+                {"key": "certificate_number", "label": "Certificate Number", "type": "text"},
+                {"key": "issuing_body", "label": "Issuing Authority", "type": "text", "required": True},
+                {"key": "expiry_date", "label": "Expiry Date", "type": "date", "required": True},
+                {"key": "issue_date", "label": "Issue Date", "type": "date"},
+                {
+                    "key": "status",
+                    "label": "Status",
+                    "type": "select",
+                    "options": ["Active", "Expiring Soon", "Expired", "Revoked"],
+                },
+                {"key": "notes", "label": "Notes", "type": "textarea"},
+            ],
+        },
+        "vehicle": {
+            "kind": "vehicle",
+            "title": "Fleet Vehicles",
+            "singular": "Vehicle",
+            "can_create": True,
+            "can_delete": True,
+            "empty": "No fleet vehicles configured. Add vans, box trucks, or trailers to track van warehouses.",
+            "columns": [
+                {"key": "vehicle_name", "label": "Vehicle Name"},
+                {"key": "plate", "label": "Plate"},
+                {"key": "vehicle_type", "label": "Type"},
+                {"key": "status", "label": "Status"},
+            ],
+            "fields": [
+                {"key": "vehicle_name", "label": "Vehicle Name", "type": "text", "required": True},
+                {"key": "plate", "label": "Plate Number", "type": "text"},
+                {"key": "vin", "label": "VIN", "type": "text"},
+                {
+                    "key": "vehicle_type",
+                    "label": "Type",
+                    "type": "select",
+                    "options": ["van", "box_truck", "trailer", "car", "other"],
+                },
+                {
+                    "key": "status",
+                    "label": "Status",
+                    "type": "select",
+                    "options": ["active", "in_service", "out_of_service"],
+                },
+                {"key": "max_payload_lb", "label": "Max Payload (lb)", "type": "number"},
+                {"key": "barcode", "label": "Barcode", "type": "text"},
+            ],
+        },
     }
     if kind not in catalogs:
         frappe.throw("Unknown workspace.")
@@ -673,12 +734,89 @@ def _delete_invoice(_name: str) -> None:
     frappe.throw("Invoices cannot be deleted here.", frappe.PermissionError)
 
 
+def _list_safety_certificates() -> list[dict]:
+    fields = [
+        "name", "certificate_name", "certificate_number", "issuing_body",
+        "status", "issue_date", "expiry_date", "document_file", "notes"
+    ]
+    rows = frappe.get_all("Safety Certificate", fields=fields, order_by="expiry_date asc", limit_page_length=200)
+    for row in rows:
+        row["id"] = row["name"]
+        try:
+            row["governed_assets"] = frappe.get_all(
+                "Safety Certificate Asset",
+                filters={"parent": row["name"]},
+                fields=["asset_ref"],
+            )
+        except Exception:
+            row["governed_assets"] = []
+    return rows
+
+
+def _get_safety_certificate(name: str) -> dict:
+    doc = frappe.get_doc("Safety Certificate", name)
+    data = doc.as_dict()
+    data["id"] = doc.name
+    return data
+
+
+def _save_safety_certificate(name: str | None, values: dict) -> str:
+    if name and frappe.db.exists("Safety Certificate", name):
+        doc = frappe.get_doc("Safety Certificate", name)
+        doc.update(values)
+    else:
+        values["doctype"] = "Safety Certificate"
+        doc = frappe.get_doc(values)
+    doc.save(ignore_permissions=True)
+    return doc.name
+
+
+def _delete_safety_certificate(name: str) -> None:
+    frappe.delete_doc("Safety Certificate", name, ignore_permissions=True)
+
+
+def _list_vehicles() -> list[dict]:
+    fields = [
+        "name", "vehicle_name", "plate", "vin", "vehicle_type", "status",
+        "capacity", "max_payload_lb", "assigned_crew", "odometer", "fuel_level",
+        "home_location", "linked_warehouse", "barcode", "registration_expiry", "insurance_expiry"
+    ]
+    rows = frappe.get_all("Vehicle", fields=fields, order_by="vehicle_name asc", limit_page_length=200)
+    for row in rows:
+        row["id"] = row["name"]
+    return rows
+
+
+def _get_vehicle(name: str) -> dict:
+    doc = frappe.get_doc("Vehicle", name)
+    data = doc.as_dict()
+    data["id"] = doc.name
+    return data
+
+
+def _save_vehicle(name: str | None, values: dict) -> str:
+    if name and frappe.db.exists("Vehicle", name):
+        doc = frappe.get_doc("Vehicle", name)
+        doc.update(values)
+    else:
+        values["doctype"] = "Vehicle"
+        doc = frappe.get_doc(values)
+    doc.save(ignore_permissions=True)
+    return doc.name
+
+
+def _delete_vehicle(name: str) -> None:
+    frappe.delete_doc("Vehicle", name, ignore_permissions=True)
+
+
 _LISTERS = {
     "inquiry": _list_inquiries,
     "job": _list_jobs,
     "package": _list_packages,
     "gear": _list_gear,
     "invoice": _list_invoices,
+    "safety_certificate": _list_safety_certificates,
+    "vehicle": _list_vehicles,
 }
 _GETTERS = {
     "inquiry": _get_inquiry,
@@ -686,6 +824,8 @@ _GETTERS = {
     "package": _get_package,
     "gear": _get_gear,
     "invoice": _get_invoice,
+    "safety_certificate": _get_safety_certificate,
+    "vehicle": _get_vehicle,
 }
 _SAVERS = {
     "inquiry": _save_inquiry,
@@ -693,6 +833,8 @@ _SAVERS = {
     "package": _save_package,
     "gear": _save_gear,
     "invoice": _save_invoice,
+    "safety_certificate": _save_safety_certificate,
+    "vehicle": _save_vehicle,
 }
 _DELETERS = {
     "inquiry": _delete_inquiry,
@@ -700,6 +842,8 @@ _DELETERS = {
     "package": _delete_package,
     "gear": _delete_gear,
     "invoice": _delete_invoice,
+    "safety_certificate": _delete_safety_certificate,
+    "vehicle": _delete_vehicle,
 }
 
 

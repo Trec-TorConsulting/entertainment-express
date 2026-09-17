@@ -20,7 +20,7 @@ from entertainment_express.fleet_maintenance.telemetry import (
 
 def _check_fleet_role(allowed_roles=None):
     if not allowed_roles:
-        allowed_roles = ["EE Tenant Admin", "EE Dispatcher", "System Manager", "EE Crew", "EE Entertainer"]
+        allowed_roles = ["EE Tenant Admin", "EE Manager", "EE Dispatcher", "System Manager", "EE Crew", "EE Entertainer"]
     user_roles = frappe.get_roles(frappe.session.user) if hasattr(frappe, "session") else []
     if not any(r in user_roles for r in allowed_roles) and frappe.session.user != "Administrator":
         frappe.throw("Not permitted to access fleet maintenance operations.", frappe.PermissionError)
@@ -98,7 +98,7 @@ def get_fleet_health_summary() -> dict:
     Return fleet readiness, count of quarantined units, overdue maintenance,
     and expiring safety certificates.
     """
-    _check_fleet_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    _check_fleet_role(["EE Tenant Admin", "EE Manager", "EE Dispatcher", "System Manager"])
 
     # Count assets
     total_assets = frappe.db.count("Service Asset", {"status": ["!=", "retired"]})
@@ -149,7 +149,7 @@ def list_quarantined_assets() -> list[dict]:
     """
     List all quarantined or out-of-service assets with their defect history and repair status.
     """
-    _check_fleet_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    _check_fleet_role(["EE Tenant Admin", "EE Manager", "EE Dispatcher", "System Manager"])
 
     assets = frappe.get_all(
         "Service Asset",
@@ -187,12 +187,12 @@ def list_quarantined_assets() -> list[dict]:
 @frappe.whitelist()
 def quarantine_asset_api(asset_id: str, reason: str) -> dict:
     """Manual quarantine trigger from owner/dispatcher dashboard."""
-    _check_fleet_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    _check_fleet_role(["EE Tenant Admin", "EE Manager", "EE Dispatcher", "System Manager"])
     return quarantine_asset(asset_id, reason)
 
 
 @frappe.whitelist()
 def release_quarantine_api(asset_id: str, repair_cost: float = 0.0, technician_notes: str = "") -> dict:
     """Manual release from quarantine with technician repair notes."""
-    _check_fleet_role(["EE Tenant Admin", "EE Dispatcher", "System Manager"])
+    _check_fleet_role(["EE Tenant Admin", "EE Manager", "EE Dispatcher", "System Manager"])
     return release_quarantine(asset_id, flt(repair_cost), technician_notes)
