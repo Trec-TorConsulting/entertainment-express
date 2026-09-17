@@ -183,11 +183,37 @@ def delete_venue(name: str) -> dict:
 
 
 @frappe.whitelist()
-def search_places_autocomplete(query: str = "") -> list[dict]:
-    """Search for venue names and street addresses for live autocomplete."""
+def search_places_autocomplete(
+    query: str = "",
+    user_lat: float | str | None = None,
+    user_lon: float | str | None = None,
+    lookup_type: str = "all"
+) -> list[dict]:
+    """Search for venue names, company names, and street addresses with optional GPS location bias."""
     _require_staff()
     from entertainment_express.integrations.maps import search_places
 
-    return search_places(query, limit=6)
+    try:
+        ulat = float(user_lat) if user_lat not in (None, "") else None
+        ulon = float(user_lon) if user_lon not in (None, "") else None
+    except (ValueError, TypeError):
+        ulat, ulon = None, None
+
+    return search_places(query=query, limit=6, user_lat=ulat, user_lon=ulon, lookup_type=lookup_type)
+
+
+@frappe.whitelist()
+def reverse_geocode_location(lat: float | str, lon: float | str) -> dict:
+    """Reverse-geocode latitude and longitude into address components."""
+    _require_staff()
+    from entertainment_express.integrations.maps import reverse_geocode
+
+    try:
+        flat = float(lat)
+        flon = float(lon)
+        return reverse_geocode(flat, flon)
+    except Exception:
+        return {}
+
 
 

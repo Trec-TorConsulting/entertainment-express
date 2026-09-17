@@ -6,7 +6,8 @@ import {
   FormField,
   Badge,
   useToast,
-  call
+  call,
+  AddressLookupInput
 } from "@portal-kit";
 import { Sparkles, Check, Send, CheckCircle2, Zap } from "lucide-react";
 
@@ -107,6 +108,19 @@ export const SmartQuoteModal: React.FC<SmartQuoteModalProps> = ({
       <div className="space-y-4 py-2">
           {!quoteResult ? (
             <div className="space-y-3">
+              <AddressLookupInput
+                label="Search Company, Organization or Venue (Geo-Biased)"
+                placeholder='Type company name or venue e.g. "Peachtree Catering" or "Ritz Hotel"...'
+                enableGeoProximity={true}
+                lookupType="all"
+                onSelect={(place) => {
+                  if (place.title) setCustomerName(place.title);
+                  if (place.address && !inquiryText) {
+                    setInquiryText(`Venue: ${place.title} - ${place.address}`);
+                  }
+                }}
+              />
+
               <FormField label="Prospective Client / Organization Name" required>
                 <Input
                   placeholder="e.g. Sarah Jenkins or Apex Software Gala"

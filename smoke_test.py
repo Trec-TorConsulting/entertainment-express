@@ -1075,14 +1075,21 @@ def test_hardening():
 
 
 def test_place_lookup_search():
-    """Test map/place search autocomplete logic in integrations.maps."""
-    print("✓ Testing Place & Address Lookup Autocomplete logic...")
+    """Test map/place search autocomplete & reverse geocoding logic in integrations.maps."""
+    print("✓ Testing Universal Geo-Biased Place Lookup & Reverse Geocoding...")
     try:
         sys.path.insert(0, "entertainment_express")
-        from entertainment_express.integrations.maps import search_places
-        results = search_places("Ritz Carlton Atlanta", limit=3)
+        from entertainment_express.integrations.maps import search_places, reverse_geocode
+
+        # Test search with user_lat / user_lon proximity bias
+        results = search_places("Ritz Carlton", limit=3, user_lat=33.7591, user_lon=-84.3880)
         assert isinstance(results, list), "search_places did not return a list"
-        print(f"  ✓ place autocomplete logic verified ({len(results)} search results returned)")
+
+        # Test reverse geocoding
+        rev = reverse_geocode(33.7591, -84.3880)
+        assert isinstance(rev, dict), "reverse_geocode did not return a dict"
+
+        print(f"  ✓ place autocomplete ({len(results)} results) and reverse geocoding verified")
         return True
     except Exception as e:
         print(f"  ✗ Place autocomplete test failed: {e}")

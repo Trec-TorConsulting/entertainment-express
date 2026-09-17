@@ -13,7 +13,8 @@ import {
   Skeleton,
   useToast,
   call,
-  downloadBase64
+  downloadBase64,
+  AddressLookupInput
 } from "@portal-kit";
 import {
   Calendar, MapPin, Clock, CloudRain, CheckCircle2,
@@ -166,9 +167,21 @@ export const EventDetailPage: React.FC = () => {
                 {booking?.start_time ? `${booking.start_time.slice(0, 5)} - ${booking.end_time?.slice(0, 5) || "End"}` : "Evening Performance"}
               </span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-[var(--ee-border)]">
-              <span className="text-[var(--ee-muted)]">Venue Location</span>
-              <span className="font-semibold text-[var(--ee-text)]">{booking?.venue_address || "TBD"}</span>
+            <div className="py-2 border-b border-[var(--ee-border)] space-y-1.5">
+              <span className="text-[var(--ee-muted)] font-medium">Venue Location</span>
+              <AddressLookupInput
+                value={booking?.venue_address || ""}
+                placeholder="Search hotel, ballroom, or address..."
+                enableGeoProximity={true}
+                onSelect={(place) => {
+                  const newAddr = place.address || place.title;
+                  setBooking((prev: any) => ({ ...prev, venue_address: newAddr }));
+                  toast({
+                    title: "Venue Updated",
+                    description: `Selected ${newAddr}`,
+                  });
+                }}
+              />
             </div>
             <div className="flex justify-between py-1.5 border-b border-[var(--ee-border)]">
               <span className="text-[var(--ee-muted)]">Expected Guests</span>

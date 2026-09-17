@@ -87,8 +87,14 @@ def travel_minutes(from_geo: str, to_geo: str) -> int | None:
     return observe.run(provider, "travel_minutes", _call)
 
 
-def search_places(query: str, limit: int = 6) -> list[dict]:
-    """Search for venues, landmarks, and addresses with multi-provider resolution."""
+def search_places(
+    query: str,
+    limit: int = 6,
+    user_lat: float | None = None,
+    user_lon: float | None = None,
+    lookup_type: str = "all"
+) -> list[dict]:
+    """Search for venues, landmarks, companies, and addresses with proximity bias and multi-provider resolution."""
     query = (query or "").strip()
     if not query or len(query) < 2:
         return []
@@ -99,7 +105,8 @@ def search_places(query: str, limit: int = 6) -> list[dict]:
     if token:
         try:
             if provider == "mapbox":
-                url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{quote(query)}.json?access_token={token}&limit={limit}"
+                proximity_param = f"&proximity={user_lon},{user_lat}" if user_lat is not None and user_lon is not None else ""
+                url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{quote(query)}.json?access_token={token}&limit={limit}{proximity_param}"
                 data = request("GET", url)
                 feats = (data or {}).get("features") or []
                 for f in feats:
@@ -108,16 +115,20 @@ def search_places(query: str, limit: int = 6) -> list[dict]:
                     geo = f"{lat},{lon}" if lat is not None and lon is not None else ""
                     title = f.get("text") or (f.get("place_name") or "").split(",")[0]
                     address = f.get("place_name") or query
+                    props = f.get("properties") or {}
+                    phone = props.get("phone") or ""
                     results.append({
                         "title": title,
                         "address": address,
                         "geo": geo,
                         "lat": lat,
                         "lon": lon,
+                        "phone": phone,
                         "provider": "mapbox",
                     })
             elif provider == "google_maps":
-                url = f"https://maps.googleapis.com/maps/api/geocode/json?address={quote(query)}&key={token}"
+                loc_param = f"&location={user_lat},{user_lon}&radius=50000" if user_lat is not None and user_lon is not None else ""
+                url = f"https://maps.googleapis.com/maps/api/geocode/json?address={quote(query)}&key={token}{loc_param}"
                 data = request("GET", url)
                 items = (data or {}).get("results") or []
                 for item in items[:limit]:
@@ -138,9 +149,17 @@ def search_places(query: str, limit: int = 6) -> list[dict]:
             pass
 
     if not results:
-        # Zero-key fallback using OpenStreetMap Nominatim
+        # Zero-key fallback using OpenStreetMap Nominatim with optional lat/lon proximity bias
         try:
-            url = f"https://nominatim.openstreetmap.org/search?q={quote(query)}&format=json&addressdetails=1&limit={limit}"
+            viewbox_param = ""
+            if user_lat is not None and user_lon is not None:
+                min_lon = user_lon - 0.5
+                max_lon = user_lon + 0.5
+                min_lat = user_lat - 0.5
+                max_lat = user_lat + 0.5
+                viewbox_param = f"&viewbox={min_lon},{max_lat},{max_lon},{min_lat}"
+
+            url = f"https://nominatim.openstreetmap.org/search?q={quote(query)}&format=json&addressdetails=1&extratags=1&limit={limit}{viewbox_param}"
             headers = {"User-Agent": "EntertainmentExpress/1.0 (entertainment-express-place-lookup)"}
             items = request("GET", url, headers=headers) or []
             if isinstance(items, list):
@@ -155,7 +174,9 @@ def search_places(query: str, limit: int = 6) -> list[dict]:
                     geo = f"{lat},{lon}" if lat is not None and lon is not None else ""
                     disp = item.get("display_name") or query
                     addr = item.get("address") or {}
-                    name = item.get("name") or addr.get("amenity") or addr.get("building") or disp.split(",")[0]
+                    extra = item.get("extratags") or {}
+                    name = item.get("name") or addr.get("amenity") or addr.get("building") or addr.get("shop") or disp.split(",")[0]
+                    phone = extra.get("phone") or extra.get("contact:phone") or ""
                     results.append({
                         "title": name,
                         "address": disp,
@@ -165,10 +186,40 @@ def search_places(query: str, limit: int = 6) -> list[dict]:
                         "city": addr.get("city") or addr.get("town") or addr.get("village") or "",
                         "state": addr.get("state") or "",
                         "postcode": addr.get("postcode") or "",
+                        "phone": phone,
                         "provider": "nominatim",
                     })
         except Exception:
             pass
 
     return results
+
+
+def reverse_geocode(lat: float, lon: float) -> dict:
+    """Reverse-geocode latitude and longitude coordinates into a formatted address."""
+    if lat is None or lon is None:
+        return {}
+    try:
+        url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json&addressdetails=1"
+        headers = {"User-Agent": "EntertainmentExpress/1.0 (entertainment-express-place-lookup)"}
+        item = request("GET", url, headers=headers) or {}
+        if isinstance(item, dict):
+            disp = item.get("display_name") or ""
+            addr = item.get("address") or {}
+            name = item.get("name") or addr.get("amenity") or addr.get("building") or disp.split(",")[0]
+            return {
+                "title": name,
+                "address": disp,
+                "geo": f"{lat},{lon}",
+                "lat": lat,
+                "lon": lon,
+                "city": addr.get("city") or addr.get("town") or addr.get("village") or "",
+                "state": addr.get("state") or "",
+                "postcode": addr.get("postcode") or "",
+                "country": addr.get("country") or "",
+            }
+    except Exception:
+        pass
+    return {"geo": f"{lat},{lon}", "lat": lat, "lon": lon}
+
 
