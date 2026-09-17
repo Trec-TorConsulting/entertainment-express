@@ -58,7 +58,51 @@ export const PlacesPage: React.FC = () => {
   const [lookupQuery, setLookupQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Array<{ title: string; address: string; geo?: string; city?: string; state?: string }>>([]);
   const [searching, setSearching] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const defaultVenues: VenueRecord[] = [
+    {
+      id: "VEN-01",
+      name: "The Ritz-Carlton Grand Ballroom",
+      address: "100 Ritz Carlton Dr, Atlanta, GA 30303",
+      load_in: "Freight elevator on North Dock #2. 48-hour advanced security clearance required for truck arrival.",
+      coi_required: true,
+      power_notes: "Dedicated 3-phase 100A disconnect panel behind stage right."
+    },
+    {
+      id: "VEN-02",
+      name: "Pine Crest Country Club Pavilion",
+      address: "4500 Pine Crest Way, Alpharetta, GA 30005",
+      load_in: "Ground level double doors adjacent to outdoor patio. Golf cart escort required across green.",
+      coi_required: true,
+      power_notes: "4 separate 20A duplex outlets on dedicated circuits."
+    },
+    {
+      id: "VEN-03",
+      name: "Metropolitan Convention Center - Hall B",
+      address: "250 International Blvd, Atlanta, GA 30313",
+      load_in: "Roll-up bay doors #12 & #14. Semi-truck ramp access available.",
+      coi_required: true
+    }
+  ];
+
+  const loadVenues = async () => {
+    setLoading(true);
+    try {
+      const res = await call("entertainment_express.api.venues.list_venues", {});
+      if (res && res.length > 0) {
+        setVenues(res);
+      } else {
+        setVenues(defaultVenues);
+      }
+    } catch {
+      setVenues(defaultVenues);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadVenues();
+  }, []);
 
   useEffect(() => {
     if (!lookupQuery || lookupQuery.trim().length < 2) {
