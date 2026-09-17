@@ -23,6 +23,15 @@ import { CatalogPage } from "./routes/catalog/CatalogPage";
 import { GearPage } from "./routes/fleet/GearPage";
 import { PlacesPage } from "./routes/operations/PlacesPage";
 import { PartnersPage } from "./routes/subcontractors/PartnersPage";
+import { ReportsPage } from "./routes/money/ReportsPage";
+import { AssistantPage } from "./routes/settings/AssistantPage";
+import { PlanPage } from "./routes/settings/PlanPage";
+import { AutomationsPage } from "./routes/settings/AutomationsPage";
+import { GrowPage } from "./routes/brand/GrowPage";
+import { CoveragePage } from "./routes/operations/CoveragePage";
+import { MovePage } from "./routes/admin/MovePage";
+import { ConnectionsPage } from "./routes/settings/ConnectionsPage";
+import { SecurityPage } from "./routes/admin/SecurityPage";
 
 // Statically import Legacy Workspaces to eliminate chunk mismatches
 import LegacyWorkspaces from "../AppLegacy";
@@ -52,6 +61,15 @@ export const OwnerApp: React.FC = () => {
           <Route path="/gear" element={<GearPage />} />
           <Route path="/places" element={<PlacesPage />} />
           <Route path="/partners" element={<PartnersPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/assistant" element={<AssistantPage />} />
+          <Route path="/plan" element={<PlanPage />} />
+          <Route path="/automations" element={<AutomationsPage />} />
+          <Route path="/grow" element={<GrowPage />} />
+          <Route path="/coverage" element={<CoveragePage />} />
+          <Route path="/move" element={<MovePage />} />
+          <Route path="/connections" element={<ConnectionsPage />} />
+          <Route path="/security" element={<SecurityPage />} />
           <Route path="/pipeline" element={<PipelinePage />} />
           <Route path="/pipeline/new" element={<Navigate to="/pipeline?new=1" replace />} />
           <Route path="/pipeline/:id/proposal" element={<LegacyWorkspaces />} />
