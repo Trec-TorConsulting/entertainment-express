@@ -47,6 +47,7 @@ export const AssistantPage: React.FC = () => {
     const query = (promptText !== undefined ? promptText : question).trim();
     if (!query) return;
     setBusy(true);
+    setReply(null);
     try {
       const res = await call("entertainment_express.api.ai.ask", { message: query });
       setReply(res);
@@ -85,6 +86,17 @@ export const AssistantPage: React.FC = () => {
 
   const routeActions = reply?.message ? extractRouteActions(reply.message) : [];
   const cleanMessage = reply?.message ? reply.message.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1") : "";
+
+  // Helper to format simple markdown bold strings (**text**)
+  const renderFormattedText = (text: string) => {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={i} className="font-semibold text-[var(--ee-brand)]">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in-50 duration-300">
@@ -135,12 +147,12 @@ export const AssistantPage: React.FC = () => {
             />
           </FormField>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-xs text-[var(--ee-muted)] font-bold flex items-center mr-1">
                 <HelpCircle className="w-3.5 h-3.5 mr-1" /> Quick Prompts:
               </span>
-              {QUICK_QUESTIONS.slice(0, 2).map((q, idx) => (
+              {QUICK_QUESTIONS.map((q, idx) => (
                 <button
                   key={idx}
                   type="button"
@@ -158,15 +170,27 @@ export const AssistantPage: React.FC = () => {
           </div>
         </form>
 
+        {/* Loading Indicator */}
+        {busy && (
+          <div className="p-6 rounded-2xl bg-[var(--ee-surface-inset)] border border-[var(--ee-brand)] space-y-3 animate-pulse">
+            <div className="flex items-center gap-2 text-sm font-bold text-[var(--ee-brand)]">
+              <Sparkles className="w-4 h-4 animate-spin text-[var(--ee-brand)]" /> AI Copilot Synthesizing Operational Guidance...
+            </div>
+            <p className="text-xs text-[var(--ee-muted)]">
+              Analyzing knowledge base, fleet readiness, and tenant context. Please wait a moment...
+            </p>
+          </div>
+        )}
+
         {/* AI Response Output */}
-        {reply && (
+        {!busy && reply && (
           <div className="p-5 rounded-2xl bg-[var(--ee-surface-inset)] border border-[var(--ee-brand)] space-y-4 animate-in fade-in-50">
             <div className="flex items-center gap-2 text-sm font-bold text-[var(--ee-brand)]">
               <Sparkles className="w-4 h-4" /> AI Copilot Intelligence Synthesis
             </div>
 
             <div className="text-sm text-[var(--ee-text)] leading-relaxed whitespace-pre-line">
-              {cleanMessage}
+              {renderFormattedText(cleanMessage)}
             </div>
 
             {routeActions.length > 0 && (
