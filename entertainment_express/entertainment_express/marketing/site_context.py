@@ -155,14 +155,9 @@ def get_sitemap_routes() -> list[str]:
         "/compare/honeybook",
         "/compare/event-rental-systems",
     ]
-    feature_routes = [
-        "/features/weather-risk",
-        "/features/dispatch-load-planning",
-        "/features/dj-playlist-export",
-        "/features/customer-portal",
-        "/features/white-label-branding",
-        "/features/ai-copilot",
-    ]
+    from entertainment_express.www.feature_page import FEATURES
+
+    feature_routes = [f"/features/{slug}" for slug in FEATURES.keys()]
     return base_routes + solution_routes + compare_routes + feature_routes
 
 

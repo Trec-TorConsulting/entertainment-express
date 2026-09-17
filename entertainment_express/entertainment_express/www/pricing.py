@@ -50,7 +50,11 @@ FAQ_ITEMS = [
     },
     {
         "question": "How do AI Financial Intelligence and Autonomous Operations work?",
-        "answer": "On Pro and Scale, our In-The-Box AI handles receipt photo OCR expense claims, 60-second instant lead quotes, and autonomous overdue AR dunning. On Scale, our Out-Of-The-Box engine adds emergency dispatch copilot broadcasts, computer vision Smart Van Eye truck inspections, and 24/7 Twilio Voice phone reception.",
+        "answer": "On Pro and Scale, our In-The-Box AI handles receipt photo OCR expense claims, 60-second instant lead quotes, and autonomous overdue AR dunning. On Scale, our Out-Of-The-Box engine adds emergency dispatch copilot broadcasts, computer vision Smart Van Eye truck inspections, 24/7 Twilio Voice phone reception, and AI Copilot direct route navigation across all platform tools.",
+    },
+    {
+        "question": "How do Subcontractor Management and the Opt-In B2B Job Board work?",
+        "answer": "Owners can add and manage trusted subcontractor partners with custom pay rates and COI tracking. When overbooked, owners can post overflow gigs to the central B2B Job Board or opt in with 1-click to receive broadcast SMS/email alerts for local overflow jobs posted by peer companies.",
     },
 ]
 
@@ -61,6 +65,7 @@ FEATURE_MATRIX = [
             {"label": "Staff Accounts", "key": "max_staff", "starter": "1 staff", "pro": "5 staff", "scale": "Unlimited"},
             {"label": "Active Bookings", "key": "active_bookings_limit", "starter": "3 active", "pro": "Unlimited", "scale": "Unlimited"},
             {"label": "File & Photo Storage", "key": "storage_gb", "starter": "500 MB", "pro": "15 GB", "scale": "100 GB"},
+            {"label": "Gamified Setup Launchpad", "key": "owner_onboarding", "starter": "Included", "pro": "Included", "scale": "Included"},
         ],
     },
     {
@@ -81,6 +86,7 @@ FEATURE_MATRIX = [
             {"label": "Instant Crew Payouts (Stripe Connect)", "key": "instant_payouts", "starter": "No", "pro": "Yes", "scale": "Yes"},
             {"label": "Digital Tip Splitting & Payroll Pool", "key": "tip_pooling", "starter": "Basic", "pro": "Yes", "scale": "Yes"},
             {"label": "Company Studio & Full Owner Parity", "key": "owner_parity", "starter": "Yes", "pro": "Yes", "scale": "Yes (Full Parity)"},
+            {"label": "Subcontractors & Opt-In B2B Job Board", "key": "subcontractors_b2b", "starter": "Yes", "pro": "Yes", "scale": "Yes"},
         ],
     },
     {
@@ -97,8 +103,8 @@ FEATURE_MATRIX = [
             {"label": "Autonomous Emergency Dispatch Copilot", "key": "dispatch_copilot", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "Computer Vision Smart Van Eye", "key": "smart_van_eye", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "24/7 AI Voice Phone Receptionist", "key": "voice_receptionist", "starter": "No", "pro": "No", "scale": "Yes"},
-            {"label": "Smart Operations Assistant", "key": "ai_assistant", "starter": "No", "pro": "No", "scale": "Yes"},
-            {"label": "Partner Overflow Exchange", "key": "overflow_exchange", "starter": "No", "pro": "No", "scale": "Yes"},
+            {"label": "Smart Operations & Platform Copilot", "key": "ai_assistant", "starter": "No", "pro": "No", "scale": "Yes"},
+            {"label": "Partner Overflow Exchange & B2B Blast", "key": "overflow_exchange", "starter": "No", "pro": "No", "scale": "Yes"},
             {"label": "Concierge Onboarding & Migration", "key": "concierge_migration", "starter": "Self-serve", "pro": "Self-serve", "scale": "Dedicated Agent"},
         ],
     },
