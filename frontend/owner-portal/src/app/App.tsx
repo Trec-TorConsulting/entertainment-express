@@ -17,6 +17,12 @@ import { CompanyStudioPage } from "./routes/settings/CompanyStudioPage";
 import { MasterDataPage } from "./routes/admin/MasterDataPage";
 import { EmergencyOverridesPage } from "./routes/operations/EmergencyOverridesPage";
 import { EventDetailsPage } from "./routes/operations/EventDetailsPage";
+import { CalendarPage } from "./routes/operations/CalendarPage";
+import { SchedulePage } from "./routes/operations/SchedulePage";
+import { CatalogPage } from "./routes/catalog/CatalogPage";
+import { GearPage } from "./routes/fleet/GearPage";
+import { PlacesPage } from "./routes/operations/PlacesPage";
+import { PartnersPage } from "./routes/subcontractors/PartnersPage";
 
 // Statically import Legacy Workspaces to eliminate chunk mismatches
 import LegacyWorkspaces from "../AppLegacy";
@@ -40,6 +46,12 @@ export const OwnerApp: React.FC = () => {
         <Routes>
           {/* Flagship Routes */}
           <Route path="/" element={<TodayPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/catalog" element={<CatalogPage />} />
+          <Route path="/gear" element={<GearPage />} />
+          <Route path="/places" element={<PlacesPage />} />
+          <Route path="/partners" element={<PartnersPage />} />
           <Route path="/pipeline" element={<PipelinePage />} />
           <Route path="/pipeline/new" element={<Navigate to="/pipeline?new=1" replace />} />
           <Route path="/pipeline/:id/proposal" element={<LegacyWorkspaces />} />
