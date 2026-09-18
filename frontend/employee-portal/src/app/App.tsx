@@ -1,39 +1,24 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { EmployeeLayout } from "./layouts/EmployeeLayout";
-import { Skeleton } from "@portal-kit";
 
-// Flagship Route Modules - Lazy Loaded
-const MyDayPage = React.lazy(() => import("./routes/today/MyDayPage").then((m) => ({ default: m.MyDayPage })));
-const DispatchEmbedPage = React.lazy(() => import("./routes/dispatch/DispatchEmbedPage").then((m) => ({ default: m.DispatchEmbedPage })));
-const MyEarningsPage = React.lazy(() => import("./routes/earnings/MyEarningsPage").then((m) => ({ default: m.MyEarningsPage })));
-const LegacyEmployeeWorkspaces = React.lazy(() => import("../AppLegacy"));
-
-const RouteFallback = () => (
-  <div className="p-4 space-y-4">
-    <Skeleton width="180px" height="2rem" />
-    <Skeleton height="8rem" />
-    <div className="grid grid-cols-2 gap-4">
-      <Skeleton height="5rem" />
-      <Skeleton height="5rem" />
-    </div>
-  </div>
-);
+import { MyDayPage } from "./routes/today/MyDayPage";
+import { DispatchEmbedPage } from "./routes/dispatch/DispatchEmbedPage";
+import { MyEarningsPage } from "./routes/earnings/MyEarningsPage";
+import LegacyEmployeeWorkspaces from "../AppLegacy";
 
 export const EmployeeApp: React.FC = () => {
   return (
     <EmployeeLayout>
-      <Suspense fallback={<RouteFallback />}>
-        <Routes>
-          {/* Flagship Routes */}
-          <Route path="/" element={<MyDayPage />} />
-          <Route path="/dispatch" element={<DispatchEmbedPage />} />
-          <Route path="/earnings" element={<MyEarningsPage />} />
+      <Routes>
+        {/* Flagship Routes */}
+        <Route path="/" element={<MyDayPage />} />
+        <Route path="/dispatch" element={<DispatchEmbedPage />} />
+        <Route path="/earnings" element={<MyEarningsPage />} />
 
-          {/* Operational & Legacy Routes */}
-          <Route path="/*" element={<LegacyEmployeeWorkspaces />} />
-        </Routes>
-      </Suspense>
+        {/* Operational & Legacy Routes */}
+        <Route path="/*" element={<LegacyEmployeeWorkspaces />} />
+      </Routes>
     </EmployeeLayout>
   );
 };

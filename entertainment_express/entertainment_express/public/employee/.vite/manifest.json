@@ -1,80 +1,9 @@
 {
-  "_EmptyState-BpnsgzkI.js": {
-    "file": "chunks/EmptyState-BpnsgzkI.js",
-    "name": "EmptyState",
-    "imports": [
-      "src/main.tsx"
-    ]
-  },
-  "_shield-check-CM3nQSy7.js": {
-    "file": "chunks/shield-check-CM3nQSy7.js",
-    "name": "shield-check",
-    "imports": [
-      "src/main.tsx"
-    ]
-  },
-  "_sparkles-1b11mNsy.js": {
-    "file": "chunks/sparkles-1b11mNsy.js",
-    "name": "sparkles",
-    "imports": [
-      "src/main.tsx"
-    ]
-  },
-  "src/AppLegacy.tsx": {
-    "file": "chunks/AppLegacy-Dn0b12O7.js",
-    "name": "AppLegacy",
-    "src": "src/AppLegacy.tsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "src/main.tsx",
-      "_EmptyState-BpnsgzkI.js"
-    ]
-  },
-  "src/app/routes/dispatch/DispatchEmbedPage.tsx": {
-    "file": "chunks/DispatchEmbedPage-D7gI21Tb.js",
-    "name": "DispatchEmbedPage",
-    "src": "src/app/routes/dispatch/DispatchEmbedPage.tsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "src/main.tsx",
-      "_sparkles-1b11mNsy.js",
-      "_EmptyState-BpnsgzkI.js"
-    ]
-  },
-  "src/app/routes/earnings/MyEarningsPage.tsx": {
-    "file": "chunks/MyEarningsPage-Cqac0SnR.js",
-    "name": "MyEarningsPage",
-    "src": "src/app/routes/earnings/MyEarningsPage.tsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "src/main.tsx",
-      "_shield-check-CM3nQSy7.js",
-      "_sparkles-1b11mNsy.js"
-    ]
-  },
-  "src/app/routes/today/MyDayPage.tsx": {
-    "file": "chunks/MyDayPage-Bxk9K6Qc.js",
-    "name": "MyDayPage",
-    "src": "src/app/routes/today/MyDayPage.tsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "src/main.tsx",
-      "_sparkles-1b11mNsy.js",
-      "_EmptyState-BpnsgzkI.js",
-      "_shield-check-CM3nQSy7.js"
-    ]
-  },
   "src/main.tsx": {
     "file": "main.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
-    "dynamicImports": [
-      "src/app/routes/today/MyDayPage.tsx",
-      "src/app/routes/dispatch/DispatchEmbedPage.tsx",
-      "src/app/routes/earnings/MyEarningsPage.tsx",
-      "src/AppLegacy.tsx"
-    ],
     "css": [
       "assets/main.css"
     ]
