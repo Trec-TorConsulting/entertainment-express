@@ -20,7 +20,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, className }) => {
     <nav
       aria-label="Mobile Navigation"
       className={clsx(
-        "fixed bottom-0 inset-x-0 z-[var(--ee-z-sticky)] h-[var(--ee-bottom-nav-height)] border-t border-[var(--ee-border)] bg-[var(--ee-surface-raised)]/95 backdrop-blur-md px-2 flex items-center justify-around shadow-ee-lg md:hidden",
+        "fixed bottom-0 inset-x-0 z-[var(--ee-z-sticky)] h-[var(--ee-bottom-nav-height)] border-t border-[var(--ee-rail-hover)] bg-[var(--ee-rail)]/95 text-[var(--ee-rail-text)] backdrop-blur-md px-2 flex items-center justify-around shadow-ee-lg md:hidden",
         className
       )}
     >

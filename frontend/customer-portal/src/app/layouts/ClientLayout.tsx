@@ -174,13 +174,13 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
     >
       <div className="flex flex-col min-h-[calc(100vh-10rem)] justify-between">
         <div>{children}</div>
-        <footer className="mt-12 py-6 px-4 border-t border-[var(--ee-border)] bg-[var(--ee-surface-inset)] rounded-2xl text-center text-xs text-[var(--ee-muted)] space-y-1 shadow-sm">
-          <div className="flex items-center justify-center gap-2 font-semibold text-[var(--ee-text)]">
+        <footer className="mt-12 py-6 px-4 border-t border-[var(--ee-rail-hover)] bg-[var(--ee-rail)] text-[var(--ee-rail-text)] rounded-2xl text-center text-xs space-y-1 shadow-md">
+          <div className="flex items-center justify-center gap-2 font-semibold text-white">
             <span>{getSessionBootstrap().branding?.name || "Entertainment Express"}</span>
             <span>·</span>
             <span>Event Experience Portal</span>
           </div>
-          <p className="text-[11px] text-[var(--ee-muted)]">
+          <p className="text-[11px] text-[var(--ee-rail-muted)]">
             Powered by Entertainment Express OS · SSL Encrypted Customer Workspace
           </p>
         </footer>
