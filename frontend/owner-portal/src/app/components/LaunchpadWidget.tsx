@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Rocket, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Rocket, Sparkles, ArrowRight, ShieldCheck, X } from "lucide-react";
 
 interface Quest {
   id: string;
@@ -23,6 +23,9 @@ export const LaunchpadWidget: React.FC = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState<OnboardingStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    return localStorage.getItem("ee_owner_launchpad_dismissed") === "true";
+  });
 
   useEffect(() => {
     fetch("/api/method/entertainment_express.api.portal_owner.get_onboarding_status")
@@ -36,8 +39,34 @@ export const LaunchpadWidget: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleDismiss = () => {
+    setDismissed(true);
+    localStorage.setItem("ee_owner_launchpad_dismissed", "true");
+  };
+
+  const handleRestore = () => {
+    setDismissed(false);
+    localStorage.removeItem("ee_owner_launchpad_dismissed");
+  };
+
   if (loading) return null;
   if (!status || status.is_fully_launched) return null;
+
+  if (dismissed) {
+    return (
+      <div className="mb-6 flex justify-end">
+        <button
+          type="button"
+          onClick={handleRestore}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-950/40 border border-purple-500/30 text-purple-300 hover:text-white hover:bg-purple-900/60 transition-all shadow-sm"
+          title="Re-open Setup Launchpad"
+        >
+          <Rocket className="w-3.5 h-3.5 text-purple-400" />
+          <span>Show Setup Launchpad ({status.completed_count}/{status.total_quests})</span>
+        </button>
+      </div>
+    );
+  }
 
   const handleAskAI = (prompt: string) => {
     navigate(`/assistant?q=${encodeURIComponent(prompt)}`);
@@ -73,6 +102,14 @@ export const LaunchpadWidget: React.FC = () => {
               style={{ width: `${status.progress}%` }}
             />
           </div>
+          <button
+            type="button"
+            onClick={handleDismiss}
+            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-purple-900/60 text-slate-400 hover:text-white transition-colors border border-slate-700/60 ml-2"
+            title="Dismiss Launchpad Banner"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
