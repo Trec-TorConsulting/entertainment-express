@@ -181,7 +181,16 @@ export const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
             <span>Event Experience Portal</span>
           </div>
           <p className="text-[11px] text-[var(--ee-rail-muted)]">
-            Powered by Entertainment Express OS · SSL Encrypted Customer Workspace
+            Powered by{" "}
+            <a
+              href={`https://www.${getSessionBootstrap().base_domain || "entx.app"}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--ee-rail-text)] underline hover:text-white transition-colors"
+            >
+              Entertainment Express
+            </a>{" "}
+            · SSL Encrypted Customer Workspace
           </p>
         </footer>
       </div>
