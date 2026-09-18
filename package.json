@@ -1,0 +1,15 @@
+{
+  "name": "entertainment-express",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Entertainment Express E2E Portal Crawler & Quality Suite",
+  "scripts": {
+    "test:e2e:quality-gates": "npx playwright test tests/e2e/portal-quality-gates.spec.ts",
+    "test:e2e:crawler": "npx playwright test tests/e2e/system-wide-portal-crawler.spec.ts",
+    "verify:backend-errors": "python3 scripts/verify_backend_error_logs.py"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0"
+  }
+}

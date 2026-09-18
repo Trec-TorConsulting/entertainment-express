@@ -15,7 +15,7 @@ export type ShellDensity = "ops" | "cockpit" | "consumer";
 
 export interface AppShellProps {
   title: string;
-  portal: "owner" | "employee" | "client";
+  portal?: "owner" | "employee" | "client" | "dispatch" | string;
   density?: ShellDensity;
   sidebar?: React.ReactNode;
   bottom?: React.ReactNode;
@@ -24,22 +24,26 @@ export interface AppShellProps {
   children: React.ReactNode;
 }
 
-const LINKS = {
+const LINKS: Record<string, { account: string; settings?: string }> = {
   owner: { account: "/owner/account", settings: "/owner/brand" },
-  employee: { account: "/employee/me", settings: undefined as string | undefined },
-  client: { account: "/client/account", settings: undefined as string | undefined },
+  employee: { account: "/employee/me", settings: undefined },
+  dispatch: { account: "/employee/me", settings: undefined },
+  client: { account: "/client/account", settings: undefined },
 };
+
+const DEFAULT_LINKS = { account: "/account", settings: undefined };
 
 function ShellHeaderActions({
   headerExtra,
-  links,
+  links = DEFAULT_LINKS,
   showSearch = true
 }: {
   headerExtra?: React.ReactNode;
-  links: { account: string; settings?: string };
+  links?: { account: string; settings?: string };
   showSearch?: boolean;
 }) {
   const { resolvedTheme, toggleTheme } = useTheme();
+  const safeLinks = links || DEFAULT_LINKS;
 
   return (
     <div className="flex items-center gap-2 sm:gap-3">
@@ -70,14 +74,14 @@ function ShellHeaderActions({
       </button>
 
       <InboxMenu />
-      <AccountMenu accountHref={links.account} settingsHref={links.settings} />
+      <AccountMenu accountHref={safeLinks.account || "/account"} settingsHref={safeLinks.settings} />
     </div>
   );
 }
 
 export const AppShell: React.FC<AppShellProps> = ({
   title,
-  portal,
+  portal = "owner",
   density = "cockpit",
   sidebar,
   bottom,
@@ -120,7 +124,6 @@ export const AppShell: React.FC<AppShellProps> = ({
     document.documentElement.style.removeProperty("--ee-text");
 
     // Inject branding CSS variables scoped to :root:not([data-theme="dark"])
-    // so custom tenant light-theme branding never destroys dark mode high-contrast text
     let styleEl = document.getElementById("ee-branding-theme") as HTMLStyleElement | null;
     if (!styleEl) {
       styleEl = document.createElement("style");
@@ -176,10 +179,11 @@ export const AppShell: React.FC<AppShellProps> = ({
       ? "density-consumer"
       : "density-cockpit";
 
-  const links = LINKS[portal];
+  const activePortal = portal || "owner";
+  const links = LINKS[activePortal] || DEFAULT_LINKS;
 
   // Default owner bottom navigation if none passed
-  const defaultOwnerBottom = portal === "owner" && !bottom ? (
+  const defaultOwnerBottom = activePortal === "owner" && !bottom ? (
     <nav
       aria-label="Owner Mobile Navigation"
       className="fixed bottom-0 inset-x-0 z-[var(--ee-z-sticky)] h-[var(--ee-bottom-nav-height)] border-t border-[var(--ee-border)] bg-[var(--ee-surface-raised)]/95 backdrop-blur-md px-2 flex items-center justify-around shadow-ee-lg md:hidden"
@@ -240,7 +244,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           >
             {/* Brand Logo & Title */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--ee-rail-hover)] mb-2">
-              <a href={`/${portal}`} className="flex items-center gap-2.5 overflow-hidden">
+              <a href={`/${activePortal}`} className="flex items-center gap-2.5 overflow-hidden">
                 {branding?.logo ? (
                   <img src={branding.logo} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
                 ) : (
@@ -344,7 +348,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           {resolvedBottom}
 
           {/* Global Command Palette */}
-          <CommandPalette portal={portal} />
+          <CommandPalette portal={activePortal} />
         </div>
       </ToastProvider>
     </ThemeProvider>

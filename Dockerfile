@@ -31,6 +31,12 @@ RUN /home/frappe/frappe-bench/env/bin/pip install --no-cache-dir \
      -e /home/frappe/frappe-bench/apps/entertainment_express \
      pytest
 
+# Ensure sites/assets/entertainment_express links directly to the app's public assets
+RUN rm -rf /home/frappe/frappe-bench/sites/assets/entertainment_express && \
+    mkdir -p /home/frappe/frappe-bench/sites/assets && \
+    ln -sf /home/frappe/frappe-bench/apps/entertainment_express/entertainment_express/public \
+           /home/frappe/frappe-bench/sites/assets/entertainment_express
+
 # Register the app. The base image's apps.txt has no trailing newline, so
 # normalize with awk (guarantees a newline per entry) and only append if missing
 # — a naive `echo >>` would concatenate onto the last entry.

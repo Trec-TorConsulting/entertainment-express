@@ -1,14 +1,11 @@
-import frappe
+from entertainment_express.security.request_guards import require_employee_login
+from entertainment_express.www.portal_spa import apply_spa_context
 
 no_cache = 1
+base_template_path = ""
 
 
 def get_context(context):
-    """Shell page for the React dispatch portal SPA."""
-    context.no_cache = 1
-    context.no_breadcrumbs = 1
-    context.no_sidebar = 1
-    context.no_header = 1
-    context.no_footer = 1
-    context.csrf_token = frappe.sessions.get_csrf_token()
-    context.portal = "dispatch"
+    require_employee_login()
+    apply_spa_context(context, title="Dispatch Operations", portal="dispatch")
+

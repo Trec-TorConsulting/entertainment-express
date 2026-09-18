@@ -58,4 +58,6 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 storybook-static/
+test-results/
+
 

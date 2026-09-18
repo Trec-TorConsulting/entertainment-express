@@ -19,7 +19,8 @@ import {
 
 export const DispatchEmbedPage: React.FC = () => {
   const { toast } = useToast();
-  const roles = getSessionBootstrap().roles || [];
+  const bootstrap = getSessionBootstrap() || {};
+  const roles = bootstrap.roles || [];
   const canAssign = roles.includes("EE Dispatcher");
 
   const [inspectorOpen, setInspectorOpen] = useState(false);

@@ -365,8 +365,9 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
                 <div className="ee-muted" style={{ display: "flex", flexWrap: "wrap", gap: "4px", alignItems: "center" }}>
                   <span>Gear:</span>
                   {(job.assets as any[]).map((a: any, idx: number) => {
-                    const name = typeof a === "string" ? a : (a.asset_name || a.name);
-                    const isQ = typeof a === "object" && a.quarantined;
+                    if (!a) return null;
+                    const name = typeof a === "string" ? a : (a.asset_name || a.name || "Asset");
+                    const isQ = typeof a === "object" && a !== null && Boolean(a.quarantined);
                     return (
                       <span
                         key={idx}
@@ -385,16 +386,16 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
                       >
                         {name}
                         {isQ ? " (Quarantined)" : ""}
-                        {idx < job.assets.length - 1 ? "," : ""}
+                        {idx < (job.assets || []).length - 1 ? "," : ""}
                       </span>
                     );
                   })}
                 </div>
               ) : null}
             </div>
-            {job.crew.length ? (
+            {(job.crew || []).length ? (
               <div className="ee-dispatch__crew">
-                {job.crew.map((row) => (
+                {(job.crew || []).map((row) => (
                   <div key={row.id} className="ee-dispatch__person">
                     <span>
                       {row.person} · {row.role} · {row.status}
@@ -407,7 +408,7 @@ export function DispatchBoard({ canAssign = true }: { canAssign?: boolean }) {
               <p className="ee-muted">No crew yet.</p>
             )}
             {canAssign ? <AssignForm jobId={job.id} people={people} roles={roles} onOffered={reload} /> : null}
-            {canAssign ? <SuggestCrew jobId={job.id} atRisk={job.at_risk || !job.crew.length} onOffered={reload} /> : null}
+            {canAssign ? <SuggestCrew jobId={job.id} atRisk={job.at_risk || !(job.crew || []).length} onOffered={reload} /> : null}
             {canAssign ? (
               <button
                 type="button"

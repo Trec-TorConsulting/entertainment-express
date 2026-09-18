@@ -190,8 +190,8 @@ export function InboxMenu() {
 }
 
 export function AccountPanel() {
-  const boot = getSessionBootstrap();
-  const person = boot.person || { full_name: boot.user, email: boot.user, name: boot.user };
+  const boot = getSessionBootstrap() || {};
+  const person = boot.person || { full_name: boot.user || "You", email: boot.user || "", name: boot.user || "You" };
   const roles = (boot.roles || []).filter((role) => role.startsWith("EE ") || role === "SaaS Operator");
   const [prefs, setPrefs] = React.useState<any>(null);
   const [hint, setHint] = React.useState("");
