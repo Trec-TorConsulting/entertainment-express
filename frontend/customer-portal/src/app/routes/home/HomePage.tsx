@@ -342,37 +342,37 @@ export const HomePage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Planning Progress Rings */}
-        <Card elevated>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[var(--ee-brand)]" />
-                Planning Progress
-              </span>
-              <Button
-                variant="ghost"
-                density="consumer"
-                onClick={() => navigate(`/planning?booking=${encodeURIComponent(activeEvent?.name || "")}`)}
-                rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
-              >
-                Run Sheet
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PlanningProgress
-              title="Event Run Sheet & Selections"
-              overallPercent={formPercent}
-              sections={[
-                { id: "timeline", label: "Timeline & Key Moments", completed: formPercent >= 80, percent: Math.min(100, formPercent + 15) },
-                { id: "music", label: "Must-Play & Special Songs", completed: formPercent >= 60, percent: formPercent },
-                { id: "logistics", label: "Venue Logistics & Access", completed: formPercent >= 40, percent: Math.max(30, formPercent - 20) },
-              ]}
-              onSectionClick={() => navigate(`/planning?booking=${encodeURIComponent(activeEvent?.name || "")}`)}
-            />
-          </CardContent>
-        </Card>
+        {/* Real Backend Planning Progress Widget */}
+        <PlanningProgress
+          title="Event Planning & Run Sheet Progress"
+          subtitle="Real-time completion tracking synced directly with your entertainment crew."
+          sections={[
+            {
+              id: "timeline",
+              title: "Timeline & Key Moments",
+              description: timelinePercent >= 100 ? `${timelineItems.length} run-of-show moments configured` : "Configure day-of event timeline",
+              completed: timelinePercent >= 100,
+              required: true
+            },
+            {
+              id: "music",
+              title: "Must-Play & Special Songs",
+              description: musicSelections.length > 0 ? `${musicSelections.length} tracks added to music sheet` : "Add favorite and banned songs",
+              completed: musicSelections.length >= 5,
+              required: true
+            },
+            {
+              id: "questionnaire",
+              title: "Venue Logistics & Questionnaires",
+              description: questionnairePercent > 0 ? `${questionnairePercent}% questionnaire completed` : "Fill out venue access & logistics form",
+              completed: questionnairePercent >= 100,
+              required: false
+            }
+          ]}
+          onOpenSection={(secId) => {
+            navigate(`/planning?booking=${encodeURIComponent(activeEvent?.name || "")}&tab=${secId}`);
+          }}
+        />
       </div>
 
       {/* Quick Launchpad Grid */}
