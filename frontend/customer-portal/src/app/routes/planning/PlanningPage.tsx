@@ -65,6 +65,13 @@ export const PlanningPage: React.FC = () => {
   const [newCollabNotes, setNewCollabNotes] = useState("");
 
   const bookingParam = searchParams.get("booking");
+  const tabParam = searchParams.get("tab");
+
+  useEffect(() => {
+    if (tabParam && ["music", "timeline", "questionnaire", "collab"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   useEffect(() => {
     const init = async () => {

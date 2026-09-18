@@ -33,6 +33,8 @@ export const HomePage: React.FC = () => {
   const [action, setAction] = useState<any>(null);
   const [upcomingMeeting, setUpcomingMeeting] = useState<any>(null);
   const [planningForms, setPlanningForms] = useState<any[]>([]);
+  const [musicSelections, setMusicSelections] = useState<any[]>([]);
+  const [timeline, setTimeline] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const bookingParam = searchParams.get("booking");
@@ -47,9 +49,14 @@ export const HomePage: React.FC = () => {
         const currentBooking = evList.find((e: any) => e.name === bookingParam) || evList[0];
 
         if (currentBooking?.name) {
-          call("entertainment_express.api.planning.list_forms", { booking_name: currentBooking.name })
-            .then((res) => setPlanningForms(res || []))
-            .catch(() => setPlanningForms([]));
+          const [formsRes, musicRes, timelineRes] = await Promise.allSettled([
+            call("entertainment_express.api.planning.list_forms", { booking_name: currentBooking.name }),
+            call("entertainment_express.api.music.list_selections", { booking_name: currentBooking.name }),
+            call("entertainment_express.api.timeline.get_timeline", { booking_name: currentBooking.name })
+          ]);
+          if (formsRes.status === "fulfilled") setPlanningForms(formsRes.value || []);
+          if (musicRes.status === "fulfilled") setMusicSelections(musicRes.value || []);
+          if (timelineRes.status === "fulfilled") setTimeline(timelineRes.value || null);
         }
 
         if (!guest) {
@@ -133,10 +140,10 @@ export const HomePage: React.FC = () => {
   }
 
   // Next action hero configuration
-  const actionHero = action?.key === "sign" ? {
-    title: "Review & Sign Your Agreement",
-    description: "Your entertainment contract is ready. E-sign securely in under 2 minutes to guarantee your event date.",
-    buttonLabel: "Review & Sign Contract",
+  const actionHero = action?.key === "contract" ? {
+    title: "Review & Sign Your Event Contract",
+    description: "Your official agreement is ready for digital signature to confirm terms and lock in talent.",
+    buttonLabel: "Review Agreement",
     badge: "Contract Ready",
     variant: "warning" as const,
     onClick: () => navigate(`/documents?booking=${encodeURIComponent(activeEvent?.name || "")}`)
@@ -156,10 +163,17 @@ export const HomePage: React.FC = () => {
     onClick: () => navigate(`/planning?booking=${encodeURIComponent(activeEvent?.name || "")}`)
   };
 
-  // Calculate planning completion
-  const formPercent = planningForms.length > 0
+  // Real calculation of planning completion across real backend endpoints
+  const questionnairePercent = planningForms.length > 0
     ? Math.round(planningForms.reduce((acc, f) => acc + Number(f.completion_percent || 0), 0) / planningForms.length)
-    : 75;
+    : 0;
+
+  const musicPercent = musicSelections.length > 0
+    ? Math.min(100, Math.round((musicSelections.length / 5) * 100))
+    : 0;
+
+  const timelineItems = timeline?.items || [];
+  const timelinePercent = timelineItems.length > 0 ? 100 : 0;
 
   return (
     <div className="space-y-8 animate-in fade-in-50 duration-200">
@@ -181,14 +195,12 @@ export const HomePage: React.FC = () => {
             variant="primary"
             density="consumer"
             onClick={actionHero.onClick}
-            rightIcon={<ArrowRight className="w-4 h-4" />}
-            className="w-full sm:w-auto shrink-0 shadow-md"
+            rightIcon={<ChevronRight className="w-4 h-4" />}
           >
             {actionHero.buttonLabel}
           </Button>
         </div>
       </Card>
-
       {/* Upcoming Consultation Banner if scheduled */}
       {upcomingMeeting && (
         <Card elevated className="border-blue-500/30 bg-blue-500/5 p-4 sm:p-5">
