@@ -35,7 +35,44 @@ def _require_pay() -> None:
 
 def _employee_for_user(user: str | None = None) -> str | None:
     user = user or frappe.session.user
-    return frappe.db.get_value("Employee", {"user_id": user}, "name")
+    if not user:
+        return None
+    user = str(user).strip()
+    if frappe.db.exists("Employee", user):
+        return user
+    if frappe.db.exists("Employee", {"user_id": user}):
+        return frappe.db.get_value("Employee", {"user_id": user}, "name")
+    if frappe.db.exists("Employee", {"company_email": user}):
+        return frappe.db.get_value("Employee", {"company_email": user}, "name")
+    if frappe.db.exists("Employee", {"personal_email": user}):
+        return frappe.db.get_value("Employee", {"personal_email": user}, "name")
+    if frappe.db.exists("Employee", {"prefered_email": user}):
+        return frappe.db.get_value("Employee", {"prefered_email": user}, "name")
+
+    user_doc_name = None
+    if frappe.db.exists("User", user):
+        user_doc_name = user
+    else:
+        user_doc_name = frappe.db.get_value("User", {"email": user}, "name")
+
+    if user_doc_name and user_doc_name != user:
+        return _employee_for_user(user_doc_name)
+
+    return None
+
+
+def _resolve_user_id_from_target(target: str | None) -> str | None:
+    if not target:
+        return None
+    target = str(target).strip()
+    if frappe.db.exists("User", target):
+        return target
+    found = frappe.db.get_value("User", {"email": target}, "name")
+    if found:
+        return found
+    if frappe.db.exists("Employee", target):
+        return frappe.db.get_value("Employee", target, "user_id")
+    return None
 
 
 def _assert_self_or_owner(employee: str) -> None:
@@ -56,7 +93,7 @@ def list_people() -> list[dict]:
     rows = list_staff() or []
     out = []
     for row in rows:
-        emp_name = _employee_for_user(row.get("name"))
+        emp_name = _employee_for_user(row.get("name")) or _employee_for_user(row.get("email"))
         profile = {
             "user": row.get("name"),
             "email": row.get("email"),
@@ -92,9 +129,21 @@ def save_profile(employee: str = None, user: str = None, values: dict | None = N
     values = values or frappe.form_dict.get("values") or {}
     if isinstance(values, str):
         values = frappe.parse_json(values) if hasattr(frappe, "parse_json") else {}
-    emp_name = employee or (_employee_for_user(user) if user else None)
+
+    target = user or employee
+    user_id = _resolve_user_id_from_target(target) or _resolve_user_id_from_target(user) or _resolve_user_id_from_target(employee)
+    emp_name = _employee_for_user(employee) or _employee_for_user(user) or _employee_for_user(user_id)
+
+    if not emp_name and user_id and frappe.db.exists("User", user_id):
+        from entertainment_express.api.portal_owner import ensure_employee_for_user
+        u_doc = frappe.get_doc("User", user_id)
+        u_roles = [r.role for r in u_doc.roles]
+        ensure_employee_for_user(user_id, u_doc.full_name or user_id, u_roles, force=True)
+        emp_name = _employee_for_user(user_id)
+
     if not emp_name:
-        frappe.throw("No worker record for this person yet. Give them field access first.")
+        frappe.throw("Could not find or create a worker record for this person.", frappe.ValidationError)
+
     allowed = {
         "ee_employment_type": values.get("worker_type") or values.get("ee_employment_type"),
         "ee_crew_roles": values.get("skills") or values.get("ee_crew_roles"),

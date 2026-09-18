@@ -18,6 +18,7 @@ import { MasterDataPage } from "./routes/admin/MasterDataPage";
 import { EmergencyOverridesPage } from "./routes/operations/EmergencyOverridesPage";
 import { EventDetailsPage } from "./routes/operations/EventDetailsPage";
 import { CalendarPage } from "./routes/operations/CalendarPage";
+import { BookingDetailPage } from "./routes/operations/BookingDetailPage";
 import { SchedulePage } from "./routes/operations/SchedulePage";
 import { CatalogPage } from "./routes/catalog/CatalogPage";
 import { GearPage } from "./routes/fleet/GearPage";
@@ -57,6 +58,7 @@ export const OwnerApp: React.FC = () => {
           {/* Flagship Routes */}
           <Route path="/" element={<TodayPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/calendar/:id" element={<BookingDetailPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/gear" element={<GearPage />} />
@@ -77,7 +79,7 @@ export const OwnerApp: React.FC = () => {
           <Route path="/pipeline" element={<PipelinePage />} />
           <Route path="/pipeline/new" element={<Navigate to="/pipeline?new=1" replace />} />
           <Route path="/pipeline/:id/proposal" element={<LegacyWorkspaces />} />
-          <Route path="/pipeline/:id" element={<LegacyWorkspaces />} />
+          <Route path="/pipeline/:id" element={<BookingDetailPage />} />
           <Route path="/fleet" element={<FleetHealthPage />} />
           <Route path="/fleet/vans" element={<VanManifestPage />} />
           <Route path="/money" element={<MoneyPage />} />

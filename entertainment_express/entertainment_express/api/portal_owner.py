@@ -430,6 +430,88 @@ def act_on_approval(approval_type: str, doctype: str, name: str, decision: str, 
     return {"ok": True, "status": decision}
 
 
+def ensure_employee_for_user(user_name: str, full_name: str, roles: list[str], force: bool = False) -> None:
+    """Create or update an Active Employee so invited staff show up in dispatch and HR management."""
+    if user_name in ("Administrator", "Guest"):
+        return
+    if not force and not set(roles or []).intersection(FIELD_ACCESS) and not set(roles or []).intersection(STAFF_ROLE_LABELS.keys()):
+        return
+
+    parts = (full_name or user_name.split("@")[0]).strip().split()
+    first = parts[0] if parts else user_name
+    last = " ".join(parts[1:]) if len(parts) > 1 else first
+    labels = []
+    if "EE Entertainer" in (roles or []):
+        labels.append("Talent")
+    if set(roles or []).intersection({"EE Crew", "EE Dispatcher"}):
+        labels.append("Field")
+    for label in labels:
+        if not frappe.db.exists("EE Crew Role", label):
+            frappe.get_doc({"doctype": "EE Crew Role", "role_name": label, "active": 1}).insert(ignore_permissions=True)
+
+    if frappe.db.exists("Employee", {"user_id": user_name}):
+        emp_name = frappe.db.get_value("Employee", {"user_id": user_name}, "name")
+        if emp_name:
+            try:
+                emp = frappe.get_doc("Employee", emp_name)
+                emp.first_name = first
+                emp.last_name = last
+                emp.employee_name = full_name or first
+                emp.status = "Active"
+                emp.ee_crew_roles = ",".join(labels)
+                emp.save(ignore_permissions=True)
+            except Exception as e:
+                frappe.logger().error(f"Failed to update Employee for {user_name}: {e}")
+        return
+
+    company = frappe.db.get_default("company") or frappe.db.get_single_value("Global Defaults", "default_company")
+    if not company:
+        company = frappe.db.get_value("Company", {}, "name")
+    if not company:
+        return
+
+    gender_val = "Male"
+    if hasattr(frappe.db, "table_exists") and frappe.db.table_exists("Gender"):
+        gender_val = frappe.db.get_value("Gender", {}, "name") or "Male"
+
+    today_str = frappe.utils.nowdate() if hasattr(frappe.utils, "nowdate") else frappe.utils.today()
+    payload = {
+        "doctype": "Employee",
+        "first_name": first,
+        "last_name": last,
+        "employee_name": full_name or first,
+        "status": "Active",
+        "date_of_joining": today_str,
+        "date_of_birth": "1990-01-01",
+        "gender": gender_val,
+        "company": company,
+        "user_id": user_name,
+        "ee_crew_roles": ",".join(labels),
+        "ee_employment_type": "1099",
+        "ee_pay_basis": "per_event",
+    }
+
+    try:
+        doc = frappe.get_doc(payload)
+        doc.insert(ignore_permissions=True)
+        return doc.name
+    except Exception as e:
+        frappe.logger().error(f"Failed to create Employee for {user_name}: {e}")
+
+
+def backfill_field_employees() -> None:
+    users = frappe.get_all(
+        "User",
+        filters={"enabled": 1, "user_type": "System User", "name": ["not in", ["Administrator", "Guest"]]},
+        fields=["name", "full_name"],
+        limit_page_length=200,
+    )
+    for user in users:
+        roles = [role for role in (frappe.get_roles(user["name"]) or []) if role in FIELD_ACCESS]
+        if roles:
+            ensure_employee_for_user(user["name"], user.get("full_name") or user["name"], roles)
+
+
 @frappe.whitelist()
 def get_financial_overview() -> dict:
     _require_owner()
@@ -484,6 +566,12 @@ def list_staff() -> list[dict]:
 def invite_staff(email: str, full_name: str, roles: list[str]) -> dict:
     _require_owner()
 
+    if not email or not email.strip():
+        frappe.throw("Email address is required.", frappe.ValidationError)
+
+    email = email.strip().lower()
+    full_name = (full_name or "").strip()
+
     from entertainment_express.workforce import check_staff_limit
 
     check_staff_limit()
@@ -493,43 +581,87 @@ def invite_staff(email: str, full_name: str, roles: list[str]) -> dict:
     if disallowed:
         frappe.throw("Cannot assign restricted roles.", frappe.PermissionError)
 
-    user = frappe.get_doc(
-        {
-            "doctype": "User",
-            "email": email,
-            "first_name": full_name,
-            "send_welcome_email": 1,
-            "user_type": "System User",
-        }
-    )
-    user.insert(ignore_permissions=True)
+    parts = full_name.split() if full_name else [email.split("@")[0]]
+    first_name = parts[0]
+    last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
 
-    for role in roles or []:
-        user.append("roles", {"role": role})
-    user.save(ignore_permissions=True)
-    ensure_employee_for_user(user.name, full_name, roles)
+    if frappe.db.exists("User", email):
+        user = frappe.get_doc("User", email)
+        if full_name:
+            user.first_name = first_name
+            user.last_name = last_name
+        user.enabled = 1
+        user.user_type = "System User"
+        existing = {r.role for r in user.roles}
+        for role in roles or []:
+            if role not in existing and frappe.db.exists("Role", role):
+                user.append("roles", {"role": role})
+        user.save(ignore_permissions=True)
+    else:
+        user = frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": email,
+                "first_name": first_name,
+                "last_name": last_name,
+                "send_welcome_email": 0,
+                "user_type": "System User",
+            }
+        )
+        user.insert(ignore_permissions=True)
+
+        for role in roles or []:
+            if frappe.db.exists("Role", role):
+                user.append("roles", {"role": role})
+        user.save(ignore_permissions=True)
+
+        try:
+            user.send_welcome_mail()
+        except Exception:
+            frappe.logger().warning(f"Could not send welcome mail to {email}")
+
+    ensure_employee_for_user(user.name, full_name or user.full_name, roles)
 
     _audit("invite_staff", {"user": user.name, "roles": roles or []})
-    return {"user": user.name}
+    return {"user": user.name, "email": email, "full_name": full_name or user.full_name}
+
+
+def _resolve_user_id(user: str) -> str | None:
+    if not user:
+        return None
+    user = user.strip()
+    if frappe.db.exists("User", user):
+        return user
+    found = frappe.db.get_value("User", {"email": user}, "name")
+    if found:
+        return found
+    if frappe.db.exists("Employee", user):
+        return frappe.db.get_value("Employee", user, "user_id")
+    return None
 
 
 @frappe.whitelist()
 def set_staff_roles(user: str, roles: list[str]) -> dict:
     _require_owner()
 
+    user_id = _resolve_user_id(user)
+    if not user_id:
+        frappe.throw(f"User '{user}' not found.", frappe.DoesNotExistError)
+
     roles = _as_role_list(roles)
     disallowed = set(roles or []).intersection(DISALLOWED_ESCALATION_ROLES)
     if disallowed:
         frappe.throw("Cannot assign restricted roles.", frappe.PermissionError)
 
-    doc = frappe.get_doc("User", user)
+    doc = frappe.get_doc("User", user_id)
     doc.set("roles", [])
     for role in roles or []:
-        doc.append("roles", {"role": role})
+        if frappe.db.exists("Role", role):
+            doc.append("roles", {"role": role})
     doc.save(ignore_permissions=True)
-    ensure_employee_for_user(user, doc.full_name or user, roles)
+    ensure_employee_for_user(user_id, doc.full_name or user_id, roles, force=True)
 
-    _audit("set_staff_roles", {"user": user, "roles": roles or []})
+    _audit("set_staff_roles", {"user": user_id, "roles": roles or []})
     return {"ok": True}
 
 
@@ -537,10 +669,14 @@ def set_staff_roles(user: str, roles: list[str]) -> dict:
 def deactivate_staff(user: str) -> dict:
     _require_owner()
 
-    doc = frappe.get_doc("User", user)
+    user_id = _resolve_user_id(user)
+    if not user_id:
+        frappe.throw(f"User '{user}' not found.", frappe.DoesNotExistError)
+
+    doc = frappe.get_doc("User", user_id)
     doc.enabled = 0
     doc.save(ignore_permissions=True)
-    _audit("deactivate_staff", {"user": user})
+    _audit("deactivate_staff", {"user": user_id})
     return {"ok": True}
 
 
