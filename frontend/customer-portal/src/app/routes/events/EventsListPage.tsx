@@ -26,16 +26,7 @@ export const EventsListPage: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await call("frappe.client.get_list", {
-          doctype: "Event Booking",
-          fields: [
-            "name", "event_name", "event_date", "status",
-            "venue_address", "grand_total", "balance_due",
-            "deposit_status", "weather_status", "weather_sensitive"
-          ],
-          order_by: "event_date asc",
-          limit_page_length: 50,
-        });
+        const res = await call("entertainment_express.api.portal_collaboration.list_my_events", {});
         setEvents(res || []);
       } catch {
         setEvents([]);

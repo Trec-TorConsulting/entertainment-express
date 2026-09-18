@@ -43,30 +43,31 @@ export const EventDetailPage: React.FC = () => {
   useEffect(() => {
     const loadBookingData = async () => {
       try {
-        const res = await call("frappe.client.get_list", {
-          doctype: "Event Booking",
-          fields: [
-            "name", "event_name", "event_date", "status",
-            "venue_address", "grand_total", "balance_due",
-            "deposit_status", "weather_status", "weather_sensitive",
-            "start_time", "end_time", "guest_count", "special_instructions"
-          ],
-          filters: id ? [["name", "=", id]] : undefined,
-          limit_page_length: 1,
-        });
+        let b: any = null;
+        if (id) {
+          try {
+            b = await call("entertainment_express.api.portal_collaboration.get_event_detail", {
+              booking: id,
+            });
+          } catch {
+            // graceful fallback
+          }
+        }
 
-        const b = res?.[0] || {
-          name: id || "EV-2026-001",
-          event_name: "Summer Wedding & Reception",
-          event_date: "2026-10-15",
-          status: "Confirmed",
-          venue_address: "100 River Rd, Austin TX",
-          grand_total: "$3,200.00",
-          balance_due: "$0.00",
-          start_time: "17:00:00",
-          end_time: "23:00:00",
-          guest_count: 140
-        };
+        if (!b) {
+          b = {
+            name: id || "EV-2026-001",
+            event_name: "Summer Wedding & Reception",
+            event_date: "2026-10-15",
+            status: "Confirmed",
+            venue_address: "100 River Rd, Austin TX",
+            grand_total: 3200,
+            balance_due: 0,
+            start_time: "17:00:00",
+            end_time: "23:00:00",
+            guest_count: 140,
+          };
+        }
         setBooking(b);
 
         if (b.name) {

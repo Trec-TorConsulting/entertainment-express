@@ -39,6 +39,9 @@ def _is_payer(booking: str, user: str) -> bool:
     customer = frappe.db.get_value("Event Booking", booking, "customer")
     if not customer or user == "Guest":
         return False
+    from entertainment_express.security.access import customer_names_for_user
+    if customer in customer_names_for_user(user):
+        return True
     emails = _customer_emails(customer)
     user_email = (frappe.db.get_value("User", user, "email") or user or "").strip().lower()
     return user_email in emails
@@ -195,10 +198,40 @@ def list_my_events() -> list[dict]:
     return frappe.get_all(
         "Event Booking",
         filters=_not_template_filters({"name": ["in", names]}),
-        fields=["name", "event_name", "event_date", "status"],
+        fields=[
+            "name", "event_name", "event_date", "status",
+            "venue_address", "grand_total", "balance_due",
+            "deposit_status", "weather_status", "weather_sensitive"
+        ],
         order_by="event_date desc",
         ignore_permissions=True,
     )
+
+
+@frappe.whitelist()
+def get_event_detail(booking: str) -> dict:
+    """Get detailed information for a single booking if user is a member/customer/talent/staff."""
+    _require_member(booking)
+    doc = frappe.get_all(
+        "Event Booking",
+        filters={"name": booking},
+        fields=[
+            "name", "event_name", "event_date", "status",
+            "venue_address", "grand_total", "balance_due",
+            "deposit_status", "weather_status", "weather_sensitive",
+            "start_time", "end_time", "guest_count", "special_instructions"
+        ],
+        ignore_permissions=True,
+        limit_page_length=1,
+    )
+    if not doc:
+        _deny("Booking not found.")
+    data = doc[0]
+    if data.get("start_time") is not None:
+        data["start_time"] = str(data["start_time"])
+    if data.get("end_time") is not None:
+        data["end_time"] = str(data["end_time"])
+    return data
 
 
 @frappe.whitelist()
