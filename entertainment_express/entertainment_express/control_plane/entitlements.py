@@ -117,6 +117,12 @@ def push_plan_to_site(tenant_name: str, extra: dict | None = None) -> None:
     if not tenant_name:
         return
     tenant = frappe.get_doc("Tenant", tenant_name)
+    # Deleted/deprovisioned tenants must not get site dirs recreated via
+    # update_site_flags(makedirs). Plan.on_update historically pushed to all.
+    if (tenant.status or "").strip().lower() in ("deleted", "deprovisioned", "archived"):
+        return
+    if not tenant.plan:
+        return
     plan = frappe.get_doc("Plan", tenant.plan)
     ents = entitlement_map_for_plan(plan.name)
     currency = plan.currency or "USD"

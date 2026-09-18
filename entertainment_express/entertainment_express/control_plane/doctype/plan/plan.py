@@ -9,7 +9,11 @@ class Plan(Document):
 		try:
 			from entertainment_express.control_plane.entitlements import push_plan_to_site
 
-			tenants = frappe.get_all("Tenant", filters={"plan": self.name}, fields=["name"])
+			tenants = frappe.get_all(
+				"Tenant",
+				filters={"plan": self.name, "status": ["in", ["active", "suspended", "pending"]]},
+				fields=["name"],
+			)
 			for t in tenants:
 				push_plan_to_site(t.get("name"))
 		except Exception as e:

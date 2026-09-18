@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Live Phase-4 DoD E2E against a tenant site (default: funytown.entx.app).
+Live Phase-4 DoD E2E against a tenant site (default: e2esmoke.entx.app).
 
 Flow: login → seed booking/crew → accept → check-in → customer crew-status +
 dispatch day-view → check-out → booking completed.
@@ -21,7 +21,7 @@ import uuid
 from datetime import datetime, timedelta
 from urllib import error, parse, request
 
-BASE = os.environ.get("EE_E2E_BASE", "https://funytown.entx.app").rstrip("/")
+BASE = os.environ.get("EE_E2E_BASE", "https://e2esmoke.entx.app").rstrip("/")
 TIMEOUT = int(os.environ.get("EE_E2E_TIMEOUT", "30"))
 
 
@@ -120,12 +120,12 @@ def unwrap(body):
 def company_name(c: Client) -> str:
     st, body = c._req("GET", "/api/resource/Company?fields=%5B%22name%22%5D&limit_page_length=1")
     if st != 200:
-        return "Funytown"
+        return "E2ESmoke"
     data = unwrap(body)
     rows = data if isinstance(data, list) else data.get("data") or []
     if rows:
         return rows[0].get("name") or rows[0]
-    return "Funytown"
+    return "E2ESmoke"
 
 
 def gender_name(c: Client) -> str:

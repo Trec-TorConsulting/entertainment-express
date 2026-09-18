@@ -99,12 +99,17 @@ def update_site_flags(site_name: str, flags: dict) -> None:
     path = _site_config_path(site_name)
     if not path:
         return
+    site_dir = os.path.dirname(path)
+    # Do not recreate incomplete/removed site dirs (e.g. deleted tenants).
+    # Provisioning creates the site first; entitlement pushes only update
+    # existing sites.
+    if not os.path.isdir(site_dir):
+        return
     conf = {}
     if os.path.isfile(path):
         with open(path, encoding="utf-8") as handle:
             conf = json.load(handle)
     conf.update(flags)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(conf, handle, indent=1)
         handle.write("\n")
