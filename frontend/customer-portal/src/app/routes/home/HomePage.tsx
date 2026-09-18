@@ -231,9 +231,8 @@ export const HomePage: React.FC = () => {
           </div>
         </Card>
       )}
-
       {/* Event Carousel / Picker */}
-      {events.length > 1 && (
+      {events.length > 0 && (
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold uppercase tracking-wider text-[var(--ee-muted)]">
@@ -248,21 +247,30 @@ export const HomePage: React.FC = () => {
               All Events
             </Button>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {events.map((ev) => (
               <Card
                 key={ev.name}
                 interactive
-                onClick={() => navigate(`/?booking=${encodeURIComponent(ev.name)}`)}
-                className={`p-4 space-y-2 transition-all ${ev.name === activeEvent?.name ? "border-[var(--ee-brand)] ring-2 ring-[var(--ee-brand)]/20 shadow-md" : ""}`}
+                onClick={() => navigate(`/events/${encodeURIComponent(ev.name)}`)}
+                className={`p-4 space-y-3 border border-[var(--ee-border)] hover:border-[var(--ee-brand)] transition-all hover:shadow-md cursor-pointer ${ev.name === activeEvent?.name ? "border-[var(--ee-brand)] ring-2 ring-[var(--ee-brand)]/20 shadow-md" : ""}`}
               >
-                <div className="flex justify-between items-start">
-                  <h4 className="font-semibold text-sm text-[var(--ee-text)] truncate">{ev.event_name || ev.name}</h4>
+                <div className="flex justify-between items-start gap-2">
+                  <div className="space-y-0.5 min-w-0">
+                    <h4 className="font-bold text-sm text-[var(--ee-text)] truncate">{ev.event_name || ev.name}</h4>
+                    <span className="text-[11px] font-mono text-[var(--ee-muted)]">#{ev.name}</span>
+                  </div>
                   <Badge variant="success" size="sm">{ev.status || "Confirmed"}</Badge>
                 </div>
-                <div className="text-xs text-[var(--ee-muted)] flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-[var(--ee-brand)]" />
-                  <span>{ev.event_date || "Date Pending"}</span>
+                <div className="text-xs text-[var(--ee-muted)] flex items-center justify-between pt-1 border-t border-[var(--ee-border)]/60">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[var(--ee-brand)]" />
+                    <span>{ev.event_date || "Date Pending"}</span>
+                  </div>
+                  <span className="text-xs font-semibold text-[var(--ee-brand)] flex items-center gap-0.5">
+                    Event Details <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
                 </div>
               </Card>
             ))}
