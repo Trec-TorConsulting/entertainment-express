@@ -219,7 +219,7 @@ def get_event_detail(booking: str) -> dict:
             "name", "event_name", "event_date", "status",
             "venue_address", "grand_total", "balance_due",
             "deposit_status", "weather_status", "weather_sensitive",
-            "start_time", "end_time", "guest_count", "special_instructions"
+            "start_time", "end_time", "notes"
         ],
         ignore_permissions=True,
         limit_page_length=1,
@@ -227,6 +227,8 @@ def get_event_detail(booking: str) -> dict:
     if not doc:
         _deny("Booking not found.")
     data = doc[0]
+    data["special_instructions"] = data.get("notes") or ""
+    data["guest_count"] = 0
     if data.get("start_time") is not None:
         data["start_time"] = str(data["start_time"])
     if data.get("end_time") is not None:
