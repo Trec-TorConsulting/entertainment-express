@@ -125,15 +125,14 @@ def _provision_create(job) -> None:
     #    bootstrap.run() in-process here: it does frappe.destroy() and would unbind
     #    this job, leaving the Provisioning Job stuck in "running".
     _log(job, "Bootstrapping tenant...")
-    bootstrap_kwargs = json.dumps({
-        "company_name": tenant.company_name,
-        "primary_email": tenant.get("primary_email") or "",
-        "primary_contact": tenant.get("primary_contact") or "",
-    })
     _bench_exec(job, [
-        "bench", "--site", site_name, "execute",
-        "entertainment_express.control_plane.bootstrap.run_bootstrap",
-        "--kwargs", bootstrap_kwargs,
+        "bench", "--site", site_name, "execute", "frappe.call",
+        "--kwargs", json.dumps({
+            "method": "entertainment_express.control_plane.bootstrap.run_bootstrap",
+            "company_name": tenant.company_name,
+            "primary_email": tenant.get("primary_email") or "",
+            "primary_contact": tenant.get("primary_contact") or "",
+        })
     ])
 
     # 6. Set host_name

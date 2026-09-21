@@ -17,11 +17,11 @@ def get_schedule(booking_name: str) -> dict:
     from entertainment_express.security.access import assert_booking_access
 
     assert_booking_access(booking_name)
-    if not frappe.db.exists("Payment Schedule", booking_name):
+    if not frappe.db.exists("EE Payment Schedule", booking_name):
         from entertainment_express.billing_payments.schedules import ensure_schedule
 
         ensure_schedule(booking_name)
-    return frappe.get_doc("Payment Schedule", booking_name).as_dict()
+    return frappe.get_doc("EE Payment Schedule", booking_name).as_dict()
 
 
 @frappe.whitelist()

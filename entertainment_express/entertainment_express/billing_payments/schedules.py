@@ -7,7 +7,7 @@ from frappe.utils import flt, add_days, getdate
 
 
 def ensure_schedule(booking_name: str, balance_days_before: int = 7) -> str:
-    if frappe.db.exists("Payment Schedule", booking_name):
+    if frappe.db.exists("EE Payment Schedule", booking_name):
         return booking_name
     booking = frappe.get_doc("Event Booking", booking_name)
     deposit = flt(booking.deposit_amount)
@@ -16,7 +16,7 @@ def ensure_schedule(booking_name: str, balance_days_before: int = 7) -> str:
     due_balance = add_days(event_date, -int(balance_days_before))
     doc = frappe.get_doc(
         {
-            "doctype": "Payment Schedule",
+            "doctype": "EE Payment Schedule",
             "booking": booking_name,
             "policy_name": f"deposit_{int(booking.deposit_percent or 25)}_balance_{balance_days_before}d",
             "status": "active",

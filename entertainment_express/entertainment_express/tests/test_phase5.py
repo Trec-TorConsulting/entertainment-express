@@ -55,7 +55,7 @@ class TestSchedule:
             "balance_due": 300,
         }).insert(ignore_permissions=True)
         ensure_schedule(bk.name)
-        sched = frappe.get_doc("Payment Schedule", bk.name)
+        sched = frappe.get_doc("EE Payment Schedule", bk.name)
         total = sum(m.amount for m in sched.milestones)
         assert abs(total - 400) < 0.02
         kinds = {m.kind for m in sched.milestones}

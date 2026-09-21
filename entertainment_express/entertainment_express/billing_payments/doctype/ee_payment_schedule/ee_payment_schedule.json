@@ -6,7 +6,7 @@
  "modified": "2026-09-01 13:53:21.721823",
  "modified_by": "Administrator",
  "module": "Billing Payments",
- "name": "Payment Schedule",
+ "name": "EE Payment Schedule",
  "owner": "Administrator",
  "istable": 0,
  "autoname": "field:booking",
