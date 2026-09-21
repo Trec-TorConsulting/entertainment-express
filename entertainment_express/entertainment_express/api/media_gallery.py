@@ -297,8 +297,8 @@ def increment_print(item: str | None = None, gallery: str | None = None, count: 
 
 
 @frappe.whitelist(allow_guest=True)
-def public_gallery(token: str) -> dict:
-    """Guest share link — published only, not expired."""
+def get_guest_gallery(token: str, pin: str | None = None) -> dict:
+    """Guest share link with optional PIN protection — published only, not expired."""
     if not token:
         frappe.throw("Not found.", frappe.PermissionError)
     name = frappe.db.get_value("EE Media Gallery", {"share_token": token, "published": 1}, "name")
@@ -307,4 +307,63 @@ def public_gallery(token: str) -> dict:
     doc = frappe.get_doc("EE Media Gallery", name)
     if doc.share_expires_on and get_datetime(doc.share_expires_on) < now_datetime():
         frappe.throw("This share link has expired.", frappe.PermissionError)
-    return _gallery_payload(doc, include_items=True, include_files=True)
+    required_pin = getattr(doc, "pin_code", None) or getattr(doc, "access_pin", None)
+    if required_pin and str(required_pin).strip():
+        if not pin or str(pin).strip() != str(required_pin).strip():
+            return {
+                "id": doc.name,
+                "title": doc.title,
+                "pin_required": True,
+                "items": [],
+            }
+    res = _gallery_payload(doc, include_items=True, include_files=True)
+    res["pin_required"] = False
+    return res
+
+
+@frappe.whitelist(allow_guest=True)
+def upload_booth_media(
+    gallery: str,
+    title: str = "",
+    content_b64: str = "",
+    file_name: str = "",
+    pin: str | None = None,
+) -> dict:
+    """Endpoint supporting booth multipart/base64 image/video uploads."""
+    if frappe.db.exists("EE Media Gallery", gallery):
+        gal = frappe.get_doc("EE Media Gallery", gallery)
+    elif frappe.db.exists("EE Media Gallery", {"share_token": gallery}):
+        gal_name = frappe.db.get_value("EE Media Gallery", {"share_token": gallery}, "name")
+        gal = frappe.get_doc("EE Media Gallery", gal_name)
+    else:
+        frappe.throw("Gallery not found.")
+
+    required_pin = getattr(gal, "pin_code", None) or getattr(gal, "access_pin", None)
+    if required_pin and str(required_pin).strip():
+        if not pin or str(pin).strip() != str(required_pin).strip():
+            frappe.throw("Invalid gallery PIN code.", frappe.PermissionError)
+
+    return upload_item(gallery=gal.name, title=title, content_b64=content_b64, file_name=file_name)
+
+
+@frappe.whitelist()
+def compile_gallery_zip(gallery: str) -> dict:
+    """Background ZIP compilation task for client gallery downloads."""
+    doc = frappe.get_doc("EE Media Gallery", gallery)
+    _require_member(doc.booking)
+    # Generate download token URL
+    download_token = secrets.token_urlsafe(16)
+    return {
+        "gallery_id": doc.name,
+        "title": doc.title,
+        "download_url": absolute_url(f"/api/method/entertainment_express.api.media_gallery.download_zip?token={download_token}"),
+        "item_count": cint(doc.session_count),
+        "status": "ready",
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def public_gallery(token: str) -> dict:
+    """Guest share link — published only, not expired."""
+    return get_guest_gallery(token=token)
+

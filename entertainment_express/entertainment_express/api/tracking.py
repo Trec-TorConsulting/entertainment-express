@@ -258,6 +258,63 @@ def public_tracking(token: str) -> dict:
     }
 
 
+@frappe.whitelist()
+def update_driver_location(session: str, latitude: float, longitude: float) -> dict:
+    """Driver GPS location update endpoint with coordinate stream."""
+    return ping(session=session, latitude=latitude, longitude=longitude)
+
+
+@frappe.whitelist()
+def transition_event_milestone(booking: str, milestone: str) -> dict:
+    """Transition Event Booking milestone (dispatched, en_route, on_site, setup_ready, live, completed)."""
+    valid_milestones = ("dispatched", "en_route", "on_site", "setup_ready", "live", "completed")
+    if milestone not in valid_milestones:
+        frappe.throw(f"Invalid milestone '{milestone}'. Must be one of {valid_milestones}")
+
+    doc = frappe.get_doc("Event Booking", booking)
+    doc.db_set("ee_dispatch_status", milestone, update_modified=False)
+
+    # Privacy Scrubber (Task 2.3): Purge tracking coordinates once milestone reaches on_site
+    if milestone in ("on_site", "setup_ready", "live", "completed"):
+        purge_tracking_privacy_data(booking)
+
+    return {
+        "booking": booking,
+        "milestone": milestone,
+        "privacy_scrubbed": milestone in ("on_site", "setup_ready", "live", "completed"),
+    }
+
+
+def purge_tracking_privacy_data(booking: str) -> None:
+    """Purge lat/lng GPS coordinates from tracking sessions to enforce privacy isolation."""
+    if frappe.db.table_exists("EE Live Tracking Session"):
+        sessions = frappe.get_all("EE Live Tracking Session", filters={"booking": booking}, pluck="name")
+        for s_name in sessions:
+            frappe.db.set_value("EE Live Tracking Session", s_name, {
+                "last_lat": None,
+                "last_lng": None,
+                "status": "ended",
+            })
+
+
+@frappe.whitelist()
+def get_flight_deck_status(booking: str) -> dict:
+    """Telemetry flight deck status for client portal viewing."""
+    doc = frappe.get_doc("Event Booking", booking)
+    milestone = getattr(doc, "ee_dispatch_status", "dispatched") or "dispatched"
+
+    tracking = client_tracking(booking)
+
+    return {
+        "booking_id": booking,
+        "event_name": doc.event_name or booking,
+        "milestone": milestone,
+        "tracking_active": tracking is not None,
+        "eta_minutes": tracking.get("eta_minutes") if tracking else None,
+        "track_url": tracking.get("track_url") if tracking else None,
+    }
+
+
 def on_stage_change(assignment_name: str, stage: str) -> None:
     """Hook from field set_stage — start/end sessions."""
     if not frappe.db.table_exists("EE Live Tracking Session"):
@@ -272,3 +329,4 @@ def on_stage_change(assignment_name: str, stage: str) -> None:
             end_session(assignment=assignment_name)
         except Exception:
             pass
+

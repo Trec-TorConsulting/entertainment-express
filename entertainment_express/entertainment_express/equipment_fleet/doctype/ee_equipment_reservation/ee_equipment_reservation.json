@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "booking",
+  "item_code",
+  "asset",
+  "reserved_qty",
+  "col1",
+  "event_start",
+  "event_end",
+  "buffer_start",
+  "buffer_end",
+  "col2",
+  "status",
+  "warehouse"
+ ],
+ "fields": [
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Booking",
+   "options": "Event Booking",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Service Asset"
+  },
+  {
+   "default": "1",
+   "fieldname": "reserved_qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Reserved Qty"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "event_start",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Event Start",
+   "reqd": 1
+  },
+  {
+   "fieldname": "event_end",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Event End",
+   "reqd": 1
+  },
+  {
+   "fieldname": "buffer_start",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Buffer Start",
+   "reqd": 1
+  },
+  {
+   "fieldname": "buffer_end",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Buffer End",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Reserved",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Reserved\nDispatched\nReturned\nQuarantined\nReleased",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  }
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "EE Equipment Reservation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Crew",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

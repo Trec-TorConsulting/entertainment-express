@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "category",
+  "prep_minutes",
+  "teardown_minutes",
+  "col1",
+  "turnaround_sanitization_minutes",
+  "requires_post_gig_inspection"
+ ],
+ "fields": [
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "Item Group",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "60",
+   "fieldname": "prep_minutes",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Prep Minutes"
+  },
+  {
+   "default": "60",
+   "fieldname": "teardown_minutes",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Teardown Minutes"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "180",
+   "fieldname": "turnaround_sanitization_minutes",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Turnaround Sanitization Minutes"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_post_gig_inspection",
+   "fieldtype": "Check",
+   "label": "Requires Post-Gig Inspection"
+  }
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "EE Category Buffer Rule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

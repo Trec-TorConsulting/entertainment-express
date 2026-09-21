@@ -9,3 +9,4 @@ Event Planning
 Equipment Fleet
 EE Integrations
 Weather
+Tenant Website

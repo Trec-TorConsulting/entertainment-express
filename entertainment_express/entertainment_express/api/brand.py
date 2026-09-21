@@ -134,6 +134,76 @@ def save_brand(data: dict | str) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
+def get_brand_theme_by_host(host: str | None = None) -> dict:
+    """Fetch brand theme settings by host with fallback to default brand."""
+    info = resolve_brand(host=host)
+    if not info:
+        return {
+            "brand_name": "Entertainment Express",
+            "primary_color": "#059669",
+            "secondary_color": "#10b981",
+            "logo": "",
+            "statement_descriptor": "ENTERTAINMENT",
+        }
+    doc = frappe.get_doc("EE Brand", info["name"])
+    return {
+        "name": doc.name,
+        "brand_name": doc.brand_name,
+        "primary_color": getattr(doc, "primary_color", "") or "#059669",
+        "secondary_color": getattr(doc, "secondary_color", "") or "#10b981",
+        "logo": getattr(doc, "logo", "") or "",
+        "email_from": getattr(doc, "email_from", "") or "",
+        "twilio_phone_number": getattr(doc, "twilio_phone_number", "") or "",
+        "statement_descriptor": getattr(doc, "statement_descriptor", "") or doc.brand_name[:20].upper(),
+    }
+
+
+def override_outbound_email_from(doc, method=None):
+    """Doc hook: override email From address based on brand linked to booking/transaction."""
+    brand_name = getattr(doc, "ee_brand", None) or getattr(doc, "brand", None)
+    if not brand_name and getattr(doc, "booking", None):
+        brand_name = frappe.db.get_value("Event Booking", doc.booking, "ee_brand")
+    if brand_name and frappe.db.exists("EE Brand", brand_name):
+        email_from = frappe.db.get_value("EE Brand", brand_name, "email_from")
+        if email_from:
+            setattr(doc, "sender", email_from)
+
+
+@frappe.whitelist()
+def get_twilio_sender_number(brand_name: str | None = None) -> str:
+    """Select Twilio sender phone number based on brand."""
+    if brand_name and frappe.db.exists("EE Brand", brand_name):
+        phone = frappe.db.get_value("EE Brand", brand_name, "twilio_phone_number")
+        if phone:
+            return phone
+    default_brand = ensure_default_brand()
+    if default_brand:
+        phone = frappe.db.get_value("EE Brand", default_brand, "twilio_phone_number")
+        if phone:
+            return phone
+    return "+18005550199"
+
+
+@frappe.whitelist()
+def get_stripe_statement_descriptor(brand_name: str | None = None) -> str:
+    """Dynamic Stripe statement descriptor pass-through during charge intent creation."""
+    if brand_name and frappe.db.exists("EE Brand", brand_name):
+        desc = frappe.db.get_value("EE Brand", brand_name, "statement_descriptor")
+        if desc:
+            return desc[:22].upper()
+    return "ENTERTAINMENT"
+
+
+def on_sales_transaction_validate(doc, method=None):
+    """Automatically link brand to Cost Center on sales transactions."""
+    brand_name = getattr(doc, "ee_brand", None) or getattr(doc, "brand", None)
+    if brand_name and frappe.db.exists("Cost Center", {"cost_center_name": brand_name}):
+        cc = frappe.db.get_value("Cost Center", {"cost_center_name": brand_name}, "name")
+        if cc:
+            doc.cost_center = cc
+
+
+@frappe.whitelist(allow_guest=True)
 def catalog_for_brand(brand: str | None = None, host: str | None = None, path: str | None = None) -> list:
     """Items/packages tagged with brand — untagged shown on default brand only."""
     resolved = None
@@ -166,3 +236,4 @@ def catalog_for_brand(brand: str | None = None, host: str | None = None, path: s
         return items
     except Exception:
         return []
+

@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle",
+  "dispatch_trip",
+  "max_payload_lbs",
+  "cargo_volume_cuft",
+  "col1",
+  "current_payload_lbs",
+  "current_volume_cuft",
+  "weight_utilization_pct",
+  "volume_utilization_pct",
+  "is_overloaded"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Vehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dispatch_trip",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dispatch Trip"
+  },
+  {
+   "default": "2800",
+   "fieldname": "max_payload_lbs",
+   "fieldtype": "Float",
+   "label": "Max Payload Limit (lbs)"
+  },
+  {
+   "default": "450",
+   "fieldname": "cargo_volume_cuft",
+   "fieldtype": "Float",
+   "label": "Cargo Volume Capacity (cu ft)"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "current_payload_lbs",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Current Cargo Weight (lbs)"
+  },
+  {
+   "default": "0",
+   "fieldname": "current_volume_cuft",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Current Cargo Volume (cu ft)"
+  },
+  {
+   "default": "0",
+   "fieldname": "weight_utilization_pct",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Weight Utilization %"
+  },
+  {
+   "default": "0",
+   "fieldname": "volume_utilization_pct",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Volume Utilization %"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_overloaded",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Overloaded Warning"
+  }
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "EE Vehicle Load Manifest",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "addon_title",
+  "price",
+  "col1",
+  "thumbnail",
+  "short_description",
+  "is_recommended"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Add-On Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "addon_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Add-On Title"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "thumbnail",
+   "fieldtype": "Attach Image",
+   "label": "Thumbnail"
+  },
+  {
+   "fieldname": "short_description",
+   "fieldtype": "Small Text",
+   "label": "Short Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_recommended",
+   "fieldtype": "Check",
+   "label": "Is Recommended"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Booking",
+ "name": "EE Proposal Addon Option",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

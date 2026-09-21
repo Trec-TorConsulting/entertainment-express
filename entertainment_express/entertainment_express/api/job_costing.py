@@ -201,12 +201,28 @@ def set_event_margin_target(booking_name: str, target_percent: float) -> dict:
     }
 
 
-@frappe.whitelist(methods=["GET", "POST"])
-def simulate_quote_margin(**kwargs):
-    """
-    Whitelisted proxy for pre-quote margin simulation.
-    """
-    _check_access()
-    from entertainment_express.job_costing.margin_simulator import simulate_quote_margin as _sim
-    return _sim(**kwargs)
+@frappe.whitelist()
+def get_event_pl_drawer_data(booking: str) -> dict:
+    """Task 2.4 API: Compiles live General Ledger entries into a structured P&L waterfall breakdown."""
+    pl_data = get_event_pl(booking_name=booking)
+    return {
+        "booking_id": booking,
+        "event_name": pl_data.get("event_name"),
+        "customer": pl_data.get("customer_name"),
+        "gross_revenue": pl_data.get("gross_revenue", 0.0),
+        "waterfall": {
+            "labor": pl_data.get("labor_cost", 0.0),
+            "subcontractor": pl_data.get("subcontractor_cost", 0.0),
+            "consumables": pl_data.get("consumable_cost", 0.0),
+            "equipment_wear": pl_data.get("equipment_wear_cost", 0.0),
+            "gateway_fees": pl_data.get("gateway_fees", 0.0),
+            "total_cogs": pl_data.get("total_cogs", 0.0),
+            "net_profit": pl_data.get("net_profit", 0.0),
+        },
+        "margin_percent": pl_data.get("margin_percent", 0.0),
+        "target_margin_percent": pl_data.get("target_margin_percent", 40.0),
+        "margin_status": pl_data.get("margin_status", "healthy"),
+        "ledger_lines": pl_data.get("ledger_lines", []),
+    }
+
 

@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "slug",
+  "is_published",
+  "is_homepage",
+  "col1",
+  "seo_title",
+  "seo_description",
+  "seo_image",
+  "section_blocks",
+  "blocks",
+  "custom_head_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Page Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "slug",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Slug",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_published",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Published"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_homepage",
+   "fieldtype": "Check",
+   "label": "Set as Tenant Homepage"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "seo_title",
+   "fieldtype": "Data",
+   "label": "SEO Title"
+  },
+  {
+   "fieldname": "seo_description",
+   "fieldtype": "Small Text",
+   "label": "SEO Meta Description"
+  },
+  {
+   "fieldname": "seo_image",
+   "fieldtype": "Attach Image",
+   "label": "SEO OpenGraph Image"
+  },
+  {
+   "fieldname": "section_blocks",
+   "fieldtype": "Section Break",
+   "label": "Block Layout & Content"
+  },
+  {
+   "fieldname": "blocks",
+   "fieldtype": "Code",
+   "label": "Blocks JSON Schema",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "custom_head_html",
+   "fieldtype": "Code",
+   "label": "Custom Head HTML/Scripts",
+   "options": "HTML"
+  }
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Tenant Website",
+ "name": "EE Tenant Page",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Staff",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

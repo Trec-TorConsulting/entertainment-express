@@ -1,0 +1,1 @@
+# EE Category Buffer Rule

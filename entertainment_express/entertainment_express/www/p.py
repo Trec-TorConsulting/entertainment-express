@@ -15,14 +15,26 @@ def get_context(context):
     if not route:
         frappe.throw(_("Page not found"), frappe.DoesNotExistError)
 
-    name = frappe.db.get_value("EE Website Page", {"route": route, "published": 1}, "name")
-    if not name:
-        frappe.local.response["http_status_code"] = 404
-        frappe.throw(_("Page not found"), frappe.DoesNotExistError)
+    name = frappe.db.get_value("EE Tenant Page", {"slug": route, "is_published": 1}, "name")
+    if name:
+        doc = frappe.get_doc("EE Tenant Page", name)
+        context.page_doc = doc
+        context.title = doc.seo_title or doc.title
+        context.seo_description = doc.seo_description or ""
+        context.body_html = doc.blocks or ""
+    else:
+        name = frappe.db.get_value("EE Website Page", {"route": route, "published": 1}, "name")
+        if not name:
+            frappe.local.response["http_status_code"] = 404
+            frappe.throw(_("Page not found"), frappe.DoesNotExistError)
 
-    from entertainment_express.website_sanitize import sanitize_html
+        from entertainment_express.website_sanitize import sanitize_html
 
-    doc = frappe.get_doc("EE Website Page", name)
+        doc = frappe.get_doc("EE Website Page", name)
+        context.page_doc = doc
+        context.title = doc.seo_title or doc.title
+        context.seo_description = doc.seo_description or ""
+        context.body_html = sanitize_html(doc.body or "")
     brand = {}
     try:
         settings = frappe.get_single("EE Portal Settings")

@@ -175,15 +175,14 @@ def execute_single_mutation(action, payload, booking_id):
                 "signature_data": sig_data,
                 "signed_at": payload.get("client_timestamp") or now_datetime()
             })
-            sig_doc.insert(ignore_permissions=True)
+@frappe.whitelist()
+def get_daily_offline_bundle(worker=None, target_date=None):
+    """Task 1.2 API: Compiles complete booking and asset graphs for offline field PWA."""
+    return get_day_offline_manifest(worker=worker, target_date=target_date)
 
-    elif action in ("clock_timesheet", "log_timesheet"):
-        if frappe.db.exists("DocType", "EE Worker Shift"):
-            shift_doc = frappe.get_doc({
-                "doctype": "EE Worker Shift",
-                "worker": frappe.session.user,
-                "booking": booking_id,
-                "clock_in": payload.get("client_timestamp") or now_datetime(),
-                "status": "Submitted"
-            })
-            shift_doc.insert(ignore_permissions=True)
+
+@frappe.whitelist()
+def process_mutation_batch(mutations=None):
+    """Task 1.3 API: Process offline mutation batch with strict UUID idempotency checks."""
+    return sync_offline_batch(mutations=mutations)
+

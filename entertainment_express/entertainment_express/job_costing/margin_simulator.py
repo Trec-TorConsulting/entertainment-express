@@ -243,3 +243,11 @@ def simulate_quote_margin(
         "status": status,
         "recommended_price": recommended_price,
     }
+
+
+@frappe.whitelist(methods=["GET", "POST"])
+def simulate_quote_cogs(**kwargs) -> dict:
+    """Task 2.1 API: Calculates direct estimated labor, mileage, consumables, wear, and gateway fees."""
+    return simulate_quote_margin(**kwargs)
+
+

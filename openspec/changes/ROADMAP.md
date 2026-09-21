@@ -464,6 +464,28 @@ entitlement enforcement.
 
 ---
 
+## Phase 42 — Industry Innovation & Competitive Moat Suite (Active Changes)
+
+Derived from deep-dive competitive analysis of top mobile entertainment & event rental platforms (InflatableOffice, Goodshuffle Pro, ERS, DJEP, Dubsado) and top industry pain points from Reddit / operator forums (`r/mobileDJ`, `r/partyrentals`, `r/sweatystartup`).
+
+| # | Change Name | Core Scope | Folder |
+|---|---|---|---|
+| 1 | **Temporal Inventory Availability** | Calendar-first reservation matrix, prep/turnaround buffers, maintenance quarantine locks | [`temporal-inventory-availability/`](temporal-inventory-availability/) |
+| 2 | **Tenant Website Builder & Widgets** | No-code CMS page builder (`/owner/website`), route engine (`/p/*`), standalone JS booking/catalog widgets | [`tenant-website-builder-widgets/`](tenant-website-builder-widgets/) |
+| 3 | **Interactive Proposals & Upseller** | Tokenized interactive proposals, package tier switching, live add-on toggles, e-sign, deposit checkout | [`interactive-proposals-upseller/`](interactive-proposals-upseller/) |
+| 4 | **Site Fit & Load Logistics** | Site intake gating (gates, stairs, surface, power), truck weight & cubic volume load balancing, delivery windows | [`site-fit-load-logistics/`](site-fit-load-logistics/) |
+| 5 | **Multi-Brand Umbrella Operations** | Multi-DBA brand hierarchy under one tenant DB; scoped storefronts, emails, SMS, and Stripe descriptors | [`multi-brand-umbrella-operations/`](multi-brand-umbrella-operations/) |
+| 6 | **Media Delivery & Guest Galleries** | Live photo/video cloud ingestion, zero-app guest QR galleries, client curation, print template overlays | [`media-delivery-guest-galleries/`](media-delivery-guest-galleries/) |
+| 7 | **Weather Risk & Cancellation Engine** | Live forecast telemetry (wind, rain, lightning), automated safety threshold gating, 1-click rain-date vouchers | [`weather-risk-cancellation-engine/`](weather-risk-cancellation-engine/) |
+| 8 | **DJ & Live Music Performance Suite** | Spotify client music planning, Serato/Rekordbox/VirtualDJ exports, live crowd request & tipping feed ("Ask The DJ") | [`dj-live-music-performance-suite/`](dj-live-music-performance-suite/) |
+| 9 | **Operator Trust Vault & Flight Deck** | Verified COI & licensing badges on proposals, real-time client flight deck with vehicle GPS ETA & geofenced privacy | [`operator-trust-vault-flight-deck/`](operator-trust-vault-flight-deck/) |
+| 10 | **Emergency Dispatch & Subcontractor Exchange** | Automated 1-tap SMS emergency crew cascade with surge bonuses, B2B peer subcontractor liquidity exchange | [`emergency-dispatch-subcontractor-exchange/`](emergency-dispatch-subcontractor-exchange/) |
+| 11 | **Margin Leakage Defense & Direct COGS** | Pre-quote direct COGS simulation (labor, transit, wear, gateway fees), auto Cost Center per event, live Event P&L | [`margin-leakage-defense-cogs/`](margin-leakage-defense-cogs/) |
+| 12 | **Digital Tip Pool & Instant Payouts** | Mobile Apple Pay tip jar, algorithmic tip splitting (equal, hours, role), Stripe Connect instant debit card payouts | [`digital-tip-pool-instant-payouts/`](digital-tip-pool-instant-payouts/) |
+| 13 | **Zero-Signal Offline Field PWA** | Local-first IndexedDB field crew PWA, offline barcode scanning, offline signatures, queued idempotent sync | [`zero-signal-offline-field-pwa/`](zero-signal-offline-field-pwa/) |
+
+---
+
 ## After the roadmap — Production operator readiness ✅ archived 2026-09-02
 Operator docs, safe re-apply on the existing cluster, website cache flush on python start, and MariaDB
 NetworkPolicy. Not a numbered product phase.

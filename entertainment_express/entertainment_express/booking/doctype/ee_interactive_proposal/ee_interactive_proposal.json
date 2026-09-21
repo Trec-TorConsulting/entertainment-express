@@ -1,0 +1,177 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "quotation",
+  "booking",
+  "token",
+  "status",
+  "allow_tier_switching",
+  "col1",
+  "selected_package",
+  "selected_addons",
+  "view_count",
+  "first_viewed_at",
+  "last_viewed_at",
+  "section_packages",
+  "available_packages",
+  "section_addons",
+  "available_addons",
+  "section_signature",
+  "signature_data",
+  "signer_name",
+  "signer_ip",
+  "signed_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Quotation",
+   "options": "Quotation"
+  },
+  {
+   "fieldname": "booking",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Event Booking",
+   "options": "Event Booking"
+  },
+  {
+   "fieldname": "token",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Public Access Token",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nSent\nViewed\nAccepted\nExpired\nSuperseded",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_tier_switching",
+   "fieldtype": "Check",
+   "label": "Allow Tier Switching"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "selected_package",
+   "fieldtype": "Link",
+   "label": "Selected Package",
+   "options": "Item"
+  },
+  {
+   "fieldname": "selected_addons",
+   "fieldtype": "Long Text",
+   "label": "Selected Add-Ons JSON"
+  },
+  {
+   "default": "0",
+   "fieldname": "view_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "View Count"
+  },
+  {
+   "fieldname": "first_viewed_at",
+   "fieldtype": "Datetime",
+   "label": "First Viewed At"
+  },
+  {
+   "fieldname": "last_viewed_at",
+   "fieldtype": "Datetime",
+   "label": "Last Viewed At"
+  },
+  {
+   "fieldname": "section_packages",
+   "fieldtype": "Section Break",
+   "label": "Package Tier Options"
+  },
+  {
+   "fieldname": "available_packages",
+   "fieldtype": "Table",
+   "label": "Available Packages",
+   "options": "EE Proposal Package Option"
+  },
+  {
+   "fieldname": "section_addons",
+   "fieldtype": "Section Break",
+   "label": "Optional Add-On Upsells"
+  },
+  {
+   "fieldname": "available_addons",
+   "fieldtype": "Table",
+   "label": "Available Add-Ons",
+   "options": "EE Proposal Addon Option"
+  },
+  {
+   "fieldname": "section_signature",
+   "fieldtype": "Section Break",
+   "label": "E-Signature & Legal Audit"
+  },
+  {
+   "fieldname": "signature_data",
+   "fieldtype": "Long Text",
+   "label": "Signature Data (Base64 PNG)"
+  },
+  {
+   "fieldname": "signer_name",
+   "fieldtype": "Data",
+   "label": "Signer Name"
+  },
+  {
+   "fieldname": "signer_ip",
+   "fieldtype": "Data",
+   "label": "Signer IP Address"
+  },
+  {
+   "fieldname": "signed_at",
+   "fieldtype": "Datetime",
+   "label": "Signed At"
+  }
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Booking",
+ "name": "EE Interactive Proposal",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Staff",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -191,18 +191,23 @@ doc_events = {
             "entertainment_express.security.auth_hardening.on_booking_update",
             "entertainment_express.job_costing.provisioning.ensure_event_cost_center_and_project",
             "entertainment_express.fleet_maintenance.telemetry.on_booking_update",
+            "entertainment_express.equipment_fleet.api.sync_booking_reservations",
         ],
     },
     "Lead": {
         "after_insert": "entertainment_express.api.ai.on_lead_insert",
     },
     "Sales Invoice": {
+        "validate": "entertainment_express.api.brand.on_sales_transaction_validate",
         "on_submit": [
             "entertainment_express.integrations.accounting.on_invoice_submit",
             "entertainment_express.security.auth_hardening.on_invoice_submit",
             "entertainment_express.job_costing.hooks.on_financial_doc_change",
         ],
         "on_update": "entertainment_express.integrations.accounting.on_invoice_update",
+    },
+    "Quotation": {
+        "validate": "entertainment_express.api.brand.on_sales_transaction_validate",
     },
     "Timesheet": {
         "on_submit": "entertainment_express.job_costing.hooks.on_financial_doc_change",

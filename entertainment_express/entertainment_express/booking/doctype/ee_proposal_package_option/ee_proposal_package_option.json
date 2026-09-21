@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "package_title",
+  "highlight_badge",
+  "col1",
+  "base_price",
+  "description",
+  "feature_list",
+  "included_assets"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Package Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "package_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Package Title"
+  },
+  {
+   "fieldname": "highlight_badge",
+   "fieldtype": "Data",
+   "label": "Highlight Badge"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Base Price"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "feature_list",
+   "fieldtype": "Small Text",
+   "label": "Feature List (newline separated)"
+  },
+  {
+   "fieldname": "included_assets",
+   "fieldtype": "Small Text",
+   "label": "Included Assets"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Booking",
+ "name": "EE Proposal Package Option",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}

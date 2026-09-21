@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "asset",
+  "quarantine_status",
+  "col1",
+  "reason",
+  "flagged_by",
+  "flagged_datetime",
+  "section_notes",
+  "notes",
+  "section_resolution",
+  "resolved_by",
+  "resolved_datetime"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Service Asset"
+  },
+  {
+   "default": "Quarantined",
+   "fieldname": "quarantine_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Quarantine Status",
+   "options": "Quarantined\nIn Repair\nInspected & Cleared",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Damage",
+   "fieldname": "reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Reason",
+   "options": "Damage\nSanitization Needed\nFailed Inspection\nMissing Parts",
+   "reqd": 1
+  },
+  {
+   "fieldname": "flagged_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Flagged By",
+   "options": "User"
+  },
+  {
+   "fieldname": "flagged_datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Flagged Datetime"
+  },
+  {
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "section_resolution",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "resolved_by",
+   "fieldtype": "Link",
+   "label": "Resolved By",
+   "options": "User"
+  },
+  {
+   "fieldname": "resolved_datetime",
+   "fieldtype": "Datetime",
+   "label": "Resolved Datetime"
+  }
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "EE Equipment Quarantine",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Crew",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

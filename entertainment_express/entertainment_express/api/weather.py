@@ -620,6 +620,46 @@ def accept_rain_date(offer: str | None = None, booking: str | None = None) -> di
 
 
 @frappe.whitelist()
+def sync_booking_weather_forecast(booking: str) -> dict:
+    """Explicitly sync Open-Meteo weather forecast for booking."""
+    return refresh_one_booking(booking)
+
+
+@frappe.whitelist()
+def claim_rain_date_reschedule(booking: str) -> dict:
+    """Claim rain date store credit voucher when event is rained out."""
+    _require_payer()
+    booking_doc = frappe.get_doc("Event Booking", booking)
+
+    voucher_code = f"RAIN-{frappe.generate_hash(length=8).upper()}"
+    credit_amount = flt(getattr(booking_doc, "grand_total", 500.0) or 500.0)
+
+    voucher = None
+    if frappe.db.table_exists("EE Rain Date Voucher"):
+        voucher = frappe.get_doc({
+            "doctype": "EE Rain Date Voucher",
+            "booking": booking,
+            "voucher_code": voucher_code,
+            "credit_amount": credit_amount,
+            "customer": booking_doc.customer,
+            "expiry_date": frappe.utils.add_days(now_datetime(), 365),
+            "status": "active",
+        })
+        voucher.insert(ignore_permissions=True)
+
+    booking_doc.status = "canceled"
+    booking_doc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {
+        "status": "claimed",
+        "booking": booking,
+        "voucher_code": voucher_code,
+        "credit_amount": credit_amount,
+    }
+
+
+@frappe.whitelist()
 def confirm_allowed(booking: str) -> dict:
     """Gate confirm/dispatch when policy blocks on weather."""
     _require_staff()
@@ -634,3 +674,4 @@ def confirm_allowed(booking: str) -> dict:
             "message": "Weather status is block — resolve before confirm/dispatch.",
         }
     return {"allowed": True, "weather_status": status, "warn": status in ("watch", "warning", "unknown")}
+

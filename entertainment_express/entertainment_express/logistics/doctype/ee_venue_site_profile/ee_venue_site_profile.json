@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "creation": "2026-09-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "venue",
+  "gate_width_inches",
+  "has_stairs",
+  "stair_step_count",
+  "col1",
+  "surface_type",
+  "power_source",
+  "water_source_distance_ft",
+  "overhead_clearance_ft",
+  "section_access",
+  "access_gate_code",
+  "driver_parking_notes",
+  "site_map_photo"
+ ],
+ "fields": [
+  {
+   "fieldname": "venue",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Venue / Address",
+   "options": "Address"
+  },
+  {
+   "default": "36",
+   "fieldname": "gate_width_inches",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Gate Pathway Width (Inches)"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_stairs",
+   "fieldtype": "Check",
+   "label": "Has Pathway Stairs"
+  },
+  {
+   "default": "0",
+   "fieldname": "stair_step_count",
+   "fieldtype": "Int",
+   "label": "Stair Step Count"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Grass",
+   "fieldname": "surface_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Setup Surface Type",
+   "options": "Grass\nAsphalt\nConcrete\nArtificial Turf\nIndoor Gymnasium\nDirt/Gravel"
+  },
+  {
+   "default": "Dedicated 20A Within 50ft",
+   "fieldname": "power_source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Power Source",
+   "options": "Dedicated 20A Within 50ft\nDedicated 20A Within 100ft\nOver 100ft Away\nNo Power Available"
+  },
+  {
+   "fieldname": "water_source_distance_ft",
+   "fieldtype": "Int",
+   "label": "Water Source Distance (ft)"
+  },
+  {
+   "default": "20",
+   "fieldname": "overhead_clearance_ft",
+   "fieldtype": "Int",
+   "label": "Overhead Clearance (ft)"
+  },
+  {
+   "fieldname": "section_access",
+   "fieldtype": "Section Break",
+   "label": "Access & Gate Codes"
+  },
+  {
+   "fieldname": "access_gate_code",
+   "fieldtype": "Data",
+   "label": "Access Gate Code"
+  },
+  {
+   "fieldname": "driver_parking_notes",
+   "fieldtype": "Small Text",
+   "label": "Driver Staging & Parking Notes"
+  },
+  {
+   "fieldname": "site_map_photo",
+   "fieldtype": "Attach Image",
+   "label": "Site Map / Entrance Photo"
+  }
+ ],
+ "modified": "2026-09-21 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Equipment Fleet",
+ "name": "EE Venue Site Profile",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "export": 1,
+   "read": 1,
+   "role": "EE Tenant Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "EE Dispatcher",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

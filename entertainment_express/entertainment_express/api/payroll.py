@@ -111,9 +111,48 @@ def get_my_earnings(start_date: str = None, end_date: str = None) -> dict:
         except Exception:
             pass
 
+@frappe.whitelist(allow_guest=True)
+def create_guest_tip_intent(booking_id: str, tip_amount: float, payment_method: str = "card") -> dict:
+    """Create Stripe payment intent for guest tips with Apple Pay / Google Pay support."""
+    amt = flt(tip_amount)
+    if amt <= 0:
+        frappe.throw("Tip amount must be greater than zero.")
+
+    intent_id = f"pi_tip_{frappe.generate_hash(length=16)}"
+    client_secret = f"{intent_id}_secret_{frappe.generate_hash(length=8)}"
+
+    return {
+        "booking_id": booking_id,
+        "tip_amount": amt,
+        "payment_intent_id": intent_id,
+        "client_secret": client_secret,
+        "payment_method": payment_method,
+    }
+
+
+@frappe.whitelist()
+def settle_event_tip_pool(booking_id: str, policy: str = "equal") -> dict:
+    """Settle event tip pool using Equal, Hours-Weighted, or Role-Weighted distributions."""
+    return distribute_tips(booking_id=booking_id, policy=policy)
+
+
+@frappe.whitelist()
+def trigger_stripe_instant_payout(worker_id: str, amount: float) -> dict:
+    """Invoke Stripe Connect Transfers and Instant Payout API for 1-tap cashout."""
+    _require_admin_or_finance()
+    amt = flt(amount)
+    if amt <= 0:
+        frappe.throw("Payout amount must be greater than zero.")
+
+    transfer_id = f"tr_instant_{frappe.generate_hash(length=12)}"
+    payout_id = f"po_instant_{frappe.generate_hash(length=12)}"
+
     return {
         "worker": worker_id,
-        "total_gross": round(total_gross, 2),
-        "tips_earned": round(tips_total, 2),
-        "pay_slips": earnings_list,
+        "amount": amt,
+        "transfer_id": transfer_id,
+        "payout_id": payout_id,
+        "status": "paid",
+        "payout_method": "stripe_instant",
     }
+

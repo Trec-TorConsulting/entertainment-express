@@ -1,16 +1,18 @@
-"""Site-fit evaluation: area, surface, power, clearance, water vs item requirements."""
+"""Site-fit evaluation: gate clearance, surface, power, clearance, water, vehicle load balancing & driver site packets."""
 
 from __future__ import annotations
 
+import json
 import frappe
+from frappe import _
 from frappe.utils import cint, flt
 
 from entertainment_express.api.portal_owner import OWNER_ROLES
 
-STAFF = OWNER_ROLES | {"EE Sales", "EE Dispatcher", "EE Accounting", "System Manager", "EE Office"}
+STAFF = OWNER_ROLES | {"EE Sales", "EE Dispatcher", "EE Accounting", "EE Crew", "System Manager", "EE Office"}
 GUEST_ROLE = "EE Event Guest"
 PAYER_ROLE = "EE Customer"
-SURFACES = {"lawn", "concrete", "asphalt", "indoor", "other"}
+SURFACES = {"grass", "asphalt", "concrete", "artificial turf", "indoor gymnasium", "dirt/gravel"}
 
 
 def _require_staff() -> None:
@@ -19,6 +21,12 @@ def _require_staff() -> None:
         frappe.throw("Not allowed.", frappe.PermissionError)
     if not roles.intersection(STAFF):
         frappe.throw("Not allowed.", frappe.PermissionError)
+
+
+def _require_crew_or_staff() -> None:
+    roles = set(frappe.get_roles() or [])
+    if not roles.intersection(STAFF | {"EE Crew"}):
+        frappe.throw("Access denied.", frappe.PermissionError)
 
 
 def _deny_guest() -> None:
@@ -35,321 +43,187 @@ def _require_payer_or_staff() -> None:
         frappe.throw("Not allowed.", frappe.PermissionError)
 
 
-def _config() -> dict:
-    try:
-        doc = frappe.get_single("EE Booking Site Config")
-        return {
-            "enabled": cint(getattr(doc, "enabled", 1)),
-            "unfit_action": getattr(doc, "unfit_action", None) or "warn",
-            "overweight_action": getattr(doc, "overweight_action", None) or "warn",
-            "require_client_site_answers": cint(getattr(doc, "require_client_site_answers", 1)),
-        }
-    except Exception:
-        return {
-            "enabled": 1,
-            "unfit_action": "warn",
-            "overweight_action": "warn",
-            "require_client_site_answers": 1,
-        }
-
-
 @frappe.whitelist()
-def get_config() -> dict:
-    _require_staff()
-    return _config()
-
-
-@frappe.whitelist()
-def save_config(values: dict | str | None = None) -> dict:
-    _require_staff()
-    if isinstance(values, str):
-        values = frappe.parse_json(values) or {}
-    values = values or {}
-    doc = frappe.get_single("EE Booking Site Config")
-    for key in ("enabled", "unfit_action", "overweight_action", "require_client_site_answers"):
-        if key in values:
-            setattr(doc, key, values[key])
-    if getattr(doc, "unfit_action", None) not in ("warn", "block"):
-        doc.unfit_action = "warn"
-    if getattr(doc, "overweight_action", None) not in ("warn", "block"):
-        doc.overweight_action = "warn"
-    doc.save(ignore_permissions=True)
-    return _config()
-
-
-def _parse_surfaces(raw) -> set[str]:
-    if not raw:
-        return set()
-    if isinstance(raw, (list, tuple, set)):
-        return {str(s).strip().lower() for s in raw if str(s).strip()}
-    return {p.strip().lower() for p in str(raw).replace(";", ",").split(",") if p.strip()}
-
-
-def _item_requirements(item_code: str) -> list[dict]:
-    if not item_code:
-        return []
-    rows = []
-    # Child table via custom field
-    try:
-        item = frappe.get_doc("Item", item_code)
-        for row in getattr(item, "ee_site_fit_requirements", None) or []:
-            rows.append(
-                {
-                    "item": item_code,
-                    "min_sq_ft": flt(getattr(row, "min_sq_ft", 0)),
-                    "surfaces": _parse_surfaces(getattr(row, "surfaces", None)),
-                    "power_amps": flt(getattr(row, "power_amps", 0)),
-                    "clearance_ft": flt(getattr(row, "clearance_ft", 0)),
-                    "water_required": cint(getattr(row, "water_required", 0)),
-                    "fulfillment_mode": getattr(item, "ee_fulfillment_mode", None) or "attended",
-                }
-            )
-    except Exception:
-        pass
-    return rows
-
-
-def _answers_from_booking(booking) -> dict:
-    answers = {
-        "sq_ft": flt(getattr(booking, "site_sq_ft", 0) or 0),
-        "surface": (getattr(booking, "site_surface", None) or "").strip().lower(),
-        "power_amps": flt(getattr(booking, "site_power_amps", 0) or 0),
-        "clearance_ft": flt(getattr(booking, "site_clearance_ft", 0) or 0),
-        "water_available": cint(getattr(booking, "site_water_available", 0)),
-    }
-    # Fill gaps from venue
-    if getattr(booking, "venue", None) and frappe.db.exists("EE Venue", booking.venue):
-        venue = frappe.get_doc("EE Venue", booking.venue)
-        if not answers["sq_ft"]:
-            answers["sq_ft"] = flt(getattr(venue, "usable_sq_ft", 0) or 0)
-        if not answers["surface"]:
-            answers["surface"] = (getattr(venue, "surface", None) or "").strip().lower()
-        if not answers["power_amps"]:
-            answers["power_amps"] = flt(getattr(venue, "power_amps", 0) or 0)
-        if not answers["clearance_ft"]:
-            answers["clearance_ft"] = flt(getattr(venue, "clearance_ft", 0) or 0)
-        if not answers["water_available"]:
-            answers["water_available"] = cint(getattr(venue, "water_available", 0))
-    return answers
-
-
-def evaluate_site_fit(booking_name: str | None = None, booking=None, answers: dict | None = None) -> dict:
+def validate_site_fit(booking_id: str) -> dict:
     """
-    Compare booking/venue/client answers to item site-fit requirements.
-    Returns status ok|warn|block plus unmet list. Never cancels a booking.
+    Checks all items on booking against EE Venue Site Profile and Item requirements.
+    Validates gate width, stairs, surface type (sandbag ballasts required for asphalt/concrete), and power.
     """
-    cfg = _config()
-    if not cfg.get("enabled"):
-        return {"status": "ok", "unmet": [], "action": "warn", "enabled": False}
+    if not frappe.db.exists("Event Booking", booking_id):
+        frappe.throw(_("Booking '{0}' does not exist.").format(booking_id), frappe.DoesNotExistError)
 
-    if booking is None:
-        booking = frappe.get_doc("Event Booking", booking_name)
-    site = answers or _answers_from_booking(booking)
+    doc = frappe.get_doc("Event Booking", booking_id)
 
-    reqs = []
-    for row in getattr(booking, "service_items", None) or []:
-        item = getattr(row, "item", None) or getattr(row, "item_code", None)
-        reqs.extend(_item_requirements(item))
+    # Get venue profile if exists
+    profile = None
+    if getattr(doc, "venue", None) and frappe.db.exists("EE Venue Site Profile", {"venue": doc.venue}):
+        profile = frappe.get_doc("EE Venue Site Profile", {"venue": doc.venue})
 
-    unmet = []
-    for req in reqs:
-        if req["min_sq_ft"] and site["sq_ft"] and site["sq_ft"] < req["min_sq_ft"]:
-            unmet.append({"item": req["item"], "field": "sq_ft", "needed": req["min_sq_ft"], "have": site["sq_ft"]})
-        if req["min_sq_ft"] and not site["sq_ft"]:
-            unmet.append({"item": req["item"], "field": "sq_ft", "needed": req["min_sq_ft"], "have": None})
-        if req["surfaces"] and site["surface"] and site["surface"] not in req["surfaces"]:
-            unmet.append(
-                {
-                    "item": req["item"],
-                    "field": "surface",
-                    "needed": sorted(req["surfaces"]),
-                    "have": site["surface"],
-                }
-            )
-        if req["surfaces"] and not site["surface"]:
-            unmet.append({"item": req["item"], "field": "surface", "needed": sorted(req["surfaces"]), "have": None})
-        if req["power_amps"] and site["power_amps"] < req["power_amps"]:
-            unmet.append(
-                {"item": req["item"], "field": "power_amps", "needed": req["power_amps"], "have": site["power_amps"]}
-            )
-        if req["clearance_ft"] and site["clearance_ft"] and site["clearance_ft"] < req["clearance_ft"]:
-            unmet.append(
-                {
-                    "item": req["item"],
-                    "field": "clearance_ft",
-                    "needed": req["clearance_ft"],
-                    "have": site["clearance_ft"],
-                }
-            )
-        if req["clearance_ft"] and not site["clearance_ft"]:
-            unmet.append({"item": req["item"], "field": "clearance_ft", "needed": req["clearance_ft"], "have": None})
-        if req["water_required"] and not site["water_available"]:
-            unmet.append({"item": req["item"], "field": "water", "needed": True, "have": False})
+    gate_width = flt(getattr(doc, "site_gate_width", 0) or (getattr(profile, "gate_width_inches", 36) if profile else 36))
+    surface = (getattr(doc, "site_surface", None) or (getattr(profile, "surface_type", "Grass") if profile else "Grass")).strip().lower()
+    power_source = getattr(doc, "site_power", None) or (getattr(profile, "power_source", "Dedicated 20A Within 50ft") if profile else "Dedicated 20A Within 50ft")
 
-    action = cfg.get("unfit_action") or "warn"
-    if not unmet:
-        status = "ok"
-    elif action == "block":
-        status = "block"
-    else:
-        status = "warn"
+    issues = []
+    sandbags_required = 0
 
-    return {
-        "status": status,
-        "unmet": unmet,
-        "action": action,
-        "answers": site,
-        "enabled": True,
-    }
-
-
-def fulfillment_crew_required(booking) -> dict:
-    """Attended items need crew; drop_off/self_serve skip attendant unless other roles listed."""
-    modes = []
-    requires_crew = False
-    for row in getattr(booking, "service_items", None) or []:
-        item = getattr(row, "item", None) or getattr(row, "item_code", None)
-        if not item:
+    for line in getattr(doc, "service_items", []) or []:
+        item_code = getattr(line, "item", None) or getattr(line, "item_code", None)
+        if not item_code or not frappe.db.exists("Item", item_code):
             continue
-        mode = frappe.db.get_value("Item", item, "ee_fulfillment_mode") or "attended"
-        modes.append({"item": item, "mode": mode})
-        if mode == "attended":
-            requires_crew = True
-        elif mode == "drop_off":
-            # Other explicit crew roles still apply via ee_requires_crew_role
-            role = frappe.db.get_value("Item", item, "ee_requires_crew_role")
-            if role:
-                requires_crew = True
-        # self_serve: no attendant by default
-    return {"requires_crew": requires_crew, "modes": modes}
 
+        item = frappe.get_doc("Item", item_code)
 
-@frappe.whitelist()
-def evaluate(booking: str) -> dict:
-    _require_staff()
-    result = evaluate_site_fit(booking_name=booking)
-    try:
-        frappe.db.set_value("Event Booking", booking, "site_fit_status", result["status"])
-    except Exception:
-        pass
-    return result
+        # 1. Gate width check
+        packed_width = flt(getattr(item, "ee_packed_width_in", 0) or 0)
+        if packed_width > 0 and gate_width < packed_width:
+            issues.append({
+                "type": "gate",
+                "severity": "blocker",
+                "message": f"Item '{item.item_name or item_code}' requires {packed_width}in gate clearance, but venue pathway gate is {gate_width}in.",
+                "action_required": "Expand pathway gate or select alternative equipment."
+            })
 
+        # 2. Surface anchoring check
+        if surface in ("asphalt", "concrete", "indoor gymnasium") and getattr(item, "ee_requires_asset", None):
+            sandbags_required += 4
+            issues.append({
+                "type": "surface",
+                "severity": "warning",
+                "message": f"Setup on {surface.title()} prohibits ground stakes. Sandbag ballasts mandated.",
+                "action_required": f"Add {sandbags_required}x 50-lb sandbag ballasts to pull sheet."
+            })
 
-@frappe.whitelist()
-def booking_logistics(booking: str) -> dict:
-    """Owner/employee payload: windows + site fit + fulfillment."""
-    _require_staff()
-    doc = frappe.get_doc("Event Booking", booking)
-    fit = evaluate_site_fit(booking=doc)
-    crew = fulfillment_crew_required(doc)
+        # 3. Power check
+        amp_draw = flt(getattr(item, "ee_amperage_draw", 0) or 0)
+        if amp_draw > 0 and "No Power" in power_source:
+            issues.append({
+                "type": "power",
+                "severity": "blocker",
+                "message": f"Item '{item.item_name or item_code}' requires {amp_draw}A power, but venue has no power.",
+                "action_required": "Mandate generator rental add-on."
+            })
+
+    compatible = not any(i["severity"] == "blocker" for i in issues)
+
     return {
-        "booking": booking,
-        "delivery_window_start": str(getattr(doc, "delivery_window_start", None) or ""),
-        "delivery_window_end": str(getattr(doc, "delivery_window_end", None) or ""),
-        "pickup_window_start": str(getattr(doc, "pickup_window_start", None) or ""),
-        "pickup_window_end": str(getattr(doc, "pickup_window_end", None) or ""),
-        "site_fit": fit,
-        "fulfillment": crew,
-        "site_answers": {
-            "site_sq_ft": flt(getattr(doc, "site_sq_ft", 0) or 0),
-            "site_surface": getattr(doc, "site_surface", None) or "",
-            "site_power_amps": flt(getattr(doc, "site_power_amps", 0) or 0),
-            "site_clearance_ft": flt(getattr(doc, "site_clearance_ft", 0) or 0),
-            "site_water_available": cint(getattr(doc, "site_water_available", 0)),
-        },
+        "booking_id": booking_id,
+        "compatible": compatible,
+        "issues": issues,
+        "sandbags_required": sandbags_required,
+        "gate_width": gate_width,
+        "surface": surface,
+        "power_source": power_source,
     }
 
 
 @frappe.whitelist()
-def save_windows(booking: str, values: dict | str | None = None) -> dict:
-    _require_staff()
-    if isinstance(values, str):
-        values = frappe.parse_json(values) or {}
-    values = values or {}
-    doc = frappe.get_doc("Event Booking", booking)
-    for key in (
-        "delivery_window_start",
-        "delivery_window_end",
-        "pickup_window_start",
-        "pickup_window_end",
-    ):
-        if key in values:
-            setattr(doc, key, values.get(key) or None)
-    doc.save(ignore_permissions=True)
-    return booking_logistics(booking)
+def check_vehicle_load_balance(vehicle_id: str, booking_ids_json: str | list) -> dict:
+    """
+    Computes cumulative weight (lbs) and volume (cu ft) of items across assigned bookings.
+    Compares against vehicle max limits.
+    """
+    if isinstance(booking_ids_json, str):
+        try:
+            booking_ids = json.loads(booking_ids_json)
+        except Exception:
+            booking_ids = []
+    else:
+        booking_ids = booking_ids_json or []
 
+    max_weight = 2800.0
+    max_volume = 450.0
 
-@frappe.whitelist()
-def save_site_answers(booking: str, values: dict | str | None = None) -> dict:
-    """Client or staff site questionnaire."""
-    _require_payer_or_staff()
-    if isinstance(values, str):
-        values = frappe.parse_json(values) or {}
-    values = values or {}
-    doc = frappe.get_doc("Event Booking", booking)
-    mapping = {
-        "site_sq_ft": "site_sq_ft",
-        "sq_ft": "site_sq_ft",
-        "site_surface": "site_surface",
-        "surface": "site_surface",
-        "site_power_amps": "site_power_amps",
-        "power_amps": "site_power_amps",
-        "site_clearance_ft": "site_clearance_ft",
-        "clearance_ft": "site_clearance_ft",
-        "site_water_available": "site_water_available",
-        "water_available": "site_water_available",
-    }
-    for src, dest in mapping.items():
-        if src in values:
-            setattr(doc, dest, values[src])
-    fit = evaluate_site_fit(booking=doc)
-    doc.site_fit_status = fit["status"]
-    if fit["status"] == "block" and (_config().get("unfit_action") == "block"):
-        # Persist status but do not auto-cancel; callers gate confirm/book
-        pass
-    doc.save(ignore_permissions=True)
-    return {"booking": booking, "site_fit": fit}
+    if frappe.db.exists("Vehicle", vehicle_id):
+        veh = frappe.get_doc("Vehicle", vehicle_id)
+        max_weight = flt(getattr(veh, "max_payload_lbs", 2800.0) or 2800.0)
+        max_volume = flt(getattr(veh, "cargo_volume_cuft", 450.0) or 450.0)
 
+    total_weight = 0.0
+    total_volume = 0.0
 
-@frappe.whitelist()
-def client_site_form(booking: str) -> dict:
-    """Questions for customer portal when config requires answers."""
-    _require_payer_or_staff()
-    cfg = _config()
-    doc = frappe.get_doc("Event Booking", booking)
-    reqs = []
-    for row in getattr(doc, "service_items", None) or []:
-        item = getattr(row, "item", None)
-        reqs.extend(_item_requirements(item))
-    needed = bool(reqs) and bool(cfg.get("require_client_site_answers"))
+    for b_id in booking_ids:
+        if not frappe.db.exists("Event Booking", b_id):
+            continue
+        b_doc = frappe.get_doc("Event Booking", b_id)
+        for line in getattr(b_doc, "service_items", []) or []:
+            code = getattr(line, "item", None) or getattr(line, "item_code", None)
+            qty = flt(getattr(line, "qty", 1) or 1)
+            if not code or not frappe.db.exists("Item", code):
+                continue
+            item = frappe.get_doc("Item", code)
+            w = flt(getattr(item, "ee_packed_weight_lbs", 150.0) or 150.0)
+            l_in = flt(getattr(item, "ee_packed_length_in", 36.0) or 36.0)
+            w_in = flt(getattr(item, "ee_packed_width_in", 36.0) or 36.0)
+            h_in = flt(getattr(item, "ee_packed_height_in", 36.0) or 36.0)
+            vol_cuft = (l_in * w_in * h_in) / 1728.0
+
+            total_weight += (w * qty)
+            total_volume += (vol_cuft * qty)
+
+    weight_pct = round((total_weight / max_weight) * 100, 1) if max_weight > 0 else 0
+    volume_pct = round((total_volume / max_volume) * 100, 1) if max_volume > 0 else 0
+
+    is_overloaded = weight_pct > 100.0 or volume_pct > 100.0
+
+    # Save manifest record if vehicle exists
+    if frappe.db.exists("DocType", "EE Vehicle Load Manifest") and vehicle_id:
+        manifest = frappe.get_doc({
+            "doctype": "EE Vehicle Load Manifest",
+            "vehicle": vehicle_id,
+            "dispatch_trip": f"Trip-{vehicle_id}",
+            "max_payload_lbs": max_weight,
+            "cargo_volume_cuft": max_volume,
+            "current_payload_lbs": total_weight,
+            "current_volume_cuft": total_volume,
+            "weight_utilization_pct": weight_pct,
+            "volume_utilization_pct": volume_pct,
+            "is_overloaded": 1 if is_overloaded else 0,
+        })
+        manifest.insert(ignore_permissions=True)
+        frappe.db.commit()
+
     return {
-        "required": needed,
-        "enabled": bool(cfg.get("enabled")),
-        "answers": {
-            "site_sq_ft": flt(getattr(doc, "site_sq_ft", 0) or 0),
-            "site_surface": getattr(doc, "site_surface", None) or "",
-            "site_power_amps": flt(getattr(doc, "site_power_amps", 0) or 0),
-            "site_clearance_ft": flt(getattr(doc, "site_clearance_ft", 0) or 0),
-            "site_water_available": cint(getattr(doc, "site_water_available", 0)),
-        },
-        "site_fit": evaluate_site_fit(booking=doc) if needed else {"status": "ok", "unmet": []},
-        "surfaces": sorted(SURFACES),
+        "vehicle_id": vehicle_id,
+        "total_weight_lbs": total_weight,
+        "max_payload_lbs": max_weight,
+        "weight_pct": weight_pct,
+        "total_volume_cuft": round(total_volume, 1),
+        "cargo_volume_cuft": max_volume,
+        "volume_pct": volume_pct,
+        "is_overloaded": is_overloaded,
     }
 
 
 @frappe.whitelist()
-def confirm_allowed(booking: str) -> dict:
-    """Gate instant book / confirm when site unfit under block policy; attended needs crew."""
-    _require_staff()
-    doc = frappe.get_doc("Event Booking", booking)
-    fit = evaluate_site_fit(booking=doc)
-    crew = fulfillment_crew_required(doc)
-    if fit["status"] == "block":
-        return {
-            "allowed": False,
-            "reason": "site_fit",
-            "message": "Site does not meet item requirements.",
-            "site_fit": fit,
-            "fulfillment": crew,
-        }
-    return {"allowed": True, "site_fit": fit, "fulfillment": crew, "warn": fit["status"] == "warn"}
+def get_driver_site_packet(booking_id: str) -> dict:
+    """
+    Field crew site packet with 1-click gate code copy, parking notes, map coordinates, and risk warnings.
+    """
+    _require_crew_or_staff()
+
+    if not frappe.db.exists("Event Booking", booking_id):
+        frappe.throw(_("Booking '{0}' does not exist.").format(booking_id), frappe.DoesNotExistError)
+
+    doc = frappe.get_doc("Event Booking", booking_id)
+
+    profile = None
+    if getattr(doc, "venue", None) and frappe.db.exists("EE Venue Site Profile", {"venue": doc.venue}):
+        profile = frappe.get_doc("EE Venue Site Profile", {"venue": doc.venue})
+
+    fit_eval = validate_site_fit(booking_id)
+
+    return {
+        "booking_id": booking_id,
+        "customer": doc.customer,
+        "event_name": getattr(doc, "event_name", ""),
+        "event_date": str(doc.event_date),
+        "venue_address": getattr(doc, "venue_address", ""),
+        "venue_geo": getattr(doc, "venue_geo", ""),
+        "access_gate_code": getattr(profile, "access_gate_code", None) or getattr(doc, "access_gate_code", "1234"),
+        "surface_type": fit_eval["surface"],
+        "power_source": fit_eval["power_source"],
+        "gate_width": fit_eval["gate_width"],
+        "driver_parking_notes": getattr(profile, "driver_parking_notes", None) or getattr(doc, "parking_notes", "Park near loading dock entrance."),
+        "site_fit": fit_eval,
+        "map_url": f"https://maps.google.com/?q={getattr(doc, 'venue_address', '')}",
+    }

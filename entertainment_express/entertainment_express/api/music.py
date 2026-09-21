@@ -359,6 +359,37 @@ def _spotify_tracks(playlist_url: str) -> list[dict]:
     return tracks
 
 
+@frappe.whitelist()
+def poll_live_dj_requests(booking: str) -> dict:
+    """Poll live guest requests for DJ booth with Do-Not-Play conflict cross-checking."""
+    require_roles(*STAFF)
+    selections = list_selections(booking)
+
+    dnp_items = [s for s in selections if s.get("category") == "do_not_play"]
+    guest_requests = [s for s in selections if s.get("category") == "general_request"]
+
+    flagged = []
+    clean_requests = []
+
+    for req in guest_requests:
+        song_txt = req.get("song") or req.get("free_text") or ""
+        is_dnp = any(
+            dnp.get("song") and dnp["song"].lower() in song_txt.lower()
+            for dnp in dnp_items
+        )
+        if is_dnp:
+            flagged.append({**req, "dnp_conflict": True})
+        else:
+            clean_requests.append({**req, "dnp_conflict": False})
+
+    return {
+        "booking": booking,
+        "total_requests": len(guest_requests),
+        "requests": clean_requests,
+        "flagged_dnp_conflicts": flagged,
+    }
+
+
 def _ensure_song(track: dict) -> str:
     existing = frappe.db.get_value(
         "Song",
@@ -381,3 +412,4 @@ def _ensure_song(track: dict) -> str:
     )
     doc.insert(ignore_permissions=True)
     return doc.name
+

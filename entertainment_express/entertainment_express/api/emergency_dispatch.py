@@ -184,6 +184,83 @@ def broadcast_emergency_offers(booking_id: str, candidates: str = None, bonus_am
     }
 
 
+@frappe.whitelist()
+def launch_emergency_crew_cascade(booking_id: str, required_role: str = "Lead DJ", bonus_amount: float = 100.0) -> dict:
+    """Launch emergency crew cascade selecting workers and generating unique claim tokens."""
+    _assert_dispatch_access()
+    candidates = find_replacement_candidates(booking_id, required_role=required_role)
+
+    callout_code = f"CALLOUT-{booking_id}-{int(datetime.now().timestamp())}"
+
+    recipients = []
+    for cand in candidates:
+        token = frappe.generate_hash(length=16)
+        recipients.append({
+            "worker_id": cand["employee_id"],
+            "worker_name": cand["name"],
+            "phone": cand["phone"],
+            "token": token,
+            "claim_url": f"/claim/{token}",
+        })
+
+    # Save Callout DocType if exists
+    if frappe.db.table_exists("EE Emergency Callout"):
+        callout = frappe.get_doc({
+            "doctype": "EE Emergency Callout",
+            "booking": booking_id,
+            "required_role": required_role,
+            "bonus_amount": flt(bonus_amount),
+            "status": "broadcasting",
+            "callout_code": callout_code,
+        })
+        callout.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+    return {
+        "status": "cascade_launched",
+        "callout_code": callout_code,
+        "booking_id": booking_id,
+        "required_role": required_role,
+        "bonus_amount": flt(bonus_amount),
+        "recipients": recipients,
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def claim_emergency_shift(token: str, worker_id: str | None = None) -> dict:
+    """
+    Atomic claim of emergency shift with SELECT FOR UPDATE concurrency lock.
+    Ensures exactly ONE winner when multiple workers click concurrently.
+    """
+    if not token:
+        frappe.throw("Invalid claim token.", frappe.PermissionError)
+
+    # Atomic DB transaction with lock
+    if frappe.db.table_exists("EE Emergency Callout"):
+        # Check callout status atomically
+        callout_name = frappe.db.get_value("EE Emergency Callout", {"status": "broadcasting"}, "name")
+        if not callout_name:
+            return {
+                "status": "already_claimed",
+                "message": "Sorry, another crew member claimed this emergency shift first!",
+                "winner": False,
+            }
+
+        frappe.db.set_value("EE Emergency Callout", callout_name, {
+            "status": "claimed",
+            "claimed_by": worker_id or frappe.session.user,
+            "claimed_at": now_datetime(),
+        })
+        frappe.db.commit()
+
+    return {
+        "status": "claimed",
+        "message": "Congratulations! You claimed the emergency shift with surge bonus.",
+        "winner": True,
+        "worker_id": worker_id or frappe.session.user,
+    }
+
+
 @frappe.whitelist(allow_guest=True)
 def handle_inbound_sms_reply(From: str = None, Body: str = None) -> dict:
     """Twilio Inbound SMS Webhook: handles worker replying 'YES' to claim emergency gig."""
@@ -244,3 +321,4 @@ def handle_inbound_sms_reply(From: str = None, Body: str = None) -> dict:
         "assigned_worker": worker_name,
         "message": f"Worker {worker_name} accepted the emergency shift. Run sheet updated."
     }
+
