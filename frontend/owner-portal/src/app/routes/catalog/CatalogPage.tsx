@@ -74,8 +74,9 @@ export const CatalogPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await call("entertainment_express.api.portal_crud.list_records", { kind: "package" });
-      if (res && res.length > 0) {
-        setPackages(res);
+      const rows = Array.isArray(res) ? res : (Array.isArray(res?.rows) ? res.rows : []);
+      if (rows.length > 0) {
+        setPackages(rows);
       } else {
         setPackages(defaultPackages);
       }

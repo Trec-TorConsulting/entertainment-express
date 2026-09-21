@@ -71,12 +71,17 @@ export const CalendarPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await call("entertainment_express.api.portal_owner.get_owner_dashboard", {});
-      const dashboardJobs: JobRecord[] = res?.jobs || [];
+      const dashboardJobs: JobRecord[] = Array.isArray(res?.jobs) ? res.jobs : [];
       
       // If dashboard jobs list is empty or minimal, fetch list_records for Job DocType
       if (dashboardJobs.length === 0) {
         const recordsRes = await call("entertainment_express.api.portal_crud.list_records", { kind: "job" });
-        setJobs(recordsRes || []);
+        const listRows: JobRecord[] = Array.isArray(recordsRes)
+          ? recordsRes
+          : Array.isArray(recordsRes?.rows)
+          ? recordsRes.rows
+          : [];
+        setJobs(listRows);
       } else {
         setJobs(dashboardJobs);
       }
@@ -170,7 +175,7 @@ export const CalendarPage: React.FC = () => {
     } catch (err: any) {
       toast({ title: "Booking Saved", description: `Added ${newJobName} to calendar` });
       setJobs((prev) => [
-        ...prev,
+        ...(Array.isArray(prev) ? prev : []),
         {
           name: `JOB-${Date.now().toString().slice(-4)}`,
           event_name: newJobName,
@@ -188,7 +193,8 @@ export const CalendarPage: React.FC = () => {
   };
 
   // Filter jobs by status tab
-  const filteredJobs = jobs.filter((job) => {
+  const safeJobs = Array.isArray(jobs) ? jobs : [];
+  const filteredJobs = safeJobs.filter((job) => {
     if (statusFilter === "all") return true;
     if (statusFilter === "confirmed") return job.status === "confirmed";
     if (statusFilter === "pending") return job.status === "pending";
