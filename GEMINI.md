@@ -53,13 +53,12 @@ openspec validate --specs
 
 1. **Authority & Separation**:
    - **This repo (`EntertainmentExpress`)**: Owns application source, DocTypes, frontend portals, Dockerfile, OpenSpec, and `./scripts/build-push-bench.sh`.
-   - **Sibling repo (`HomeLab-Redo`)**: Owns cluster operations, Helm chart (`entertainment-express/chart`), Traefik Gateway HTTPRoutes, GKE POC (`entertainment-express-gke/`), and image promotion scripts.
-2. **Pre-Cutover Deploy Workflow (`deploy-entx`)**:
+   - **Sibling repo (`HomeLab-Redo`)**: Owns K3S cluster operations, Helm chart (`entertainment-express/chart`), Traefik Gateway HTTPRoutes, and image promotion scripts.
+2. **K3S Deployment Workflow (`deploy-entx`)**:
    - Always validate locally first: `python3 smoke_test.py`.
    - Use the **`deploy-entx`** skill (`.agent/skills/deploy-entx/SKILL.md`):
-     1. Build and dual-push: `./scripts/build-push-bench.sh <tag>` (pushes to both `registry.maddscientist.com` and Artifact Registry).
+     1. Build and push: `./scripts/build-push-bench.sh <tag>` (pushes to `registry.maddscientist.com`).
      2. Promote in HomeLab: `cd ~/Projects/Personal/HomeLab-Redo && ./entertainment-express/scripts/promote-image.sh <tag> [--apply]`.
      3. Verify `entx.app` ping and pods.
-   - **Never point production DNS (`*.entx.app`) at GKE.**
 
 

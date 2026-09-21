@@ -38,7 +38,7 @@ The platform uses a clean, two-tier URL model:
 - Logged-in portals: `/owner`, `/employee`, `/client` (login-gated; walkthrough is a human session)
 - Field PWA for crew (not a native React Native store app as the primary client)
 - Payments: Stripe + Square + PayPal paths; **Stripe Connect and W2 payroll remain stubs**
-- Apply path: dual-cluster via `promote-image.sh --apply` in HomeLab-Redo (see deploy-entx skill)
+- Apply path: K3S deployment via `promote-image.sh --apply` in HomeLab-Redo (see deploy-entx skill)
 
 
 ---
@@ -204,5 +204,4 @@ For a code rollback: re-promote the previous known-good tag:
 cd ~/Projects/Personal/HomeLab-Redo
 ./entertainment-express/scripts/promote-image.sh <prev-tag> --apply
 ```
-Avoid lone `kubectl rollout undo` — it bypasses the dual-cluster promote path and leaves K3S and
-GKE at different image versions.
+Avoid lone `kubectl rollout undo` — re-promote through `promote-image.sh --apply` to keep HomeLab chart values aligned.
