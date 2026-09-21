@@ -62,6 +62,29 @@
     slugPreview.textContent = workspaceUrl(slugInput.value);
   }
 
+  function showError(msg) {
+    status.style.display = "block";
+    status.style.color = "#dc2626";
+    status.style.background = "#fee2e2";
+    status.style.border = "1px solid #fca5a5";
+    status.style.padding = "0.75rem 1rem";
+    status.style.borderRadius = "0.375rem";
+    status.style.marginTop = "1rem";
+    status.style.fontWeight = "500";
+    status.textContent = msg || "Unable to submit application. Please try again.";
+  }
+
+  function showInfo(msg) {
+    status.style.display = "block";
+    status.style.color = "#1e293b";
+    status.style.background = "#f1f5f9";
+    status.style.border = "1px solid #cbd5e1";
+    status.style.padding = "0.75rem 1rem";
+    status.style.borderRadius = "0.375rem";
+    status.style.marginTop = "1rem";
+    status.textContent = msg;
+  }
+
   if (params.get("success") === "1") {
     var slug = params.get("slug") || "";
     var siteUrl = workspaceUrl(slug);
@@ -77,7 +100,7 @@
   }
 
   if (params.get("canceled") === "1" && status) {
-    status.textContent = "Checkout was canceled. You can try again when you're ready.";
+    showError("Checkout was canceled. You can try again when you're ready.");
   }
 
   if (!form) {
@@ -89,17 +112,28 @@
 
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
-    status.textContent = "Submitting...";
+    showInfo("Submitting...");
 
     var data = Object.fromEntries(new FormData(form).entries());
     try {
       var res = await frappe.call({
         method: "entertainment_express.api.marketing.start_trial",
-        args: { payload: data }
+        args: { payload: data },
+        error: function(r) {
+          var msg = (r && r._server_messages) ? (JSON.parse(r._server_messages)[0] || "") : "";
+          if (msg) {
+            try { msg = JSON.parse(msg).message || msg; } catch(e){}
+          }
+          showError(msg || "Workspace address is already taken or invalid. Please try another address.");
+        }
       });
       var message = res.message || {};
+      if (message.ok === false || message.error) {
+        showError(message.error || "Unable to submit application. Please try again.");
+        return;
+      }
       if (message.checkout_url) {
-        status.textContent = "Redirecting to secure checkout...";
+        showInfo("Redirecting to secure checkout...");
         if (typeof window.eeTrackConversion === "function") {
           window.eeTrackConversion("trial_started");
         }
@@ -107,10 +141,10 @@
         return;
       }
       if (message.manual_review) {
-        status.textContent = (message.message || "Application submitted.") +
-          " Your workspace will be " + (message.site_url || workspaceUrl(data.requested_slug)) + ".";
+        showInfo((message.message || "Application submitted.") +
+          " Your workspace will be " + (message.site_url || workspaceUrl(data.requested_slug)) + ".");
       } else {
-        status.textContent = "Application submitted.";
+        showInfo("Application submitted.");
       }
       if (typeof window.eeTrackConversion === "function") {
         window.eeTrackConversion("trial_started");
@@ -118,7 +152,7 @@
       form.reset();
       updatePreview();
     } catch (err) {
-      status.textContent = "Unable to submit application. Please try again.";
+      showError(err.message || "Unable to submit application. Please try again.");
     }
   });
 })();

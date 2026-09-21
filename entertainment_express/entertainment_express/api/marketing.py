@@ -375,95 +375,106 @@ def start_trial(payload=None):
     if (data.get("website") or "").strip():
         return {"ok": True, "redirect": "/signup"}
 
-    client_ip = _get_client_ip()
-    _check_rate_limit(f"ee:marketing:trial:{client_ip}", limit_count=15, window_seconds=3600)
-    _require_captcha_if_enabled(data)
+    try:
+        client_ip = _get_client_ip()
+        _check_rate_limit(f"ee:marketing:trial:{client_ip}", limit_count=15, window_seconds=3600)
+        _require_captcha_if_enabled(data)
 
-    company_name = (data.get("company_name") or "").strip()
-    contact_email = (data.get("contact_email") or "").strip()
-    requested_slug = (data.get("requested_slug") or "").strip().lower()
-    plan_code = (data.get("plan_code") or "starter").strip().lower()
+        company_name = (data.get("company_name") or "").strip()
+        contact_email = (data.get("contact_email") or "").strip()
+        requested_slug = (data.get("requested_slug") or "").strip().lower()
+        plan_code = (data.get("plan_code") or "starter").strip().lower()
 
-    if not company_name:
-        frappe.throw(_("Company name is required."), frappe.ValidationError)
-    if not contact_email or "@" not in contact_email:
-        frappe.throw(_("A valid email is required."), frappe.ValidationError)
-    if not requested_slug:
-        frappe.throw(_("Requested slug is required."), frappe.ValidationError)
+        if not company_name:
+            return {"ok": False, "error": _("Company name is required.")}
+        if not contact_email or "@" not in contact_email:
+            return {"ok": False, "error": _("A valid email is required.")}
+        if not requested_slug:
+            return {"ok": False, "error": _("Requested workspace address is required.")}
 
-    from entertainment_express.control_plane.provisioner import validate_slug
+        from entertainment_express.control_plane.provisioner import validate_slug
 
-    validate_slug(requested_slug)
+        validate_slug(requested_slug)
 
-    plan_name = frappe.db.get_value("Plan", {"plan_code": plan_code}, "name")
-    if not plan_name:
-        plan_name = frappe.db.get_value("Plan", {"status": ("in", ["Active", "active"])}, "name")
-    if not plan_name:
-        frappe.throw(_("No active plan is available for signup."), frappe.ValidationError)
+        plan_name = frappe.db.get_value("Plan", {"plan_code": plan_code}, "name")
+        if not plan_name:
+            plan_name = frappe.db.get_value("Plan", {"status": ("in", ["Active", "active"])}, "name")
+        if not plan_name:
+            return {"ok": False, "error": _("No active plan is available for signup.")}
 
-    trial_lead = submit_lead(
-        {
-            "lead_type": "trial",
-            "full_name": company_name,
-            "company": company_name,
-            "email": contact_email,
-            "phone": (data.get("phone") or ""),
-            "vertical": (data.get("vertical") or ""),
-            "source_page": (data.get("source_page") or "/start-trial"),
-            "utm_source": (data.get("utm_source") or ""),
-            "utm_medium": (data.get("utm_medium") or ""),
-            "utm_campaign": (data.get("utm_campaign") or ""),
-            "utm_term": (data.get("utm_term") or ""),
-            "utm_content": (data.get("utm_content") or ""),
-            "referrer": (data.get("referrer") or ""),
-            "consent_marketing": (data.get("consent_marketing") or ""),
+        trial_lead = submit_lead(
+            {
+                "lead_type": "trial",
+                "full_name": company_name,
+                "company": company_name,
+                "email": contact_email,
+                "phone": (data.get("phone") or ""),
+                "vertical": (data.get("vertical") or ""),
+                "source_page": (data.get("source_page") or "/start-trial"),
+                "utm_source": (data.get("utm_source") or ""),
+                "utm_medium": (data.get("utm_medium") or ""),
+                "utm_campaign": (data.get("utm_campaign") or ""),
+                "utm_term": (data.get("utm_term") or ""),
+                "utm_content": (data.get("utm_content") or ""),
+                "referrer": (data.get("referrer") or ""),
+                "consent_marketing": (data.get("consent_marketing") or ""),
+            }
+        )
+
+        signup_values = {
+            "doctype": "Signup Application",
+            "company_name": company_name[:200],
+            "requested_slug": requested_slug[:50],
+            "contact_email": contact_email[:240],
+            "plan": plan_name,
+            "status": "new",
         }
-    )
+        _set_if_field(signup_values, "Signup Application", "ee_utm_source", (data.get("utm_source") or "")[:140])
+        _set_if_field(signup_values, "Signup Application", "ee_utm_medium", (data.get("utm_medium") or "")[:140])
+        _set_if_field(signup_values, "Signup Application", "ee_utm_campaign", (data.get("utm_campaign") or "")[:140])
+        _set_if_field(signup_values, "Signup Application", "ee_source_page", (data.get("source_page") or "/start-trial")[:140])
+        _set_if_field(signup_values, "Signup Application", "ee_origin_lead", trial_lead.get("lead"))
 
-    signup_values = {
-        "doctype": "Signup Application",
-        "company_name": company_name[:200],
-        "requested_slug": requested_slug[:50],
-        "contact_email": contact_email[:240],
-        "plan": plan_name,
-        "status": "new",
-    }
-    _set_if_field(signup_values, "Signup Application", "ee_utm_source", (data.get("utm_source") or "")[:140])
-    _set_if_field(signup_values, "Signup Application", "ee_utm_medium", (data.get("utm_medium") or "")[:140])
-    _set_if_field(signup_values, "Signup Application", "ee_utm_campaign", (data.get("utm_campaign") or "")[:140])
-    _set_if_field(signup_values, "Signup Application", "ee_source_page", (data.get("source_page") or "/start-trial")[:140])
-    _set_if_field(signup_values, "Signup Application", "ee_origin_lead", trial_lead.get("lead"))
+        signup = frappe.get_doc(signup_values)
+        signup.insert(ignore_permissions=True)
+        frappe.db.commit()
 
-    signup = frappe.get_doc(signup_values)
-    signup.insert(ignore_permissions=True)
-    frappe.db.commit()
+        if plan_code == "starter":
+            from entertainment_express.api.signup_onboarding import approve_signup_application
+            from entertainment_express.api.saas_billing import ensure_subscription
+            from entertainment_express.control_plane.tenant_urls import tenant_site_url
 
-    if plan_code == "starter":
-        from entertainment_express.api.signup_onboarding import approve_signup_application
-        from entertainment_express.api.saas_billing import ensure_subscription
-        from entertainment_express.control_plane.tenant_urls import tenant_site_url
+            site_url = tenant_site_url(requested_slug)
+            try:
+                res = approve_signup_application(signup.name)
+                if res.get("tenant"):
+                    ensure_subscription(res["tenant"])
+            except Exception:
+                pass
+            return {
+                "ok": True,
+                "site_url": site_url,
+                "checkout_url": None,
+                "plan": "starter",
+                "application": signup.name,
+            }
 
-        site_url = tenant_site_url(requested_slug)
-        try:
-            res = approve_signup_application(signup.name)
-            if res.get("tenant"):
-                ensure_subscription(res["tenant"])
-        except Exception:
-            pass
-        return {
-            "ok": True,
-            "site_url": site_url,
-            "checkout_url": None,
-            "plan": "starter",
-            "application": signup.name,
-        }
+        from entertainment_express.api.signup_onboarding import signup_handoff
 
-    from entertainment_express.api.signup_onboarding import signup_handoff
+        interval = (data.get("billing_interval") or "month").strip().lower()
+        handoff = signup_handoff(signup.name, requested_slug, interval=interval)
+        handoff["plan"] = plan_code
+        handoff["ok"] = True
+        return handoff
+    except frappe.ValidationError as e:
+        msg = str(e)
+        if hasattr(e, "args") and e.args:
+            msg = str(e.args[0])
+        return {"ok": False, "error": msg}
+    except Exception as e:
+        frappe.log_error(f"start_trial error: {e}")
+        return {"ok": False, "error": _("Unable to submit application. Please try again.")}
 
-    interval = (data.get("billing_interval") or "month").strip().lower()
-    handoff = signup_handoff(signup.name, requested_slug, interval=interval)
-    handoff["plan"] = plan_code
-    return handoff
 
 
 @frappe.whitelist(allow_guest=True)

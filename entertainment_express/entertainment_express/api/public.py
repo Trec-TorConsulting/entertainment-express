@@ -69,36 +69,47 @@ def submit_signup(
     Submit a new tenant signup application.
     Control-plane endpoint — only valid on admin.{base_domain}.
     """
-    if not contact_email or "@" not in contact_email:
-        frappe.throw("Valid email required.")
+    try:
+        if not contact_email or "@" not in contact_email:
+            return {"ok": False, "status": "error", "error": "Valid email required."}
 
-    from entertainment_express.control_plane.provisioner import validate_slug
+        from entertainment_express.control_plane.provisioner import validate_slug
 
-    validate_slug(requested_slug[:50].lower().strip())
+        validate_slug(requested_slug[:50].lower().strip())
 
-    plan = frappe.db.get_value("Plan", {"plan_code": plan_code, "status": "Active"}, "name")
-    if not plan:
-        plan = frappe.db.get_value("Plan", {"status": "Active"}, "name")
+        plan = frappe.db.get_value("Plan", {"plan_code": plan_code, "status": "Active"}, "name")
+        if not plan:
+            plan = frappe.db.get_value("Plan", {"status": "Active"}, "name")
 
-    app = frappe.get_doc({
-        "doctype": "Signup Application",
-        "company_name": company_name[:200],
-        "requested_slug": requested_slug[:50].lower().strip(),
-        "contact_email": contact_email[:240],
-        "plan": plan,
-        "status": "new",
-    })
-    app.insert(ignore_permissions=True)
-    frappe.db.commit()
+        app = frappe.get_doc({
+            "doctype": "Signup Application",
+            "company_name": company_name[:200],
+            "requested_slug": requested_slug[:50].lower().strip(),
+            "contact_email": contact_email[:240],
+            "plan": plan,
+            "status": "new",
+        })
+        app.insert(ignore_permissions=True)
+        frappe.db.commit()
 
-    from entertainment_express.api.signup_onboarding import signup_handoff
+        from entertainment_express.api.signup_onboarding import signup_handoff
 
-    handoff = signup_handoff(app.name, app.requested_slug.lower().strip())
-    return {
-        "status": "submitted",
-        "application": app.name,
-        **handoff,
-    }
+        handoff = signup_handoff(app.name, app.requested_slug.lower().strip())
+        return {
+            "ok": True,
+            "status": "submitted",
+            "application": app.name,
+            **handoff,
+        }
+    except frappe.ValidationError as e:
+        msg = str(e)
+        if hasattr(e, "args") and e.args:
+            msg = str(e.args[0])
+        return {"ok": False, "status": "error", "error": msg}
+    except Exception as e:
+        frappe.log_error(f"submit_signup error: {e}")
+        return {"ok": False, "status": "error", "error": "An error occurred during submission."}
+
 
 
 @frappe.whitelist()
