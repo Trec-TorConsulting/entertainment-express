@@ -21,7 +21,7 @@ import uuid
 from datetime import datetime, timedelta
 from urllib import error, parse, request
 
-BASE = os.environ.get("EE_E2E_BASE", "https://e2esmoke.entx.app").rstrip("/")
+BASE = os.environ.get("EE_E2E_BASE", "https://admin.entx.app").rstrip("/")
 TIMEOUT = int(os.environ.get("EE_E2E_TIMEOUT", "30"))
 
 

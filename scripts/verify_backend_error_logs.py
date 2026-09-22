@@ -2,8 +2,8 @@
 """
 Backend Error Log Verification Helper for Entertainment Express E2E Crawler.
 
-Queries Frappe's `Error Log` doctype on target site (default: https://e2esmoke.entx.app)
-between a start timestamp and end timestamp.
+Queries Frappe's `Error Log` doctype on target site (default: https://admin.entx.app)
+to verify if recent backend exceptions occurred during test runs.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import time
 from datetime import datetime, timezone
 from urllib import error, parse, request
 
-BASE_URL = os.environ.get("EE_E2E_BASE", "https://e2esmoke.entx.app").rstrip("/")
+BASE_URL = os.environ.get("EE_E2E_BASE", "https://admin.entx.app").rstrip("/")
 ADMIN_PASS = os.environ.get("EE_ADMIN_PASSWORD", "")
 
 

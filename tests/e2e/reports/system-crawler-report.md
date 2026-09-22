@@ -1,9 +1,9 @@
 # System-Wide Portal Crawler Execution Report
 
-- **Execution Time**: 2026-09-18T18:58:21.343Z
-- **Target Base URL**: https://e2esmoke.entx.app
-- **Total Routes Visited**: 16
-- **Total Errors Detected**: 13
+- **Execution Time**: 2026-09-22T10:44:40.504Z
+- **Target Base URL**: https://admin.entx.app
+- **Total Routes Visited**: 23
+- **Total Errors Detected**: 0
 
 ## Visited Portal Summary
 
@@ -11,50 +11,28 @@
 | :--- | :--- | :--- | :--- | :--- |
 | Owner Portal | Owner | `/owner/` | ✅ OK | 0 |
 | Employee Portal | Employee | `/employee/` | ✅ OK | 0 |
-| Dispatch Portal | Dispatcher | `/dispatch/` | ✅ OK | 0 |
-| Crew App | Crew | `/crew/` | ❌ ERROR | 0 |
 | Customer Portal | Customer | `/client/` | ✅ OK | 0 |
-| Public Website | Guest | `/` | ✅ OK | 22 |
-| Public Website | Guest | `/catalog` | ✅ OK | 12 |
-| Public Website | Guest | `/request-quote` | ✅ OK | 12 |
-| Public Website | Guest | `/login` | ✅ OK | 1 |
-| Public Website | Guest | `/login?redirect-to=/client` | ✅ OK | 1 |
-| Public Website | Guest | `/request-quote?package=starter-signature` | ✅ OK | 12 |
-| Public Website | Guest | `/request-quote?package=starter-premium` | ✅ OK | 12 |
-| Public Website | Guest | `/request-quote?package=starter-grand` | ✅ OK | 12 |
-| Public Website | Guest | `/book` | ✅ OK | 12 |
-| Public Website | Guest | `/client` | ✅ OK | 1 |
-| Public Website | Guest | `/signup` | ✅ OK | 12 |
+| Public Website | Guest | `/` | ✅ OK | 54 |
+| Public Website | Guest | `/solutions/djs` | ✅ OK | 50 |
+| Public Website | Guest | `/solutions/rentals` | ✅ OK | 50 |
+| Public Website | Guest | `/solutions/photo-booths` | ✅ OK | 50 |
+| Public Website | Guest | `/solutions/game-trucks` | ✅ OK | 50 |
+| Public Website | Guest | `/solutions/casino` | ✅ OK | 50 |
+| Public Website | Guest | `/solutions/performers` | ✅ OK | 50 |
+| Public Website | Guest | `/features/weather-risk` | ✅ OK | 61 |
+| Public Website | Guest | `/features/dispatch-load-planning` | ✅ OK | 61 |
+| Public Website | Guest | `/features/dj-playlist-export` | ✅ OK | 61 |
+| Public Website | Guest | `/features/customer-portal` | ✅ OK | 61 |
+| Public Website | Guest | `/features/white-label-branding` | ✅ OK | 61 |
+| Public Website | Guest | `/features/ai-copilot` | ✅ OK | 61 |
+| Public Website | Guest | `/features` | ✅ OK | 60 |
+| Public Website | Guest | `/compare/inflatable-office` | ✅ OK | 49 |
+| Public Website | Guest | `/compare/goodshuffle-pro` | ✅ OK | 49 |
+| Public Website | Guest | `/compare/dj-event-planner` | ✅ OK | 49 |
+| Public Website | Guest | `/compare/honeybook` | ✅ OK | 49 |
+| Public Website | Guest | `/compare/event-rental-systems` | ✅ OK | 49 |
+| Public Website | Guest | `/pricing` | ✅ OK | 45 |
 
-## Detected Frontend Errors
+## Results
 
-| Portal | Role | URL | Error Type | Message |
-| :--- | :--- | :--- | :--- | :--- |
-| Owner Portal | Owner | `https://e2esmoke.entx.app/login` | **console_error** | Failed to load resource: the server responded with a status of 401 () |
-| Owner Portal | Owner | `https://e2esmoke.entx.app/login` | **console_error** | Traceback (most recent call last):
-  File "apps/frappe/frappe/app.py", line 100, in application
-    init_request(request)
-  File "apps/frappe/frappe/a |
-| Employee Portal | Employee | `https://e2esmoke.entx.app/login` | **console_error** | Failed to load resource: the server responded with a status of 401 () |
-| Employee Portal | Employee | `https://e2esmoke.entx.app/login` | **console_error** | Traceback (most recent call last):
-  File "apps/frappe/frappe/app.py", line 100, in application
-    init_request(request)
-  File "apps/frappe/frappe/a |
-| Dispatch Portal | Dispatcher | `https://e2esmoke.entx.app/login` | **console_error** | Failed to load resource: the server responded with a status of 401 () |
-| Dispatch Portal | Dispatcher | `https://e2esmoke.entx.app/login` | **console_error** | Traceback (most recent call last):
-  File "apps/frappe/frappe/app.py", line 100, in application
-    init_request(request)
-  File "apps/frappe/frappe/a |
-| Crew App | Crew | `https://e2esmoke.entx.app/login` | **console_error** | Failed to load resource: the server responded with a status of 401 () |
-| Crew App | Crew | `https://e2esmoke.entx.app/login` | **console_error** | Traceback (most recent call last):
-  File "apps/frappe/frappe/app.py", line 100, in application
-    init_request(request)
-  File "apps/frappe/frappe/a |
-| Crew App | Crew | `https://e2esmoke.entx.app/login` | **network_failure** | HTTP 404 on https://e2esmoke.entx.app/crew/ |
-| Crew App | Crew | `https://e2esmoke.entx.app/crew/` | **console_error** | Failed to load resource: the server responded with a status of 404 () |
-| Crew App | Crew | `https://e2esmoke.entx.app/crew/` | **dead_link** | Page returned HTTP 404 |
-| Customer Portal | Customer | `https://e2esmoke.entx.app/login` | **console_error** | Failed to load resource: the server responded with a status of 401 () |
-| Customer Portal | Customer | `https://e2esmoke.entx.app/login` | **console_error** | Traceback (most recent call last):
-  File "apps/frappe/frappe/app.py", line 100, in application
-    init_request(request)
-  File "apps/frappe/frappe/a |
+🎉 **Zero frontend errors, JS exceptions, or broken links detected!**

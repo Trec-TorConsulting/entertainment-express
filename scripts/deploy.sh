@@ -8,19 +8,20 @@
 # (MariaDB is created once). After that, use this script.
 #
 # Usage:
-#   TENANT_HOST=e2esmoke.entx.app ./scripts/deploy.sh
-#   ./scripts/deploy.sh --dry-run
+#   TENANT_HOST=admin.entx.app ./scripts/deploy.sh
 #
-# Env:
-#   TENANT_HOST   Tenant hostname to curl after roll (default: e2esmoke.entx.app)
-#   NS            Kubernetes namespace (default: entertainment-express)
-
-set -euo pipefail
+# Environment variables:
+#   IMAGE         Full Docker image tag to apply (default: registry.maddscientist.com/entertainment-express/bench:0.1.10-ee)
+#   TENANT_HOST   Tenant hostname to curl after roll (default: admin.entx.app)
+#   SKIP_CURL     If 1, skip post-deploy HTTP verification
+# ─────────────────────────────────────────────────────────────────────────────
+set -eo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="${ROOT}/k8s-deployment.yaml"
 NS="${NS:-entertainment-express}"
-TENANT_HOST="${TENANT_HOST:-e2esmoke.entx.app}"
+IMAGE="${IMAGE:-registry.maddscientist.com/entertainment-express/bench:0.1.10-ee}"
+TENANT_HOST="${TENANT_HOST:-admin.entx.app}"
 DRY_RUN=0
 
 if [[ "${1:-}" == "--dry-run" ]]; then

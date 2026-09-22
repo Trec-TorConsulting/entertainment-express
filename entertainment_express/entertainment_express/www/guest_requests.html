@@ -26,38 +26,51 @@
 (function () {
   const token = new URLSearchParams(location.search).get("token") || "";
   const err = document.getElementById("ee-err");
-  frappe.call({
-    method: "entertainment_express.api.music.guest_context",
-    args: { token: token },
-    callback: function (r) {
-      const d = r.message || {};
-      document.getElementById("ee-ev").textContent = (d.event_name || "This event") + (d.event_date ? " · " + d.event_date : "");
-    },
-    error: function () {
-      err.classList.remove("d-none");
-      err.textContent = "This link is invalid or expired.";
-      document.getElementById("ee-gr").hidden = true;
+  function call(method, args) {
+    if (window.frappe && typeof window.frappe.call === "function") {
+      return new Promise(function(resolve, reject) {
+        window.frappe.call({
+          method: method,
+          args: args || {},
+          callback: function(r) { resolve(r.message); },
+          error: function(e) { reject(e); }
+        });
+      });
     }
+    return fetch("/api/method/" + method, {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "X-Frappe-CSRF-Token": (window.csrf_token || "")},
+      body: JSON.stringify(args || {}),
+      credentials: "same-origin",
+    }).then(function(r){ return r.json(); }).then(function(p){
+      if (p.exc || p._server_messages) throw new Error((p._error_message) || "Request failed");
+      return p.message;
+    });
+  }
+
+  call("entertainment_express.api.music.guest_context", { token: token }).then(function(d) {
+    d = d || {};
+    document.getElementById("ee-ev").textContent = (d.event_name || "This event") + (d.event_date ? " · " + d.event_date : "");
+  }).catch(function() {
+    err.classList.remove("d-none");
+    err.textContent = "This link is invalid or expired.";
+    document.getElementById("ee-gr").hidden = true;
   });
+
   document.getElementById("ee-gr").addEventListener("submit", function (ev) {
     ev.preventDefault();
     const fd = new FormData(ev.target);
-    frappe.call({
-      method: "entertainment_express.api.music.submit_guest_request",
-      args: {
-        token: token,
-        title: fd.get("title"),
-        artist: fd.get("artist"),
-        requester_name: fd.get("requester_name")
-      },
-      callback: function () {
-        document.getElementById("ee-ok").classList.remove("d-none");
-        ev.target.reset();
-      },
-      error: function (e) {
-        err.classList.remove("d-none");
-        err.textContent = "That song cannot be requested, or the link is no longer valid.";
-      }
+    call("entertainment_express.api.music.submit_guest_request", {
+      token: token,
+      title: fd.get("title"),
+      artist: fd.get("artist"),
+      requester_name: fd.get("requester_name")
+    }).then(function() {
+      document.getElementById("ee-ok").classList.remove("d-none");
+      ev.target.reset();
+    }).catch(function() {
+      err.classList.remove("d-none");
+      err.textContent = "That song cannot be requested, or the link is no longer valid.";
     });
   });
 })();

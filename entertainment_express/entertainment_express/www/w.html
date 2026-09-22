@@ -16,7 +16,7 @@
 (function () {
   var token = {{ token|tojson }};
   if (!token) {
-    var m = location.pathname.match(/\\/w\\/([^\\/?#]+)/);
+    var m = location.pathname.match(/\/w\/([^\/?#]+)/);
     token = m ? decodeURIComponent(m[1]) : new URLSearchParams(location.search).get("token");
   }
   var form = document.getElementById("ee-sign");
