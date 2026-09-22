@@ -1,13 +1,13 @@
 {
  "charts": [],
- "content": "[{\"id\":\"eeHdrShortcut\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Ops Priorities</b></span>\",\"col\":12}},{\"id\":\"eeScBooking\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Event Booking\",\"col\":3}},{\"id\":\"eeScCrew\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"eeScRunSheet\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"EE Contract\",\"col\":3}},{\"id\":\"eeScSignup\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Crew Assignment\",\"col\":3}},{\"id\":\"eeScTenant\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quotation\",\"col\":3}},{\"id\":\"eeScPackage\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lead\",\"col\":3}},{\"id\":\"eeSpacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"eeHdrExplore\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Explore</b></span>\",\"col\":12}},{\"id\":\"eeCardBooking\",\"type\":\"card\",\"data\":{\"card_name\":\"Booking\",\"col\":4}},{\"id\":\"eeCardCatalog\",\"type\":\"card\",\"data\":{\"card_name\":\"Service Catalog\",\"col\":4}},{\"id\":\"eeCardDispatch\",\"type\":\"card\",\"data\":{\"card_name\":\"Scheduling & Dispatch\",\"col\":4}},{\"id\":\"eeCardContracts\",\"type\":\"card\",\"data\":{\"card_name\":\"Contracts\",\"col\":4}},{\"id\":\"eeCardHr\",\"type\":\"card\",\"data\":{\"card_name\":\"HR & Workforce\",\"col\":4}},{\"id\":\"eeCardBilling\",\"type\":\"card\",\"data\":{\"card_name\":\"Billing & Payments\",\"col\":4}},{\"id\":\"eeCardControl\",\"type\":\"card\",\"data\":{\"card_name\":\"Control Plane\",\"col\":4}},{\"id\":\"eeCardSetup\",\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4}}]",
+ "content": "[{\"id\":\"eeHdrShortcut\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Super Admin Command Center</b></span>\",\"col\":12}},{\"id\":\"eeScTenant\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tenant\",\"col\":3}},{\"id\":\"eeScSignup\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Signup Application\",\"col\":3}},{\"id\":\"eeScSubscription\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Subscription\",\"col\":3}},{\"id\":\"eeScUser\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"User\",\"col\":3}},{\"id\":\"eeScProvisioning\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Provisioning Job\",\"col\":3}},{\"id\":\"eeScPlan\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Plan\",\"col\":3}},{\"id\":\"eeSpacer1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"eeHdrExplore\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Platform Control & Governance</b></span>\",\"col\":12}},{\"id\":\"eeCardControl\",\"type\":\"card\",\"data\":{\"card_name\":\"Tenants & Fleet Control\",\"col\":4}},{\"id\":\"eeCardBilling\",\"type\":\"card\",\"data\":{\"card_name\":\"Subscriptions & SaaS Billing\",\"col\":4}},{\"id\":\"eeCardUsers\",\"type\":\"card\",\"data\":{\"card_name\":\"Platform Users & Access Control\",\"col\":4}},{\"id\":\"eeCardGovernance\",\"type\":\"card\",\"data\":{\"card_name\":\"System Governance & Monitoring\",\"col\":4}},{\"id\":\"eeCardBookings\",\"type\":\"card\",\"data\":{\"card_name\":\"Tenant Operations Supervision\",\"col\":4}},{\"id\":\"eeCardWorkforce\",\"type\":\"card\",\"data\":{\"card_name\":\"Workforce & Field Supervision\",\"col\":4}}]",
  "creation": "2026-07-24 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "calendar",
+ "icon": "shield-check",
  "idx": 0,
  "is_hidden": 0,
  "label": "Entertainment Express",
@@ -15,8 +15,249 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Booking",
-   "link_count": 2,
+   "label": "Tenants & Fleet Control",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenant",
+   "link_count": 0,
+   "link_to": "Tenant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Signup Application",
+   "link_count": 0,
+   "link_to": "Signup Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Provisioning Job",
+   "link_count": 0,
+   "link_to": "Provisioning Job",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenant Domain",
+   "link_count": 0,
+   "link_to": "Tenant Domain",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Marketing Settings",
+   "link_count": 0,
+   "link_to": "Marketing Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Subscriptions & SaaS Billing",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Subscription",
+   "link_count": 0,
+   "link_to": "Subscription",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Plan",
+   "link_count": 0,
+   "link_to": "Plan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "SaaS Invoice",
+   "link_count": 0,
+   "link_to": "SaaS Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Usage Record",
+   "link_count": 0,
+   "link_to": "Usage Record",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stripe Processed Event",
+   "link_count": 0,
+   "link_to": "Stripe Processed Event",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Platform Users & Access Control",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "User",
+   "link_count": 0,
+   "link_to": "User",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Role",
+   "link_count": 0,
+   "link_to": "Role",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "EE Crew Role",
+   "link_count": 0,
+   "link_to": "EE Crew Role",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "System Governance & Monitoring",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "EE Exchange Listing",
+   "link_count": 0,
+   "link_to": "EE Exchange Listing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Notification Template",
+   "link_count": 0,
+   "link_to": "Notification Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "EE Portal Settings",
+   "link_count": 0,
+   "link_to": "EE Portal Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fleet Health Dashboard",
+   "link_count": 0,
+   "link_to": "/ops",
+   "link_type": "URL",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenant Operations Supervision",
+   "link_count": 5,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -35,20 +276,12 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Event Booking Hold",
+   "label": "EE Contract",
    "link_count": 0,
-   "link_to": "Event Booking Hold",
+   "link_to": "EE Contract",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Service Catalog",
-   "link_count": 3,
-   "onboard": 0,
-   "type": "Card Break"
   },
   {
    "dependencies": "",
@@ -86,8 +319,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Scheduling & Dispatch",
-   "link_count": 2,
+   "label": "Workforce & Field Supervision",
+   "link_count": 5,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -112,55 +345,6 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Contracts",
-   "link_count": 3,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "EE Contract",
-   "link_count": 0,
-   "link_to": "EE Contract",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "EE Contract Template",
-   "link_count": 0,
-   "link_to": "EE Contract Template",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "EE Crew Role",
-   "link_count": 0,
-   "link_to": "EE Crew Role",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "HR & Workforce",
-   "link_count": 4,
-   "onboard": 0,
-   "type": "Card Break"
   },
   {
    "dependencies": "",
@@ -188,138 +372,15 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Worker Time Off",
-   "link_count": 0,
-   "link_to": "Worker Time Off",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Compliance Document",
    "link_count": 0,
    "link_to": "Compliance Document",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Billing & Payments",
-   "link_count": 3,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stripe Processed Event",
-   "link_count": 0,
-   "link_to": "Stripe Processed Event",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Invoice",
-   "link_count": 0,
-   "link_to": "Sales Invoice",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment Entry",
-   "link_count": 0,
-   "link_to": "Payment Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Control Plane",
-   "link_count": 4,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Tenant",
-   "link_count": 0,
-   "link_to": "Tenant",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Plan",
-   "link_count": 0,
-   "link_to": "Plan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Signup Application",
-   "link_count": 0,
-   "link_to": "Signup Application",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Provisioning Job",
-   "link_count": 0,
-   "link_to": "Provisioning Job",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Setup",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Notification Template",
-   "link_count": 0,
-   "link_to": "Notification Template",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2026-07-24 00:00:00.000000",
+ "modified": "2026-09-22 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Entertainment Express Core",
  "name": "Entertainment Express",
@@ -329,25 +390,20 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "SaaS Operator"
+  }
+ ],
  "sequence_id": 0.5,
  "shortcuts": [
   {
    "color": "Green",
-   "label": "Event Booking",
-   "link_to": "Event Booking",
-   "type": "DocType"
-  },
-  {
-   "color": "Orange",
-   "label": "Crew Assignment",
-   "link_to": "Crew Assignment",
-   "type": "DocType"
-  },
-  {
-   "color": "Orange",
-   "label": "Run Sheet",
-   "link_to": "Run Sheet",
+   "label": "Tenant",
+   "link_to": "Tenant",
    "type": "DocType"
   },
   {
@@ -357,15 +413,27 @@
    "type": "DocType"
   },
   {
-   "color": "Blue",
-   "label": "Tenant",
-   "link_to": "Tenant",
+   "color": "Cyan",
+   "label": "Subscription",
+   "link_to": "Subscription",
    "type": "DocType"
   },
   {
-   "color": "Cyan",
-   "label": "Service Package",
-   "link_to": "Service Package",
+   "color": "Purple",
+   "label": "User",
+   "link_to": "User",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "label": "Provisioning Job",
+   "link_to": "Provisioning Job",
+   "type": "DocType"
+  },
+  {
+   "color": "Yellow",
+   "label": "Plan",
+   "link_to": "Plan",
    "type": "DocType"
   }
  ],
