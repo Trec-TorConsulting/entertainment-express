@@ -52,6 +52,7 @@ interface ProviderMeta {
 }
 
 const PROVIDER_METADATA: Record<string, ProviderMeta> = {
+  native_calendar: { title: "EntX Built-in Calendar & Schedule Engine", subtitle: "Native internal booking calendar, crew availability schedule, blackout date manager & dispatch timeline", category: "Calendar Sync" },
   google_calendar: { title: "Google Calendar API", subtitle: "2-way real-time booking & availability block sync", category: "Calendar Sync" },
   microsoft_365: { title: "Microsoft 365 / Outlook", subtitle: "Enterprise Outlook calendar synchronization", category: "Calendar Sync" },
   ical: { title: "Live iCal Subscription Feed", subtitle: "Publish live calendar feed for Apple Calendar, Outlook & mobile", category: "Calendar Sync" },
@@ -115,8 +116,11 @@ export const ConnectionsPage: React.FC = () => {
     try {
       const res = await call("entertainment_express.api.integrations.list_connections", {});
       if (Array.isArray(res) && res.length > 0) {
-        // Ensure native_esign and native_accounting are present in array
+        // Ensure native_calendar, native_esign, and native_accounting are present in array
         let list = [...res];
+        if (!list.some((r) => r.provider === "native_calendar")) {
+          list.unshift({ provider: "native_calendar", label: PROVIDER_METADATA.native_calendar.title, enabled: 1, status: "connected" });
+        }
         if (!list.some((r) => r.provider === "native_esign")) {
           list.unshift({ provider: "native_esign", label: PROVIDER_METADATA.native_esign.title, enabled: 1, status: "connected" });
         }
@@ -128,8 +132,8 @@ export const ConnectionsPage: React.FC = () => {
         const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
           provider: p,
           label: PROVIDER_METADATA[p].title,
-          enabled: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
-          status: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
+          enabled: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
+          status: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
         }));
         setConnections(fallbackList);
       }
@@ -137,8 +141,8 @@ export const ConnectionsPage: React.FC = () => {
       const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
         provider: p,
         label: PROVIDER_METADATA[p].title,
-        enabled: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
-        status: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
+        enabled: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
+        status: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
       }));
       setConnections(fallbackList);
     } finally {

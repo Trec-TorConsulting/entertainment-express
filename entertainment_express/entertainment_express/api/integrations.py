@@ -18,6 +18,7 @@ GUEST_ROLE = "EE Event Guest"
 OWNER = ["EE Tenant Admin", "System Manager"]
 CREW = {"EE Crew", "EE Entertainer"}
 LABELS = {
+    "native_calendar": "EntX Native Calendar & Schedule Engine (Built-in)",
     "google_calendar": "Google Calendar",
     "microsoft_365": "Microsoft 365",
     "ical": "Calendar feed",

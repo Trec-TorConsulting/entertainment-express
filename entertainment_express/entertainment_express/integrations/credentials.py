@@ -7,6 +7,7 @@ import json
 import frappe
 
 PROVIDERS = (
+    "native_calendar",
     "google_calendar",
     "microsoft_365",
     "ical",
