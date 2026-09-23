@@ -49,10 +49,11 @@ interface ProviderMeta {
   title: string;
   subtitle: string;
   category: string;
+  isNative?: boolean;
 }
 
 const PROVIDER_METADATA: Record<string, ProviderMeta> = {
-  native_calendar: { title: "EntX Built-in Calendar & Schedule Engine", subtitle: "Native internal booking calendar, crew availability schedule, blackout date manager & dispatch timeline", category: "Calendar Sync" },
+  native_calendar: { title: "EntX Built-in Calendar & Schedule Engine", subtitle: "Native internal booking calendar, crew availability schedule, blackout date manager & dispatch timeline", category: "Calendar Sync", isNative: true },
   google_calendar: { title: "Google Calendar API", subtitle: "2-way real-time booking & availability block sync", category: "Calendar Sync" },
   microsoft_365: { title: "Microsoft 365 / Outlook", subtitle: "Enterprise Outlook calendar synchronization", category: "Calendar Sync" },
   ical: { title: "Live iCal Subscription Feed", subtitle: "Publish live calendar feed for Apple Calendar, Outlook & mobile", category: "Calendar Sync" },
@@ -60,10 +61,10 @@ const PROVIDER_METADATA: Record<string, ProviderMeta> = {
   mapbox: { title: "Mapbox Navigation & Matrix", subtitle: "Vector maps, location geocoding & call-time drive matrix", category: "Maps & Location" },
   google_maps: { title: "Google Maps Platform", subtitle: "Distance matrix, Place autocomplete & reverse geocoding", category: "Maps & Location" },
 
-  native_esign: { title: "EntX Built-in Digital E-Signatures", subtitle: "Native zero-cost contract signing with canvas signature capture, IP/timestamp audit trail & instant PDF generation", category: "Digital E-Signatures" },
+  native_esign: { title: "EntX Built-in Digital E-Signatures", subtitle: "Native zero-cost contract signing with canvas signature capture, IP/timestamp audit trail & instant PDF generation", category: "Digital E-Signatures", isNative: true },
   docusign: { title: "DocuSign Enterprise Envelopes", subtitle: "Optional third-party DocuSign envelope workflow and webhooks", category: "Digital E-Signatures" },
 
-  native_accounting: { title: "EntX Built-in General Ledger & Accounting", subtitle: "Native multi-currency Chart of Accounts, automated Invoicing, Payment Entries, AR/AP & real-time P&L reporting", category: "Accounting & Books" },
+  native_accounting: { title: "EntX Built-in General Ledger & Accounting", subtitle: "Native multi-currency Chart of Accounts, automated Invoicing, Payment Entries, AR/AP & real-time P&L reporting", category: "Accounting & Books", isNative: true },
   quickbooks: { title: "QuickBooks Online Sync", subtitle: "Automated invoice, deposit, and ledger reconciliation", category: "Accounting & Books" },
   xero: { title: "Xero Accounting", subtitle: "Two-way accounting ledger & client contact synchronization", category: "Accounting & Books" },
 
@@ -129,21 +130,27 @@ export const ConnectionsPage: React.FC = () => {
         }
         setConnections(list);
       } else {
-        const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
-          provider: p,
-          label: PROVIDER_METADATA[p].title,
-          enabled: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
-          status: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
-        }));
+        const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => {
+          const isNat = PROVIDER_METADATA[p]?.isNative || p.startsWith("native_");
+          return {
+            provider: p,
+            label: PROVIDER_METADATA[p].title,
+            enabled: isNat ? 1 : 0,
+            status: isNat ? "connected" : "disconnected",
+          };
+        });
         setConnections(fallbackList);
       }
     } catch {
-      const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
-        provider: p,
-        label: PROVIDER_METADATA[p].title,
-        enabled: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
-        status: p === "native_calendar" || p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
-      }));
+      const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => {
+        const isNat = PROVIDER_METADATA[p]?.isNative || p.startsWith("native_");
+        return {
+          provider: p,
+          label: PROVIDER_METADATA[p].title,
+          enabled: isNat ? 1 : 0,
+          status: isNat ? "connected" : "disconnected",
+        };
+      });
       setConnections(fallbackList);
     } finally {
       setLoading(false);
@@ -303,20 +310,31 @@ export const ConnectionsPage: React.FC = () => {
                       subtitle: "External API integration bridge.",
                       category: category.id,
                     };
-                    const isConnected = Boolean(item.enabled) || item.status === "connected";
+                    const isNative = Boolean(meta.isNative || item.provider.startsWith("native_"));
+                    const isConnected = Boolean(item.enabled) || item.status === "connected" || isNative;
                     const isError = Boolean(item.last_error);
 
                     return (
                       <div
                         key={item.provider}
-                        className="p-4 rounded-xl bg-[var(--ee-surface-inset)] border border-[var(--ee-border)] flex flex-col justify-between gap-3 hover:border-[var(--ee-border-strong)] transition-all"
+                        className={`p-4 rounded-xl border flex flex-col justify-between gap-3 transition-all ${
+                          isNative
+                            ? "bg-[var(--ee-brand)]/5 border-[var(--ee-brand)]/30 hover:border-[var(--ee-brand)]/50"
+                            : "bg-[var(--ee-surface-inset)] border-[var(--ee-border)] hover:border-[var(--ee-border-strong)]"
+                        }`}
                       >
                         <div className="space-y-1">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-bold text-sm text-[var(--ee-text)]">{meta.title}</span>
-                            <Badge variant={isError ? "danger" : isConnected ? "success" : "neutral"} size="sm">
-                              {isError ? "Error" : isConnected ? "Connected" : "Disconnected"}
-                            </Badge>
+                            {isNative ? (
+                              <Badge variant="success" size="sm" className="bg-[var(--ee-brand)]/15 text-[var(--ee-brand)] border border-[var(--ee-brand)]/30 font-semibold">
+                                Built-in (Active)
+                              </Badge>
+                            ) : (
+                              <Badge variant={isError ? "danger" : isConnected ? "success" : "neutral"} size="sm">
+                                {isError ? "Error" : isConnected ? "Connected" : "Disconnected"}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-xs text-[var(--ee-muted)] line-clamp-2">{meta.subtitle}</p>
                           {item.last_error && (
@@ -340,14 +358,25 @@ export const ConnectionsPage: React.FC = () => {
                                 {icalUrl ? "Regenerate" : "Generate Link"}
                               </Button>
                             )}
-                            <Button
-                              density="compact"
-                              variant={isConnected ? "secondary" : "primary"}
-                              onClick={() => openConfigModal(item)}
-                              leftIcon={<Settings className="w-3.5 h-3.5" />}
-                            >
-                              Configure
-                            </Button>
+                            {isNative ? (
+                              <Button
+                                density="compact"
+                                variant="outline"
+                                onClick={() => openConfigModal(item)}
+                                leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-[var(--ee-brand)]" />}
+                              >
+                                Built-in Engine
+                              </Button>
+                            ) : (
+                              <Button
+                                density="compact"
+                                variant={isConnected ? "secondary" : "primary"}
+                                onClick={() => openConfigModal(item)}
+                                leftIcon={isConnected ? <Settings className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+                              >
+                                {isConnected ? "Configure" : "Connect"}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -387,48 +416,74 @@ export const ConnectionsPage: React.FC = () => {
         onOpenChange={(open) => !open && setSelectedProvider(null)}
         title={
           selectedProvider
-            ? `Configure ${PROVIDER_METADATA[selectedProvider.provider]?.title || selectedProvider.label}`
+            ? `${(PROVIDER_METADATA[selectedProvider.provider]?.isNative || selectedProvider.provider.startsWith("native_")) ? "Built-in Engine Details" : "Connect Integration"}: ${PROVIDER_METADATA[selectedProvider.provider]?.title || selectedProvider.label}`
             : "Configure Integration"
         }
-        description="Encrypted per-site API credentials. Keys are stored in the server secret vault and are never sent back to the browser."
+        description={
+          selectedProvider && (PROVIDER_METADATA[selectedProvider.provider]?.isNative || selectedProvider.provider.startsWith("native_"))
+            ? "Pre-configured core engine built into Entertainment Express & ERPNext. Multi-tenant isolated."
+            : "Encrypted per-site API credentials. Keys are stored in the server secret vault and are never sent back to the browser."
+        }
       >
         {selectedProvider && (
           <div className="space-y-5 pt-2">
             <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--ee-surface-inset)] border border-[var(--ee-border)]">
               <span className="text-xs font-mono text-[var(--ee-muted)]">Provider ID: {selectedProvider.provider}</span>
-              <Badge variant={selectedProvider.enabled ? "success" : "neutral"} size="sm">
-                {selectedProvider.enabled ? "Enabled" : "Disabled"}
-              </Badge>
+              {(PROVIDER_METADATA[selectedProvider.provider]?.isNative || selectedProvider.provider.startsWith("native_")) ? (
+                <Badge variant="success" size="sm" className="bg-[var(--ee-brand)]/15 text-[var(--ee-brand)] border border-[var(--ee-brand)]/30 font-semibold">
+                  Built-in Engine (Pre-configured)
+                </Badge>
+              ) : (
+                <Badge variant={selectedProvider.enabled ? "success" : "neutral"} size="sm">
+                  {selectedProvider.enabled ? "Enabled" : "Disabled"}
+                </Badge>
+              )}
             </div>
 
-            <FormField label="API Key / Secret Token / Credentials">
-              <Input
-                type={showKey ? "text" : "password"}
-                placeholder="Enter API key, secret token, or credential JSON..."
-                value={inputKey}
-                onChange={(e) => setInputKey(e.target.value)}
-                leftIcon={<Key className="w-4 h-4" />}
-                rightIcon={
-                  <button
-                    type="button"
-                    onClick={() => setShowKey(!showKey)}
-                    className="p-1 text-[var(--ee-muted)] hover:text-[var(--ee-text)] transition-colors"
-                  >
-                    {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                }
-              />
-              <p className="text-xs text-[var(--ee-muted)] mt-1">
-                Leave blank if you wish to keep existing encrypted credentials unchanged.
-              </p>
-            </FormField>
+            {(PROVIDER_METADATA[selectedProvider.provider]?.isNative || selectedProvider.provider.startsWith("native_")) ? (
+              <div className="p-4 rounded-xl bg-[var(--ee-brand)]/10 border border-[var(--ee-brand)]/20 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-[var(--ee-brand)]">
+                  <ShieldCheck className="w-5 h-5" />
+                  Core Native Engine Active
+                </div>
+                <p className="text-xs text-[var(--ee-muted)] leading-relaxed">
+                  This service is built directly into Entertainment Express. No API keys, secret tokens, or third-party subscriptions are needed. All data is securely isolated per tenant site with real-time audit logging and automatic backups.
+                </p>
+              </div>
+            ) : (
+              <FormField label="API Key / Secret Token / Credentials">
+                <Input
+                  type={showKey ? "text" : "password"}
+                  placeholder="Enter API key, secret token, or credential JSON..."
+                  value={inputKey}
+                  onChange={(e) => setInputKey(e.target.value)}
+                  leftIcon={<Key className="w-4 h-4" />}
+                  rightIcon={
+                    <button
+                      type="button"
+                      onClick={() => setShowKey(!showKey)}
+                      className="p-1 text-[var(--ee-muted)] hover:text-[var(--ee-text)] transition-colors"
+                    >
+                      {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  }
+                />
+                <p className="text-xs text-[var(--ee-muted)] mt-1">
+                  Leave blank if you wish to keep existing encrypted credentials unchanged.
+                </p>
+              </FormField>
+            )}
 
             <div className="pt-2">
               <Switch
                 id="enable-toggle"
                 checked={inputEnabled}
                 onCheckedChange={setInputEnabled}
-                label="Enable this integration on this site"
+                label={
+                  (PROVIDER_METADATA[selectedProvider.provider]?.isNative || selectedProvider.provider.startsWith("native_"))
+                    ? "Keep Native Engine active as primary handler"
+                    : "Enable this integration on this site"
+                }
               />
             </div>
 
@@ -441,11 +496,13 @@ export const ConnectionsPage: React.FC = () => {
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--ee-border)]">
               <Button variant="outline" onClick={() => setSelectedProvider(null)}>
-                Cancel
+                Close
               </Button>
-              <Button variant="primary" onClick={handleSaveConnection} loading={saving}>
-                Save Connection
-              </Button>
+              {!(PROVIDER_METADATA[selectedProvider.provider]?.isNative || selectedProvider.provider.startsWith("native_")) && (
+                <Button variant="primary" onClick={handleSaveConnection} loading={saving}>
+                  Save Connection
+                </Button>
+              )}
             </div>
           </div>
         )}
