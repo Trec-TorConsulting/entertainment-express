@@ -43,6 +43,20 @@ interface PackageRecord {
   active?: boolean;
 }
 
+function toPackage(row: any): PackageRecord {
+  return {
+    id: row.id || row.name,
+    name: row.name || row.item_name || "Package",
+    vertical: row.vertical || "DJs & Sound",
+    description: row.description || "",
+    rate_raw: Number(row.rate_raw ?? row.rate ?? 0),
+    deposit_percent: Number(row.deposit_percent ?? 25),
+    included_hours: Number(row.included_hours ?? 4),
+    features: Array.isArray(row.features) ? row.features : [],
+    active: row.active !== false,
+  };
+}
+
 const CATEGORY_TABS = [
   { id: "all", label: "All Packages", icon: Package },
   { id: "dj", label: "DJs & Sound", icon: Music },
@@ -76,7 +90,7 @@ export const CatalogPage: React.FC = () => {
       const res = await call("entertainment_express.api.portal_crud.list_records", { kind: "package" });
       const rows = Array.isArray(res) ? res : (Array.isArray(res?.rows) ? res.rows : []);
       if (rows.length > 0) {
-        setPackages(rows);
+        setPackages(rows.map(toPackage));
       } else {
         setPackages(defaultPackages);
       }
@@ -204,18 +218,25 @@ export const CatalogPage: React.FC = () => {
     try {
       await call("entertainment_express.api.portal_crud.save_record", {
         kind: "package",
-        values: newRecord
+        name: editingPkg?.id || null,
+        values: {
+          item_name: pkgName,
+          rate: newRecord.rate_raw,
+          unit: "event",
+          description: pkgDesc,
+        },
       });
       toast({ title: "Package Saved", description: `${pkgName} added to catalog studio.` });
-    } catch {
-      toast({ title: "Package Saved", description: `${pkgName} added to catalog studio.` });
-    } finally {
-      setPackages((prev) => {
-        if (editingPkg) return prev.map((p) => (p.id === editingPkg.id ? newRecord : p));
-        return [newRecord, ...prev];
-      });
-      setSaving(false);
       setModalOpen(false);
+      await loadCatalog();
+    } catch (err: any) {
+      toast({
+        title: "Save Failed",
+        description: err?.message || "Could not save package.",
+        variant: "danger",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 

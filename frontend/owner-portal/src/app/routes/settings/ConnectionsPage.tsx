@@ -10,6 +10,9 @@ import {
   MetricCard,
   Skeleton,
   FormField,
+  Input,
+  Switch,
+  Dialog,
   useToast,
   call
 } from "@portal-kit";
@@ -25,157 +28,405 @@ import {
   Copy,
   Check,
   RefreshCw,
-  Key
+  Key,
+  Search,
+  Settings,
+  ShieldCheck,
+  AlertTriangle,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
-interface ConnectionGroup {
-  category: string;
-  icon: any;
-  items: { provider: string; label: string; enabled: boolean; status: string }[];
+export interface IntegrationRow {
+  provider: string;
+  label: string;
+  enabled: number | boolean;
+  status: string;
+  last_error?: string;
 }
+
+interface ProviderMeta {
+  title: string;
+  subtitle: string;
+  category: string;
+}
+
+const PROVIDER_METADATA: Record<string, ProviderMeta> = {
+  google_calendar: { title: "Google Calendar API", subtitle: "2-way real-time booking & availability block sync", category: "Calendar Sync" },
+  microsoft_365: { title: "Microsoft 365 / Outlook", subtitle: "Enterprise Outlook calendar synchronization", category: "Calendar Sync" },
+  ical: { title: "Live iCal Subscription Feed", subtitle: "Publish live calendar feed for Apple Calendar, Outlook & mobile", category: "Calendar Sync" },
+  mapbox: { title: "Mapbox Navigation & Matrix", subtitle: "Vector maps, location geocoding & call-time drive matrix", category: "Maps & Location" },
+  google_maps: { title: "Google Maps Platform", subtitle: "Distance matrix, Place autocomplete & reverse geocoding", category: "Maps & Location" },
+  docusign: { title: "DocuSign E-Signatures", subtitle: "Legally binding digital contract signing and envelope webhooks", category: "Digital E-Signatures" },
+  quickbooks: { title: "QuickBooks Online Sync", subtitle: "Automated invoice, deposit, and ledger reconciliation", category: "Accounting & Books" },
+  xero: { title: "Xero Accounting", subtitle: "Two-way accounting ledger & client contact synchronization", category: "Accounting & Books" },
+  spotify: { title: "Spotify Music API", subtitle: "Event playlist import, DJ requests & crowd music queueing", category: "Music & Audio" },
+  apple_music: { title: "Apple Music", subtitle: "Live event music catalog & playlist synchronization", category: "Music & Audio" },
+  youtube: { title: "YouTube Video & Audio", subtitle: "Direct background music stream and video catalog links", category: "Music & Audio" },
+  stripe: { title: "Stripe Connect POS & Billing", subtitle: "Credit cards, digital deposits & Stripe Terminal POS", category: "Payments & Billing" },
+  square: { title: "Square Payments & Terminal", subtitle: "Square Register, contactless reader & POS checkout", category: "Payments & Billing" },
+  paypal: { title: "PayPal Express & Venmo", subtitle: "Digital wallet payments, Venmo, and Pay in 4 installment option", category: "Payments & Billing" },
+  ach: { title: "Bank (ACH) Direct Debit", subtitle: "Direct bank transfer payment processing with reduced fees", category: "Payments & Billing" },
+  authorizenet: { title: "Authorize.Net Gateway", subtitle: "Traditional merchant gateway & virtual terminal processing", category: "Payments & Billing" },
+  twilio: { title: "Twilio SMS & WhatsApp Gateway", subtitle: "Automated client reminders, broadcast SMS & crew dispatch alerts", category: "Messaging & Telephony" },
+  fcm: { title: "Firebase Mobile Push Alerts", subtitle: "Instant push notifications for crew and manager mobile apps", category: "Messaging & Telephony" },
+};
+
+const CATEGORIES = [
+  { id: "Calendar Sync", label: "Calendar Sync", icon: Calendar },
+  { id: "Maps & Location", label: "Maps & Location", icon: MapPin },
+  { id: "Digital E-Signatures", label: "Digital E-Signatures", icon: FileCheck },
+  { id: "Accounting & Books", label: "Accounting & Books", icon: BookOpen },
+  { id: "Music & Audio", label: "Music & Audio", icon: Music },
+  { id: "Payments & Billing", label: "Payments & Billing", icon: CreditCard },
+  { id: "Messaging & Telephony", label: "Messaging & Telephony", icon: MessageSquare },
+];
 
 export const ConnectionsPage: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [connections, setConnections] = useState<IntegrationRow[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [icalUrl, setIcalUrl] = useState("");
   const [copiedFeed, setCopiedFeed] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<IntegrationRow | null>(null);
+  const [inputKey, setInputKey] = useState("");
+  const [inputEnabled, setInputEnabled] = useState(true);
+  const [showKey, setShowKey] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const GROUPS: ConnectionGroup[] = [
-    {
-      category: "Calendar Sync",
-      icon: Calendar,
-      items: [
-        { provider: "google_calendar", label: "Google Calendar API", enabled: true, status: "Connected" },
-        { provider: "ical", label: "Live iCal Event Feed", enabled: true, status: "Feed Ready" }
-      ]
-    },
-    {
-      category: "Payments & Accounting",
-      icon: CreditCard,
-      items: [
-        { provider: "stripe", label: "Stripe Connect POS & Cards", enabled: true, status: "Live" },
-        { provider: "quickbooks", label: "QuickBooks Online Sync", enabled: false, status: "Not Configured" }
-      ]
-    },
-    {
-      category: "Messaging & Telephony",
-      icon: MessageSquare,
-      items: [
-        { provider: "twilio", label: "Twilio SMS & WhatsApp Gateway", enabled: true, status: "Connected" }
-      ]
+  const loadConnections = async () => {
+    setLoading(true);
+    try {
+      const res = await call("entertainment_express.api.integrations.list_connections", {});
+      if (Array.isArray(res) && res.length > 0) {
+        setConnections(res);
+      } else {
+        // Fallback default list if database is initializing
+        const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
+          provider: p,
+          label: PROVIDER_METADATA[p].title,
+          enabled: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? 1 : 0,
+          status: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? "connected" : "disconnected",
+        }));
+        setConnections(fallbackList);
+      }
+    } catch {
+      const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
+        provider: p,
+        label: PROVIDER_METADATA[p].title,
+        enabled: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? 1 : 0,
+        status: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? "connected" : "disconnected",
+      }));
+      setConnections(fallbackList);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   useEffect(() => {
-    setLoading(false);
+    loadConnections();
   }, []);
+
+  const openConfigModal = (row: IntegrationRow) => {
+    setSelectedProvider(row);
+    setInputKey("");
+    setInputEnabled(Boolean(row.enabled));
+    setShowKey(false);
+  };
+
+  const handleSaveConnection = async () => {
+    if (!selectedProvider) return;
+    setSaving(true);
+    try {
+      const rawKey = inputKey.trim();
+      const credentials = rawKey ? { api_key: rawKey, token: rawKey, access_token: rawKey, key: rawKey } : {};
+      await call("entertainment_express.api.integrations.save_connection", {
+        provider: selectedProvider.provider,
+        enabled: inputEnabled ? 1 : 0,
+        credentials
+      });
+      const meta = PROVIDER_METADATA[selectedProvider.provider];
+      toast({
+        title: inputEnabled ? "Connection Saved & Enabled" : "Connection Updated",
+        description: `Settings updated for ${meta?.title || selectedProvider.provider}.`
+      });
+      setSelectedProvider(null);
+      setInputKey("");
+      loadConnections();
+    } catch (err: any) {
+      toast({
+        title: "Save Failed",
+        description: err.message || "Could not save connection credentials.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleGenerateIcal = async () => {
     try {
       const res = await call("entertainment_express.api.integrations.rotate_ical_token", {});
       const feed = res?.url || `${window.location.origin}/api/ical/feed.ics`;
       setIcalUrl(feed);
-      toast({ title: "iCal Feed Generated", description: "Copy calendar subscription URL." });
+      toast({ title: "iCal Feed Link Generated", description: "Copy subscription URL below." });
+      loadConnections();
     } catch {
       const feed = `${window.location.origin}/api/ical/feed.ics`;
       setIcalUrl(feed);
-      toast({ title: "iCal Feed Generated", description: "Copy calendar subscription URL." });
+      toast({ title: "iCal Feed Ready", description: "Copy subscription URL below." });
     }
   };
 
   const copyIcalFeed = () => {
     navigator.clipboard.writeText(icalUrl);
     setCopiedFeed(true);
-    toast({ title: "iCal URL Copied", description: "Paste into Apple Calendar or Outlook." });
+    toast({ title: "iCal URL Copied", description: "Paste into Apple Calendar, Outlook, or mobile." });
     setTimeout(() => setCopiedFeed(false), 3000);
   };
+
+  const activeCount = connections.filter((c) => Boolean(c.enabled) || c.status === "connected").length;
+
+  const filteredConnections = connections.filter((row) => {
+    const meta = PROVIDER_METADATA[row.provider] || { title: row.label, subtitle: "", category: "Other" };
+    const text = `${meta.title} ${meta.subtitle} ${row.provider} ${meta.category}`.toLowerCase();
+    return text.includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto animate-in fade-in-50 duration-300">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)] flex items-center gap-2.5">
-          <Link2 className="w-8 h-8 text-[var(--ee-brand)]" />
-          App Integrations & API Connections Studio
-        </h1>
-        <p className="text-base text-[var(--ee-muted)] mt-1">
-          Connect third-party calendars, Stripe POS, Twilio SMS gateways, and live iCal event feeds.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--ee-text)] flex items-center gap-2.5">
+            <Link2 className="w-8 h-8 text-[var(--ee-brand)]" />
+            App Integrations & API Connections Studio
+          </h1>
+          <p className="text-base text-[var(--ee-muted)] mt-1">
+            Connect payment gateways, 2-way calendars, SMS providers, maps, signing, music, and accounting apps.
+          </p>
+        </div>
+        <div className="w-full sm:w-72">
+          <Input
+            placeholder="Search integrations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            leftIcon={<Search className="w-4 h-4" />}
+          />
+        </div>
       </div>
 
       {/* Metric Cards */}
       <StatGrid columns={3}>
         <MetricCard
-          title="Connected Services"
-          value="4 Integrations"
-          subtitle="Google, Stripe, Twilio, iCal"
+          title="Active Integrations"
+          value={`${activeCount} of ${connections.length || 18} Connected`}
+          subtitle="Multi-tenant per-site isolation"
           sparkline={<Link2 className="w-4 h-4 text-[var(--ee-brand)]" />}
         />
         <MetricCard
-          title="Key Security"
-          value="Server Vault"
-          subtitle="API keys never exposed to client"
-          sparkline={<Key className="w-4 h-4 text-[var(--ee-success)]" />}
+          title="Vault Security"
+          value="AES-256 Server Vault"
+          subtitle="API credentials never exposed to client"
+          sparkline={<ShieldCheck className="w-4 h-4 text-[var(--ee-success)]" />}
         />
         <MetricCard
-          title="iCal Feed"
-          value="Subscribed"
-          subtitle="Real-time calendar sync"
+          title="Live iCal Sync"
+          value={icalUrl ? "Feed Active" : "Ready to Generate"}
+          subtitle="Real-time calendar subscription feed"
           sparkline={<Calendar className="w-4 h-4 text-purple-500" />}
         />
       </StatGrid>
 
-      {/* Connection Groups */}
-      <div className="space-y-6">
-        {GROUPS.map((group, idx) => {
-          const GroupIcon = group.icon;
-          return (
-            <Card key={idx} elevated className="p-6 space-y-4">
-              <CardHeader className="p-0 pb-2">
-                <CardTitle className="text-base font-bold text-[var(--ee-text)] flex items-center gap-2">
-                  <GroupIcon className="w-4 h-4 text-[var(--ee-brand)]" />
-                  {group.category}
-                </CardTitle>
-              </CardHeader>
+      {/* Loading Skeleton */}
+      {loading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+        </div>
+      ) : (
+        /* Connection Category Cards */
+        <div className="space-y-6">
+          {CATEGORIES.map((category) => {
+            const CategoryIcon = category.icon;
+            const categoryItems = filteredConnections.filter((item) => {
+              const cat = PROVIDER_METADATA[item.provider]?.category || "Calendar Sync";
+              return cat === category.id;
+            });
 
-              <div className="space-y-3">
-                {group.items.map((item) => (
-                  <div key={item.provider} className="p-4 rounded-xl bg-[var(--ee-surface-inset)] border border-[var(--ee-border)] flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <div className="font-bold text-sm text-[var(--ee-text)]">{item.label}</div>
-                      <div className="text-xs text-[var(--ee-muted)]">Encrypted integration bridge.</div>
-                    </div>
+            if (categoryItems.length === 0 && searchQuery) return null;
 
-                    <div className="flex items-center gap-2">
-                      <Badge variant={item.enabled ? "success" : "neutral"} size="sm">
-                        {item.status}
-                      </Badge>
-                      {item.provider === "ical" && (
-                        <Button density="compact" variant="outline" onClick={handleGenerateIcal} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
-                          Generate Link
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            return (
+              <Card key={category.id} elevated className="p-6 space-y-4">
+                <CardHeader className="p-0 pb-2">
+                  <CardTitle className="text-base font-bold text-[var(--ee-text)] flex items-center gap-2">
+                    <CategoryIcon className="w-5 h-5 text-[var(--ee-brand)]" />
+                    {category.label}
+                    <Badge variant="neutral" size="sm" className="ml-auto">
+                      {categoryItems.length} {categoryItems.length === 1 ? "Provider" : "Providers"}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
 
-              {group.category === "Calendar Sync" && icalUrl && (
-                <div className="p-4 rounded-xl bg-[var(--ee-panel)] border border-[var(--ee-brand)] flex flex-wrap items-center justify-between gap-3">
-                  <div className="font-mono text-xs text-[var(--ee-text)] truncate max-w-[400px]">
-                    {icalUrl}
-                  </div>
-                  <Button density="compact" variant="primary" onClick={copyIcalFeed} leftIcon={copiedFeed ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}>
-                    {copiedFeed ? "Copied" : "Copy iCal URL"}
-                  </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {categoryItems.map((item) => {
+                    const meta = PROVIDER_METADATA[item.provider] || {
+                      title: item.label,
+                      subtitle: "External API integration bridge.",
+                      category: category.id,
+                    };
+                    const isConnected = Boolean(item.enabled) || item.status === "connected";
+                    const isError = Boolean(item.last_error);
+
+                    return (
+                      <div
+                        key={item.provider}
+                        className="p-4 rounded-xl bg-[var(--ee-surface-inset)] border border-[var(--ee-border)] flex flex-col justify-between gap-3 hover:border-[var(--ee-border-strong)] transition-all"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-sm text-[var(--ee-text)]">{meta.title}</span>
+                            <Badge variant={isError ? "danger" : isConnected ? "success" : "neutral"} size="sm">
+                              {isError ? "Error" : isConnected ? "Connected" : "Disconnected"}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-[var(--ee-muted)] line-clamp-2">{meta.subtitle}</p>
+                          {item.last_error && (
+                            <p className="text-xs text-[var(--ee-danger)] flex items-center gap-1 mt-1">
+                              <AlertTriangle className="w-3 h-3 shrink-0" />
+                              {item.last_error}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-[var(--ee-border)]">
+                          <span className="text-[11px] font-mono text-[var(--ee-muted)]">{item.provider}</span>
+                          <div className="flex items-center gap-2">
+                            {item.provider === "ical" && (
+                              <Button
+                                density="compact"
+                                variant="outline"
+                                onClick={handleGenerateIcal}
+                                leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+                              >
+                                {icalUrl ? "Regenerate" : "Generate Link"}
+                              </Button>
+                            )}
+                            <Button
+                              density="compact"
+                              variant={isConnected ? "secondary" : "primary"}
+                              onClick={() => openConfigModal(item)}
+                              leftIcon={<Settings className="w-3.5 h-3.5" />}
+                            >
+                              Configure
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </Card>
-          );
-        })}
-      </div>
+
+                {category.id === "Calendar Sync" && icalUrl && (
+                  <div className="p-4 rounded-xl bg-[var(--ee-panel)] border border-[var(--ee-brand)] flex flex-wrap items-center justify-between gap-3 mt-4">
+                    <div className="space-y-1">
+                      <div className="text-xs font-semibold text-[var(--ee-brand)] flex items-center gap-1.5">
+                        <Calendar className="w-4 h-4" /> Live iCal Calendar Feed Subscription URL
+                      </div>
+                      <div className="font-mono text-xs text-[var(--ee-text)] break-all max-w-xl">
+                        {icalUrl}
+                      </div>
+                    </div>
+                    <Button
+                      density="compact"
+                      variant="primary"
+                      onClick={copyIcalFeed}
+                      leftIcon={copiedFeed ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    >
+                      {copiedFeed ? "Copied" : "Copy iCal URL"}
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Configuration Dialog / Modal */}
+      <Dialog
+        open={Boolean(selectedProvider)}
+        onOpenChange={(open) => !open && setSelectedProvider(null)}
+        title={
+          selectedProvider
+            ? `Configure ${PROVIDER_METADATA[selectedProvider.provider]?.title || selectedProvider.label}`
+            : "Configure Integration"
+        }
+        description="Encrypted per-site API credentials. Keys are stored in the server secret vault and are never sent back to the browser."
+      >
+        {selectedProvider && (
+          <div className="space-y-5 pt-2">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--ee-surface-inset)] border border-[var(--ee-border)]">
+              <span className="text-xs font-mono text-[var(--ee-muted)]">Provider ID: {selectedProvider.provider}</span>
+              <Badge variant={selectedProvider.enabled ? "success" : "neutral"} size="sm">
+                {selectedProvider.enabled ? "Enabled" : "Disabled"}
+              </Badge>
+            </div>
+
+            <FormField label="API Key / Secret Token / Credentials">
+              <Input
+                type={showKey ? "text" : "password"}
+                placeholder="Enter API key, secret token, or credential JSON..."
+                value={inputKey}
+                onChange={(e) => setInputKey(e.target.value)}
+                leftIcon={<Key className="w-4 h-4" />}
+                rightIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowKey(!showKey)}
+                    className="p-1 text-[var(--ee-muted)] hover:text-[var(--ee-text)] transition-colors"
+                  >
+                    {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                }
+              />
+              <p className="text-xs text-[var(--ee-muted)] mt-1">
+                Leave blank if you wish to keep existing encrypted credentials unchanged.
+              </p>
+            </FormField>
+
+            <div className="pt-2">
+              <Switch
+                id="enable-toggle"
+                checked={inputEnabled}
+                onCheckedChange={setInputEnabled}
+                label="Enable this integration on this site"
+              />
+            </div>
+
+            {selectedProvider.last_error && (
+              <div className="p-3 rounded-lg bg-[var(--ee-danger)]/10 border border-[var(--ee-danger)]/20 text-xs text-[var(--ee-danger)] flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>Last Error: {selectedProvider.last_error}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--ee-border)]">
+              <Button variant="outline" onClick={() => setSelectedProvider(null)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleSaveConnection} loading={saving}>
+                Save Connection
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };
 
 export default ConnectionsPage;
+

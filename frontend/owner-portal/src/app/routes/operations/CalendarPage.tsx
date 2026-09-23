@@ -158,11 +158,11 @@ export const CalendarPage: React.FC = () => {
         kind: "job",
         values: {
           event_name: newJobName,
-          client_name: newJobClient,
+          customer_name: newJobClient,
           event_date: newJobDate,
-          service_type: newJobType,
+          venue_address: newJobType,
           total_amount: parseFloat(newJobAmount) || 0,
-          status: "confirmed"
+          status: "Confirmed"
         }
       });
       toast({ title: "Booking Created", description: `Successfully scheduled ${newJobName}` });
@@ -173,20 +173,11 @@ export const CalendarPage: React.FC = () => {
       setNewJobAmount("");
       await loadJobs();
     } catch (err: any) {
-      toast({ title: "Booking Saved", description: `Added ${newJobName} to calendar` });
-      setJobs((prev) => [
-        ...(Array.isArray(prev) ? prev : []),
-        {
-          name: `JOB-${Date.now().toString().slice(-4)}`,
-          event_name: newJobName,
-          event_date: newJobDate,
-          status: "confirmed",
-          client_name: newJobClient,
-          total_amount: parseFloat(newJobAmount) || 0,
-          planning_percent: 10
-        }
-      ]);
-      setModalOpen(false);
+      toast({
+        title: "Save Failed",
+        description: err?.message || "Could not save booking.",
+        variant: "danger",
+      });
     } finally {
       setSavingJob(false);
     }

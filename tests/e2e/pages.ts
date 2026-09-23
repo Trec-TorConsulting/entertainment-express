@@ -1,0 +1,55 @@
+/** Sidebar destinations. These are the pages a signed-in user can actually click. */
+
+export const OWNER_PAGES = [
+  "Today",
+  "Calendar",
+  "Schedule",
+  "Pipeline",
+  "Dispatch",
+  "Fleet & Safety",
+  "Emergency Overrides",
+  "Event details",
+  "Packages",
+  "Gear",
+  "People",
+  "Places",
+  "Partners",
+  "Subcontractors",
+  "Money",
+  "Reports",
+  "Assistant",
+  "Plan",
+  "Reminders",
+  "Grow",
+  "Import",
+  "Company Studio",
+  "Master Data Explorer",
+  "Brand",
+  "Website",
+  "Coverage",
+  "Connections",
+  "Security",
+];
+
+export const EMPLOYEE_PAGES = [
+  "My Day",
+  "Dispatch",
+  "Pull Sheet",
+  "Field Board",
+  "My Earnings",
+  "Reports",
+  "My Profile",
+];
+
+export const CLIENT_PAGES = [
+  "Home",
+  "My Events",
+  "Payments & Invoices",
+  "Planning Hub",
+  "Live Event Chat",
+  "Co-Hosts & Guests",
+  "Consultations",
+  "Contracts & Docs",
+  "Event Photos",
+  "Account & Preferences",
+];

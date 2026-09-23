@@ -1,0 +1,64 @@
+name: Live portal QA
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 13 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "tests/e2e/**"
+      - "frontend/**"
+      - "scripts/seed_qa_personas.py"
+      - ".github/workflows/live-portal-qa.yml"
+
+jobs:
+  click-and-golden-path:
+    name: Click every portal page and run the golden path
+    runs-on: ubuntu-latest
+    env:
+      EE_E2E_BASE: ${{ secrets.EE_E2E_BASE }}
+      EE_ADMIN_PASSWORD: ${{ secrets.EE_ADMIN_PASSWORD }}
+      EE_OWNER_EMAIL: ${{ secrets.EE_OWNER_EMAIL }}
+      EE_OWNER_PASSWORD: ${{ secrets.EE_OWNER_PASSWORD }}
+      EE_EMPLOYEE_EMAIL: ${{ secrets.EE_EMPLOYEE_EMAIL }}
+      EE_EMPLOYEE_PASSWORD: ${{ secrets.EE_EMPLOYEE_PASSWORD }}
+      EE_CLIENT_EMAIL: ${{ secrets.EE_CLIENT_EMAIL }}
+      EE_CLIENT_PASSWORD: ${{ secrets.EE_CLIENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Require QA tenant credentials
+        run: |
+          test -n "$EE_E2E_BASE" || { echo "Set GitHub secret EE_E2E_BASE to a live QA tenant. e2esmoke.entx.app is not provisioned."; exit 1; }
+          for name in EE_OWNER_EMAIL EE_OWNER_PASSWORD EE_EMPLOYEE_EMAIL EE_EMPLOYEE_PASSWORD EE_CLIENT_EMAIL EE_CLIENT_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "Missing GitHub secret $name"
+              exit 1
+            fi
+          done
+          echo "EE_E2E_BASE=$EE_E2E_BASE" >> "$GITHUB_ENV"
+      - name: Install Playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Seed owner, employee, and client personas
+        run: |
+          if [ -n "$EE_ADMIN_PASSWORD" ]; then
+            python3 scripts/seed_qa_personas.py
+          else
+            echo "EE_ADMIN_PASSWORD is unset. Personas must already exist on the QA tenant."
+          fi
+      - name: Click through and golden path
+        run: npx playwright test tests/e2e/portal-click-through.spec.ts tests/e2e/golden-path.spec.ts --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: live-qa-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore

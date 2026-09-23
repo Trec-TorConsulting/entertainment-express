@@ -65,7 +65,7 @@ def _checklist(booking: str) -> list[dict]:
 def _job_payload(row: dict, booking) -> dict:
     geo = getattr(booking, "venue_geo", None) or ""
     place = booking.venue_address or ""
-    status = row.get("status")
+    status = row.get("status_key") or row.get("status")
     stage = row.get("stage") or ""
     return {
         **row,

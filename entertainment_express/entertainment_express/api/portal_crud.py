@@ -474,7 +474,7 @@ def _get_job(name: str) -> dict:
 
 
 def _save_job(name: str | None, values: dict) -> str:
-    customer = _ensure_customer(values.get("customer_name") or "")
+    customer = _ensure_customer(values.get("customer_name") or values.get("client_name") or "")
     payload = {
         "event_name": (values.get("event_name") or "").strip(),
         "customer": customer,
@@ -490,6 +490,12 @@ def _save_job(name: str | None, values: dict) -> str:
         "source": "staff",
         "timezone": "America/New_York",
     }
+    meta = frappe.get_meta("Event Booking")
+    amount = flt(values.get("total_amount") or values.get("grand_total") or 0)
+    if amount and meta.has_field("grand_total"):
+        payload["grand_total"] = amount
+    if amount and meta.has_field("balance_due"):
+        payload["balance_due"] = amount
     if not payload["event_name"]:
         frappe.throw("Event name is required.")
     if name:

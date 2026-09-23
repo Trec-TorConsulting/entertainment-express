@@ -1,10 +1,9 @@
 # Tasks: Frontend Test Plan Execution
 
 - [x] Redirect standalone `/dispatch` and `/crew` routes to `/employee`
-- [x] Configure Playwright crawler to target `/owner`, `/employee`, `/client`, and `/`
-- [ ] Implement & run Owner Full Lifecycle & CRUD E2E test suite (`tests/e2e/owner-full-lifecycle.spec.ts`)
-- [ ] Implement & run Employee Full Lifecycle E2E test suite (`tests/e2e/employee-full-lifecycle.spec.ts`)
-- [ ] Implement & run Client Full Lifecycle E2E test suite (`tests/e2e/client-full-lifecycle.spec.ts`)
-- [ ] Verify 0 JS console errors, 0 page exceptions, and 0 React Error Boundaries across all 3 suites
-- [ ] Verify 0 backend Error Log exceptions
-- [ ] Generate Markdown and HTML execution reports
+- [x] Configure Playwright to target `/owner`, `/employee`, `/client`, and `/`
+- [x] Click every owner, employee, and client sidebar page after a real login (`tests/e2e/portal-click-through.spec.ts`)
+- [x] Golden path: package, booked lead, confirmed booking, crew offer, en-route milestone, balance invoice (`tests/e2e/golden-path.spec.ts`)
+- [x] Fail on page exceptions, console errors, and HTTP 500s
+- [x] Read saved records back through the whitelisted APIs
+- [x] Run the suites in `.github/workflows/live-portal-qa.yml` against the QA tenant

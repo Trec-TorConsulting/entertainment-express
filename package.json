@@ -4,8 +4,17 @@
   "private": true,
   "description": "Entertainment Express E2E Portal Crawler & Quality Suite",
   "scripts": {
+    "test:e2e": "npx playwright test",
+    "test:e2e:api": "npx playwright test --project=api",
+    "test:e2e:owner": "npx playwright test --project=owner",
+    "test:e2e:employee": "npx playwright test --project=employee",
+    "test:e2e:client": "npx playwright test --project=client",
+    "test:e2e:public": "npx playwright test --project=public",
+    "test:e2e:workflows": "npx playwright test --project=workflows",
     "test:e2e:quality-gates": "npx playwright test tests/e2e/portal-quality-gates.spec.ts",
-    "test:e2e:crawler": "npx playwright test tests/e2e/system-wide-portal-crawler.spec.ts",
+    "test:e2e:pages": "npx playwright test tests/e2e/portal-click-through.spec.ts",
+    "test:e2e:golden": "npx playwright test tests/e2e/golden-path.spec.ts",
+    "test:e2e:live": "npx playwright test tests/e2e/portal-click-through.spec.ts tests/e2e/golden-path.spec.ts",
     "verify:backend-errors": "python3 scripts/verify_backend_error_logs.py"
   },
   "devDependencies": {

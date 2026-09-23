@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   Input,
   FormField,
+  Dialog,
   useToast,
   Skeleton,
   MarginHealthBadge,
@@ -36,6 +37,11 @@ export const MoneyPage: React.FC = () => {
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState("overview");
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [invoiceJobs, setInvoiceJobs] = useState<any[]>([]);
+  const [invoiceJob, setInvoiceJob] = useState("");
+  const [invoiceResult, setInvoiceResult] = useState("");
+  const [invoicing, setInvoicing] = useState(false);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [payRuns, setPayRuns] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -545,7 +551,18 @@ export const MoneyPage: React.FC = () => {
           <Button
             variant="primary"
             density="cockpit"
-            onClick={() => navigate("/money/new")}
+            onClick={async () => {
+              setInvoiceResult("");
+              setInvoiceOpen(true);
+              try {
+                const jobs = await call("entertainment_express.api.portal_billing.list_jobs", {});
+                const rows = Array.isArray(jobs) ? jobs : [];
+                setInvoiceJobs(rows);
+                setInvoiceJob(rows[0]?.name || "");
+              } catch (err: any) {
+                toast({ title: "Could not load bookings", description: err?.message || "Try again.", variant: "danger" });
+              }
+            }}
             leftIcon={<Plus className="w-3.5 h-3.5" />}
           >
             + Create Invoice
@@ -564,6 +581,61 @@ export const MoneyPage: React.FC = () => {
           { id: "holds", label: "Holds & Deposits", icon: <Shield className="w-4 h-4" />, content: holdsTab },
         ]}
       />
+
+      <Dialog
+        open={invoiceOpen}
+        onOpenChange={setInvoiceOpen}
+        title="Create balance invoice"
+        description="Writes a balance Sales Invoice for the selected booking."
+      >
+        <div className="space-y-4">
+          <FormField label="Booking">
+            <select
+              className="w-full px-3 py-2 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-sm"
+              value={invoiceJob}
+              onChange={(e) => setInvoiceJob(e.target.value)}
+            >
+              <option value="">Select a booking</option>
+              {invoiceJobs.map((job) => (
+                <option key={job.name} value={job.name}>
+                  {job.event_name || job.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          {invoiceResult ? <p className="text-sm font-medium">{invoiceResult}</p> : null}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" density="compact" type="button" onClick={() => setInvoiceOpen(false)}>
+              Close
+            </Button>
+            <Button
+              variant="primary"
+              density="compact"
+              type="button"
+              loading={invoicing}
+              disabled={!invoiceJob}
+              onClick={async () => {
+                setInvoicing(true);
+                try {
+                  const res = await call("entertainment_express.api.portal_billing.create_balance_invoice", {
+                    booking_name: invoiceJob,
+                  });
+                  const name = res?.invoice || res?.name;
+                  if (!name) throw new Error("Invoice was not created.");
+                  setInvoiceResult(`Invoice ${name}`);
+                  toast({ title: "Invoice created", description: String(name), variant: "success" });
+                } catch (err: any) {
+                  toast({ title: "Invoice failed", description: err?.message || "Could not create invoice.", variant: "danger" });
+                } finally {
+                  setInvoicing(false);
+                }
+              }}
+            >
+              Create balance invoice
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
       <EventPLDrawer
         bookingId={plDrawerBookingId}

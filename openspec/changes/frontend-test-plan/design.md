@@ -1,15 +1,9 @@
 # Design: Comprehensive Frontend Test Architecture
 
 ## Architecture & Test Harness
-- **Framework**: Playwright TypeScript E2E suite (`tests/e2e/system-wide-portal-crawler.spec.ts`).
-- **Target Surfaces**:
-  1. `/owner/` - Owner Portal SPA routes (Today, Pipeline, Money, Catalog, Fleet, Fleet/Gear, Operations/Calendar, Settings, Security).
-  2. `/employee/` - Employee Portal SPA routes (My Day, Dispatch, Earnings, Profile, Timeoff, Workspaces).
-  3. `/client/` - Customer Portal SPA routes (Dashboard, Bookings, Quotes, Invoices, Contracts, Planning, Deliverables).
-  4. `/` - Marketing & Tenant Public Pages (Home, Pricing, Solutions, Blog, Contact).
-- **Telemetry Collection**:
-  - `page.on('console')`: Fail on any level="error" message.
-  - `page.on('pageerror')`: Fail on any unhandled JS exception.
-  - `page.on('response')`: Fail on any HTTP 4xx/5xx status code (excluding intentional 401/403/429 checks).
-  - DOM Inspector: Check for React Error Boundary message nodes.
-- **Reporting**: Output Markdown (`system-crawler-report.md`) and HTML (`system-crawler-report.html`) containing URL metrics and error logs.
+- **Framework**: Playwright. Public pages click through `https://www.entx.app` (`EE_E2E_PUBLIC`). Portal pages and the golden path use `EE_E2E_BASE`. `e2esmoke.entx.app` is not provisioned, so the tenant host is required and has no default.
+- **Personas**: `EE_OWNER_EMAIL`, `EE_EMPLOYEE_EMAIL`, `EE_CLIENT_EMAIL` and matching passwords. Seed with `python3 scripts/seed_qa_personas.py` using `EE_ADMIN_PASSWORD`.
+- **Click-through**: `tests/e2e/portal-click-through.spec.ts` logs in, then clicks every sidebar destination. A redirect back to `/login` fails the test.
+- **Golden path**: `tests/e2e/golden-path.spec.ts` creates a package, marks a lead booked, saves a booking, offers a shift, advances it to en route, and creates a balance invoice. Each step is asserted through the whitelist API.
+- **CI**: `.github/workflows/live-portal-qa.yml`. `python3 smoke_test.py` stays the image gate.
+- **Telemetry**: fail on `pageerror`, console errors, and HTTP 500. Asset 404s fail. Playwright keeps a trace and screenshot when a test fails. Login redirects fail the test before any page is marked passed.
