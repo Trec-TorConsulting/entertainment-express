@@ -83,6 +83,7 @@ const PROVIDER_METADATA: Record<string, ProviderMeta> = {
   authorizenet: { title: "Authorize.Net Gateway", subtitle: "Traditional merchant gateway & virtual terminal processing", category: "Payments & Billing" },
 
   twilio: { title: "Twilio SMS & WhatsApp Gateway", subtitle: "Automated client reminders, broadcast SMS & crew dispatch alerts", category: "Messaging & Telephony" },
+  dial_ai: { title: "Dial.ai AI Voice Agent & Telephony", subtitle: "AI voice receptionist, automated phone call booking inquiries, call transcription & agent SMS/WhatsApp", category: "Messaging & Telephony" },
   fcm: { title: "Firebase Mobile Push Alerts", subtitle: "Instant push notifications for crew and manager mobile apps", category: "Messaging & Telephony" },
 };
 

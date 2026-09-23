@@ -43,6 +43,7 @@ LABELS = {
     "ach": "Bank (ACH)",
     "authorizenet": "Authorize.Net",
     "twilio": "Twilio",
+    "dial_ai": "Dial.ai AI Voice & Telephony",
     "fcm": "Phone alerts",
 }
 

@@ -32,6 +32,7 @@ PROVIDERS = (
     "ach",
     "authorizenet",
     "twilio",
+    "dial_ai",
     "fcm",
 )
 
