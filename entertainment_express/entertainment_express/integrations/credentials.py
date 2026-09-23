@@ -14,6 +14,7 @@ PROVIDERS = (
     "google_maps",
     "native_esign",
     "docusign",
+    "native_accounting",
     "quickbooks",
     "xero",
     "spotify",

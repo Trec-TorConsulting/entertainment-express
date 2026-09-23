@@ -62,6 +62,7 @@ const PROVIDER_METADATA: Record<string, ProviderMeta> = {
   native_esign: { title: "EntX Built-in Digital E-Signatures", subtitle: "Native zero-cost contract signing with canvas signature capture, IP/timestamp audit trail & instant PDF generation", category: "Digital E-Signatures" },
   docusign: { title: "DocuSign Enterprise Envelopes", subtitle: "Optional third-party DocuSign envelope workflow and webhooks", category: "Digital E-Signatures" },
 
+  native_accounting: { title: "EntX Built-in General Ledger & Accounting", subtitle: "Native multi-currency Chart of Accounts, automated Invoicing, Payment Entries, AR/AP & real-time P&L reporting", category: "Accounting & Books" },
   quickbooks: { title: "QuickBooks Online Sync", subtitle: "Automated invoice, deposit, and ledger reconciliation", category: "Accounting & Books" },
   xero: { title: "Xero Accounting", subtitle: "Two-way accounting ledger & client contact synchronization", category: "Accounting & Books" },
 
@@ -113,18 +114,21 @@ export const ConnectionsPage: React.FC = () => {
     try {
       const res = await call("entertainment_express.api.integrations.list_connections", {});
       if (Array.isArray(res) && res.length > 0) {
-        // Ensure native_esign is present in array
-        const hasNative = res.some((r) => r.provider === "native_esign");
-        const list = hasNative
-          ? res
-          : [{ provider: "native_esign", label: PROVIDER_METADATA.native_esign.title, enabled: 1, status: "connected" }, ...res];
+        // Ensure native_esign and native_accounting are present in array
+        let list = [...res];
+        if (!list.some((r) => r.provider === "native_esign")) {
+          list.unshift({ provider: "native_esign", label: PROVIDER_METADATA.native_esign.title, enabled: 1, status: "connected" });
+        }
+        if (!list.some((r) => r.provider === "native_accounting")) {
+          list.unshift({ provider: "native_accounting", label: PROVIDER_METADATA.native_accounting.title, enabled: 1, status: "connected" });
+        }
         setConnections(list);
       } else {
         const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
           provider: p,
           label: PROVIDER_METADATA[p].title,
-          enabled: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
-          status: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
+          enabled: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
+          status: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
         }));
         setConnections(fallbackList);
       }
@@ -132,8 +136,8 @@ export const ConnectionsPage: React.FC = () => {
       const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
         provider: p,
         label: PROVIDER_METADATA[p].title,
-        enabled: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
-        status: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
+        enabled: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
+        status: p === "native_esign" || p === "native_accounting" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
       }));
       setConnections(fallbackList);
     } finally {

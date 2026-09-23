@@ -25,6 +25,7 @@ LABELS = {
     "google_maps": "Google Maps",
     "native_esign": "EntX Native E-Signatures (Built-in)",
     "docusign": "DocuSign",
+    "native_accounting": "EntX Native Accounting & General Ledger (Built-in)",
     "quickbooks": "QuickBooks",
     "xero": "Xero",
     "spotify": "Spotify",
