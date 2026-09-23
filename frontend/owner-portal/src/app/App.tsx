@@ -85,11 +85,12 @@ export const OwnerApp: React.FC = () => {
           <Route path="/money" element={<MoneyPage />} />
           <Route path="/money/payroll" element={<PayrollSettlementPage />} />
           <Route path="/subcontractors" element={<SubcontractorsPage />} />
-          <Route path="/brand" element={<BrandPage />} />
+          <Route path="/brand" element={<Navigate to="/website?tab=brand" replace />} />
+          <Route path="/settings/brand" element={<Navigate to="/website?tab=brand" replace />} />
           <Route path="/website" element={<WebsitePage />} />
+          <Route path="/settings/website" element={<WebsitePage />} />
           <Route path="/event-details" element={<EventDetailsPage />} />
           <Route path="/operations/event-details" element={<EventDetailsPage />} />
-          <Route path="/settings/website" element={<WebsitePage />} />
           <Route path="/settings/studio" element={<CompanyStudioPage />} />
           <Route path="/settings" element={<Navigate to="/settings/studio" replace />} />
           <Route path="/admin/data" element={<MasterDataPage />} />

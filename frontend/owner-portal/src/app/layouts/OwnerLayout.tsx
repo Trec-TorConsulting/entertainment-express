@@ -73,9 +73,8 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
       label: "Settings",
       items: [
         { id: "company-studio", label: "Company Studio", icon: <Building2 className="w-4 h-4 text-indigo-400" />, active: currentPath.startsWith("/settings/studio"), onClick: () => navigate("/settings/studio") },
+        { id: "website-brand", label: "Website & Brand Studio", icon: <Globe className="w-4 h-4 text-emerald-400" />, active: currentPath.startsWith("/website") || currentPath.startsWith("/brand"), onClick: () => navigate("/website") },
         { id: "master-data", label: "Master Data Explorer", icon: <Database className="w-4 h-4 text-emerald-400" />, active: currentPath.startsWith("/admin/data"), onClick: () => navigate("/admin/data") },
-        { id: "brand", label: "Brand", icon: <Palette className="w-4 h-4" />, active: currentPath.startsWith("/brand"), onClick: () => navigate("/brand") },
-        { id: "website", label: "Website", icon: <Globe className="w-4 h-4" />, active: currentPath.startsWith("/website"), onClick: () => navigate("/website") },
         { id: "coverage", label: "Coverage", icon: <Shield className="w-4 h-4" />, active: currentPath.startsWith("/coverage"), onClick: () => navigate("/coverage") },
         { id: "connections", label: "Connections", icon: <Key className="w-4 h-4" />, active: currentPath.startsWith("/connections"), onClick: () => navigate("/connections") },
         { id: "security", label: "Security", icon: <Lock className="w-4 h-4" />, active: currentPath.startsWith("/security"), onClick: () => navigate("/security") },
