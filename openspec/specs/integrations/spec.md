@@ -29,15 +29,14 @@ The system SHALL integrate Stripe, Square, PayPal, and ACH for tenant customer p
 - **THEN** it becomes selectable for customer payments and its webhooks are registered and verified
 
 ### Requirement: Communication Integrations
-The system SHALL integrate SMTP/email, Twilio (SMS/WhatsApp), and FCM (push) for `notifications`.
+The system SHALL integrate SMTP/email, Twilio (SMS/WhatsApp), FCM (push), and Dial.ai (AI voice agent calling & transcriptions) for `notifications` and voice telephony.
 
 #### Scenario: Comms provider active
-- **WHEN** a tenant configures Twilio and SMTP
-- **THEN** SMS/WhatsApp and email sends route through them with delivery webhooks tracked
+- **WHEN** a tenant configures Twilio, Dial.ai, or SMTP
+- **THEN** SMS/WhatsApp, AI voice calls, and email sends route through them with delivery webhooks tracked
 
 ### Requirement: Calendar Sync
-The system SHALL two-way sync bookings/crew schedules with Google Calendar and Microsoft 365, plus iCal
-feeds.
+The system SHALL two-way sync bookings/crew schedules with Google Calendar and Microsoft 365, plus live iCal subscription feeds.
 
 #### Scenario: Booking appears on calendar
 - **WHEN** a booking is confirmed and calendar sync is enabled
@@ -52,8 +51,11 @@ time, and route optimization.
 - **THEN** it is geocoded, checked against service areas, and travel time/fees are computed
 
 ### Requirement: E-Signature Integration
-The system SHALL support native in-app e-signature by default and optional DocuSign, with executed-document
-retrieval.
+The system SHALL support native in-app zero-cost e-signature canvas capture with IP/timestamp audit trail by default, and optional third-party DocuSign envelope workflows.
+
+#### Scenario: Native built-in e-signature
+- **WHEN** a customer reviews a contract in the portal
+- **THEN** canvas signature capture generates a SHA-256 seal, records IP and timestamp audit logs, and renders instant executed contract PDFs without third-party fees
 
 #### Scenario: DocuSign optional
 - **WHEN** a tenant enables DocuSign
@@ -75,25 +77,26 @@ The system SHALL log integration syncs and surface failures without breaking cor
 - **THEN** the error is logged to the sync log, retried per policy, and the core workflow degrades gracefully
   rather than failing the whole operation
 
-### Requirement: Accounting Integrations (QuickBooks / Xero)
-The system SHALL optionally sync invoices, payments, and customers to QuickBooks Online and Xero for tenants
-that keep their books there.
+### Requirement: Accounting & General Ledger Systems
+The system SHALL provide native multi-currency Chart of Accounts, automated Invoicing, Payment Entries, AR/AP, and P&L reporting built-in by default, and SHALL optionally sync to QuickBooks Online and Xero for tenants that keep external books.
+
+#### Scenario: Native general ledger accounting
+- **WHEN** a booking, payment, or expense is recorded
+- **THEN** general ledger accounts update automatically with job-level cost center margin intelligence
 
 #### Scenario: Sync invoice to QuickBooks
 - **WHEN** a tenant connects QuickBooks and an invoice is finalized/paid
-- **THEN** the invoice, payment, and customer sync to QuickBooks idempotently, with sync status and errors
-  logged
+- **THEN** the invoice, payment, and customer sync to QuickBooks idempotently, with sync status and errors logged
 
-### Requirement: Music Streaming Integrations
-The system SHALL integrate Spotify, Apple Music, and YouTube Music for playlist import and track preview (see
-`music-planning`).
+### Requirement: Music Streaming & DJ Record Pool Integrations
+The system SHALL integrate Spotify, Apple Music, YouTube, Tidal DJ Streaming, Beatsource/Beatport, and SoundCloud Go+ for playlist import, track previews, and DJ crate compilation.
 
 #### Scenario: Import a streaming playlist
-- **WHEN** a client provides a Spotify/Apple/YouTube playlist link
+- **WHEN** a client provides a Spotify/Apple/YouTube/SoundCloud playlist link
 - **THEN** the tracks are imported as music selections with preview links where the provider allows
 
 ### Requirement: DJ Software Export Formats
-The system SHALL provide integration adapters that export music planning metadata to Serato CSV, Rekordbox XML (supported subset), native VirtualDJ (.vdjfolder XML), and M3U without distributing audio binaries.
+The system SHALL provide integration adapters that export music planning metadata to Serato CSV, Rekordbox XML, native Atomix VirtualDJ (.vdjfolder XML), and M3U without distributing audio binaries.
 
 #### Scenario: Export via integrations module
 - **WHEN** staff request a Serato or VirtualDJ export for a booking music list

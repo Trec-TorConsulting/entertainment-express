@@ -295,6 +295,25 @@ FEATURES = {
         "keywords": ["live event flight deck", "real time event dispatch", "dynamic timeline pacing", "event mission control"],
         "icon": "🛰️",
     },
+    "integrations-connections": {
+        "name": "App Integrations & Connections Studio",
+        "headline": "Connect Your Entire Operating Ecosystem with Native & 3rd-Party Integrations",
+        "summary": "Native built-in e-signatures, built-in general ledger accounting, pro DJ software crates (VirtualDJ, Serato, Rekordbox), AI voice telephony (Dial.ai, Twilio), music pools (Tidal, Beatsource, SoundCloud, Spotify, Apple, YouTube), payment gateways (Stripe, Square, PayPal, ACH), maps (Mapbox, Google Maps), and accounting sync (QuickBooks, Xero).",
+        "meta_description": "App integrations for event entertainment companies. Native built-in e-signatures, built-in accounting, VirtualDJ, Serato, Rekordbox, Dial.ai AI voice receptionist, Stripe, Square, and Twilio.",
+        "problem": "Event operators waste hours manually copying song requests into DJ software crates, paying expensive monthly e-signature fees, copying customer records into external accounting spreadsheets, and missing phone inquiries.",
+        "solution": "Entertainment Express features built-in native e-signatures and general ledger accounting out of the box with zero monthly fees, combined with 18+ pluggable third-party connections. Export VirtualDJ, Serato, and Rekordbox crates in one click, connect Dial.ai for AI voice phone receptionists, and process payments across Stripe, Square, PayPal, and ACH.",
+        "highlights": [
+            "Native Built-in Digital E-Signatures: zero monthly fee canvas signature capture, IP/timestamp audit trail & instant PDF generation",
+            "Native Built-in General Ledger Accounting: multi-currency Chart of Accounts, automated Invoicing, AR/AP, and real-time P&L reporting",
+            "Pro DJ Software Crate Export: 1-click export to Atomix VirtualDJ (.vdjfolder XML), Serato CSV, and Pioneer Rekordbox XML",
+            "DJ Record Pools & Streaming: Tidal DJ Lossless, Beatsource/Beatport, SoundCloud Go+, Spotify Curation, Apple Music, and YouTube",
+            "AI Voice Telephony & SMS: Dial.ai AI voice receptionist, Twilio SMS/WhatsApp gateway, and Firebase mobile push notifications",
+            "Payment Gateways: Stripe Connect POS, Square Terminal, PayPal Express, Bank (ACH) Direct Debit, and Authorize.Net",
+            "Calendar Sync & Maps: 2-way sync for Google Calendar & Microsoft 365, live iCal subscription feeds, and Mapbox / Google Maps geocoding",
+        ],
+        "keywords": ["event software integrations", "VirtualDJ crate export", "Serato playlist export", "Dial.ai AI voice receptionist", "built-in e-signature event software", "Stripe POS party rental"],
+        "icon": "🔌",
+    },
 }
 
 

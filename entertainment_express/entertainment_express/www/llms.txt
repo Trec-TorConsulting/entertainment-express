@@ -4,11 +4,24 @@
 
 Entertainment Express (EntX) provides an end-to-end platform for DJs, party rentals, photo booths, game trucks, and entertainment professionals with bookings, crew scheduling, contracts, dispatch, and client management.
 
+## Native Built-in Engines (Zero Monthly Fee)
+
+- **EntX Built-in Digital E-Signatures**: Native canvas signature capture, IP/timestamp audit trail, SHA-256 seal, and instant executed contract PDFs without third-party fees.
+- **EntX Built-in General Ledger Accounting**: Multi-currency Chart of Accounts, automated Invoicing, Payment Entries, AR/AP, and real-time P&L margin reporting.
+
+## App Integrations & Connections Ecosystem
+
+- **Pro DJ & Music Software**: Atomix VirtualDJ (.vdjfolder XML export & Ask-The-DJ live feed), Serato DJ Pro (CSV crates), Pioneer Rekordbox (XML), Tidal DJ Lossless, Beatsource/Beatport, SoundCloud Go+, Spotify, Apple Music, and YouTube.
+- **AI Voice & Telephony**: Dial.ai (AI voice receptionist, phone call booking inquiries & transcriptions), Twilio (SMS/WhatsApp gateway), and Firebase FCM (push notifications).
+- **Payment Gateways**: Stripe Connect POS, Square Terminal, PayPal Express & Venmo, Bank ACH Direct Debit, and Authorize.Net.
+- **Calendar & Maps**: Google Calendar 2-way sync, Microsoft 365 Outlook, live iCal subscription feeds, Mapbox Navigation, and Google Maps Platform.
+- **Accounting Sync**: QuickBooks Online Sync and Xero Accounting.
+
 ## Core Services & Portals
 
 - [Client Portal](https://entx.app/client): Customer event hub, contract e-signing, online payments, timeline management, and song requests.
-- [Owner Portal](https://entx.app/owner): Master company dashboard, gamified onboarding launchpad, financials, live calendar, dispatch, and fleet management.
-- [Platform Features](https://entx.app/features): Deep-dive documentation covering Zero-Signal Field PWA, AI Copilot, Subcontractor Management & Opt-In B2B Job Board, Company Studio, and Weather Risk Automation.
+- [Owner Portal](https://entx.app/owner): Master company dashboard, gamified onboarding launchpad, financials, live calendar, dispatch, connections studio, and fleet management.
+- [Platform Features](https://entx.app/features): Deep-dive documentation covering Zero-Signal Field PWA, AI Copilot, Subcontractor Management & Opt-In B2B Job Board, App Integrations Studio, Company Studio, and Weather Risk Automation.
 - [Pricing & Plans](https://entx.app/pricing): Transparent pricing tiers for single operators, multi-op companies, and enterprise fleets.
 - [Supported Solutions](https://entx.app/solutions): Tailored workflows for DJs & Emcees, Inflatables & Party Rentals, Photo Booths, Game Trucks, and Performers.
 - [About Entertainment Express](https://entx.app/about): Company mission, enterprise capabilities, and multi-tenant infrastructure.
