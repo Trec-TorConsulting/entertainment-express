@@ -55,19 +55,32 @@ const PROVIDER_METADATA: Record<string, ProviderMeta> = {
   google_calendar: { title: "Google Calendar API", subtitle: "2-way real-time booking & availability block sync", category: "Calendar Sync" },
   microsoft_365: { title: "Microsoft 365 / Outlook", subtitle: "Enterprise Outlook calendar synchronization", category: "Calendar Sync" },
   ical: { title: "Live iCal Subscription Feed", subtitle: "Publish live calendar feed for Apple Calendar, Outlook & mobile", category: "Calendar Sync" },
+
   mapbox: { title: "Mapbox Navigation & Matrix", subtitle: "Vector maps, location geocoding & call-time drive matrix", category: "Maps & Location" },
   google_maps: { title: "Google Maps Platform", subtitle: "Distance matrix, Place autocomplete & reverse geocoding", category: "Maps & Location" },
-  docusign: { title: "DocuSign E-Signatures", subtitle: "Legally binding digital contract signing and envelope webhooks", category: "Digital E-Signatures" },
+
+  native_esign: { title: "EntX Built-in Digital E-Signatures", subtitle: "Native zero-cost contract signing with canvas signature capture, IP/timestamp audit trail & instant PDF generation", category: "Digital E-Signatures" },
+  docusign: { title: "DocuSign Enterprise Envelopes", subtitle: "Optional third-party DocuSign envelope workflow and webhooks", category: "Digital E-Signatures" },
+
   quickbooks: { title: "QuickBooks Online Sync", subtitle: "Automated invoice, deposit, and ledger reconciliation", category: "Accounting & Books" },
   xero: { title: "Xero Accounting", subtitle: "Two-way accounting ledger & client contact synchronization", category: "Accounting & Books" },
-  spotify: { title: "Spotify Music API", subtitle: "Event playlist import, DJ requests & crowd music queueing", category: "Music & Audio" },
-  apple_music: { title: "Apple Music", subtitle: "Live event music catalog & playlist synchronization", category: "Music & Audio" },
-  youtube: { title: "YouTube Video & Audio", subtitle: "Direct background music stream and video catalog links", category: "Music & Audio" },
+
+  virtualdj: { title: "Atomix VirtualDJ Pro", subtitle: "Native .vdjfolder crate export, live HTTP request feed ('Ask The DJ') & set history log reconciliation", category: "Music & DJ Platforms" },
+  serato: { title: "Serato DJ Pro & Lite", subtitle: "Direct Serato CSV crate export & track cue metadata sync", category: "Music & DJ Platforms" },
+  rekordbox: { title: "Pioneer Rekordbox", subtitle: "Rekordbox XML playlist export & Pioneer CDJ/XDJ hot cue sync", category: "Music & DJ Platforms" },
+  spotify: { title: "Spotify Curation API", subtitle: "Event playlist import, client song wishlist & DJ request queue", category: "Music & DJ Platforms" },
+  tidal: { title: "Tidal DJ Lossless Streaming", subtitle: "High-fidelity lossless streaming & offline locker sync for live performance", category: "Music & DJ Platforms" },
+  beatsource: { title: "Beatsource & Beatport Pool", subtitle: "Official DJ record pool, clean radio edits & curated genre crates", category: "Music & DJ Platforms" },
+  soundcloud: { title: "SoundCloud Go+", subtitle: "DJ bootlegs, remixes, custom edits & crowd playlist import", category: "Music & DJ Platforms" },
+  apple_music: { title: "Apple Music Sync", subtitle: "Live event music catalog & Apple playlist synchronization", category: "Music & DJ Platforms" },
+  youtube: { title: "YouTube Video & Audio", subtitle: "Direct background music stream and video catalog links", category: "Music & DJ Platforms" },
+
   stripe: { title: "Stripe Connect POS & Billing", subtitle: "Credit cards, digital deposits & Stripe Terminal POS", category: "Payments & Billing" },
   square: { title: "Square Payments & Terminal", subtitle: "Square Register, contactless reader & POS checkout", category: "Payments & Billing" },
   paypal: { title: "PayPal Express & Venmo", subtitle: "Digital wallet payments, Venmo, and Pay in 4 installment option", category: "Payments & Billing" },
   ach: { title: "Bank (ACH) Direct Debit", subtitle: "Direct bank transfer payment processing with reduced fees", category: "Payments & Billing" },
   authorizenet: { title: "Authorize.Net Gateway", subtitle: "Traditional merchant gateway & virtual terminal processing", category: "Payments & Billing" },
+
   twilio: { title: "Twilio SMS & WhatsApp Gateway", subtitle: "Automated client reminders, broadcast SMS & crew dispatch alerts", category: "Messaging & Telephony" },
   fcm: { title: "Firebase Mobile Push Alerts", subtitle: "Instant push notifications for crew and manager mobile apps", category: "Messaging & Telephony" },
 };
@@ -77,7 +90,7 @@ const CATEGORIES = [
   { id: "Maps & Location", label: "Maps & Location", icon: MapPin },
   { id: "Digital E-Signatures", label: "Digital E-Signatures", icon: FileCheck },
   { id: "Accounting & Books", label: "Accounting & Books", icon: BookOpen },
-  { id: "Music & Audio", label: "Music & Audio", icon: Music },
+  { id: "Music & DJ Platforms", label: "Music & DJ Platforms", icon: Music },
   { id: "Payments & Billing", label: "Payments & Billing", icon: CreditCard },
   { id: "Messaging & Telephony", label: "Messaging & Telephony", icon: MessageSquare },
 ];
@@ -100,14 +113,18 @@ export const ConnectionsPage: React.FC = () => {
     try {
       const res = await call("entertainment_express.api.integrations.list_connections", {});
       if (Array.isArray(res) && res.length > 0) {
-        setConnections(res);
+        // Ensure native_esign is present in array
+        const hasNative = res.some((r) => r.provider === "native_esign");
+        const list = hasNative
+          ? res
+          : [{ provider: "native_esign", label: PROVIDER_METADATA.native_esign.title, enabled: 1, status: "connected" }, ...res];
+        setConnections(list);
       } else {
-        // Fallback default list if database is initializing
         const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
           provider: p,
           label: PROVIDER_METADATA[p].title,
-          enabled: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? 1 : 0,
-          status: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? "connected" : "disconnected",
+          enabled: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
+          status: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
         }));
         setConnections(fallbackList);
       }
@@ -115,8 +132,8 @@ export const ConnectionsPage: React.FC = () => {
       const fallbackList: IntegrationRow[] = Object.keys(PROVIDER_METADATA).map((p) => ({
         provider: p,
         label: PROVIDER_METADATA[p].title,
-        enabled: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? 1 : 0,
-        status: p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" ? "connected" : "disconnected",
+        enabled: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? 1 : 0,
+        status: p === "native_esign" || p === "google_calendar" || p === "stripe" || p === "twilio" || p === "ical" || p === "virtualdj" ? "connected" : "disconnected",
       }));
       setConnections(fallbackList);
     } finally {
