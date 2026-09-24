@@ -18,13 +18,10 @@ import {
   Code,
   Eye,
   Edit3,
-  Plus,
   Wand2,
-  FileText,
-  AlertCircle,
-  Heading,
-  Split,
-  HelpCircle
+  HelpCircle,
+  Sun,
+  Moon
 } from "lucide-react";
 
 interface RichContractEditorProps {
@@ -40,10 +37,11 @@ export const RichContractEditor: React.FC<RichContractEditorProps> = ({
   onChange,
   signerName = "Alex Morgan",
   signerEmail = "alex@example.com",
-  height = "h-[360px]"
+  height = "h-[480px]"
 }) => {
   const { toast } = useToast();
   const [editorMode, setEditorMode] = useState<"visual" | "code" | "preview">("visual");
+  const [paperTheme, setPaperTheme] = useState<"white" | "dark">("white");
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -208,6 +206,8 @@ export const RichContractEditor: React.FC<RichContractEditorProps> = ({
     }
   ];
 
+  const isWhitePaper = paperTheme === "white";
+
   return (
     <div className="rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface)] overflow-hidden shadow-sm">
       {/* Top Controls Header */}
@@ -249,8 +249,26 @@ export const RichContractEditor: React.FC<RichContractEditorProps> = ({
           </button>
         </div>
 
-        {/* AI Copilot & Preset Action Buttons */}
+        {/* Paper Theme & AI Copilot Action Buttons */}
         <div className="flex items-center gap-2">
+          {/* High-Contrast Paper Mode Switcher */}
+          <button
+            type="button"
+            onClick={() => setPaperTheme(isWhitePaper ? "dark" : "white")}
+            className="h-8 px-2.5 text-xs font-semibold rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface)] text-[var(--ee-text)] hover:border-[var(--ee-brand)] flex items-center gap-1.5"
+            title="Toggle high-contrast paper background"
+          >
+            {isWhitePaper ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-500" /> White Paper
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-indigo-400" /> Dark Paper
+              </>
+            )}
+          </button>
+
           <select
             onChange={(e) => {
               if (e.target.value) {
@@ -280,7 +298,7 @@ export const RichContractEditor: React.FC<RichContractEditorProps> = ({
         </div>
       </div>
 
-      {/* AI Copilot Drawer / Modal Bar */}
+      {/* AI Copilot Drawer */}
       {showAiModal && (
         <div className="p-3 bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-emerald-500/10 border-b border-[var(--ee-border)] space-y-2.5">
           <div className="flex items-center justify-between">
@@ -452,13 +470,21 @@ export const RichContractEditor: React.FC<RichContractEditorProps> = ({
       )}
 
       {/* Editor Body Area */}
-      <div className={`relative ${height} bg-[var(--ee-surface)] overflow-y-auto p-3 text-sm text-[var(--ee-text)]`}>
+      <div className={`relative ${height} p-3 overflow-y-auto ${
+        isWhitePaper
+          ? "bg-white text-slate-900 border-t border-b border-slate-200"
+          : "bg-slate-900 text-slate-100 border-t border-b border-slate-800"
+      }`}>
         {editorMode === "visual" && (
           <div
             ref={editorRef}
             contentEditable
             onInput={handleVisualInput}
-            className="min-h-full outline-none prose max-w-none prose-headings:text-[var(--ee-text)] prose-p:text-[var(--ee-text)] prose-strong:text-[var(--ee-text)] focus:ring-1 focus:ring-[var(--ee-brand)] p-2 rounded-lg"
+            className={`min-h-full outline-none p-4 rounded-xl font-sans text-sm leading-relaxed ${
+              isWhitePaper
+                ? "bg-white text-slate-900 [&_*]:text-slate-900 [&_h2]:text-teal-700 [&_h3]:text-slate-900 [&_strong]:text-slate-950 focus:ring-2 focus:ring-teal-500"
+                : "bg-slate-900 text-slate-100 [&_*]:text-slate-100 [&_h2]:text-teal-400 [&_h3]:text-slate-100 [&_strong]:text-white focus:ring-2 focus:ring-teal-400"
+            }`}
           />
         )}
 
@@ -466,20 +492,30 @@ export const RichContractEditor: React.FC<RichContractEditorProps> = ({
           <textarea
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full h-full font-mono text-xs p-2 bg-[var(--ee-surface-inset)] text-[var(--ee-text)] border-0 focus:outline-none resize-none leading-relaxed"
+            className={`w-full h-full font-mono text-xs p-3 border-0 focus:outline-none resize-none leading-relaxed rounded-xl ${
+              isWhitePaper
+                ? "bg-slate-100 text-slate-900"
+                : "bg-slate-950 text-emerald-400"
+            }`}
             placeholder="<div>Enter Jinja / HTML contract body...</div>"
           />
         )}
 
         {editorMode === "preview" && (
-          <div className="p-4 bg-white rounded-lg shadow border border-slate-200 text-slate-800 font-sans leading-normal space-y-3 min-h-full">
-            <div className="text-xs font-semibold uppercase tracking-wider text-teal-700 pb-2 border-b border-slate-200 flex items-center justify-between">
+          <div className={`p-6 rounded-xl shadow-sm border font-sans leading-normal space-y-4 min-h-full ${
+            isWhitePaper
+              ? "bg-white text-slate-900 border-slate-200 [&_*]:text-slate-900 [&_h2]:text-teal-700"
+              : "bg-slate-900 text-slate-100 border-slate-700 [&_*]:text-slate-100 [&_h2]:text-teal-400"
+          }`}>
+            <div className={`text-xs font-semibold uppercase tracking-wider pb-2 border-b flex items-center justify-between ${
+              isWhitePaper ? "text-teal-700 border-slate-200" : "text-teal-400 border-slate-700"
+            }`}>
               <span>📄 Live Contract Sample Render</span>
-              <span className="text-[10px] text-slate-500 font-normal">Interpolated with sample booking values</span>
+              <span className="text-[10px] opacity-70 font-normal">Interpolated with sample booking values</span>
             </div>
             <div
-              dangerouslySetInnerHTML={{ __html: samplePreviewHtml || "<p class='text-slate-400 italic'>No content yet...</p>" }}
-              className="prose max-w-none text-sm"
+              dangerouslySetInnerHTML={{ __html: samplePreviewHtml || "<p class='italic opacity-50'>No content yet...</p>" }}
+              className="text-sm leading-relaxed"
             />
           </div>
         )}

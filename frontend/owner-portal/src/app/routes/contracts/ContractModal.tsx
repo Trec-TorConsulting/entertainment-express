@@ -120,6 +120,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
       open={open}
       onOpenChange={onOpenChange}
       title={contract ? `Edit Contract: ${contract.name}` : "Create New Binding Contract / Agreement"}
+      className="max-w-4xl max-h-[92vh] overflow-y-auto"
     >
       <form onSubmit={handleSave} className="space-y-4 pt-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -189,7 +190,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
             onChange={setBody}
             signerName={signerName}
             signerEmail={signerEmail}
-            height="h-[340px]"
+            height="h-[480px]"
           />
         </FormField>
 

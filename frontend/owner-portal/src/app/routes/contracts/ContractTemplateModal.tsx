@@ -90,6 +90,7 @@ export const ContractTemplateModal: React.FC<ContractTemplateModalProps> = ({
       open={open}
       onOpenChange={onOpenChange}
       title={template ? `Edit Template: ${template.template_name}` : "Create Contract & Agreement Template"}
+      className="max-w-4xl max-h-[92vh] overflow-y-auto"
     >
       <form onSubmit={handleSave} className="space-y-4 pt-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -124,7 +125,7 @@ export const ContractTemplateModal: React.FC<ContractTemplateModalProps> = ({
           <RichContractEditor
             value={body}
             onChange={setBody}
-            height="h-[320px]"
+            height="h-[480px]"
           />
         </FormField>
 
