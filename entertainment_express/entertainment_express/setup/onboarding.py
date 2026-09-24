@@ -47,10 +47,16 @@ def hide_third_party_onboarding() -> None:
                 pass
 
     if frappe.db.table_exists("System Settings"):
-        try:
-            if frappe.get_meta("System Settings").has_field("disable_standard_email_footer"):
-                frappe.db.set_single_value("System Settings", "disable_standard_email_footer", 1)
-        except Exception:
-            pass
+        for field, value in (
+            ("disable_standard_email_footer", 1),
+            ("email_footer_address", ""),
+            ("email_footer", ""),
+        ):
+            try:
+                if frappe.get_meta("System Settings").has_field(field):
+                    frappe.db.set_single_value("System Settings", field, value)
+            except Exception:
+                pass
 
     frappe.db.commit()
+

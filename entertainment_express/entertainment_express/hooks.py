@@ -18,6 +18,10 @@ update_website_context = [
     "entertainment_express.www.branding.update_website_context",
 ]
 
+# Disable default third-party ERPNext email footer platform-wide
+default_mail_footer = ""
+
+
 # Runtime boundary: Desk/backend is internal-only and backend URLs are branded EE-only.
 before_request = [
     "entertainment_express.security.auth_hardening.check_login_lockout",

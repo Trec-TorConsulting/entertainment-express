@@ -265,7 +265,14 @@ def _in_quiet_hours(prefs: dict) -> bool:
 
 def _deliver_channel(channel, recipient, subject, body, text, from_name: str | None = None):
     if channel == "email":
-        kwargs = {"recipients": [recipient], "subject": subject, "message": body, "now": True}
+        kwargs = {
+            "recipients": [recipient],
+            "subject": subject,
+            "message": body,
+            "now": True,
+            "add_footer": False,
+            "with_container": False,
+        }
         if from_name:
             try:
                 kwargs["sender_name"] = from_name
@@ -275,9 +282,16 @@ def _deliver_channel(channel, recipient, subject, body, text, from_name: str | N
             frappe.sendmail(**kwargs)
             return True, "", "", "frappe"
         except TypeError:
-            # Older frappe without sender_name
+            # Older frappe without sender_name or extra kwargs
             try:
-                frappe.sendmail(recipients=[recipient], subject=subject, message=body, now=True)
+                frappe.sendmail(
+                    recipients=[recipient],
+                    subject=subject,
+                    message=body,
+                    now=True,
+                    add_footer=False,
+                    with_container=False,
+                )
                 return True, "", "", "frappe"
             except Exception as exc:
                 return False, str(exc)[:180], "", "frappe"
