@@ -7,7 +7,8 @@ import {
   useToast,
   call
 } from "@portal-kit";
-import { Check, AlertCircle } from "lucide-react";
+import { Check } from "lucide-react";
+import { RichContractEditor } from "./RichContractEditor";
 
 export interface ContractTemplateModalProps {
   open: boolean;
@@ -38,7 +39,7 @@ export const ContractTemplateModal: React.FC<ContractTemplateModalProps> = ({
         setTemplateName("");
         setActive(true);
         setBody(
-          `<div style="font-family: sans-serif; max-width: 650px; margin: 0 auto; padding: 20px;">\n  <h2>AGREEMENT TITLE</h2>\n  <p>This contract is between {{ company_name }} and {{ customer_name }}.</p>\n  <p>Event Date: {{ event_date }}</p>\n  <p>Grand Total: {{ grand_total }} | Deposit: {{ deposit_amount }}</p>\n  <h3>Terms & Conditions</h3>\n  <p>1. Performance details and cancellation rules...</p>\n</div>`
+          `<div style="font-family: sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; color: #1e293b;">\n  <h2 style="color: #0f766e; border-bottom: 2px solid #0f766e; padding-bottom: 8px;">PERFORMANCE & SERVICE AGREEMENT</h2>\n  <p>This Binding Agreement is entered into between <strong>{{ owner.company_name }}</strong> ("Provider") and <strong>{{ doc.signer_name }}</strong> ("Client").</p>\n  <h3>1. Scope of Services & Equipment</h3>\n  <p>Provider agrees to perform professional entertainment services for the event on <strong>{{ doc.event_date }}</strong> at <strong>{{ doc.venue_address }}</strong>.</p>\n  <h3>2. Compensation & Payment Schedule</h3>\n  <p>Total Contract Price: <strong>{{ doc.grand_total }}</strong>.<br/>A non-refundable deposit of <strong>{{ doc.deposit_amount }}</strong> is required upon signature.</p>\n  <h3>3. Terms & Cancellation Policy</h3>\n  <p>In the event of cancellation by Client within 14 days of the event, deposit shall be forfeited.</p>\n  <br/>\n  <p style="font-style: italic;">By typing your name below, you agree to all terms and conditions outlined in this binding contract.</p>\n</div>`
         );
       }
     }
@@ -119,34 +120,13 @@ export const ContractTemplateModal: React.FC<ContractTemplateModalProps> = ({
           </div>
         </div>
 
-        <FormField label="Template Body (Jinja2 / HTML)">
-          <textarea
-            rows={10}
-            className="w-full px-3 py-2 text-sm font-mono border rounded-md bg-[var(--ee-surface)] text-[var(--ee-text)] border-[var(--ee-border)] focus:outline-none focus:ring-1 focus:ring-[var(--ee-brand)]"
+        <FormField label="Template Body (WYSIWYG & Visual Formatting Studio)">
+          <RichContractEditor
             value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="<p>Insert template HTML here...</p>"
+            onChange={setBody}
+            height="h-[320px]"
           />
         </FormField>
-
-        {/* Jinja Helper */}
-        <div className="p-3 bg-[var(--ee-surface-inset)] rounded-lg border border-[var(--ee-border)] space-y-1">
-          <div className="text-xs font-bold text-[var(--ee-text)] flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5 text-[var(--ee-brand)]" /> Available Template Placeholders:
-          </div>
-          <div className="flex flex-wrap gap-1.5 text-xs">
-            {["{{ customer_name }}", "{{ company_name }}", "{{ event_date }}", "{{ venue_address }}", "{{ grand_total }}", "{{ deposit_amount }}"].map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setBody((prev) => prev + " " + v)}
-                className="px-2 py-0.5 rounded bg-[var(--ee-panel)] border border-[var(--ee-border)] font-mono text-[11px] text-[var(--ee-text)] hover:border-[var(--ee-brand)]"
-              >
-                + {v}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Footer Actions */}
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--ee-border)]">

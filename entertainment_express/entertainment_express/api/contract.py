@@ -426,3 +426,67 @@ def delete_template(name: str | None = None) -> dict:
         frappe.db.commit()
     return {"ok": True}
 
+
+@frappe.whitelist()
+def ai_generate_clause(prompt: str | None = None, clause_type: str | None = None, existing_text: str | None = None) -> dict:
+    """
+    AI Legal & Clause Drafting endpoint for owner contract studio.
+    Supports preset clause categories (cancellation, deposit, safety, weather, media, overtime)
+    and custom AI prompt instructions.
+    """
+    _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
+    prompt = (prompt or frappe.form_dict.get("prompt") or "").strip()
+    clause_type = (clause_type or frappe.form_dict.get("clause_type") or "").strip().lower()
+    existing_text = (existing_text or frappe.form_dict.get("existing_text") or "").strip()
+
+    company_name = frappe.db.get_single_value("Global Defaults", "default_company") or "Provider"
+
+    PRESET_CLAUSES = {
+        "cancellation": f"""<h3>Cancellation & Refund Terms</h3>
+<p>1. <strong>Client Cancellation:</strong> Cancellations made more than 30 days prior to event date receive a full refund minus a $100 processing fee. Cancellations within 14–30 days forfeit the deposit amount of <strong>{{{{ doc.deposit_amount }}}}</strong>. Cancellations within 14 days of the event require payment of the full <strong>{{{{ doc.grand_total }}}}</strong> contract total.</p>
+<p>2. <strong>Provider Postponement:</strong> In the unlikely event <strong>{company_name}</strong> cannot perform due to severe weather, illness, or emergency, all payments including deposit will be promptly refunded or transferred to a rescheduled date without penalty.</p>""",
+        "deposit": f"""<h3>Deposit & Payment Schedule</h3>
+<p>1. <strong>Retainer Deposit:</strong> A non-refundable initial retainer of <strong>{{{{ doc.deposit_amount }}}}</strong> is required upon execution of this agreement to secure the event date on <strong>{{{{ doc.event_date }}}}</strong>.</p>
+<p>2. <strong>Final Balance:</strong> The remaining contract balance must be paid in full no later than 7 business days prior to the event date.</p>""",
+        "safety_weather": f"""<h3>Equipment & Weather Safety Policy</h3>
+<p>1. <strong>Weather Safety:</strong> For outdoor inflatable, game truck, or stage setups, <strong>{company_name}</strong> reserves the right to pause or collapse equipment during high winds exceeding 15 mph, severe thunder, or heavy rain to protect guest safety.</p>
+<p>2. <strong>Power & Space Requirements:</strong> Client must ensure a clean, level setup space at <strong>{{{{ doc.venue_address }}}}</strong> with standard 120V grounded power outlets within 50 feet of setup location.</p>""",
+        "overtime": f"""<h3>Overtime & Extended Performance Rates</h3>
+<p>1. <strong>Extended Hours:</strong> Any extension of performance time beyond the contracted period must be requested by the Client and approved by <strong>{company_name}</strong> on site.</p>
+<p>2. <strong>Overtime Rate:</strong> Overtime is billed at a rate of <strong>$150 per additional hour</strong> (or portion thereof), due at the conclusion of the event.</p>""",
+        "media_release": f"""<h3>Photo, Video & Marketing Release</h3>
+<p>1. <strong>Media Consent:</strong> Client grants <strong>{company_name}</strong> permission to capture promotional photographs and video clips of the setup and event atmosphere solely for marketing, social media, and portfolio purposes.</p>
+<p>2. <strong>Privacy Option:</strong> Client may opt out of media release by providing written notice prior to the event date.</p>"""
+    }
+
+    if clause_type in PRESET_CLAUSES:
+        return {"ok": True, "clause_type": clause_type, "html": PRESET_CLAUSES[clause_type]}
+
+    system_instructions = (
+        "You are an expert event contract attorney and legal writer for mobile entertainment businesses "
+        "(DJs, inflatables, photo booths, game trucks, performers). "
+        "Generate clear, professional, well-formatted HTML clause snippets. Use <h3>, <p>, <strong>, <ul> tags. "
+        "Include Jinja tags like {{ doc.signer_name }}, {{ owner.company_name }}, {{ doc.event_date }}, {{ doc.grand_total }}, {{ doc.deposit_amount }} where appropriate. "
+        "Do NOT return raw markdown backticks or <html><body> wrappers."
+    )
+
+    full_prompt = prompt or f"Draft a professional event contract clause regarding: {existing_text or 'general performance terms'}."
+
+    html = ""
+    try:
+        from entertainment_express.api.ai import ask_ai
+        response = ask_ai(prompt=full_prompt, system=system_instructions)
+        if response and isinstance(response, str):
+            html = response.replace("```html", "").replace("```", "").strip()
+    except Exception:
+        html = ""
+
+    if not html:
+        title_text = prompt.title() if prompt else "Terms & Conditions"
+        html = f"""<h3>{title_text}</h3>
+<p>1. <strong>Scope of Agreement:</strong> <strong>{company_name}</strong> and <strong>{{{{ doc.signer_name }}}}</strong> agree that for the event scheduled on <strong>{{{{ doc.event_date }}}}</strong> at <strong>{{{{ doc.venue_address }}}}</strong>, all performance guidelines and safety protocols shall be strictly maintained.</p>
+<p>2. <strong>Mutual Agreement:</strong> Both parties acknowledge that total compensation of <strong>{{{{ doc.grand_total }}}}</strong> covers all contracted services.</p>"""
+
+    return {"ok": True, "prompt": prompt, "html": html}
+
+
