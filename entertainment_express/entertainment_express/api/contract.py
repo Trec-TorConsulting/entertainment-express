@@ -243,3 +243,169 @@ def _check_role(allowed_roles: list[str]) -> None:
         frappe.throw("Authentication required.", frappe.PermissionError)
     if not any(r in frappe.get_roles(frappe.session.user) for r in allowed_roles):
         frappe.throw("Insufficient permissions.", frappe.PermissionError)
+
+
+def _values(values) -> dict:
+    values = values or frappe.form_dict.get("values") or {}
+    if isinstance(values, str):
+        values = frappe.parse_json(values) if hasattr(frappe, "parse_json") else {}
+    return values or {}
+
+
+@frappe.whitelist()
+def list_contracts(status: str | None = None, search: str | None = None) -> list[dict]:
+    """List contracts and agreements for owner portal."""
+    _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
+    filters = {}
+    if status and status != "all":
+        filters["status"] = status
+
+    rows = frappe.get_all(
+        "EE Contract",
+        filters=filters,
+        fields=[
+            "name", "status", "signer_name", "signer_email", "quotation",
+            "booking", "template", "signed_at", "signed_ip", "content_hash",
+            "signature_typed", "expires_at", "creation", "rendered_html"
+        ],
+        order_by="creation desc",
+        limit_page_length=200
+    )
+
+    site_url = get_public_base_url()
+    out = []
+    for r in rows:
+        if search:
+            q = search.lower()
+            combined = f"{r.name} {r.signer_name} {r.signer_email} {r.quotation} {r.booking}".lower()
+            if q not in combined:
+                continue
+        token = _signing_token(r.name)
+        r_dict = dict(r)
+        r_dict["sign_link"] = f"{site_url}/sign?contract={r.name}&token={token}"
+        out.append(r_dict)
+    return out
+
+
+@frappe.whitelist()
+def save_contract(name: str | None = None, values: dict | None = None) -> dict:
+    """Create or update a contract / binding agreement for owner portal."""
+    _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
+    values = _values(values)
+    target_name = name or values.get("id") or values.get("name")
+
+    signer_name = values.get("signer_name") or "Valued Client"
+    signer_email = values.get("signer_email") or ""
+    rendered_html = values.get("rendered_html") or values.get("body") or "<p>Agreement terms...</p>"
+    status = values.get("status") or "draft"
+    expires_at = values.get("expires_at") or add_days(now_datetime(), 30)
+
+    if target_name and frappe.db.exists("EE Contract", target_name):
+        doc = frappe.get_doc("EE Contract", target_name)
+        doc.signer_name = signer_name
+        if signer_email:
+            doc.signer_email = signer_email
+        doc.rendered_html = rendered_html
+        if values.get("status"):
+            doc.status = status
+        if values.get("template"):
+            doc.template = values.get("template")
+        if values.get("quotation"):
+            doc.quotation = values.get("quotation")
+        if values.get("booking"):
+            doc.booking = values.get("booking")
+        doc.save(ignore_permissions=True)
+    else:
+        doc = frappe.get_doc({
+            "doctype": "EE Contract",
+            "naming_series": "EE-CON-.YYYY.-.####",
+            "template": values.get("template"),
+            "quotation": values.get("quotation"),
+            "booking": values.get("booking"),
+            "status": status,
+            "rendered_html": rendered_html,
+            "signer_name": signer_name,
+            "signer_email": signer_email,
+            "expires_at": expires_at,
+        })
+        doc.insert(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    if values.get("send_signature_request") and doc.signer_email and doc.status == "draft":
+        try:
+            send_contract(doc.name)
+        except Exception:
+            pass
+
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def delete_contract(name: str | None = None) -> dict:
+    """Delete a contract / agreement."""
+    _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
+    target = name or frappe.form_dict.get("name")
+    if not target:
+        frappe.throw("Please specify a contract to delete.")
+    if frappe.db.exists("EE Contract", target):
+        frappe.delete_doc("EE Contract", target, ignore_permissions=True)
+        frappe.db.commit()
+    return {"ok": True}
+
+
+@frappe.whitelist()
+def list_templates() -> list[dict]:
+    """List reusable contract and agreement templates."""
+    _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
+    rows = frappe.get_all(
+        "EE Contract Template",
+        fields=["name", "template_name", "active", "body", "creation"],
+        order_by="creation desc",
+        limit_page_length=100
+    )
+    return rows
+
+
+@frappe.whitelist()
+def save_template(name: str | None = None, values: dict | None = None) -> dict:
+    """Create or update a contract template."""
+    _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
+    values = _values(values)
+    target_name = name or values.get("id") or values.get("name")
+    template_name = values.get("template_name") or values.get("title") or "Standard Contract Template"
+    body = values.get("body") or "<p>Enter contract terms jinja template HTML...</p>"
+    active = 1 if values.get("active", 1) else 0
+
+    if target_name and frappe.db.exists("EE Contract Template", target_name):
+        doc = frappe.get_doc("EE Contract Template", target_name)
+        doc.template_name = template_name
+        doc.body = body
+        doc.active = active
+        doc.save(ignore_permissions=True)
+    else:
+        doc = frappe.get_doc({
+            "doctype": "EE Contract Template",
+            "naming_series": "EE-CT-.####",
+            "template_name": template_name,
+            "active": active,
+            "body": body,
+        })
+        doc.insert(ignore_permissions=True)
+
+    frappe.db.commit()
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def delete_template(name: str | None = None) -> dict:
+    """Delete a contract template."""
+    _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
+    target = name or frappe.form_dict.get("name")
+    if not target:
+        frappe.throw("Please specify a contract template to delete.")
+    if frappe.db.exists("EE Contract Template", target):
+        frappe.delete_doc("EE Contract Template", target, ignore_permissions=True)
+        frappe.db.commit()
+    return {"ok": True}
+

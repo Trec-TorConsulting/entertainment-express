@@ -34,6 +34,7 @@ import { PeoplePage } from "./routes/operations/PeoplePage";
 import { MovePage } from "./routes/admin/MovePage";
 import { ConnectionsPage } from "./routes/settings/ConnectionsPage";
 import { SecurityPage } from "./routes/admin/SecurityPage";
+import { ContractsPage } from "./routes/contracts/ContractsPage";
 
 // Statically import Legacy Workspaces to eliminate chunk mismatches
 import LegacyWorkspaces from "../AppLegacy";
@@ -95,6 +96,7 @@ export const OwnerApp: React.FC = () => {
           <Route path="/settings" element={<Navigate to="/settings/studio" replace />} />
           <Route path="/admin/data" element={<MasterDataPage />} />
           <Route path="/operations/overrides" element={<EmergencyOverridesPage />} />
+          <Route path="/contracts" element={<ContractsPage />} />
           <Route path="/account" element={<AccountPanel />} />
 
           {/* Legacy / Operational Workspaces */}
