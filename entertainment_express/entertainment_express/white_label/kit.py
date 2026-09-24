@@ -298,27 +298,32 @@ def wrap_email_html(body: str, kit: dict | None = None) -> str:
     logo = (kit.get("brand_logo") or "").strip()
     footer = (kit.get("footer_text") or "").strip()
     if not footer and name:
-        footer = name
+        footer = f"© {name}. All rights reserved."
     footer = escape(footer)
     primary = escape(kit.get("brand_color") or DEFAULT_PRIMARY)
     header = ""
     if logo:
         header = (
-            f'<div style="padding:16px 0 12px;border-bottom:2px solid {primary};">'
+            f'<div style="padding:20px 0 16px;border-bottom:2px solid {primary};text-align:left;">'
             f'<img src="{escape(logo, quote=True)}" alt="{name}" '
-            f'style="max-height:48px;max-width:220px;"></div>'
+            f'style="max-height:48px;max-width:220px;display:block;"></div>'
         )
     elif name:
         header = (
-            f'<div style="padding:16px 0 12px;border-bottom:2px solid {primary};'
-            f'font-family:sans-serif;font-size:18px;font-weight:600;color:{primary};">{name}</div>'
+            f'<div style="padding:20px 0 16px;border-bottom:2px solid {primary};'
+            f'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:{primary};">{name}</div>'
         )
     foot = ""
     if footer:
         foot = (
-            f'<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;'
-            f'font-family:sans-serif;font-size:12px;color:#64748b;">{footer}</div>'
+            f'<div style="margin-top:28px;padding-top:16px;border-top:1px solid #e2e8f0;'
+            f'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:12px;color:#64748b;">{footer}</div>'
         )
-    if not header and not foot:
-        return body
-    return f'<div style="max-width:640px;margin:0 auto;">{header}{body}{foot}</div>'
+    return (
+        f'<div style="background-color:#f8fafc;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;">'
+        f'<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.05);">'
+        f'{header}'
+        f'<div style="padding:24px 0 16px;font-size:14px;line-height:1.6;color:#1e293b;">{body}</div>'
+        f'{foot}'
+        f'</div></div>'
+    )

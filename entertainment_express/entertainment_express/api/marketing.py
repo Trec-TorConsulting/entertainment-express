@@ -207,14 +207,20 @@ def _newsletter_token_cache_key(token):
 
 def _send_newsletter_confirmation_email(email, token):
     confirm_url = get_url(f"/api/method/entertainment_express.api.marketing.confirm_subscription?token={token}")
+    body = (
+        "<p>Please confirm your subscription to our newsletter.</p>"
+        f"<p><a href='{confirm_url}' style='background:#0f766e;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin:12px 0;'>Confirm subscription</a></p>"
+        "<p style='color:#64748b;font-size:12px;'>If you did not request this, you can safely ignore this email.</p>"
+    )
+    try:
+        from entertainment_express.white_label.kit import wrap_email_html, kit_dict
+        body = wrap_email_html(body, kit_dict())
+    except Exception:
+        pass
     frappe.sendmail(
         recipients=[email],
-        subject="Confirm your EE newsletter subscription",
-        message=(
-            "<p>Please confirm your subscription to the Entertainment Express newsletter.</p>"
-            f"<p><a href='{confirm_url}'>Confirm subscription</a></p>"
-            "<p>If you did not request this, you can ignore this email.</p>"
-        ),
+        subject="Confirm your newsletter subscription",
+        message=body,
     )
 
 

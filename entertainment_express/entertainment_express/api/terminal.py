@@ -323,9 +323,15 @@ def send_digital_receipt(
         res = send_sms(to=recipient, message=msg)
         return {"status": "dispatched", "method": "sms", "recipient": recipient}
     else:
+        body = f"<div style='white-space: pre-wrap; font-family:-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6;'>{msg}</div>"
+        try:
+            from entertainment_express.white_label.kit import wrap_email_html, kit_dict
+            body = wrap_email_html(body, kit_dict())
+        except Exception:
+            pass
         frappe.sendmail(
             recipients=[recipient],
             subject=f"Your Payment Receipt from {company} ({invoice_name})",
-            message=f"<pre style='font-family: sans-serif;'>{msg}</pre>"
+            message=body,
         )
         return {"status": "dispatched", "method": "email", "recipient": recipient}
