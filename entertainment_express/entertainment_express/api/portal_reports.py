@@ -44,10 +44,13 @@ def _money(amount) -> str:
 
 
 def _require_owner() -> None:
-    roles = set(frappe.get_roles() or [])
+    user = getattr(getattr(frappe, "session", None), "user", None)
+    if user == "Administrator":
+        return
+    roles = set(frappe.get_roles(user) or frappe.get_roles() or [])
     if GUEST_ROLE in roles:
         frappe.throw("Reports access denied.", frappe.PermissionError)
-    if not roles.intersection(OWNER_ROLES):
+    if not roles.intersection(OWNER_ROLES | {"System Manager"}):
         frappe.throw("Reports access denied.", frappe.PermissionError)
 
 

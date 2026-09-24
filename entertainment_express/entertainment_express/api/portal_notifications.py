@@ -26,6 +26,9 @@ def _require_signed_in() -> set[str]:
 
 
 def _require_owner() -> None:
+    user = getattr(getattr(frappe, "session", None), "user", None)
+    if user == "Administrator":
+        return
     if not _roles().intersection(OWNER):
         frappe.throw("Message access denied.", frappe.PermissionError)
 

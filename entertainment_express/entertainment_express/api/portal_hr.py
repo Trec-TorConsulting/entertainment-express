@@ -17,7 +17,11 @@ def _roles() -> set[str]:
 
 
 def _require_owner() -> None:
-    if not _roles().intersection(OWNER_ROLES):
+    user = getattr(getattr(frappe, "session", None), "user", None)
+    if user == "Administrator":
+        return
+    roles = set(frappe.get_roles(user) or _roles() or [])
+    if not roles.intersection(OWNER_ROLES | {"System Manager"}):
         frappe.throw("Owner portal access denied.", frappe.PermissionError)
 
 
