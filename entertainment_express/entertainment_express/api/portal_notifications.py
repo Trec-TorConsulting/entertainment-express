@@ -114,16 +114,16 @@ def list_templates() -> list[dict]:
         "Notification Template",
         fields=["name", "template_key", "subject", "channels", "fallback_channel", "priority", "active", "body_html"],
         order_by="template_key asc",
-        limit_page_length=80,
+        limit_page_length=150,
     )
     out = []
     for row in rows:
         out.append(
             {
                 "id": row.name,
-                "key": row.template_key,
-                "title": (row.template_key or "").replace("_", " "),
-                "subject": row.subject,
+                "key": row.template_key or row.name,
+                "title": (row.template_key or row.name or "").replace("_", " ").title(),
+                "subject": row.subject or "",
                 "channels": row.channels or "email",
                 "fallback": row.fallback_channel or "email",
                 "priority": row.priority or "transactional",
@@ -135,13 +135,33 @@ def list_templates() -> list[dict]:
 
 
 @frappe.whitelist()
-def save_template(name: str = None, values: dict | None = None) -> dict:
+def save_template(name: str | None = None, values: dict | None = None) -> dict:
     _require_owner()
     values = _values(values)
-    name = name or values.get("id") or values.get("key")
-    if not name:
-        frappe.throw("Pick a message to save.")
-    doc = frappe.get_doc("Notification Template", name)
+    target_name = name or values.get("id") or values.get("name")
+    raw_key = values.get("key") or target_name or ""
+    key = raw_key.strip().lower().replace(" ", "_")
+    if not key and not target_name:
+        frappe.throw("Please specify a template name or key.")
+
+    if target_name and frappe.db.exists("Notification Template", target_name):
+        doc = frappe.get_doc("Notification Template", target_name)
+    elif key and frappe.db.exists("Notification Template", key):
+        doc = frappe.get_doc("Notification Template", key)
+    else:
+        doc = frappe.get_doc({
+            "doctype": "Notification Template",
+            "name": key or target_name,
+            "template_key": key or target_name,
+            "subject": values.get("subject") or "Notification",
+            "body_html": values.get("body") or values.get("body_html") or "",
+            "channels": values.get("channels") or "email",
+            "fallback_channel": values.get("fallback") or values.get("fallback_channel") or "email",
+            "priority": values.get("priority") or "transactional",
+            "active": cint(values.get("active", 1)),
+        })
+        doc.insert(ignore_permissions=True)
+
     if values.get("subject") is not None:
         doc.subject = values.get("subject")
     if values.get("body") is not None or values.get("body_html") is not None:
@@ -156,7 +176,19 @@ def save_template(name: str = None, values: dict | None = None) -> dict:
         doc.active = cint(values.get("active"))
     doc.save(ignore_permissions=True)
     frappe.db.commit()
-    return {"id": doc.name}
+    return {"id": doc.name, "key": doc.template_key}
+
+
+@frappe.whitelist()
+def delete_template(name: str | None = None, key: str | None = None) -> dict:
+    _require_owner()
+    target = name or key or frappe.form_dict.get("name") or frappe.form_dict.get("key")
+    if not target:
+        frappe.throw("Please specify a template to delete.")
+    if frappe.db.exists("Notification Template", target):
+        frappe.delete_doc("Notification Template", target, ignore_permissions=True)
+        frappe.db.commit()
+    return {"ok": True}
 
 
 @frappe.whitelist()
