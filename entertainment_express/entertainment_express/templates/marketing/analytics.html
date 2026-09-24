@@ -5,6 +5,27 @@
     siteId: "{{ analytics_site_id }}"
   };
 </script>
+
+{% if analytics_provider == "ga4" %}
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ analytics_site_id }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  var initialConsent = (localStorage.getItem("ee_consent") === "accepted") ? "granted" : "denied";
+  gtag('consent', 'default', {
+    'ad_storage': initialConsent,
+    'analytics_storage': initialConsent,
+    'ad_user_data': initialConsent,
+    'ad_personalization': initialConsent
+  });
+
+  gtag('config', '{{ analytics_site_id }}', { 'anonymize_ip': true });
+</script>
+{% endif %}
+
 {% else %}
 <script>
   window.eeAnalyticsConfig = null;

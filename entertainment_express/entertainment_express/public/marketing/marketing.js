@@ -7,11 +7,27 @@
     if (getConsentState() !== "accepted") {
       return;
     }
-    if (!window.eeAnalyticsConfig || window.eeAnalyticsLoaded) {
+    if (!window.eeAnalyticsConfig) {
       return;
     }
 
     var config = window.eeAnalyticsConfig;
+
+    if (config.provider === "ga4" && typeof window.gtag === "function") {
+      window.gtag("consent", "update", {
+        ad_storage: "granted",
+        analytics_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted"
+      });
+      window.eeAnalyticsLoaded = true;
+      return;
+    }
+
+    if (window.eeAnalyticsLoaded) {
+      return;
+    }
+
     var script = document.createElement("script");
     script.async = true;
 
@@ -28,6 +44,12 @@
         window.dataLayer.push(arguments);
       };
       window.gtag("js", new Date());
+      window.gtag("consent", "update", {
+        ad_storage: "granted",
+        analytics_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted"
+      });
       window.gtag("config", config.siteId, { anonymize_ip: true });
     } else {
       return;
