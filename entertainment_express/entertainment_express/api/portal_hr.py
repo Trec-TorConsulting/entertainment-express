@@ -211,30 +211,102 @@ def list_time_off(employee: str) -> list[dict]:
     _assert_self_or_owner(employee)
     if not getattr(frappe.db, "table_exists", lambda *_: True)("Worker Time Off"):
         return []
-    return frappe.get_all(
+    fields = ["name", "start_date", "end_date", "reason"]
+    meta = frappe.get_meta("Worker Time Off") if hasattr(frappe, "get_meta") else None
+    if meta and meta.has_field("status"):
+        fields.append("status")
+    rows = frappe.get_all(
         "Worker Time Off",
         filters={"employee": employee},
-        fields=["name", "start_date", "end_date", "reason"],
+        fields=fields,
         order_by="start_date desc",
         limit_page_length=50,
     )
+    for r in rows:
+        if "status" not in r:
+            r["status"] = "Approved"
+    return rows
 
 
 @frappe.whitelist()
 def save_time_off(employee: str, start_date: str, end_date: str, reason: str = "") -> dict:
     _assert_self_or_owner(employee)
-    doc = frappe.get_doc(
-        {
-            "doctype": "Worker Time Off",
-            "employee": employee,
-            "start_date": start_date,
-            "end_date": end_date or start_date,
-            "reason": reason,
-        }
-    )
+    payload = {
+        "doctype": "Worker Time Off",
+        "employee": employee,
+        "start_date": start_date,
+        "end_date": end_date or start_date,
+        "reason": reason,
+    }
+    meta = frappe.get_meta("Worker Time Off") if hasattr(frappe, "get_meta") else None
+    if meta and meta.has_field("status"):
+        payload["status"] = "Pending Review"
+
+    doc = frappe.get_doc(payload)
     doc.insert(ignore_permissions=True)
     frappe.db.commit()
-    return {"name": doc.name}
+    return {"name": doc.name, "status": getattr(doc, "status", "Pending Review")}
+
+
+@frappe.whitelist()
+def approve_time_off(name: str, decision_notes: str = "") -> dict:
+    _require_owner()
+    if not frappe.db.exists("Worker Time Off", name):
+        frappe.throw("Time off request not found.")
+    doc = frappe.get_doc("Worker Time Off", name)
+    meta = frappe.get_meta("Worker Time Off")
+    if meta.has_field("status"):
+        doc.status = "Approved"
+    if meta.has_field("decision_notes"):
+        doc.decision_notes = decision_notes
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    # Notify employee
+    try:
+        from entertainment_express.notifications import send
+        emp_email = frappe.db.get_value("Employee", doc.employee, "user_id") or frappe.db.get_value("Employee", doc.employee, "company_email")
+        if emp_email:
+            send("time_off_approved", emp_email, {
+                "employee_name": frappe.db.get_value("Employee", doc.employee, "employee_name"),
+                "start_date": str(doc.start_date),
+                "end_date": str(doc.end_date),
+                "decision_notes": decision_notes or "Approved by Manager"
+            })
+    except Exception:
+        pass
+
+    return {"ok": True, "name": name, "status": "Approved"}
+
+
+@frappe.whitelist()
+def reject_time_off(name: str, decision_notes: str = "") -> dict:
+    _require_owner()
+    if not frappe.db.exists("Worker Time Off", name):
+        frappe.throw("Time off request not found.")
+    doc = frappe.get_doc("Worker Time Off", name)
+    meta = frappe.get_meta("Worker Time Off")
+    if meta.has_field("status"):
+        doc.status = "Rejected"
+    if meta.has_field("decision_notes"):
+        doc.decision_notes = decision_notes
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    try:
+        from entertainment_express.notifications import send
+        emp_email = frappe.db.get_value("Employee", doc.employee, "user_id") or frappe.db.get_value("Employee", doc.employee, "company_email")
+        if emp_email:
+            send("time_off_rejected", emp_email, {
+                "employee_name": frappe.db.get_value("Employee", doc.employee, "employee_name"),
+                "start_date": str(doc.start_date),
+                "end_date": str(doc.end_date),
+                "decision_notes": decision_notes or "Declined by Manager"
+            })
+    except Exception:
+        pass
+
+    return {"ok": True, "name": name, "status": "Rejected"}
 
 
 @frappe.whitelist()

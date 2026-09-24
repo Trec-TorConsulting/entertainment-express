@@ -12,7 +12,7 @@ import {
   LayoutDashboard, Calendar, Sparkles, Clock, Truck, FileText,
   Tag, Briefcase, Users, MapPin, Handshake, DollarSign,
   BarChart3, Bot, Compass, Bell, TrendingUp, Globe,
-  Shield, Move, Download, Palette, Key, Lock, Building2, Database, AlertTriangle
+  Shield, Move, Download, Palette, Key, Lock, Building2, Database, AlertTriangle, CheckSquare
 } from "lucide-react";
 
 export interface OwnerLayoutProps {
@@ -36,6 +36,7 @@ export const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
         { id: "today", label: "Today", icon: <LayoutDashboard className="w-4 h-4" />, active: currentPath === "/" || currentPath === "/today", onClick: () => navigate("/") },
         { id: "calendar", label: "Calendar", icon: <Calendar className="w-4 h-4" />, active: currentPath.startsWith("/calendar"), onClick: () => navigate("/calendar") },
         { id: "schedule", label: "Schedule", icon: <Clock className="w-4 h-4" />, active: currentPath.startsWith("/schedule"), onClick: () => navigate("/schedule") },
+        { id: "approvals", label: "Approvals & Checks", icon: <CheckSquare className="w-4 h-4 text-emerald-400" />, active: currentPath.startsWith("/approvals"), onClick: () => navigate("/approvals") },
         { id: "pipeline", label: "Pipeline", icon: <Sparkles className="w-4 h-4" />, active: currentPath.startsWith("/pipeline"), onClick: () => navigate("/pipeline") },
         { id: "dispatch", label: "Dispatch", icon: <Truck className="w-4 h-4" />, active: currentPath.startsWith("/dispatch"), onClick: () => navigate("/dispatch") },
         { id: "fleet", label: "Fleet & Safety", icon: <Shield className="w-4 h-4" />, active: currentPath.startsWith("/fleet"), onClick: () => navigate("/fleet") },
