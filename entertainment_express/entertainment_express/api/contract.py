@@ -372,14 +372,31 @@ def save_template(name: str | None = None, values: dict | None = None) -> dict:
     """Create or update a contract template."""
     _check_role(["EE Tenant Admin", "EE Sales", "System Manager"])
     values = _values(values)
-    target_name = name or values.get("id") or values.get("name")
-    template_name = values.get("template_name") or values.get("title") or "Standard Contract Template"
-    body = values.get("body") or "<p>Enter contract terms jinja template HTML...</p>"
-    active = 1 if values.get("active", 1) else 0
+    target_name = name or values.get("id") or values.get("name") or frappe.form_dict.get("name")
+    template_name = (
+        values.get("template_name")
+        or values.get("title")
+        or frappe.form_dict.get("template_name")
+        or frappe.form_dict.get("title")
+        or "Standard Contract Template"
+    )
+    body = (
+        values.get("body")
+        or values.get("rendered_html")
+        or frappe.form_dict.get("body")
+        or "<p>Enter contract terms jinja template HTML...</p>"
+    )
+    active = 1 if values.get("active", frappe.form_dict.get("active", 1)) else 0
 
     if target_name and frappe.db.exists("EE Contract Template", target_name):
         doc = frappe.get_doc("EE Contract Template", target_name)
         doc.template_name = template_name
+        doc.body = body
+        doc.active = active
+        doc.save(ignore_permissions=True)
+    elif frappe.db.exists("EE Contract Template", {"template_name": template_name}):
+        doc_name = frappe.db.get_value("EE Contract Template", {"template_name": template_name}, "name")
+        doc = frappe.get_doc("EE Contract Template", doc_name)
         doc.body = body
         doc.active = active
         doc.save(ignore_permissions=True)

@@ -53,14 +53,17 @@ export const ContractTemplateModal: React.FC<ContractTemplateModalProps> = ({
 
     setSaving(true);
     try {
-      await call("entertainment_express.api.contract.save_template", {
-        name: template?.name,
+      const payload: any = {
         values: {
           template_name: templateName,
           active: active ? 1 : 0,
           body: body
         }
-      });
+      };
+      if (template?.name) {
+        payload.name = template.name;
+      }
+      await call("entertainment_express.api.contract.save_template", payload);
 
       toast({
         title: template ? "Template Updated" : "Template Created",

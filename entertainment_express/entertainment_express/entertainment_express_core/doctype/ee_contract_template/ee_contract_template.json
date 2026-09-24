@@ -10,7 +10,7 @@
   "section_body", "body"
  ],
  "fields": [
-  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-CT-.####"},
+  {"default": "EE-CT-.####", "fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "EE-CT-.####"},
   {"fieldname": "template_name", "fieldtype": "Data", "label": "Template Name", "reqd": 1, "in_list_view": 1},
   {"fieldname": "active", "fieldtype": "Check", "label": "Active", "default": "1", "in_list_view": 1},
   {"fieldname": "section_body", "fieldtype": "Section Break", "label": "Contract Body (Jinja HTML)"},
