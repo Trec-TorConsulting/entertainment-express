@@ -854,14 +854,12 @@ def get_onboarding_status() -> dict:
     # 4. Contracts & Forms quest
     contracts_done = False
     try:
-        if frappe.db.table_exists("Terms and Conditions") and frappe.db.count("Terms and Conditions") > 0:
+        if frappe.db.table_exists("EE Contract Template") and frappe.db.count("EE Contract Template") > 0:
             contracts_done = True
-        elif frappe.db.table_exists("Contract") and frappe.db.count("Contract") > 0:
+        elif frappe.db.table_exists("EE Contract") and frappe.db.count("EE Contract") > 0:
             contracts_done = True
-        elif frappe.db.table_exists("EE Booking Site Config"):
-            b = frappe.get_single("EE Booking Site Config")
-            if getattr(b, "contract_terms", None) or getattr(b, "require_deposit", None):
-                contracts_done = True
+        elif frappe.db.table_exists("Terms and Conditions") and frappe.db.count("Terms and Conditions") > 0:
+            contracts_done = True
     except Exception:
         pass
 
@@ -904,7 +902,7 @@ def get_onboarding_status() -> dict:
             "id": "contracts",
             "title": "Set Up Contracts & Forms",
             "description": "Define deposit terms, contract templates, and client questionnaires.",
-            "route": "/pipeline",
+            "route": "/contracts",
             "completed": contracts_done,
             "ai_prompt": "Write a standard contract agreement and deposit policy for events.",
         },

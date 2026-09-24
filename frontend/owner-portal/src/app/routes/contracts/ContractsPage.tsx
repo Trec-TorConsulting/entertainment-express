@@ -27,10 +27,12 @@ import {
   AlertCircle,
   FileCheck,
   Layers,
+  Download,
   ExternalLink
 } from "lucide-react";
 import { ContractModal } from "./ContractModal";
 import { ContractTemplateModal } from "./ContractTemplateModal";
+import { ImportBundleModal } from "./ImportBundleModal";
 
 interface EEContract {
   name: string;
@@ -75,6 +77,7 @@ export const ContractsPage: React.FC = () => {
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<EEContractTemplate | null>(null);
 
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [auditContract, setAuditContract] = useState<EEContract | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -271,6 +274,10 @@ export const ContractsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
+          <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+            <Download className="w-4 h-4 mr-1.5" />
+            Import Starter Pack
+          </Button>
           <Button variant="outline" onClick={openNewTemplateModal}>
             <Layers className="w-4 h-4 mr-1.5" />
             New Template
@@ -572,6 +579,16 @@ export const ContractsPage: React.FC = () => {
         onOpenChange={setTemplateModalOpen}
         template={selectedTemplate}
         onSuccess={() => loadTemplates()}
+      />
+
+      {/* Import Industry Starter Pack Modal */}
+      <ImportBundleModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onSuccess={() => {
+          loadContracts();
+          loadTemplates();
+        }}
       />
 
       {/* Cryptographic Signature Audit Trail Modal */}

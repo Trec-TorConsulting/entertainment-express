@@ -16,6 +16,13 @@ def after_install():
     seed_marketing_pages()
     seed_salary_components()
 
+    try:
+        from entertainment_express.api.starter_bundles import seed_vertical_bundle
+        seed_vertical_bundle("general")
+    except Exception:
+        pass
+
+
 
 def create_all():
     """Create or update all EE custom fields on ERPNext DocTypes."""

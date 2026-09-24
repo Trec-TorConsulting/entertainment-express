@@ -27,9 +27,11 @@ import {
   Clock,
   History,
   Layers,
-  FileText
+  FileText,
+  Download
 } from "lucide-react";
 import { TemplateModal } from "./TemplateModal";
+import { ImportBundleModal } from "../contracts/ImportBundleModal";
 
 interface ToggleItem {
   key: string;
@@ -73,6 +75,7 @@ export const AutomationsPage: React.FC = () => {
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<NotificationTemplate | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -229,10 +232,16 @@ export const AutomationsPage: React.FC = () => {
           </p>
         </div>
 
-        <Button variant="primary" onClick={openAddModal} className="shrink-0">
-          <Plus className="w-4 h-4 mr-1.5" />
-          Add Email Template
-        </Button>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+            <Download className="w-4 h-4 mr-1.5" />
+            Import Starter Pack
+          </Button>
+          <Button variant="primary" onClick={openAddModal}>
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add Email Template
+          </Button>
+        </div>
       </div>
 
       {/* Metric Cards */}
@@ -489,6 +498,15 @@ export const AutomationsPage: React.FC = () => {
         open={modalOpen}
         onOpenChange={setModalOpen}
         template={selectedTemplate}
+        onSuccess={() => {
+          loadTemplates();
+        }}
+      />
+
+      {/* Import Industry Starter Pack Modal */}
+      <ImportBundleModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
         onSuccess={() => {
           loadTemplates();
         }}
