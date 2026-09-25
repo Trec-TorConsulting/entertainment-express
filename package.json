@@ -11,10 +11,16 @@
     "test:e2e:client": "npx playwright test --project=client",
     "test:e2e:public": "npx playwright test --project=public",
     "test:e2e:workflows": "npx playwright test --project=workflows",
+    "test:e2e:security": "npx playwright test --project=security",
+    "test:e2e:mobile": "npx playwright test --project=mobile",
+    "test:e2e:firefox": "npx playwright test --project=firefox",
+    "test:e2e:webkit": "npx playwright test --project=webkit",
+    "test:e2e:crud": "npx playwright test tests/e2e/06-api/crud-lifecycle.spec.ts",
     "test:e2e:quality-gates": "npx playwright test tests/e2e/portal-quality-gates.spec.ts",
     "test:e2e:pages": "npx playwright test tests/e2e/portal-click-through.spec.ts",
     "test:e2e:golden": "npx playwright test tests/e2e/golden-path.spec.ts",
     "test:e2e:live": "npx playwright test tests/e2e/portal-click-through.spec.ts tests/e2e/golden-path.spec.ts",
+    "test:e2e:full": "npx playwright test --project=api --project=owner --project=employee --project=client --project=public --project=workflows --project=security --project=mobile",
     "verify:backend-errors": "python3 scripts/verify_backend_error_logs.py"
   },
   "devDependencies": {

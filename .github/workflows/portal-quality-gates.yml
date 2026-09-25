@@ -17,7 +17,7 @@ on:
 jobs:
   build-and-lint:
     name: Build Portal SPAs & Validate Bundles
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,7 +52,7 @@ jobs:
 
   visual-regression-and-a11y:
     name: Playwright Visual Regression & Axe A11y
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     needs: build-and-lint
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +68,7 @@ jobs:
 
   lighthouse-ci:
     name: Lighthouse CI Performance & Budget Gates
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     needs: build-and-lint
     steps:
       - uses: actions/checkout@v4

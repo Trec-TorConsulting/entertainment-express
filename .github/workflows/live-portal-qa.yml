@@ -15,7 +15,7 @@ on:
 jobs:
   click-and-golden-path:
     name: Click every portal page and run the golden path
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     env:
       EE_E2E_BASE: ${{ secrets.EE_E2E_BASE }}
       EE_ADMIN_PASSWORD: ${{ secrets.EE_ADMIN_PASSWORD }}

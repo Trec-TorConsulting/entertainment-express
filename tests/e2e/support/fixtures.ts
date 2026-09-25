@@ -1,6 +1,7 @@
 import { test as base, Page } from "@playwright/test";
 import { login, watchPage, personas, PUBLIC_URL, tenantBase } from "./session";
 import { ApiClient } from "./api-client";
+import { TestDataFactory } from "./test-data-factory";
 
 type TestFixtures = {
   ownerPage: Page;
@@ -8,6 +9,7 @@ type TestFixtures = {
   clientPage: Page;
   guestPage: Page;
   apiClient: ApiClient;
+  testData: TestDataFactory;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -45,6 +47,14 @@ export const test = base.extend<TestFixtures>({
   apiClient: async ({}, use) => {
     const client = new ApiClient();
     await use(client);
+    await client.dispose();
+  },
+
+  testData: async ({}, use) => {
+    const client = new ApiClient();
+    const factory = new TestDataFactory(client);
+    await use(factory);
+    await factory.dispose();
     await client.dispose();
   },
 });

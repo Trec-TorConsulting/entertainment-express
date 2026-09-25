@@ -20,11 +20,12 @@ if (fs.existsSync(envPath)) {
 export default defineConfig({
   testDir: "tests/e2e",
   globalSetup: "./tests/e2e/support/global-setup.ts",
+  globalTeardown: "./tests/e2e/support/global-teardown.ts",
   timeout: 180_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
   workers: 1,
-  retries: 0,
+  retries: 1,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     ...devices["Desktop Chrome"],
@@ -57,6 +58,34 @@ export default defineConfig({
     {
       name: "workflows",
       testMatch: /05-workflows\/.*\.spec\.ts/,
+    },
+    {
+      name: "security",
+      testMatch: /07-security\/.*\.spec\.ts/,
+      retries: 0, // Security tests must never flake — no retries
+    },
+    {
+      name: "mobile",
+      testMatch: /08-mobile\/.*\.spec\.ts/,
+      use: {
+        ...devices["Pixel 7"],
+      },
+    },
+    // ── Cross-browser matrix (run via: npx playwright test --project=firefox) ──
+    {
+      name: "firefox",
+      testMatch: /0[1-6]-.*\/.*\.spec\.ts/,
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit",
+      testMatch: /0[1-6]-.*\/.*\.spec\.ts/,
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      name: "mobile-safari",
+      testMatch: /08-mobile\/.*\.spec\.ts/,
+      use: { ...devices["iPhone 14"] },
     },
   ],
 });

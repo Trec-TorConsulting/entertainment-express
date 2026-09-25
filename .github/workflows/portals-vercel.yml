@@ -20,7 +20,7 @@ on:
 jobs:
   build-customer:
     name: Build customer portal
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     defaults:
       run:
         working-directory: frontend/customer-portal
@@ -40,7 +40,7 @@ jobs:
 
   build-dispatch:
     name: Build dispatch portal
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     defaults:
       run:
         working-directory: frontend/dispatch-portal
@@ -61,7 +61,7 @@ jobs:
   deploy-customer:
     name: Deploy customer → Vercel
     needs: build-customer
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     defaults:
       run:
         working-directory: frontend/customer-portal
@@ -97,7 +97,7 @@ jobs:
   deploy-dispatch:
     name: Deploy dispatch → Vercel
     needs: build-dispatch
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     defaults:
       run:
         working-directory: frontend/dispatch-portal

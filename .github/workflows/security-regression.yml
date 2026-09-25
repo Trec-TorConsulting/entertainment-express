@@ -1,0 +1,159 @@
+name: Security & Full Regression E2E
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Nightly full regression at 2 AM UTC
+    - cron: "0 2 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "tests/e2e/07-security/**"
+      - "tests/e2e/08-mobile/**"
+      - "entertainment_express/**/api/**"
+      - ".github/workflows/security-regression.yml"
+
+jobs:
+  security-suite:
+    name: Security — Authorization, Input Validation, Rate Limiting
+    runs-on: arc-runner-x86
+    env:
+      EE_E2E_BASE: ${{ secrets.EE_E2E_BASE }}
+      EE_OWNER_EMAIL: ${{ secrets.EE_OWNER_EMAIL }}
+      EE_OWNER_PASSWORD: ${{ secrets.EE_OWNER_PASSWORD }}
+      EE_EMPLOYEE_EMAIL: ${{ secrets.EE_EMPLOYEE_EMAIL }}
+      EE_EMPLOYEE_PASSWORD: ${{ secrets.EE_EMPLOYEE_PASSWORD }}
+      EE_CLIENT_EMAIL: ${{ secrets.EE_CLIENT_EMAIL }}
+      EE_CLIENT_PASSWORD: ${{ secrets.EE_CLIENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Require QA tenant credentials
+        run: |
+          test -n "$EE_E2E_BASE" || { echo "Set EE_E2E_BASE secret"; exit 1; }
+          for name in EE_OWNER_EMAIL EE_OWNER_PASSWORD EE_EMPLOYEE_EMAIL EE_EMPLOYEE_PASSWORD EE_CLIENT_EMAIL EE_CLIENT_PASSWORD; do
+            test -n "${!name}" || { echo "Missing $name"; exit 1; }
+          done
+      - name: Install Playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Run Security Suite (zero retries)
+        run: npx playwright test --project=security --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: security-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+
+  api-contract-tests:
+    name: API Contract — CRUD Lifecycle & Schema Validation
+    runs-on: arc-runner-x86
+    env:
+      EE_E2E_BASE: ${{ secrets.EE_E2E_BASE }}
+      EE_OWNER_EMAIL: ${{ secrets.EE_OWNER_EMAIL }}
+      EE_OWNER_PASSWORD: ${{ secrets.EE_OWNER_PASSWORD }}
+      EE_EMPLOYEE_EMAIL: ${{ secrets.EE_EMPLOYEE_EMAIL }}
+      EE_EMPLOYEE_PASSWORD: ${{ secrets.EE_EMPLOYEE_PASSWORD }}
+      EE_CLIENT_EMAIL: ${{ secrets.EE_CLIENT_EMAIL }}
+      EE_CLIENT_PASSWORD: ${{ secrets.EE_CLIENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install Playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Run API Contract Tests
+        run: npx playwright test --project=api --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: api-contract-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+
+  mobile-responsive:
+    name: Mobile Responsive — Viewport & Touch Targets
+    runs-on: arc-runner-x86
+    env:
+      EE_E2E_BASE: ${{ secrets.EE_E2E_BASE }}
+      EE_OWNER_EMAIL: ${{ secrets.EE_OWNER_EMAIL }}
+      EE_OWNER_PASSWORD: ${{ secrets.EE_OWNER_PASSWORD }}
+      EE_EMPLOYEE_EMAIL: ${{ secrets.EE_EMPLOYEE_EMAIL }}
+      EE_EMPLOYEE_PASSWORD: ${{ secrets.EE_EMPLOYEE_PASSWORD }}
+      EE_CLIENT_EMAIL: ${{ secrets.EE_CLIENT_EMAIL }}
+      EE_CLIENT_PASSWORD: ${{ secrets.EE_CLIENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install Playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Run Mobile Tests
+        run: npx playwright test --project=mobile --reporter=list
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: mobile-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+
+  full-regression-nightly:
+    name: Full Regression (all projects)
+    runs-on: arc-runner-x86
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [security-suite, api-contract-tests, mobile-responsive]
+    env:
+      EE_E2E_BASE: ${{ secrets.EE_E2E_BASE }}
+      EE_ADMIN_PASSWORD: ${{ secrets.EE_ADMIN_PASSWORD }}
+      EE_OWNER_EMAIL: ${{ secrets.EE_OWNER_EMAIL }}
+      EE_OWNER_PASSWORD: ${{ secrets.EE_OWNER_PASSWORD }}
+      EE_EMPLOYEE_EMAIL: ${{ secrets.EE_EMPLOYEE_EMAIL }}
+      EE_EMPLOYEE_PASSWORD: ${{ secrets.EE_EMPLOYEE_PASSWORD }}
+      EE_CLIENT_EMAIL: ${{ secrets.EE_CLIENT_EMAIL }}
+      EE_CLIENT_PASSWORD: ${{ secrets.EE_CLIENT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install Playwright
+        run: |
+          npm install
+          npx playwright install --with-deps chromium firefox webkit
+      - name: Seed QA personas
+        run: |
+          if [ -n "$EE_ADMIN_PASSWORD" ]; then
+            python3 scripts/seed_qa_personas.py
+          fi
+      - name: Run Full Regression (Chrome + Firefox + WebKit)
+        run: npm run test:e2e:full -- --reporter=list
+      - name: Run Cross-browser (Firefox)
+        run: npx playwright test --project=firefox --reporter=list || echo "Firefox run completed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-regression-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore

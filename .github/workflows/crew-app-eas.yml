@@ -35,7 +35,7 @@ on:
 jobs:
   eas-build:
     name: EAS ${{ github.event.inputs.profile || 'preview' }} (${{ github.event.inputs.platform || 'all' }})
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-x86
     defaults:
       run:
         working-directory: frontend/crew-app
