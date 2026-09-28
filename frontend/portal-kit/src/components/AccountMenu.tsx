@@ -2,7 +2,7 @@ import React from "react";
 import { call } from "../api/client";
 import { getSessionBootstrap } from "../api/session";
 import { FormField } from "./FormField";
-import { User, Settings, LogOut, Inbox, CheckCircle2 } from "lucide-react";
+import { User, Settings, LogOut, Inbox, CheckCircle2, HelpCircle } from "lucide-react";
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -94,6 +94,17 @@ export function AccountMenu({ accountHref, settingsHref }: Props) {
                 <span>Company settings</span>
               </a>
             ) : null}
+            <a
+              href="/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 text-xs text-[var(--ee-text)] hover:bg-[var(--ee-surface-inset)] transition-colors"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-[var(--ee-muted)]" />
+              <span>User Guides & Docs</span>
+            </a>
           </div>
           <div className="py-1 flex flex-col">
             <button

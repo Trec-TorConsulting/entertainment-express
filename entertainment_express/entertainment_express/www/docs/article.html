@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.7);
+      --accent: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.8);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+    .brand-logo span {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      margin-left: 1.5rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-main); }
+    
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 3rem;
+    }
+    @media (max-width: 850px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumbs a { color: var(--accent); text-decoration: none; }
+    
+    .article-header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+    .article-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+    .article-meta {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .badge {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .article-content {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+    }
+    .article-content h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 2rem 0 1rem;
+    }
+    .article-content h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 1.5rem 0 0.75rem;
+    }
+    .article-content p { margin-bottom: 1.25rem; }
+    .article-content ul, .article-content ol {
+      margin-bottom: 1.25rem;
+      padding-left: 1.5rem;
+    }
+    .article-content li { margin-bottom: 0.4rem; }
+    .article-content code {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #f472b6;
+    }
+    .article-content pre {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      padding: 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+    .article-content pre code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      color: #38bdf8;
+    }
+
+    .feedback-box {
+      margin-top: 3rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .feedback-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .btn-feedback {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-feedback:hover {
+      background: var(--accent);
+      border-color: transparent;
+    }
+
+    .sidebar-widget {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      position: sticky;
+      top: 5rem;
+    }
+    .sidebar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .related-list {
+      list-style: none;
+    }
+    .related-list li {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .related-list li:last-child { border-bottom: none; }
+    .related-list a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      transition: color 0.2s;
+    }
+    .related-list a:hover { color: var(--accent); }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="nav-container">
+      <a href="/docs" class="brand-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Entertainment Express</span> Docs
+      </a>
+      <div class="nav-links">
+        <a href="/docs">Docs Home</a>
+        <a href="/owner">Owner Cockpit</a>
+        <a href="/employee">Field App</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div>
+      <div class="breadcrumbs">
+        <a href="/docs">Docs</a> &rsaquo;
+        <span>{{ article.category }}</span> &rsaquo;
+        <span>{{ article.title }}</span>
+      </div>
+
+      <article class="article-header">
+        <div class="article-meta">
+          <span class="badge">{{ article.category }}</span>
+          <span style="color: var(--text-muted);">Difficulty: {{ article.level }}</span>
+        </div>
+        <h1 class="article-title">{{ article.title }}</h1>
+      </article>
+
+      <div class="article-content">
+        {{ article.content }}
+      </div>
+
+      <div class="feedback-box">
+        <h4>Was this documentation article helpful?</h4>
+        <div class="feedback-buttons">
+          <button class="btn-feedback" onclick="handleFeedback(true)">👍 Yes, helpful</button>
+          <button class="btn-feedback" onclick="handleFeedback(false)">👎 Needs improvement</button>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="sidebar-widget">
+        <div class="sidebar-title">In This Category</div>
+        <ul class="related-list">
+          {% for rel in related_articles %}
+            <li>
+              <a href="{{ rel.route }}">{{ rel.title }}</a>
+            </li>
+          {% else %}
+            <li style="color: var(--text-muted);">No other articles in this section.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Entertainment Express. Enterprise User Documentation Portal.</p>
+  </footer>
+
+  <script>
+    function handleFeedback(isHelpful) {
+      alert(isHelpful ? "Thank you for your feedback!" : "Thanks! We'll review and improve this article.");
+    }
+  </script>
+</body>
+</html>

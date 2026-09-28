@@ -4,7 +4,7 @@ app_publisher = "Trec-Tor Consulting"
 app_description = "A spec-first multi-tenant vertical SaaS platform for entertainment businesses."
 app_email = "info@trector.com"
 app_license = "mit"
-app_version = "0.1.10"
+app_version = "0.1.31"
 
 required_apps = ["erpnext"]
 
@@ -88,6 +88,7 @@ after_install = "entertainment_express.setup.install.after_install"
 after_migrate = [
     "entertainment_express.setup.onboarding.hide_third_party_onboarding",
     "entertainment_express.setup.install.create_all",
+    "entertainment_express.setup.documentation_seed.seed_documentation_data",
 ]
 
 # Scheduled tasks
@@ -186,6 +187,8 @@ website_route_rules = [
     {"from_route": "/t/<token>", "to_route": "t"},
     {"from_route": "/coming-soon", "to_route": "coming_soon"},
     {"from_route": "/live/<token>", "to_route": "live"},
+    {"from_route": "/help", "to_route": "docs"},
+    {"from_route": "/docs/<path:article_slug>", "to_route": "docs/article"},
 ]
 
 doc_events = {
