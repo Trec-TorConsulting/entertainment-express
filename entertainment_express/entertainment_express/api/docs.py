@@ -1,6 +1,9 @@
 import frappe
 from entertainment_express.setup.documentation_seed import SEED_CATEGORIES, SEED_ARTICLES
 
+# Lookup map for category metadata
+SEED_CAT_MAP = {c["category_name"]: c for c in SEED_CATEGORIES}
+
 @frappe.whitelist(allow_guest=True)
 def search_documentation(query=None, role=None, category=None):
     """
@@ -8,31 +11,35 @@ def search_documentation(query=None, role=None, category=None):
     Returns JSON array of matching documentation articles.
     """
     query = (query or "").strip().lower()
+    articles = []
     
     # 1. Try querying Frappe DB first if DocType exists
-    articles = []
-    if frappe.db.exists("DocType", "Help Article"):
-        filters = {"published": 1}
-        if category:
-            filters["category"] = category
-            
-        db_articles = frappe.get_all(
-            "Help Article",
-            filters=filters,
-            fields=["title", "category", "route", "level", "content"]
-        )
-        for art in db_articles:
-            title = art.get("title") or ""
-            content = art.get("content") or ""
-            # Simple keyword matching
-            if not query or query in title.lower() or query in content.lower():
-                articles.append({
-                    "title": title,
-                    "category": art.get("category"),
-                    "route": art.get("route") or f"docs/{frappe.utils.slug(title)}",
-                    "level": art.get("level", "Beginner"),
-                    "snippet": (content[:160] + "...") if len(content) > 160 else content
-                })
+    try:
+        if frappe.db.exists("DocType", "Help Article"):
+            filters = {"published": 1}
+            if category:
+                filters["category"] = category
+                
+            db_articles = frappe.get_all(
+                "Help Article",
+                filters=filters,
+                fields=["title", "category", "route", "content"]
+            )
+            for art in db_articles:
+                title = art.get("title") or ""
+                content = art.get("content") or ""
+                # Simple keyword matching
+                if not query or query in title.lower() or query in content.lower():
+                    articles.append({
+                        "title": title,
+                        "category": art.get("category"),
+                        "route": art.get("route") or f"docs/{frappe.utils.slug(title)}",
+                        "level": "Beginner",
+                        "snippet": (content[:160] + "...") if len(content) > 160 else content
+                    })
+    except Exception as e:
+        frappe.logger("entertainment_express").warning(f"Error querying Help Article DB: {e}")
+        articles = []
 
     # 2. Fallback to SEED_ARTICLES if DB returns no results or is unavailable
     if not articles:
@@ -63,16 +70,23 @@ def search_documentation(query=None, role=None, category=None):
 def get_documentation_categories():
     """Returns all documentation categories with article counts."""
     categories = []
-    if frappe.db.exists("DocType", "Help Category"):
-        db_cats = frappe.get_all("Help Category", filters={"published": 1}, fields=["category_name", "description", "route"])
-        for c in db_cats:
-            count = frappe.db.count("Help Article", filters={"category": c["category_name"], "published": 1})
-            categories.append({
-                "category_name": c["category_name"],
-                "description": c.get("description", ""),
-                "route": c.get("route") or f"docs/{frappe.utils.slug(c['category_name'])}",
-                "article_count": count
-            })
+    try:
+        if frappe.db.exists("DocType", "Help Category"):
+            db_cats = frappe.get_all("Help Category", filters={"published": 1}, fields=["category_name", "route"])
+            for c in db_cats:
+                cat_name = c["category_name"]
+                seed_meta = SEED_CAT_MAP.get(cat_name, {})
+                count = frappe.db.count("Help Article", filters={"category": cat_name, "published": 1})
+                categories.append({
+                    "category_name": cat_name,
+                    "description": seed_meta.get("description", "Guides and articles for " + cat_name),
+                    "route": c.get("route") or f"docs/{frappe.utils.slug(cat_name)}",
+                    "article_count": count,
+                    "icon": seed_meta.get("icon", "book")
+                })
+    except Exception as e:
+        frappe.logger("entertainment_express").warning(f"Error querying Help Category DB: {e}")
+        categories = []
 
     if not categories:
         for cat in SEED_CATEGORIES:

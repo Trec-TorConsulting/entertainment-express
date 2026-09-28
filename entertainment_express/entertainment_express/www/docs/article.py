@@ -10,16 +10,27 @@ def get_context(context):
     article = None
     
     # 1. Query Help Article DocType first if present
-    if frappe.db.exists("DocType", "Help Article") and route:
-        matched = frappe.get_all(
-            "Help Article",
-            filters={"published": 1},
-            fields=["name", "title", "category", "content", "level", "route", "likes"]
-        )
-        for doc in matched:
-            if route in (doc.get("route") or "") or route in (doc.get("name") or "") or route in (doc.get("title") or "").lower().replace(" ", "-"):
-                article = doc
-                break
+    try:
+        if frappe.db.exists("DocType", "Help Article") and route:
+            matched = frappe.get_all(
+                "Help Article",
+                filters={"published": 1},
+                fields=["name", "title", "category", "content", "route"]
+            )
+            for doc in matched:
+                if route in (doc.get("route") or "") or route in (doc.get("name") or "") or route in (doc.get("title") or "").lower().replace(" ", "-"):
+                    article = {
+                        "name": doc.get("name"),
+                        "title": doc.get("title"),
+                        "category": doc.get("category"),
+                        "content": doc.get("content"),
+                        "level": "Beginner",
+                        "route": doc.get("route")
+                    }
+                    break
+    except Exception as e:
+        frappe.logger("entertainment_express").warning(f"Error querying Help Article DB: {e}")
+        article = None
 
     # 2. Fallback to SEED_ARTICLES match
     if not article and route:
