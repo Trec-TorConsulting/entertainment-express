@@ -4677,6 +4677,10 @@ export default function LegacyWorkspaces() {
       <Route path="/connections" element={<ConnectionsWorkspace />} />
       <Route path="/security" element={<SecurityWorkspace />} />
       <Route path="/approvals" element={<ApprovalsWorkspace />} />
+      <Route path="/app" element={<Navigate to="/" replace />} />
+      <Route path="/app/*" element={<Navigate to="/" replace />} />
+      <Route path="/desk" element={<Navigate to="/" replace />} />
+      <Route path="/desk/*" element={<Navigate to="/" replace />} />
       <Route path="*" element={<EmptyState title="Not found" message="That page is not in your company workspace." />} />
     </Routes>
   );

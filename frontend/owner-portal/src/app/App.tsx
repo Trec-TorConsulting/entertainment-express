@@ -101,6 +101,10 @@ export const OwnerApp: React.FC = () => {
           <Route path="/contracts" element={<ContractsPage />} />
           <Route path="/approvals" element={<ApprovalsPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/app" element={<Navigate to="/" replace />} />
+          <Route path="/app/*" element={<Navigate to="/" replace />} />
+          <Route path="/desk" element={<Navigate to="/" replace />} />
+          <Route path="/desk/*" element={<Navigate to="/" replace />} />
 
           {/* Legacy / Operational Workspaces */}
           <Route path="/*" element={<LegacyWorkspaces />} />

@@ -7,6 +7,11 @@ import "../../portal-kit/src/tokens.css";
 
 const isDev = import.meta.env.DEV;
 const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+
+if (typeof window !== "undefined" && (pathname.startsWith("/app") || pathname.startsWith("/desk"))) {
+  window.location.replace("/owner");
+}
+
 const basename = isDev
   ? "/assets/entertainment_express/owner"
   : pathname.startsWith("/owner")
