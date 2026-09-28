@@ -457,9 +457,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "EE Venue Site Profile",
+   "label": "EE Venue",
    "link_count": 0,
-   "link_to": "EE Venue Site Profile",
+   "link_to": "EE Venue",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -468,9 +468,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "EE Subcontractor Job",
+   "label": "EE Subcontract Job",
    "link_count": 0,
-   "link_to": "EE Subcontractor Job",
+   "link_to": "EE Subcontract Job",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
