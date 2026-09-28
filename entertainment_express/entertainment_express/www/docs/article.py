@@ -1,75 +1,86 @@
 import frappe
-from entertainment_express.setup.documentation_seed import SEED_ARTICLES, SEED_CATEGORIES
+from entertainment_express.setup.documentation_seed import (
+    SEED_ARTICLES,
+    SEED_CATEGORIES,
+)
+from entertainment_express.api.docs import (
+    SEED_ARTICLES_BY_ROUTE,
+    SEED_ARTICLES_BY_TITLE,
+)
 
 def get_context(context):
     context.no_cache = 1
     
-    # Extract path / route from form_dict or request
-    route = frappe.form_dict.get("article_slug") or frappe.form_dict.get("route")
+    route = (frappe.form_dict.get("article_slug") or frappe.form_dict.get("route") or "").strip().lower()
+    clean_route = route.replace("docs/", "").strip("/")
     
     article = None
     
-    # 1. Query Help Article DocType first if present
-    try:
-        if frappe.db.exists("DocType", "Help Article") and route:
+    # 1. First look up directly in SEED_ARTICLES_BY_ROUTE for full rich metadata
+    if clean_route in SEED_ARTICLES_BY_ROUTE:
+        article = dict(SEED_ARTICLES_BY_ROUTE[clean_route])
+
+    # 2. Try querying Frappe DB
+    if not article and frappe.db.exists("DocType", "Help Article"):
+        try:
             matched = frappe.get_all(
                 "Help Article",
                 filters={"published": 1},
                 fields=["name", "title", "category", "content", "route"]
             )
             for doc in matched:
-                if route in (doc.get("route") or "") or route in (doc.get("name") or "") or route in (doc.get("title") or "").lower().replace(" ", "-"):
+                doc_route = (doc.get("route") or "").lower().replace("docs/", "").strip("/")
+                doc_title = (doc.get("title") or "").strip().lower()
+                doc_name = (doc.get("name") or "").lower()
+                if clean_route in (doc_route, doc_name) or clean_route in doc_title.replace(" ", "-"):
+                    meta = SEED_ARTICLES_BY_TITLE.get(doc_title) or {}
                     article = {
-                        "name": doc.get("name"),
                         "title": doc.get("title"),
                         "category": doc.get("category"),
-                        "content": doc.get("content"),
-                        "level": "Beginner",
+                        "content": meta.get("content") or doc.get("content"),
+                        "role": meta.get("role", "All Users"),
+                        "level": meta.get("level", "Beginner"),
+                        "read_time": meta.get("read_time", "4 min read"),
+                        "summary": meta.get("summary", ""),
                         "route": doc.get("route")
                     }
                     break
-    except Exception as e:
-        frappe.logger("entertainment_express").warning(f"Error querying Help Article DB: {e}")
-        article = None
+        except Exception as e:
+            frappe.logger("entertainment_express").warning(f"Error querying article: {e}")
 
-    # 2. Fallback to SEED_ARTICLES match
-    if not article and route:
-        clean_route = route.replace("docs/", "")
+    # 3. Partial route fallback match
+    if not article and clean_route:
         for sa in SEED_ARTICLES:
-            if sa["route"] == clean_route or sa["route"] in route or clean_route in sa["route"]:
-                article = {
-                    "title": sa["title"],
-                    "category": sa["category"],
-                    "content": sa["content"],
-                    "level": sa.get("level", "Beginner"),
-                    "role": sa.get("role", "All Users"),
-                    "likes": 12
-                }
+            if clean_route in sa["route"] or sa["route"] in clean_route:
+                article = dict(sa)
                 break
 
-    # 3. Default fallback article if none matched
+    # 4. Final fallback
     if not article:
-        sa = SEED_ARTICLES[0]
-        article = {
-            "title": sa["title"],
-            "category": sa["category"],
-            "content": sa["content"],
-            "level": sa.get("level", "Beginner"),
-            "role": sa.get("role", "All Users"),
-            "likes": 12
-        }
+        article = dict(SEED_ARTICLES[0])
 
-    context.title = f"{article['title']} — Entertainment Express Documentation"
+    context.title = f"{article['title']} — Entertainment Express Docs"
     context.article = article
-    
-    # Related articles in same category
+
+    # Determine back link
+    role = article.get("role", "")
+    if role in ("Owner", "Crew", "Client", "Developer"):
+        context.back_url = f"/docs?role={role}"
+        context.back_label = f"← Back to {role} Playbooks"
+    else:
+        context.back_url = "/docs"
+        context.back_label = "← Back to All Guides"
+
+    # Related guides in same category
+    cat = article.get("category")
     context.related_articles = [
         {
             "title": a["title"],
             "route": f"/docs/{a['route']}",
-            "level": a.get("level", "Beginner")
+            "read_time": a.get("read_time", "4 min read")
         }
-        for a in SEED_ARTICLES if a["category"] == article["category"] and a["title"] != article["title"]
-    ][:4]
+        for a in SEED_ARTICLES
+        if a.get("category") == cat and a["title"] != article["title"]
+    ][:6]
 
     return context

@@ -9,29 +9,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0f172a;
-      --bg-card: rgba(30, 41, 59, 0.7);
+      --bg-dark: #090e1a;
+      --bg-card: rgba(20, 29, 47, 0.75);
       --accent: #6366f1;
       --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.1);
-      --radius: 12px;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --radius: 14px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-dark);
       color: var(--text-main);
-      line-height: 1.7;
+      line-height: 1.75;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
     .header {
       border-bottom: 1px solid var(--border-color);
-      backdrop-filter: blur(12px);
-      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(16px);
+      background: rgba(9, 14, 26, 0.85);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -61,8 +61,8 @@
     .nav-links a {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.95rem;
-      margin-left: 1.5rem;
+      font-size: 0.9rem;
+      margin-left: 1.25rem;
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--text-main); }
@@ -70,49 +70,80 @@
     .container {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 2.5rem 1.5rem 4rem;
+      padding: 2.5rem 1.5rem 5rem;
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 300px;
+      grid-template-columns: 1fr 310px;
       gap: 3rem;
+      width: 100%;
     }
-    @media (max-width: 850px) {
+    @media (max-width: 860px) {
       .container { grid-template-columns: 1fr; }
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #818cf8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      transition: transform 0.15s ease;
+    }
+    .back-btn:hover {
+      transform: translateX(-3px);
+      color: #a5b4fc;
     }
 
     .breadcrumbs {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
-    .breadcrumbs a { color: var(--accent); text-decoration: none; }
+    .breadcrumbs a { color: var(--text-muted); text-decoration: none; }
+    .breadcrumbs a:hover { color: var(--text-main); }
     
     .article-header {
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 1.5rem;
-    }
-    .article-title {
-      font-size: 2.2rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.75rem;
+      padding-bottom: 1.75rem;
     }
     .article-meta {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       align-items: center;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
-    .badge {
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
-      padding: 0.2rem 0.6rem;
+    .role-tag {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      padding: 0.2rem 0.65rem;
       border-radius: 6px;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .category-tag {
+      color: var(--text-muted);
+    }
+
+    .article-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.3;
+      margin-bottom: 1rem;
+    }
+    .article-summary-lead {
+      font-size: 1.15rem;
+      color: #cbd5e1;
+      line-height: 1.6;
     }
 
     .article-content {
@@ -120,76 +151,152 @@
       color: #cbd5e1;
     }
     .article-content h2 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 700;
       color: var(--text-main);
-      margin: 2rem 0 1rem;
+      margin: 2.5rem 0 1rem;
+      letter-spacing: -0.01em;
     }
     .article-content h3 {
       font-size: 1.25rem;
       font-weight: 600;
       color: var(--text-main);
-      margin: 1.5rem 0 0.75rem;
+      margin: 1.75rem 0 0.75rem;
     }
-    .article-content p { margin-bottom: 1.25rem; }
+    .article-content p { margin-bottom: 1.35rem; }
     .article-content ul, .article-content ol {
-      margin-bottom: 1.25rem;
-      padding-left: 1.5rem;
+      margin-bottom: 1.35rem;
+      padding-left: 1.6rem;
     }
-    .article-content li { margin-bottom: 0.4rem; }
-    .article-content code {
-      background: rgba(0, 0, 0, 0.4);
+    .article-content li { margin-bottom: 0.5rem; }
+    
+    /* Step Cards */
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+    .step-card {
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 0.9em;
-      color: #f472b6;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      color: white;
+      font-weight: 800;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    .step-body {
+      flex: 1;
+    }
+    .step-body h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+    .step-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Callout & Tips */
+    .callout-box {
+      background: rgba(99, 102, 241, 0.08);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1.75rem 0;
+      color: #e2e8f0;
+    }
+    .tip-box {
+      background: rgba(16, 185, 129, 0.08);
+      border-left: 4px solid #10b981;
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1.75rem 0;
+      color: #e2e8f0;
+    }
+    .warning-box {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid #f59e0b;
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1.75rem 0;
+      color: #e2e8f0;
+    }
+
+    .article-content code {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border-color);
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88em;
+      color: #38bdf8;
     }
     .article-content pre {
-      background: #090d16;
+      background: #050811;
       border: 1px solid var(--border-color);
-      padding: 1.25rem;
-      border-radius: 8px;
+      padding: 1.3rem;
+      border-radius: var(--radius);
       overflow-x: auto;
-      margin-bottom: 1.5rem;
+      margin: 1.5rem 0;
     }
     .article-content pre code {
       background: transparent;
       border: none;
       padding: 0;
-      color: #38bdf8;
+      color: #a5f3fc;
     }
 
+    /* Feedback */
     .feedback-box {
-      margin-top: 3rem;
+      margin-top: 3.5rem;
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 1.5rem;
+      padding: 2rem;
       text-align: center;
     }
     .feedback-buttons {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      margin-top: 1rem;
+      margin-top: 1.25rem;
     }
     .btn-feedback {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 0.5rem 1.5rem;
-      border-radius: 8px;
+      padding: 0.6rem 1.5rem;
+      border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
+      font-size: 0.95rem;
       transition: all 0.2s;
     }
     .btn-feedback:hover {
       background: var(--accent);
       border-color: transparent;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
     }
 
+    /* Sidebar */
     .sidebar-widget {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -199,12 +306,14 @@
       top: 5rem;
     }
     .sidebar-title {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       margin-bottom: 1rem;
+      letter-spacing: -0.01em;
     }
     .related-list {
       list-style: none;
+      padding: 0;
     }
     .related-list li {
       margin-bottom: 0.75rem;
@@ -215,14 +324,16 @@
     .related-list a {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      display: block;
       transition: color 0.2s;
     }
-    .related-list a:hover { color: var(--accent); }
+    .related-list a:hover { color: #818cf8; }
 
     footer {
       border-top: 1px solid var(--border-color);
-      padding: 2rem 1.5rem;
+      padding: 2.5rem 1.5rem;
       text-align: center;
       color: var(--text-muted);
       font-size: 0.9rem;
@@ -241,24 +352,31 @@
         <a href="/docs">Docs Home</a>
         <a href="/owner">Owner Cockpit</a>
         <a href="/employee">Field App</a>
+        <a href="/client">Client Portal</a>
       </div>
     </div>
   </header>
 
   <main class="container">
     <div>
+      <a href="{{ back_url }}" class="back-btn">{{ back_label }}</a>
+
       <div class="breadcrumbs">
         <a href="/docs">Docs</a> &rsaquo;
         <span>{{ article.category }}</span> &rsaquo;
-        <span>{{ article.title }}</span>
+        <span style="color: var(--text-main);">{{ article.title }}</span>
       </div>
 
       <article class="article-header">
         <div class="article-meta">
-          <span class="badge">{{ article.category }}</span>
-          <span style="color: var(--text-muted);">Difficulty: {{ article.level }}</span>
+          <span class="role-tag">{{ article.role }}</span>
+          <span class="category-tag">{{ article.category }}</span>
+          <span style="color: var(--text-muted);">• {{ article.read_time }}</span>
         </div>
         <h1 class="article-title">{{ article.title }}</h1>
+        {% if article.summary %}
+          <div class="article-summary-lead">{{ article.summary }}</div>
+        {% endif %}
       </article>
 
       <div class="article-content">
@@ -266,21 +384,23 @@
       </div>
 
       <div class="feedback-box">
-        <h4>Was this documentation article helpful?</h4>
+        <h3>Was this step-by-step guide helpful?</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.35rem;">Your feedback helps us improve our documentation for entertainment teams.</p>
         <div class="feedback-buttons">
-          <button class="btn-feedback" onclick="handleFeedback(true)">👍 Yes, helpful</button>
-          <button class="btn-feedback" onclick="handleFeedback(false)">👎 Needs improvement</button>
+          <button type="button" class="btn-feedback" onclick="handleFeedback(true)">👍 Yes, very helpful</button>
+          <button type="button" class="btn-feedback" onclick="handleFeedback(false)">👎 Needs more detail</button>
         </div>
       </div>
     </div>
 
     <aside>
       <div class="sidebar-widget">
-        <div class="sidebar-title">In This Category</div>
+        <div class="sidebar-title">More in This Category</div>
         <ul class="related-list">
           {% for rel in related_articles %}
             <li>
               <a href="{{ rel.route }}">{{ rel.title }}</a>
+              <span style="font-size: 0.78rem; color: #64748b;">{{ rel.read_time }}</span>
             </li>
           {% else %}
             <li style="color: var(--text-muted);">No other articles in this section.</li>
@@ -291,12 +411,12 @@
   </main>
 
   <footer>
-    <p>&copy; 2026 Entertainment Express. Enterprise User Documentation Portal.</p>
+    <p>&copy; 2026 Entertainment Express. Enterprise Multi-Tenant Platform Documentation.</p>
   </footer>
 
   <script>
     function handleFeedback(isHelpful) {
-      alert(isHelpful ? "Thank you for your feedback!" : "Thanks! We'll review and improve this article.");
+      alert(isHelpful ? "Thank you for your feedback!" : "Thank you! We'll review and expand this guide.");
     }
   </script>
 </body>

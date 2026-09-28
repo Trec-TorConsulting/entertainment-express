@@ -4,25 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }}</title>
-  <meta name="description" content="{{ meta_description }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0f172a;
-      --bg-card: rgba(30, 41, 59, 0.7);
-      --bg-card-hover: rgba(51, 65, 85, 0.8);
+      --bg-dark: #090e1a;
+      --bg-card: rgba(20, 29, 47, 0.75);
+      --bg-card-hover: rgba(30, 43, 69, 0.9);
       --accent: #6366f1;
       --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.1);
-      --radius: 12px;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --radius: 14px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-dark);
       color: var(--text-main);
       line-height: 1.6;
@@ -32,8 +31,8 @@
     }
     .header {
       border-bottom: 1px solid var(--border-color);
-      backdrop-filter: blur(12px);
-      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(16px);
+      background: rgba(9, 14, 26, 0.85);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -62,27 +61,37 @@
     }
     .nav-links {
       display: flex;
-      gap: 1.5rem;
+      gap: 1.25rem;
+      align-items: center;
     }
     .nav-links a {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 500;
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--text-main); }
+    .portal-btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+    }
     
     .hero {
-      padding: 4rem 1.5rem 3rem;
+      padding: 4rem 1.5rem 2.5rem;
       text-align: center;
-      background: radial-gradient(circle at top, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      background: radial-gradient(circle at top, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
     }
     .hero h1 {
-      font-size: 2.75rem;
+      font-size: 2.6rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.75rem;
+      max-width: 850px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .hero h1 span {
       background: var(--accent-gradient);
@@ -91,27 +100,27 @@
     }
     .hero p {
       color: var(--text-muted);
-      font-size: 1.15rem;
-      max-width: 650px;
-      margin: 0 auto 2.5rem;
+      font-size: 1.12rem;
+      max-width: 680px;
+      margin: 0 auto 2.25rem;
     }
     
     .search-box-container {
-      max-width: 640px;
+      max-width: 620px;
       margin: 0 auto;
       position: relative;
     }
     .search-input {
       width: 100%;
       padding: 1.1rem 1.5rem 1.1rem 3.25rem;
-      background: rgba(30, 41, 59, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(20, 29, 47, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 14px;
       color: var(--text-main);
       font-size: 1.05rem;
       outline: none;
       transition: all 0.2s ease;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
     .search-input:focus {
       border-color: var(--accent);
@@ -131,87 +140,112 @@
       right: 1.2rem;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 6px;
       padding: 0.2rem 0.5rem;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text-muted);
       pointer-events: none;
+    }
+    
+    .role-pills {
+      display: flex;
+      justify-content: center;
+      gap: 0.65rem;
+      margin-top: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .role-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.55rem 1.25rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .role-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .role-pill.active {
+      background: var(--accent-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+      font-weight: 600;
     }
     
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
+      padding: 2.5rem 1.5rem 5rem;
       flex: 1;
+      width: 100%;
     }
 
-    .role-pills {
+    .section-header {
+      margin-bottom: 2rem;
       display: flex;
-      justify-content: center;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
     }
-    .role-pill {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 0.5rem 1.2rem;
-      border-radius: 20px;
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    .role-pill:hover, .role-pill.active {
-      background: var(--accent-gradient);
-      color: white;
-      border-color: transparent;
-    }
-    
     .section-title {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      letter-spacing: -0.01em;
     }
-    
+    .section-count {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
     .categories-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 4rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 3.5rem;
     }
     .category-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 1.75rem;
+      padding: 1.5rem;
       text-decoration: none;
       color: var(--text-main);
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
     .category-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       background: var(--bg-card-hover);
-      border-color: rgba(99, 102, 241, 0.4);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(99, 102, 241, 0.35);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    .category-card.selected {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
     }
     .category-title {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
     }
     .category-desc {
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       margin-bottom: 1.25rem;
+      line-height: 1.5;
     }
     .category-meta {
       display: flex;
@@ -224,48 +258,96 @@
 
     .articles-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
       gap: 1.5rem;
     }
     .article-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 1.5rem;
+      padding: 1.6rem;
       text-decoration: none;
       color: var(--text-main);
       transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .article-card:hover {
       border-color: rgba(99, 102, 241, 0.5);
       background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
-    .article-badge {
+    .card-top {
+      margin-bottom: 1.25rem;
+    }
+    .card-badges {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .role-badge {
       display: inline-block;
-      padding: 0.25rem 0.6rem;
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
+      padding: 0.2rem 0.6rem;
       border-radius: 6px;
       font-size: 0.75rem;
-      font-weight: 600;
-      margin-bottom: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .role-badge.owner { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+    .role-badge.crew { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .role-badge.client { background: rgba(244, 63, 94, 0.2); color: #fda4af; }
+    .role-badge.developer { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    .role-badge.all { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+    
+    .meta-time {
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
     .article-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      line-height: 1.4;
+      color: var(--text-main);
     }
-    .article-snippet {
+    .article-summary {
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.92rem;
+      line-height: 1.55;
     }
+    .card-footer {
+      font-size: 0.88rem;
+      color: var(--accent);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+    }
+    .empty-state h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .empty-state p { color: var(--text-muted); margin-bottom: 1.5rem; }
 
     footer {
       border-top: 1px solid var(--border-color);
-      padding: 2rem 1.5rem;
+      padding: 2.5rem 1.5rem;
       text-align: center;
       color: var(--text-muted);
       font-size: 0.9rem;
+      margin-top: auto;
     }
   </style>
 </head>
@@ -278,86 +360,128 @@
         <span>Entertainment Express</span> Docs
       </a>
       <div class="nav-links">
-        <a href="/owner">Owner Cockpit</a>
-        <a href="/employee">Field App</a>
-        <a href="/client">Client Portal</a>
+        <a href="/owner" class="portal-btn">Owner Cockpit</a>
+        <a href="/employee" class="portal-btn">Field App</a>
+        <a href="/client" class="portal-btn">Client Portal</a>
       </div>
     </div>
   </header>
 
   <section class="hero">
-    <h1>Documentation & <span>Knowledge Base</span></h1>
-    <p>Everything you need to configure, operate, and scale your entertainment business on Entertainment Express.</p>
+    <h1>{{ role_headline }}</h1>
+    <p>{{ role_description }}</p>
     
     <form action="/docs" method="GET" class="search-box-container">
+      {% if selected_role %}
+        <input type="hidden" name="role" value="{{ selected_role }}">
+      {% endif %}
       <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-      <input type="text" name="q" id="docsSearchInput" class="search-input" placeholder="Search user guides, API endpoints, workflow playbooks..." value="{{ search_query or '' }}">
+      <input type="text" name="q" id="docsSearchInput" class="search-input" placeholder="Search guides, setup checklists, workflows..." value="{{ search_query }}">
       <span class="kbd-shortcut">⌘K</span>
     </form>
 
     <div class="role-pills">
-      <a href="/docs" class="role-pill {% if not search_query %}active{% endif %}">All Guides</a>
-      <a href="/docs?role=Owner" class="role-pill">Owners & Admins</a>
-      <a href="/docs?role=Crew" class="role-pill">Field Crew & DJs</a>
-      <a href="/docs?role=Client" class="role-pill">Clients</a>
-      <a href="/docs?role=Developer" class="role-pill">API & Webhooks</a>
+      <a href="/docs{% if search_query %}?q={{ search_query }}{% endif %}" class="role-pill {% if not selected_role %}active{% endif %}">
+        🌐 All User Guides
+      </a>
+      <a href="/docs?role=Owner{% if search_query %}&q={{ search_query }}{% endif %}" class="role-pill {% if selected_role == 'Owner' %}active{% endif %}">
+        🏢 Owners & Admins
+      </a>
+      <a href="/docs?role=Crew{% if search_query %}&q={{ search_query }}{% endif %}" class="role-pill {% if selected_role == 'Crew' %}active{% endif %}">
+        🎧 Field Crew & DJs
+      </a>
+      <a href="/docs?role=Client{% if search_query %}&q={{ search_query }}{% endif %}" class="role-pill {% if selected_role == 'Client' %}active{% endif %}">
+        🎉 Clients & Event Hosts
+      </a>
+      <a href="/docs?role=Developer{% if search_query %}&q={{ search_query }}{% endif %}" class="role-pill {% if selected_role == 'Developer' %}active{% endif %}">
+        ⚡ APIs & Webhooks
+      </a>
     </div>
   </section>
 
   <main class="container">
 
-    {% if search_results is not none %}
-      <div class="section-title">
-        Search Results for "{{ search_query }}" ({{ search_results | length }})
+    <!-- Categories Section -->
+    <div class="section-header">
+      <div class="section-title">Documentation Categories</div>
+      <div class="section-count">
+        {% if selected_role %}Filtered for {{ selected_role }}{% else %}All Topics{% endif %}
       </div>
-      <div class="articles-grid">
-        {% for item in search_results %}
-          <a href="/{{ item.route }}" class="article-card">
-            <span class="article-badge">{{ item.category }} • {{ item.level }}</span>
-            <div class="article-title">{{ item.title }}</div>
-            <div class="article-snippet">{{ item.snippet }}</div>
-          </a>
-        {% else %}
-          <div style="color: var(--text-muted); grid-column: 1/-1; padding: 2rem; text-align: center;">
-            No articles found matching your query. Try searching with different keywords.
+    </div>
+
+    <div class="categories-grid">
+      {% for cat in categories %}
+        <a href="/docs?category={{ cat.route | replace('docs/', '') }}{% if selected_role %}&role={{ selected_role }}{% endif %}" class="category-card {% if selected_category and selected_category in cat.route %}selected{% endif %}">
+          <div>
+            <div class="category-title">{{ cat.category_name }}</div>
+            <div class="category-desc">{{ cat.description }}</div>
           </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      
-      <div class="section-title">Browse Documentation by Category</div>
-      <div class="categories-grid">
-        {% for cat in categories %}
-          <a href="/{{ cat.route }}" class="category-card">
-            <div>
-              <div class="category-title">{{ cat.category_name }}</div>
-              <div class="category-desc">{{ cat.description }}</div>
-            </div>
-            <div class="category-meta">
-              <span>{{ cat.article_count }} Articles</span>
-              <span>Explore →</span>
-            </div>
-          </a>
-        {% endfor %}
-      </div>
+          <div class="category-meta">
+            <span>{{ cat.article_count }} Guides</span>
+            <span>View Guides →</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
 
-      <div class="section-title">Featured User Guides</div>
-      <div class="articles-grid">
-        {% for art in featured_articles %}
-          <a href="{{ art.route }}" class="article-card">
-            <span class="article-badge">{{ art.category }} • {{ art.role }}</span>
+    <!-- Guides List Section -->
+    <div class="section-header">
+      <div class="section-title">
+        {% if search_query %}
+          Search Results for "{{ search_query }}"
+        {% elif selected_role == 'Owner' %}
+          Owner & Admin Operations Playbooks
+        {% elif selected_role == 'Crew' %}
+          Field Crew, DJs & Talent Playbooks
+        {% elif selected_role == 'Client' %}
+          Client & Event Host Guides
+        {% elif selected_role == 'Developer' %}
+          APIs & Integration Guides
+        {% else %}
+          Featured Operations & User Guides
+        {% endif %}
+      </div>
+      <div class="section-count">{{ results_count }} Guides Available</div>
+    </div>
+
+    <div class="articles-grid">
+      {% for art in articles_list %}
+        <a href="/{{ art.route }}" class="article-card">
+          <div class="card-top">
+            <div class="card-badges">
+              {% if art.role == 'Owner' %}
+                <span class="role-badge owner">Owner</span>
+              {% elif art.role == 'Crew' %}
+                <span class="role-badge crew">Field Crew</span>
+              {% elif art.role == 'Client' %}
+                <span class="role-badge client">Client</span>
+              {% elif art.role == 'Developer' %}
+                <span class="role-badge developer">API</span>
+              {% else %}
+                <span class="role-badge all">All Users</span>
+              {% endif %}
+              <span class="meta-time">{{ art.category }} • {{ art.read_time }}</span>
+            </div>
             <div class="article-title">{{ art.title }}</div>
-            <div class="article-snippet">{{ art.snippet }}</div>
-          </a>
-        {% endfor %}
-      </div>
-
-    {% endif %}
+            <div class="article-summary">{{ art.summary }}</div>
+          </div>
+          <div class="card-footer">
+            Read Step-by-Step Guide →
+          </div>
+        </a>
+      {% else %}
+        <div class="empty-state">
+          <h3>No guides found matching your filter</h3>
+          <p>Try clearing your search query or selecting "All User Guides".</p>
+          <a href="/docs" class="role-pill active">Reset Filters</a>
+        </div>
+      {% endfor %}
+    </div>
 
   </main>
 
   <footer>
-    <p>&copy; 2026 Entertainment Express. Enterprise Multi-Tenant SaaS Documentation System.</p>
+    <p>&copy; 2026 Entertainment Express. Enterprise Multi-Tenant Platform Documentation.</p>
   </footer>
 
   <script>

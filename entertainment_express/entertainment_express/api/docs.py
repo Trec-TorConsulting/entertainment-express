@@ -1,102 +1,144 @@
 import frappe
 from entertainment_express.setup.documentation_seed import SEED_CATEGORIES, SEED_ARTICLES
 
-# Lookup map for category metadata
+# Lookup map for category and article metadata
 SEED_CAT_MAP = {c["category_name"]: c for c in SEED_CATEGORIES}
+SEED_ARTICLES_BY_TITLE = {a["title"].strip().lower(): a for a in SEED_ARTICLES}
+SEED_ARTICLES_BY_ROUTE = {a["route"].strip().lower(): a for a in SEED_ARTICLES}
+
+def _matches_role(article_role, requested_role):
+    if not requested_role or requested_role.lower() in ("all", "all users", ""):
+        return True
+    req = requested_role.strip().lower()
+    art = (article_role or "").strip().lower()
+    if art in ("all users", "all"):
+        return True
+    # Aliases
+    if req in ("owner", "admin", "owners & admins") and art in ("owner", "admin"):
+        return True
+    if req in ("crew", "employee", "djs", "field crew") and art in ("crew", "employee"):
+        return True
+    if req in ("client", "customer", "host") and art in ("client", "customer"):
+        return True
+    if req in ("developer", "api", "integrations") and art in ("developer", "api"):
+        return True
+    return req == art
 
 @frappe.whitelist(allow_guest=True)
 def search_documentation(query=None, role=None, category=None):
     """
     Whitelisted API to search help articles.
-    Returns JSON array of matching documentation articles.
+    Returns JSON array of matching documentation articles with role filtering.
     """
     query = (query or "").strip().lower()
-    articles = []
-    
-    # 1. Try querying Frappe DB first if DocType exists
+    category = (category or "").strip().lower()
+    matched_articles = []
+    seen_titles = set()
+
+    # 1. First process DB records if present
     try:
         if frappe.db.exists("DocType", "Help Article"):
             filters = {"published": 1}
-            if category:
-                filters["category"] = category
-                
             db_articles = frappe.get_all(
                 "Help Article",
                 filters=filters,
                 fields=["title", "category", "route", "content"]
             )
-            for art in db_articles:
-                title = art.get("title") or ""
-                content = art.get("content") or ""
-                # Simple keyword matching
-                if not query or query in title.lower() or query in content.lower():
-                    articles.append({
-                        "title": title,
-                        "category": art.get("category"),
-                        "route": art.get("route") or f"docs/{frappe.utils.slug(title)}",
-                        "level": "Beginner",
-                        "snippet": (content[:160] + "...") if len(content) > 160 else content
-                    })
-    except Exception as e:
-        frappe.logger("entertainment_express").warning(f"Error querying Help Article DB: {e}")
-        articles = []
-
-    # 2. Fallback to SEED_ARTICLES if DB returns no results or is unavailable
-    if not articles:
-        for art in SEED_ARTICLES:
-            if role and role.lower() != "all users" and art.get("role", "").lower() not in [role.lower(), "all users"]:
-                continue
-            if category and art.get("category", "").lower() != category.lower():
-                continue
+            for doc in db_articles:
+                t = (doc.get("title") or "").strip()
+                t_key = t.lower()
+                cat = doc.get("category") or ""
                 
-            title = art["title"]
-            content = art["content"]
-            if not query or query in title.lower() or query in content.lower():
-                articles.append({
-                    "title": title,
-                    "category": art["category"],
-                    "route": f"docs/{art['route']}",
-                    "level": art.get("level", "Beginner"),
-                    "snippet": content[:160].replace("<h2>", "").replace("</h2>", "").replace("<p>", "").replace("</p>", "") + "..."
+                # Enrich with seed metadata
+                meta = SEED_ARTICLES_BY_TITLE.get(t_key) or {}
+                art_role = meta.get("role", "All Users")
+                summary = meta.get("summary") or doc.get("content", "")[:160]
+                read_time = meta.get("read_time", "4 min read")
+                level = meta.get("level", "Beginner")
+
+                # Filter by Role
+                if role and not _matches_role(art_role, role):
+                    continue
+
+                # Filter by Category
+                if category and category not in cat.lower() and category not in (doc.get("route") or "").lower():
+                    continue
+
+                # Filter by Keyword Query
+                content = doc.get("content") or ""
+                if query and (query not in t_key and query not in content.lower() and query not in summary.lower()):
+                    continue
+
+                matched_articles.append({
+                    "title": t,
+                    "category": cat,
+                    "route": doc.get("route") or f"docs/{frappe.utils.slug(t)}",
+                    "role": art_role,
+                    "level": level,
+                    "read_time": read_time,
+                    "summary": summary
                 })
+                seen_titles.add(t_key)
+    except Exception as e:
+        frappe.logger("entertainment_express").warning(f"Error reading Help Article DB: {e}")
+
+    # 2. Add or supplement from SEED_ARTICLES
+    for sa in SEED_ARTICLES:
+        t = sa["title"].strip()
+        t_key = t.lower()
+        if t_key in seen_titles:
+            continue
+
+        art_role = sa.get("role", "All Users")
+        if role and not _matches_role(art_role, role):
+            continue
+
+        cat = sa.get("category", "")
+        if category and category not in cat.lower() and category not in sa.get("route", "").lower():
+            continue
+
+        content = sa.get("content", "")
+        summary = sa.get("summary", "")
+        if query and (query not in t_key and query not in content.lower() and query not in summary.lower()):
+            continue
+
+        matched_articles.append({
+            "title": t,
+            "category": cat,
+            "route": f"docs/{sa['route']}",
+            "role": art_role,
+            "level": sa.get("level", "Beginner"),
+            "read_time": sa.get("read_time", "4 min read"),
+            "summary": summary
+        })
+        seen_titles.add(t_key)
 
     return {
         "query": query,
-        "results_count": len(articles),
-        "results": articles
+        "role": role,
+        "category": category,
+        "results_count": len(matched_articles),
+        "results": matched_articles
     }
 
 @frappe.whitelist(allow_guest=True)
-def get_documentation_categories():
-    """Returns all documentation categories with article counts."""
+def get_documentation_categories(role=None):
+    """Returns all documentation categories with article counts matching the requested role."""
     categories = []
-    try:
-        if frappe.db.exists("DocType", "Help Category"):
-            db_cats = frappe.get_all("Help Category", filters={"published": 1}, fields=["category_name", "route"])
-            for c in db_cats:
-                cat_name = c["category_name"]
-                seed_meta = SEED_CAT_MAP.get(cat_name, {})
-                count = frappe.db.count("Help Article", filters={"category": cat_name, "published": 1})
-                categories.append({
-                    "category_name": cat_name,
-                    "description": seed_meta.get("description", "Guides and articles for " + cat_name),
-                    "route": c.get("route") or f"docs/{frappe.utils.slug(cat_name)}",
-                    "article_count": count,
-                    "icon": seed_meta.get("icon", "book")
-                })
-    except Exception as e:
-        frappe.logger("entertainment_express").warning(f"Error querying Help Category DB: {e}")
-        categories = []
-
-    if not categories:
-        for cat in SEED_CATEGORIES:
-            count = sum(1 for a in SEED_ARTICLES if a["category"] == cat["category_name"])
-            categories.append({
-                "category_name": cat["category_name"],
-                "description": cat["description"],
-                "route": f"docs/{cat['route']}",
-                "article_count": count,
-                "icon": cat.get("icon", "book")
-            })
+    
+    # Calculate counts from seed articles filtered by role
+    for cat in SEED_CATEGORIES:
+        cat_name = cat["category_name"]
+        matching_count = sum(
+            1 for a in SEED_ARTICLES
+            if a["category"] == cat_name and _matches_role(a.get("role"), role)
+        )
+        categories.append({
+            "category_name": cat_name,
+            "description": cat["description"],
+            "route": f"docs/{cat['route']}",
+            "article_count": matching_count,
+            "icon": cat.get("icon", "book")
+        })
 
     return categories
