@@ -147,6 +147,18 @@ def kit_dict(settings: Any = None, *, overrides: dict | None = None) -> dict:
         for k, v in overrides.items():
             if k in out and v is not None and v != "":
                 out[k] = v
+    if not out.get("brand_name"):
+        try:
+            import frappe
+            company = frappe.db.get_default("company") or (getattr(frappe, "defaults", None) and frappe.defaults.get_user_default("company"))
+            if company and company not in ("Frappe", "ERPNext"):
+                out["brand_name"] = company
+            else:
+                app_name = frappe.db.get_single_value("Website Settings", "app_name")
+                if app_name and app_name not in ("Frappe", "ERPNext"):
+                    out["brand_name"] = app_name
+        except Exception:
+            pass
     if out.get("brand_logo"):
         logo_lower = str(out["brand_logo"]).lower()
         if "trector" in logo_lower or "trec-tor" in logo_lower:

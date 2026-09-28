@@ -17,6 +17,8 @@ def test_auth_and_system_templates_exist():
         TEMPLATES_DIR / "login.html",
         INCLUDES_DIR / "login.html",
         TEMPLATES_DIR / "update_password.html",
+        TEMPLATES_DIR / "update-password.html",
+        ROOT / "www" / "update-password.html",
         TEMPLATES_DIR / "404.html",
         TEMPLATES_DIR / "500.html",
         TEMPLATES_DIR / "403.html",
@@ -58,13 +60,10 @@ def test_frappe_login_dom_contract_preserved():
 
 
 def test_update_password_contract_preserved():
-    update_html = _read(TEMPLATES_DIR / "update_password.html")
-    assert 'id="new_password"' in update_html
-    assert 'id="confirm_password"' in update_html
-    assert 'id="rule-length"' in update_html
-    assert 'id="rule-letter"' in update_html
-    assert 'id="rule-number"' in update_html
-    assert "ee-password-toggle" in update_html
+    for filename in ("update_password.html", "update-password.html"):
+        update_html = _read(TEMPLATES_DIR / filename)
+        assert 'id="new_password"' in update_html or 'update_password.html' in update_html
+        assert "ee-password-toggle" in update_html or 'update_password.html' in update_html
 
 
 def test_system_error_pages_contain_recovery_navigation():

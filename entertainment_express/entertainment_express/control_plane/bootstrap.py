@@ -83,6 +83,7 @@ def _run_steps(ctx) -> None:
     _ensure_notification_templates()
     _ensure_tenant_admin(ctx)
     _ensure_email_defaults()
+    _ensure_brand_settings(ctx)
 
 
 def _ensure_erpnext_baseline() -> None:
@@ -583,6 +584,34 @@ def tenant_password_setup_link(email: str = "") -> str:
     except Exception:
         frappe.log_error(title="EE bootstrap password link")
         return ""
+
+
+def _ensure_brand_settings(ctx) -> None:
+    """Initialize EE Portal Settings and Website Settings with tenant company name."""
+    company_name = ctx.get("company_name") or ""
+    if not company_name:
+        return
+    try:
+        if frappe.db.exists("DocType", "EE Portal Settings"):
+            settings = frappe.get_doc("EE Portal Settings", "EE Portal Settings")
+            changed = False
+            if not getattr(settings, "brand_name", None):
+                settings.brand_name = company_name
+                changed = True
+            if not getattr(settings, "email_from_name", None):
+                settings.email_from_name = company_name
+                changed = True
+            if changed:
+                settings.save(ignore_permissions=True)
+    except Exception:
+        pass
+
+    try:
+        current_app = frappe.db.get_single_value("Website Settings", "app_name")
+        if not current_app or current_app in ("Frappe", "ERPNext"):
+            frappe.db.set_single_value("Website Settings", "app_name", company_name)
+    except Exception:
+        pass
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

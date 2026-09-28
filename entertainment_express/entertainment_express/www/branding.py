@@ -98,13 +98,14 @@ def update_website_context(context):
     except Exception:
         path = ""
 
-    pathname = str(context.get("pathname") or "")
+    pathname = str(context.get("pathname") or context.get("path") or context.get("route") or "")
     template = str(context.get("template") or "")
     is_auth_or_sys = (
         path in ("/login", "/update-password", "/404", "/500", "/403")
-        or pathname in ("login", "update-password", "404", "500", "403")
+        or pathname in ("login", "update-password", "update_password", "404", "500", "403")
         or "login" in template
         or "update_password" in template
+        or "update-password" in template
         or "404" in template
         or "500" in template
     )
@@ -113,6 +114,20 @@ def update_website_context(context):
         body_cls = context.get("body_class") or ""
         if "ee-auth-page" not in body_cls:
             context["body_class"] = (body_cls + " ee-auth-page").strip()
+        try:
+            import frappe
+            req_key = (
+                getattr(frappe.local, "form_dict", {}).get("key")
+                or (getattr(frappe.local, "request", None) and frappe.local.request.args.get("key"))
+            )
+            if req_key:
+                context["key"] = req_key
+        except Exception:
+            pass
+
+    ee_default_svg_favicon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36' fill='none'%3E%3Crect width='36' height='36' rx='8' fill='%236d28d9'/%3E%3Cpath d='M8.5 11C8.5 10.17 9.17 9.5 10 9.5H18C18.55 9.5 19 9.95 19 10.5V11.5C19 12.05 18.55 12.5 18 12.5H11.5V15H16.5C17.05 15 17.5 15.45 17.5 16V17C17.5 17.55 17.05 18 16.5 18H11.5V20.5H18C18.55 20.5 19 20.95 19 21.5V22.5C19 23.05 18.55 23.5 18 23.5H10C9.17 23.5 8.5 22.83 8.5 22V11Z' fill='%23ffffff'/%3E%3Cpath d='M20.5 12C20.5 11.45 20.95 11 21.5 11H26C26.55 11 27 11.45 27 12V13C27 13.55 26.55 14 26 14H22.5V15.5H25C25.55 15.5 26 15.95 26 16.5V17.5C26 18.05 25.55 18.5 25 18.5H22.5V20H26C26.55 20 27 20.45 27 21V22C27 22.55 26.55 23 26 23H21.5C20.95 23 20.5 22.55 20.5 22V12Z' fill='%23fb923c'/%3E%3Cpolygon points='17.5,7.5 19.5,11.5 17.5,15.5 15.5,11.5' fill='%23ffffff' opacity='0.95'/%3E%3C/svg%3E"
+    effective_favicon = favicon or ee_default_svg_favicon
+    context["favicon"] = effective_favicon
 
     extra = context.get("head_html") or ""
     styles = (
@@ -168,8 +183,8 @@ def update_website_context(context):
             context["body_class"] = ((context.get("body_class") or "") + " ee-hide-product").strip()
         except Exception:
             pass
-    if favicon:
-        styles += f'<link rel="icon" href="{favicon}">\n'
+    if effective_favicon:
+        styles += f'<link rel="icon" href="{effective_favicon}">\n<link rel="shortcut icon" href="{effective_favicon}">\n'
     if og_image:
         styles += f'<meta property="og:image" content="{og_image}">\n'
     if full and brand_name:

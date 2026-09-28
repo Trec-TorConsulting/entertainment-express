@@ -504,9 +504,26 @@
       });
     }
 
-    // 5. Update Password Form (#form-update-password)
-    var formUpdatePwd = document.getElementById('form-update-password');
+    // 5. Update Password Form (#form-update-password / #reset-password)
+    var formUpdatePwd = document.getElementById('form-update-password') || document.getElementById('reset-password') || document.querySelector('.ee-form-update-password');
     if (formUpdatePwd) {
+      var urlParams = new URLSearchParams(window.location.search);
+      var key = urlParams.get('key');
+      var oldPwdField = document.getElementById('old-password-field') || (document.getElementById('old_password') ? document.getElementById('old_password').closest('.ee-auth-field') : null);
+      if (key) {
+        if (oldPwdField) {
+          oldPwdField.style.display = 'none';
+        }
+        var oldInputInit = document.getElementById('old_password');
+        if (oldInputInit) {
+          oldInputInit.removeAttribute('required');
+        }
+        var brandHeading = formUpdatePwd.closest('.ee-auth-card') ? formUpdatePwd.closest('.ee-auth-card').querySelector('.ee-auth-brand-name') : null;
+        if (brandHeading && brandHeading.textContent.trim().toLowerCase().includes('reset')) {
+          brandHeading.textContent = 'Set New Password';
+        }
+      }
+
       formUpdatePwd.addEventListener('submit', function (e) {
         e.preventDefault();
         var oldPwdInput = document.getElementById('old_password');
@@ -517,8 +534,18 @@
         var newPwd = newPwdInput ? newPwdInput.value : '';
         var confirmPwd = confirmPwdInput ? confirmPwdInput.value : '';
 
+        var currentKey = new URLSearchParams(window.location.search).get('key') || '';
+
+        if (!currentKey && !oldPwd) {
+          showAlert(formUpdatePwd, 'Please enter your current password.', 'error');
+          return;
+        }
         if (!newPwd) {
           showAlert(formUpdatePwd, 'Please enter a new password.', 'error');
+          return;
+        }
+        if (newPwd.length < 8) {
+          showAlert(formUpdatePwd, 'Password must be at least 8 characters.', 'error');
           return;
         }
         if (newPwd !== confirmPwd) {
@@ -526,42 +553,43 @@
           return;
         }
 
-        var urlParams = new URLSearchParams(window.location.search);
-        var key = urlParams.get('key');
-
-        var btn = formUpdatePwd.querySelector('.btn-update-password') || formUpdatePwd.querySelector('button[type="submit"]');
-        var originalText = btn && btn.querySelector('span') ? btn.querySelector('span').textContent : 'Save New Password';
+        var btn = formUpdatePwd.querySelector('.btn-update-password') || formUpdatePwd.querySelector('.btn-update') || formUpdatePwd.querySelector('button[type="submit"]');
+        var originalText = btn && btn.querySelector('span') ? btn.querySelector('span').textContent : (btn ? btn.textContent.trim() : 'Save Password');
         setButtonLoading(btn, true, originalText, 'Saving...');
 
         var args = {
           cmd: 'frappe.core.doctype.user.user.update_password',
           new_password: newPwd,
-          key: key
+          confirm_password: confirmPwd,
+          key: currentKey,
+          logout_all_sessions: 1
         };
         if (oldPwd) args.old_password = oldPwd;
 
         if (typeof frappe !== 'undefined' && frappe.call) {
           frappe.call({
             type: 'POST',
-            url: '/',
+            method: 'frappe.core.doctype.user.user.update_password',
+            btn: btn,
             args: args,
             freeze: true,
             statusCode: {
               200: function (r) {
                 setButtonLoading(btn, false, originalText, originalText);
-                showAlert(formUpdatePwd, 'Password updated successfully! Redirecting...', 'success');
+                showAlert(formUpdatePwd, 'Password saved successfully! Redirecting...', 'success');
                 setTimeout(function () {
-                  window.location.href = (typeof r.message === 'string' && r.message.startsWith('/')) ? r.message : '/app';
+                  var dest = (typeof r.message === 'string' && r.message.startsWith('/')) ? r.message : '/app';
+                  window.location.href = dest;
                 }, 1200);
               },
               401: function () {
                 setButtonLoading(btn, false, originalText, originalText);
-                showAlert(formUpdatePwd, 'Unauthorized or session expired.', 'error');
+                showAlert(formUpdatePwd, 'Unauthorized or session expired. Please verify your old password.', 'error');
               },
               410: function (xhr) {
                 setButtonLoading(btn, false, originalText, originalText);
                 var err = xhr.responseJSON || {};
-                showAlert(formUpdatePwd, err.message || 'Link expired or invalid.', 'error');
+                showAlert(formUpdatePwd, err.message || 'Password setup link expired or invalid.', 'error');
               },
               417: function (xhr) {
                 setButtonLoading(btn, false, originalText, originalText);
@@ -583,6 +611,32 @@
                 showAlert(formUpdatePwd, 'Server error. Please try again.', 'error');
               }
             }
+          });
+        } else {
+          var csrfToken = (window.frappe && window.frappe.csrf_token) || '';
+          fetch('/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Frappe-CSRF-Token': csrfToken
+            },
+            body: new URLSearchParams(args).toString()
+          }).then(function (res) {
+            return res.json().then(function (data) {
+              setButtonLoading(btn, false, originalText, originalText);
+              if (res.ok) {
+                showAlert(formUpdatePwd, 'Password saved successfully! Redirecting...', 'success');
+                setTimeout(function () {
+                  var dest = (data.message && typeof data.message === 'string' && data.message.startsWith('/')) ? data.message : '/app';
+                  window.location.href = dest;
+                }, 1200);
+              } else {
+                showAlert(formUpdatePwd, data.message || 'Password update failed.', 'error');
+              }
+            });
+          }).catch(function () {
+            setButtonLoading(btn, false, originalText, originalText);
+            showAlert(formUpdatePwd, 'Network error. Please try again.', 'error');
           });
         }
       });
