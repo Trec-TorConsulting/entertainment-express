@@ -104,3 +104,96 @@ def search(query: str) -> list[dict]:
     except Exception:
         pass
     return results
+
+
+@frappe.whitelist()
+def get_my_account() -> dict:
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw("Authentication required.", frappe.PermissionError)
+
+    roles = frappe.get_roles(user) or []
+    row = frappe.db.get_value(
+        "User",
+        user,
+        ["full_name", "first_name", "last_name", "email", "mobile_no", "phone", "user_image"],
+        as_dict=True,
+    ) or {}
+
+    phone = row.get("mobile_no") or row.get("phone") or ""
+    if not phone and frappe.db.exists("Employee", {"user_id": user}):
+        phone = frappe.db.get_value("Employee", {"user_id": user}, "cell_number") or ""
+
+    company = (
+        frappe.db.get_default("company")
+        or frappe.db.get_single_value("Global Defaults", "default_company")
+        or frappe.db.get_single_value("Website Settings", "app_name")
+        or "Your Company"
+    )
+
+    plan_info = {"plan": "Enterprise", "status": "active", "price": "$149 / mo"}
+    try:
+        from entertainment_express.api.saas_billing import my_plan
+        plan_info = my_plan()
+    except Exception:
+        pass
+
+    require_2fa = False
+    try:
+        from entertainment_express.api.hardening import security_status
+        sec = security_status()
+        require_2fa = bool(sec.get("require_2fa"))
+    except Exception:
+        pass
+
+    return {
+        "user": user,
+        "full_name": row.get("full_name") or row.get("first_name") or user,
+        "first_name": row.get("first_name") or "",
+        "last_name": row.get("last_name") or "",
+        "email": row.get("email") or user,
+        "phone": phone,
+        "image": row.get("user_image"),
+        "roles": roles,
+        "company": company,
+        "plan": plan_info,
+        "require_2fa": require_2fa,
+        "site": getattr(frappe.local, "site", "") or "",
+    }
+
+
+@frappe.whitelist()
+def update_my_profile(full_name: str | None = None, phone: str | None = None) -> dict:
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw("Authentication required.", frappe.PermissionError)
+
+    updates = {}
+    if full_name is not None:
+        full_name = full_name.strip()
+        if full_name:
+            updates["full_name"] = full_name
+            parts = full_name.split(" ", 1)
+            updates["first_name"] = parts[0]
+            updates["last_name"] = parts[1] if len(parts) > 1 else ""
+
+    if phone is not None:
+        updates["mobile_no"] = phone.strip()
+        updates["phone"] = phone.strip()
+
+    if updates:
+        frappe.db.set_value("User", user, updates)
+        if frappe.db.exists("Employee", {"user_id": user}):
+            emp_updates = {}
+            if "first_name" in updates:
+                emp_updates["first_name"] = updates["first_name"]
+                emp_updates["last_name"] = updates.get("last_name", "")
+            if "mobile_no" in updates:
+                emp_updates["cell_number"] = updates["mobile_no"]
+            if emp_updates:
+                emp_name = frappe.db.get_value("Employee", {"user_id": user}, "name")
+                frappe.db.set_value("Employee", emp_name, emp_updates)
+        frappe.db.commit()
+
+    return {"ok": True, "user": user, "full_name": updates.get("full_name")}
+

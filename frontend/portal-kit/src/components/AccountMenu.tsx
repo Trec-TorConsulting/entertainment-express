@@ -10,7 +10,7 @@ function initials(name: string) {
   return ((parts[0][0] || "") + (parts[1]?.[0] || "")).toUpperCase();
 }
 
-async function signOut() {
+export async function signOut() {
   const csrf = getSessionBootstrap().csrf_token || "";
   try {
     await fetch("/api/method/logout", {
@@ -203,76 +203,112 @@ export function InboxMenu() {
 export function AccountPanel() {
   const boot = getSessionBootstrap() || {};
   const person = boot.person || { full_name: boot.user || "You", email: boot.user || "", name: boot.user || "You" };
-  const roles = (boot.roles || []).filter((role) => role.startsWith("EE ") || role === "SaaS Operator");
+  const roles = (boot.roles || []).filter((role) => role.startsWith("EE ") || role === "SaaS Operator" || role === "System Manager");
   const [prefs, setPrefs] = React.useState<any>(null);
   const [hint, setHint] = React.useState("");
+
   React.useEffect(() => {
     call("entertainment_express.api.portal_notifications.get_my_preferences", {})
       .then(setPrefs)
       .catch(() => setPrefs(null));
   }, []);
+
   return (
-    <section className="ee-account-panel">
-      <h1>Your profile</h1>
-      <p className="ee-lead">Signed in through your company workspace. Password and 2FA stay on the login screen.</p>
-      <dl>
+    <div className="max-w-2xl mx-auto p-6 space-y-6 animate-in fade-in duration-200">
+      <div className="flex items-center justify-between pb-4 border-b border-[var(--ee-border)]">
         <div>
-          <dt>Name</dt>
-          <dd>{person.full_name}</dd>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--ee-text)]">Your Profile & Workspace Account</h1>
+          <p className="text-sm text-[var(--ee-muted)] mt-1">
+            Signed in through your company workspace. Credentials and 2FA are managed through authentication security.
+          </p>
         </div>
-        <div>
-          <dt>Email</dt>
-          <dd>{person.email}</dd>
+      </div>
+
+      <div className="rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface-raised)] shadow-sm p-6 space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--ee-muted)]">Profile Details</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-3.5 rounded-lg bg-[var(--ee-surface-inset)] border border-[var(--ee-border)]">
+            <span className="text-xs text-[var(--ee-muted)] block">Name</span>
+            <span className="text-sm font-semibold text-[var(--ee-text)]">{person.full_name}</span>
+          </div>
+          <div className="p-3.5 rounded-lg bg-[var(--ee-surface-inset)] border border-[var(--ee-border)]">
+            <span className="text-xs text-[var(--ee-muted)] block">Email</span>
+            <span className="text-sm font-semibold text-[var(--ee-text)]">{person.email}</span>
+          </div>
+          <div className="p-3.5 rounded-lg bg-[var(--ee-surface-inset)] border border-[var(--ee-border)] sm:col-span-2">
+            <span className="text-xs text-[var(--ee-muted)] block">Access Roles</span>
+            <span className="text-sm font-semibold text-[var(--ee-brand)]">{roles.join(" · ") || "Workspace Member"}</span>
+          </div>
         </div>
-        <div>
-          <dt>Access</dt>
-          <dd>{roles.join(" · ") || "Workspace member"}</dd>
-        </div>
-      </dl>
+      </div>
+
       {prefs ? (
-        <div className="ee-form" style={{ marginTop: "1rem" }}>
-          <h2 style={{ margin: 0 }}>How we reach you</h2>
-          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <input type="checkbox" checked={!!prefs.email} onChange={() => setPrefs({ ...prefs, email: prefs.email ? 0 : 1 })} />
-            Email
-          </label>
-          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <input type="checkbox" checked={!!prefs.sms} onChange={() => setPrefs({ ...prefs, sms: prefs.sms ? 0 : 1 })} />
-            Text
-          </label>
-          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <input type="checkbox" checked={!!prefs.whatsapp} onChange={() => setPrefs({ ...prefs, whatsapp: prefs.whatsapp ? 0 : 1 })} />
-            WhatsApp
-          </label>
-          <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <input type="checkbox" checked={!!prefs.push} onChange={() => setPrefs({ ...prefs, push: prefs.push ? 0 : 1 })} />
-            Phone alerts
-          </label>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.75rem" }}>
-            <FormField label="Quiet from">
-              <input type="time" value={prefs.quiet_from || ""} onChange={(e) => setPrefs({ ...prefs, quiet_from: e.target.value })} />
+        <div className="rounded-xl border border-[var(--ee-border)] bg-[var(--ee-surface-raised)] shadow-sm p-6 space-y-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--ee-muted)]">Notification Routing</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { key: "email", label: "Email" },
+              { key: "sms", label: "Text / SMS" },
+              { key: "whatsapp", label: "WhatsApp" },
+              { key: "push", label: "Mobile Push" }
+            ].map(({ key, label }) => (
+              <label key={key} className="flex items-center gap-2 p-3 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] cursor-pointer text-xs font-medium text-[var(--ee-text)]">
+                <input
+                  type="checkbox"
+                  className="rounded text-[var(--ee-brand)] focus:ring-[var(--ee-brand)]"
+                  checked={!!prefs[key]}
+                  onChange={() => setPrefs({ ...prefs, [key]: prefs[key] ? 0 : 1 })}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <FormField label="Quiet from (Evening)">
+              <input
+                type="time"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-sm text-[var(--ee-text)]"
+                value={prefs.quiet_from || ""}
+                onChange={(e) => setPrefs({ ...prefs, quiet_from: e.target.value })}
+              />
             </FormField>
-            <FormField label="Quiet until">
-              <input type="time" value={prefs.quiet_to || ""} onChange={(e) => setPrefs({ ...prefs, quiet_to: e.target.value })} />
+            <FormField label="Quiet until (Morning)">
+              <input
+                type="time"
+                className="w-full px-3 py-2 rounded-lg border border-[var(--ee-border)] bg-[var(--ee-surface-inset)] text-sm text-[var(--ee-text)]"
+                value={prefs.quiet_to || ""}
+                onChange={(e) => setPrefs({ ...prefs, quiet_to: e.target.value })}
+              />
             </FormField>
           </div>
-          {hint ? <p>{hint}</p> : null}
+
+          {hint && <p className="text-xs text-emerald-500 font-medium">{hint}</p>}
+
           <button
             type="button"
-            className="ee-btn"
+            className="px-4 py-2 rounded-lg bg-[var(--ee-brand)] text-white text-xs font-semibold hover:opacity-90 transition-opacity"
             onClick={async () => {
               await call("entertainment_express.api.portal_notifications.save_my_preferences", { values: prefs });
-              setHint("Saved.");
+              setHint("Preferences saved successfully.");
+              setTimeout(() => setHint(""), 3000);
             }}
           >
-            Save message settings
+            Save Message Settings
           </button>
         </div>
       ) : null}
-      <button type="button" className="ee-btn ee-btn--ghost" onClick={() => signOut()}>
-        Sign out
-      </button>
-    </section>
+
+      <div className="flex justify-end pt-2">
+        <button
+          type="button"
+          className="px-4 py-2 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 text-xs font-semibold transition-colors"
+          onClick={() => signOut()}
+        >
+          Sign Out of Workspace
+        </button>
+      </div>
+    </div>
   );
 }
 
