@@ -126,9 +126,9 @@ def _provision_create(job) -> None:
     #    this job, leaving the Provisioning Job stuck in "running".
     _log(job, "Bootstrapping tenant...")
     _bench_exec(job, [
-        "bench", "--site", site_name, "execute", "frappe.call",
+        "bench", "--site", site_name, "execute",
+        "entertainment_express.control_plane.bootstrap.run_bootstrap",
         "--kwargs", json.dumps({
-            "method": "entertainment_express.control_plane.bootstrap.run_bootstrap",
             "company_name": tenant.company_name,
             "primary_email": tenant.get("primary_email") or "",
             "primary_contact": tenant.get("primary_contact") or "",
