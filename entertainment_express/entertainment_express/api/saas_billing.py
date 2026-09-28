@@ -62,25 +62,26 @@ def _success_url(is_owner: bool) -> str:
 def ensure_subscription(tenant_name: str) -> dict:
     """Create trial/active Subscription if missing. Control-plane internal."""
     tenant = frappe.get_doc("Tenant", tenant_name)
-    plan = frappe.get_doc("Plan", tenant.plan)
+    plan_name = tenant.plan or frappe.db.get_value("Plan", {"status": ("in", ["Active", "active"])}, "name") or frappe.db.get_value("Plan", {}, "name")
+    plan = frappe.get_doc("Plan", plan_name) if plan_name else None
     existing = frappe.db.get_value("Subscription", {"tenant": tenant_name}, "name")
     if existing:
         push_plan_to_site(tenant_name)
         return {"subscription": existing, "status": frappe.db.get_value("Subscription", existing, "status")}
-    days = int(plan.trial_days or 0)
+    days = int(plan.trial_days or 0) if plan else 0
     sub = frappe.get_doc(
         {
             "doctype": "Subscription",
             "tenant": tenant_name,
-            "plan": plan.name,
+            "plan": plan.name if plan else None,
             "status": "trialing" if days else "active",
             "provider": "stripe",
             "current_period_start": now_datetime(),
             "current_period_end": add_days(now_datetime(), days or 30),
-            "mrr": flt(plan.price_monthly),
+            "mrr": flt(plan.price_monthly) if plan else 0.0,
         }
     )
-    sub.insert()
+    sub.insert(ignore_permissions=True)
     frappe.db.commit()
     push_plan_to_site(tenant_name)
     return {"subscription": sub.name, "status": sub.status}
@@ -440,7 +441,7 @@ def _upsert_subscription(obj):
         frappe.db.set_value("Subscription", name, values)
     else:
         tenant_doc = frappe.get_doc("Tenant", tenant)
-        frappe.get_doc({"doctype": "Subscription", "tenant": tenant, "plan": tenant_doc.plan, **values}).insert()
+        frappe.get_doc({"doctype": "Subscription", "tenant": tenant, "plan": tenant_doc.plan, **values}).insert(ignore_permissions=True)
     push_plan_to_site(tenant)
 
 

@@ -40,6 +40,12 @@
   function handleRouteHash() {
     var rawHash = window.location.hash || '#login';
     var targetSecId = getTargetSectionId(rawHash);
+
+    // If the targeted section is not rendered in the DOM (e.g. #signup when signup is disabled), fall back to login-section
+    if (!document.getElementById(targetSecId)) {
+      targetSecId = 'login-section';
+    }
+
     var tabs = document.querySelectorAll('.ee-auth-nav-tab');
     var sections = document.querySelectorAll('.ee-auth-section');
 
@@ -339,13 +345,41 @@
                   showAlert(formSignup, successMsg, 'success');
                 }
               },
+              400: function (xhr) {
+                setButtonLoading(btn, false, originalText, originalText);
+                var msg = 'Invalid signup details. Please check your name and email.';
+                if (xhr && xhr.responseJSON && xhr.responseJSON._server_messages) {
+                  try {
+                    var msgs = JSON.parse(xhr.responseJSON._server_messages);
+                    var p = typeof msgs[0] === 'string' ? JSON.parse(msgs[0]) : msgs[0];
+                    msg = p.message || msg;
+                  } catch (e) {}
+                }
+                showAlert(formSignup, msg, 'error');
+              },
               401: function () {
                 setButtonLoading(btn, false, originalText, originalText);
                 showAlert(formSignup, 'Signup request failed. Please try again.', 'error');
               },
+              403: function (xhr) {
+                setButtonLoading(btn, false, originalText, originalText);
+                var msg = 'User registration is currently restricted on this workspace.';
+                if (xhr && xhr.responseJSON && xhr.responseJSON._server_messages) {
+                  try {
+                    var msgs = JSON.parse(xhr.responseJSON._server_messages);
+                    var p = typeof msgs[0] === 'string' ? JSON.parse(msgs[0]) : msgs[0];
+                    msg = p.message || msg;
+                  } catch (e) {}
+                }
+                showAlert(formSignup, msg, 'error');
+              },
               404: function () {
                 setButtonLoading(btn, false, originalText, originalText);
-                showAlert(formSignup, 'Not found. Please try again.', 'error');
+                showAlert(formSignup, 'Signup service not found. Please try again.', 'error');
+              },
+              409: function () {
+                setButtonLoading(btn, false, originalText, originalText);
+                showAlert(formSignup, 'An account with this email address already exists. Please sign in instead.', 'error');
               },
               417: function (xhr) {
                 setButtonLoading(btn, false, originalText, originalText);
@@ -364,9 +398,53 @@
               },
               500: function () {
                 setButtonLoading(btn, false, originalText, originalText);
-                showAlert(formSignup, 'Server error during signup.', 'error');
+                showAlert(formSignup, 'Server error during signup. Please try again later.', 'error');
               }
+            },
+            error: function (r) {
+              setButtonLoading(btn, false, originalText, originalText);
+              var msg = 'Unable to complete account registration. Please try again.';
+              if (r && r._server_messages) {
+                try {
+                  var msgs = JSON.parse(r._server_messages);
+                  var p = typeof msgs[0] === 'string' ? JSON.parse(msgs[0]) : msgs[0];
+                  msg = p.message || msg;
+                } catch (e) {}
+              }
+              showAlert(formSignup, msg, 'error');
             }
+          });
+        } else {
+          // Fallback direct POST to /
+          fetch('/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              'Accept': 'application/json'
+            },
+            body: new URLSearchParams({
+              cmd: 'frappe.core.doctype.user.user.sign_up',
+              email: email,
+              full_name: fullName,
+              redirect_to: redirectTo
+            })
+          })
+          .then(function (res) {
+            setButtonLoading(btn, false, originalText, originalText);
+            return res.json();
+          })
+          .then(function (data) {
+            if (data.message && (Array.isArray(data.message) ? data.message[0] !== 0 : true)) {
+              var sMsg = (Array.isArray(data.message) ? data.message[1] : data.message) || 'Account created! Please check your email.';
+              showAlert(formSignup, sMsg, 'success');
+            } else {
+              var eMsg = (Array.isArray(data.message) ? data.message[1] : data.message) || 'Signup failed.';
+              showAlert(formSignup, eMsg, 'error');
+            }
+          })
+          .catch(function () {
+            setButtonLoading(btn, false, originalText, originalText);
+            showAlert(formSignup, 'Network error. Please try again.', 'error');
           });
         }
       });

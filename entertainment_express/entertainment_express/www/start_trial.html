@@ -50,19 +50,34 @@
   var successPanel = document.getElementById("trial-success");
   var status = document.getElementById("trial-status");
   var form = document.getElementById("ee-trial-form");
+  var companyInput = document.getElementById("trial-company");
   var slugInput = document.getElementById("trial-slug");
   var slugPreview = document.getElementById("trial-slug-preview");
+  var submitBtn = form ? form.querySelector("button[type='submit']") : null;
+  var slugUserEdited = false;
+
+  function slugify(text) {
+    return (text || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50);
+  }
 
   function workspaceUrl(slug) {
-    var clean = (slug || "your-company").toLowerCase().replace(/[^a-z0-9-]/g, "") || "your-company";
+    var clean = slugify(slug) || "your-company";
     return "https://" + clean + "." + tenantDomain;
   }
 
   function updatePreview() {
-    slugPreview.textContent = workspaceUrl(slugInput.value);
+    if (slugPreview && slugInput) {
+      slugPreview.textContent = workspaceUrl(slugInput.value);
+    }
   }
 
   function showError(msg) {
+    if (!status) return;
     status.style.display = "block";
     status.style.color = "#dc2626";
     status.style.background = "#fee2e2";
@@ -72,9 +87,14 @@
     status.style.marginTop = "1rem";
     status.style.fontWeight = "500";
     status.textContent = msg || "Unable to submit application. Please try again.";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Continue to checkout";
+    }
   }
 
   function showInfo(msg) {
+    if (!status) return;
     status.style.display = "block";
     status.style.color = "#1e293b";
     status.style.background = "#f1f5f9";
@@ -88,11 +108,13 @@
   if (params.get("success") === "1") {
     var slug = params.get("slug") || "";
     var siteUrl = workspaceUrl(slug);
-    successPanel.hidden = false;
-    successPanel.innerHTML =
-      "<h2>Payment received — we're building your workspace</h2>" +
-      "<p>Your site will be ready at <a href='" + siteUrl + "'><strong>" + siteUrl + "</strong></a> " +
-      "within a few minutes. Watch your inbox for a welcome email with a link to set your password.</p>";
+    if (successPanel) {
+      successPanel.hidden = false;
+      successPanel.innerHTML =
+        "<h2>Payment received — we're building your workspace</h2>" +
+        "<p>Your site will be ready at <a href='" + siteUrl + "'><strong>" + siteUrl + "</strong></a> " +
+        "within a few minutes. Watch your inbox for a welcome email with a link to set your password.</p>";
+    }
     if (form) {
       form.style.display = "none";
     }
@@ -103,18 +125,60 @@
     showError("Checkout was canceled. You can try again when you're ready.");
   }
 
-  if (!form) {
+  if (!form || !slugInput) {
     return;
   }
 
-  slugInput.addEventListener("input", updatePreview);
+  if (companyInput) {
+    companyInput.addEventListener("input", function() {
+      if (status) status.style.display = "none";
+      if (!slugUserEdited || !slugInput.value.trim()) {
+        slugInput.value = slugify(companyInput.value);
+        updatePreview();
+      }
+    });
+  }
+
+  slugInput.addEventListener("input", function() {
+    slugUserEdited = true;
+    if (status) status.style.display = "none";
+    var raw = slugInput.value;
+    var sanitized = raw.toLowerCase().replace(/[^a-z0-9\-]/g, "-").replace(/-{2,}/g, "-");
+    if (raw !== sanitized) {
+      slugInput.value = sanitized;
+    }
+    updatePreview();
+  });
+
+  slugInput.addEventListener("blur", function() {
+    slugInput.value = slugify(slugInput.value);
+    updatePreview();
+  });
+
   updatePreview();
 
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
+
+    var cleanSlug = slugify(slugInput.value);
+    slugInput.value = cleanSlug;
+    updatePreview();
+
+    if (!cleanSlug || cleanSlug.length < 3) {
+      showError("Please enter a workspace address with at least 3 letters or numbers.");
+      slugInput.focus();
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Setting up your workspace...";
+    }
     showInfo("Submitting...");
 
     var data = Object.fromEntries(new FormData(form).entries());
+    data.requested_slug = cleanSlug;
+
     try {
       var res = await frappe.call({
         method: "entertainment_express.api.marketing.start_trial",
@@ -142,15 +206,19 @@
       }
       if (message.manual_review) {
         showInfo((message.message || "Application submitted.") +
-          " Your workspace will be " + (message.site_url || workspaceUrl(data.requested_slug)) + ".");
+          " Your workspace will be " + (message.site_url || workspaceUrl(cleanSlug)) + ".");
       } else {
-        showInfo("Application submitted.");
+        showInfo("Application submitted! Your workspace will be " + (message.site_url || workspaceUrl(cleanSlug)) + ".");
       }
       if (typeof window.eeTrackConversion === "function") {
         window.eeTrackConversion("trial_started");
       }
       form.reset();
       updatePreview();
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Continue to checkout";
+      }
     } catch (err) {
       showError(err.message || "Unable to submit application. Please try again.");
     }

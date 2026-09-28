@@ -215,6 +215,10 @@ def enforce_coming_soon() -> None:
         or path.startswith(COMING_SOON_PATH + "/")
         or path.startswith("/login")
         or path.startswith("/logout")
+        or path == "/signup"
+        or path.startswith("/signup/")
+        or path == "/start-trial"
+        or path.startswith("/start-trial/")
         or path.startswith("/api/")
         or path.startswith("/assets/")
         or path.startswith("/files/")

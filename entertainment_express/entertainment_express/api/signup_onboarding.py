@@ -91,55 +91,78 @@ def create_signup_checkout(application_name: str, interval: str = "month") -> di
     if app.status != "new":
         frappe.throw("This signup application is no longer available for checkout.")
 
-    plan = frappe.get_doc("Plan", app.plan)
-    from entertainment_express.api.saas_billing import _stripe
+    plan_name = app.plan
+    if not plan_name or not frappe.db.exists("Plan", plan_name):
+        plan_name = frappe.db.get_value("Plan", {"status": ("in", ["Active", "active"])}, "name") or frappe.db.get_value("Plan", {}, "name")
+        if plan_name:
+            app.plan = plan_name
+            app.save(ignore_permissions=True)
+            frappe.db.commit()
 
-    stripe = _stripe()
-    price = plan.get("stripe_price_annual") if interval == "year" else plan.get("stripe_price_monthly")
-    unit = int(round(flt(plan.price_annual if interval == "year" else plan.price_monthly) * 100))
-    currency = (plan.currency or "usd").lower()
-    product_name = f"Entertainment Express — {plan.plan_name}"
+    if not plan_name:
+        return {"checkout_url": None}
 
-    success = (
-        f"{marketing_public_url('/start-trial')}"
-        f"?success=1&application={quote(app.name)}&slug={quote(app.requested_slug)}"
-    )
-    cancel = f"{marketing_public_url('/start-trial')}?plan={plan.plan_code}&canceled=1"
+    plan = frappe.get_doc("Plan", plan_name)
 
-    kwargs = {
-        "mode": "subscription",
-        "success_url": success,
-        "cancel_url": cancel,
-        "customer_email": app.contact_email,
-        "metadata": {
-            "signup_application": app.name,
-            "requested_slug": app.requested_slug,
-            "plan": plan.name,
-            "company_name": app.company_name,
-            "contact_email": app.contact_email,
-        },
-    }
-    trial_days = int(plan.trial_days or 0)
-    if trial_days > 0:
-        kwargs["subscription_data"] = {"trial_period_days": trial_days}
+    try:
+        from entertainment_express.api.saas_billing import _stripe
 
-    if price:
-        kwargs["line_items"] = [{"price": price, "quantity": 1}]
-    else:
-        kwargs["line_items"] = [
-            {
-                "price_data": {
-                    "currency": currency,
-                    "recurring": {"interval": "year" if interval == "year" else "month"},
-                    "unit_amount": unit,
-                    "product_data": {"name": product_name},
-                },
-                "quantity": 1,
-            }
-        ]
+        stripe = _stripe()
+        price = plan.get("stripe_price_annual") if interval == "year" else plan.get("stripe_price_monthly")
+        unit = int(round(flt(plan.price_annual if interval == "year" else plan.price_monthly) * 100))
+        currency = (plan.currency or "usd").lower()
+        product_name = f"Entertainment Express — {plan.plan_name}"
 
-    session = stripe.checkout.Session.create(**kwargs)
-    return {"checkout_url": session.url, "session_id": session.id}
+        success = (
+            f"{marketing_public_url('/start-trial')}"
+            f"?success=1&application={quote(app.name)}&slug={quote(app.requested_slug)}"
+        )
+        cancel = f"{marketing_public_url('/start-trial')}?plan={plan.plan_code}&canceled=1"
+
+        kwargs = {
+            "mode": "subscription",
+            "success_url": success,
+            "cancel_url": cancel,
+            "customer_email": app.contact_email,
+            "metadata": {
+                "signup_application": app.name,
+                "requested_slug": app.requested_slug,
+                "plan": plan.name,
+                "company_name": app.company_name,
+                "contact_email": app.contact_email,
+            },
+        }
+        trial_days = int(plan.trial_days or 0)
+        if trial_days > 0:
+            kwargs["subscription_data"] = {"trial_period_days": trial_days}
+
+        if price:
+            kwargs["line_items"] = [{"price": price, "quantity": 1}]
+        else:
+            kwargs["line_items"] = [
+                {
+                    "price_data": {
+                        "currency": currency,
+                        "recurring": {"interval": "year" if interval == "year" else "month"},
+                        "unit_amount": unit,
+                        "product_data": {"name": product_name},
+                    },
+                    "quantity": 1,
+                }
+            ]
+
+        session = stripe.checkout.Session.create(**kwargs)
+        return {"checkout_url": session.url, "session_id": session.id}
+    except Exception as e:
+        frappe.logger("control_plane").warning(f"create_signup_checkout Stripe session creation skipped: {e}")
+        try:
+            frappe.log_error(
+                title="stripe_checkout_fallback",
+                message=f"create_signup_checkout failed for {application_name}: {e}\n{frappe.get_traceback()}",
+            )
+        except Exception:
+            pass
+        return {"checkout_url": None}
 
 
 def handle_signup_checkout_completed(session: dict) -> dict | None:

@@ -89,7 +89,7 @@
 - [x] 10.2 Create `tests/e2e/04-public/pricing-page.spec.ts` — verify pricing page loads, plan cards display, annual/monthly toggle works (if present), CTA buttons navigate to signup.
 - [ ] 10.3 Create `tests/e2e/04-public/solutions-pages.spec.ts` — verify solutions page loads, click each vertical-specific page, FAQ accordions expand/collapse.
 - [ ] 10.4 Create `tests/e2e/04-public/features-pages.spec.ts` — verify features page loads, feature detail pages load on click.
-- [ ] 10.5 Create `tests/e2e/04-public/signup-trial.spec.ts` — verify signup form loads, form validation on empty submit, email format validation, successful submission navigates to confirmation page.
+- [x] 10.5 Create `tests/e2e/04-public/signup-trial.spec.ts` — verify signup form loads, form validation on empty submit, email format validation, successful submission navigates to confirmation page.
 - [ ] 10.6 Create `tests/e2e/04-public/tenant-homepage.spec.ts` — verify tenant homepage at `EE_E2E_BASE`, service cards display, booking CTA navigates.
 - [ ] 10.7 Create `tests/e2e/04-public/request-quote-form.spec.ts` — fill quote request form (Name, Email, Phone, Event Date, Event Type, Details → submit → verify success message), test validation on empty required fields.
 - [x] 10.8 Create `tests/e2e/04-public/guest-music-requests.spec.ts` — fill music request form (Song Name, Artist, Dedication → submit → verify confirmation).

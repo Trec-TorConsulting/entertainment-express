@@ -478,7 +478,10 @@ def start_trial(payload=None):
             msg = str(e.args[0])
         return {"ok": False, "error": msg}
     except Exception as e:
-        frappe.log_error(f"start_trial error: {e}")
+        try:
+            frappe.log_error(title="start_trial_error", message=f"start_trial error: {e}\n{frappe.get_traceback()}")
+        except Exception:
+            pass
         return {"ok": False, "error": _("Unable to submit application. Please try again.")}
 
 

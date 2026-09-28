@@ -7,40 +7,67 @@
   <h2>Start Your Free Trial</h2>
   <p class="text-muted">Set up your mobile entertainment company on Entertainment Express.</p>
 
-  <div id="signup-success" class="alert alert-success d-none"></div>
-  <div id="signup-error" class="alert alert-danger d-none"></div>
+  <div id="signup-success" class="alert alert-success d-none" role="alert"></div>
+  <div id="signup-error" class="alert alert-danger d-none" role="alert"></div>
 
-  <form id="signup-form">
+  <form id="signup-form" novalidate>
     <div class="mb-3">
-      <label class="form-label">Company Name *</label>
-      <input type="text" class="form-control" name="company_name" required maxlength="200">
+      <label class="form-label" for="company-name">Company Name *</label>
+      <input type="text" class="form-control" name="company_name" id="company-name" required maxlength="200" placeholder="e.g. SoundEFX DJs" autocomplete="organization">
+      <div class="invalid-feedback">Please enter your company name.</div>
     </div>
     <div class="mb-3">
-      <label class="form-label">Your workspace address *</label>
+      <label class="form-label" for="signup-slug">Your workspace address *</label>
       <div class="input-group">
         <input type="text" class="form-control" name="requested_slug" id="signup-slug" required maxlength="50"
                pattern="[a-z0-9][a-z0-9\-]{1,48}[a-z0-9]"
-               placeholder="your-company">
+               title="Lowercase letters, numbers, and hyphens only (3-50 characters)"
+               placeholder="your-company" autocomplete="off" autocapitalize="none" spellcheck="false">
         <span class="input-group-text">.{{ tenant_domain or "entx.app" }}</span>
       </div>
       <div class="form-text">You will get: <strong id="signup-slug-preview">https://your-company.{{ tenant_domain or "entx.app" }}</strong></div>
+      <div class="invalid-feedback" id="slug-feedback">Workspace address must be 3–50 lowercase letters, numbers, or hyphens.</div>
     </div>
     <div class="mb-3">
-      <label class="form-label">Your Email *</label>
-      <input type="email" class="form-control" name="contact_email" required>
+      <label class="form-label" for="contact-email">Your Email *</label>
+      <input type="email" class="form-control" name="contact_email" id="contact-email" required placeholder="you@example.com" autocomplete="email">
+      <div class="invalid-feedback">Please enter a valid email address.</div>
     </div>
-    <button type="submit" class="btn btn-primary btn-lg w-100">Continue to checkout</button>
+    <input type="hidden" name="plan_code" value="starter">
+    <button type="submit" id="signup-submit-btn" class="btn btn-primary btn-lg w-100">
+      <span class="btn-text">Continue to checkout</span>
+      <span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+    </button>
   </form>
 </div>
 
 <script>
 (function () {
   var tenantDomain = {{ (tenant_domain or "entx.app") | tojson }};
+  var companyInput = document.getElementById("company-name");
   var slugInput = document.getElementById("signup-slug");
+  var emailInput = document.getElementById("contact-email");
   var slugPreview = document.getElementById("signup-slug-preview");
+  var submitBtn = document.getElementById("signup-submit-btn");
+  var btnText = submitBtn.querySelector(".btn-text");
+  var spinner = submitBtn.querySelector(".spinner-border");
+  var successEl = document.getElementById("signup-success");
+  var errorEl = document.getElementById("signup-error");
+  var form = document.getElementById("signup-form");
+
+  var slugUserEdited = false;
+
+  function slugify(text) {
+    return (text || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50);
+  }
 
   function workspaceUrl(slug) {
-    var clean = (slug || "your-company").toLowerCase().replace(/[^a-z0-9-]/g, "") || "your-company";
+    var clean = slugify(slug) || "your-company";
     return "https://" + clean + "." + tenantDomain;
   }
 
@@ -48,33 +75,145 @@
     slugPreview.textContent = workspaceUrl(slugInput.value);
   }
 
-  slugInput.addEventListener("input", updatePreview);
+  function hideError() {
+    errorEl.classList.add("d-none");
+    errorEl.textContent = "";
+  }
+
+  function showError(msg) {
+    errorEl.textContent = msg || "An error occurred. Please try again.";
+    errorEl.classList.remove("d-none");
+  }
+
+  function setLoading(isLoading) {
+    if (isLoading) {
+      submitBtn.disabled = true;
+      btnText.textContent = "Setting up your workspace...";
+      spinner.classList.remove("d-none");
+    } else {
+      submitBtn.disabled = false;
+      btnText.textContent = "Continue to checkout";
+      spinner.classList.add("d-none");
+    }
+  }
+
+  companyInput.addEventListener("input", function() {
+    hideError();
+    companyInput.classList.remove("is-invalid");
+    if (!slugUserEdited || !slugInput.value.trim()) {
+      slugInput.value = slugify(companyInput.value);
+      updatePreview();
+    }
+  });
+
+  slugInput.addEventListener("input", function() {
+    slugUserEdited = true;
+    hideError();
+    slugInput.classList.remove("is-invalid");
+    var raw = slugInput.value;
+    var sanitized = raw.toLowerCase().replace(/[^a-z0-9\-]/g, "-").replace(/-{2,}/g, "-");
+    if (raw !== sanitized) {
+      slugInput.value = sanitized;
+    }
+    updatePreview();
+  });
+
+  slugInput.addEventListener("blur", function() {
+    slugInput.value = slugify(slugInput.value);
+    updatePreview();
+  });
+
+  emailInput.addEventListener("input", function() {
+    hideError();
+    emailInput.classList.remove("is-invalid");
+  });
+
   updatePreview();
 
-  document.getElementById('signup-form').addEventListener('submit', async function(e) {
+  form.addEventListener("submit", async function(e) {
     e.preventDefault();
-    var data = Object.fromEntries(new FormData(e.target));
+    hideError();
+
+    var company = companyInput.value.trim();
+    var email = emailInput.value.trim();
+    var cleanSlug = slugify(slugInput.value);
+    slugInput.value = cleanSlug;
+    updatePreview();
+
+    var valid = true;
+    if (!company) {
+      companyInput.classList.add("is-invalid");
+      valid = false;
+    }
+    if (!cleanSlug || cleanSlug.length < 3) {
+      slugInput.classList.add("is-invalid");
+      document.getElementById("slug-feedback").textContent = "Workspace address must be at least 3 characters.";
+      valid = false;
+    }
+    if (!email || !email.includes("@")) {
+      emailInput.classList.add("is-invalid");
+      valid = false;
+    }
+
+    if (!valid) {
+      return;
+    }
+
+    setLoading(true);
+    var data = Object.fromEntries(new FormData(form));
+    data.company_name = company;
+    data.requested_slug = cleanSlug;
+    data.contact_email = email;
+
     try {
       var res = await frappe.call({
-        method: 'entertainment_express.api.public.submit_signup',
+        method: "entertainment_express.api.public.submit_signup",
         args: data,
+        error: function(r) {
+          var serverMsg = "";
+          if (r && r._server_messages) {
+            try {
+              var list = JSON.parse(r._server_messages);
+              if (list.length > 0) {
+                var item = typeof list[0] === "string" ? JSON.parse(list[0]) : list[0];
+                serverMsg = item.message || list[0];
+              }
+            } catch (err) {}
+          }
+          showError(serverMsg || "Unable to submit signup application. Please check your details and try again.");
+          setLoading(false);
+        }
       });
-      var message = res.message || {};
+
+      var message = (res && res.message) ? res.message : {};
+
+      if (message.ok === false || message.status === "error" || message.error) {
+        showError(message.error || "Unable to submit signup application. Please try another workspace address.");
+        if (message.error && message.error.toLowerCase().includes("slug")) {
+          slugInput.classList.add("is-invalid");
+          slugInput.focus();
+        }
+        setLoading(false);
+        return;
+      }
+
       if (message.checkout_url) {
         window.location.href = message.checkout_url;
         return;
       }
-      if (message.status === 'submitted' || message.ok) {
-        var success = document.getElementById('signup-success');
-        success.textContent = (message.message || 'Application submitted!') +
-          ' Your workspace will be ' + (message.site_url || workspaceUrl(data.requested_slug)) + '.';
-        success.classList.remove('d-none');
-        e.target.style.display = 'none';
+
+      if (message.status === "submitted" || message.ok) {
+        successEl.textContent = (message.message || "Application submitted!") +
+          " Your workspace will be " + (message.site_url || workspaceUrl(cleanSlug)) + ".";
+        successEl.classList.remove("d-none");
+        form.style.display = "none";
+      } else {
+        showError("Unexpected response. Please refresh and try again.");
+        setLoading(false);
       }
     } catch (err) {
-      var el = document.getElementById('signup-error');
-      el.textContent = err.message || 'An error occurred. Please try again.';
-      el.classList.remove('d-none');
+      showError(err.message || "An error occurred during submission. Please try again.");
+      setLoading(false);
     }
   });
 })();

@@ -70,22 +70,32 @@ def submit_signup(
     Control-plane endpoint — only valid on admin.{base_domain}.
     """
     try:
-        if not contact_email or "@" not in contact_email:
-            return {"ok": False, "status": "error", "error": "Valid email required."}
+        import re
+
+        if not (contact_email or "").strip() or "@" not in contact_email:
+            return {"ok": False, "status": "error", "error": "A valid email address is required."}
+
+        clean_slug = re.sub(r"[^a-z0-9\-]+", "-", (requested_slug or "").strip().lower()).strip("-")[:50]
+        if not clean_slug:
+            return {"ok": False, "status": "error", "error": "Requested workspace address is required."}
 
         from entertainment_express.control_plane.provisioner import validate_slug
 
-        validate_slug(requested_slug[:50].lower().strip())
+        validate_slug(clean_slug)
 
-        plan = frappe.db.get_value("Plan", {"plan_code": plan_code, "status": "Active"}, "name")
+        plan = frappe.db.get_value("Plan", {"plan_code": plan_code, "status": ("in", ["Active", "active"])}, "name")
         if not plan:
-            plan = frappe.db.get_value("Plan", {"status": "Active"}, "name")
+            plan = frappe.db.get_value("Plan", {"plan_code": plan_code}, "name")
+        if not plan:
+            plan = frappe.db.get_value("Plan", {"status": ("in", ["Active", "active"])}, "name")
+        if not plan:
+            plan = frappe.db.get_value("Plan", {}, "name")
 
         app = frappe.get_doc({
             "doctype": "Signup Application",
-            "company_name": company_name[:200],
-            "requested_slug": requested_slug[:50].lower().strip(),
-            "contact_email": contact_email[:240],
+            "company_name": (company_name or "").strip()[:200],
+            "requested_slug": clean_slug,
+            "contact_email": contact_email.strip()[:240],
             "plan": plan,
             "status": "new",
         })
@@ -94,7 +104,7 @@ def submit_signup(
 
         from entertainment_express.api.signup_onboarding import signup_handoff
 
-        handoff = signup_handoff(app.name, app.requested_slug.lower().strip())
+        handoff = signup_handoff(app.name, clean_slug)
         return {
             "ok": True,
             "status": "submitted",
@@ -107,8 +117,14 @@ def submit_signup(
             msg = str(e.args[0])
         return {"ok": False, "status": "error", "error": msg}
     except Exception as e:
-        frappe.log_error(f"submit_signup error: {e}")
-        return {"ok": False, "status": "error", "error": "An error occurred during submission."}
+        try:
+            frappe.log_error(
+                title="submit_signup_error",
+                message=f"submit_signup error for {company_name} ({requested_slug}): {e}\n{frappe.get_traceback()}",
+            )
+        except Exception:
+            pass
+        return {"ok": False, "status": "error", "error": "An error occurred during submission. Please try again."}
 
 
 
