@@ -1463,6 +1463,116 @@ SEED_ARTICLES = [
   </div>
 </div>
 """
+    },
+    {
+        "title": "Calendar Synchronization: Google Calendar & Microsoft 365 Outlook",
+        "category": "APIs, Hardware & Webhooks",
+        "route": "calendar-google-outlook-sync",
+        "role": "Developer",
+        "level": "Intermediate",
+        "read_time": "5 min read",
+        "summary": "Connect two-way live calendar sync for event bookings, crew call times, and personal calendar busy-time conflict detection.",
+        "content": """
+<h2>Two-Way Calendar Synchronization</h2>
+<p>Keep your entire event schedule synchronized across your mobile devices, Google Calendar, and Microsoft 365 Outlook with automatic conflict prevention.</p>
+
+<div class="callout-box">
+  <strong>Live Sync:</strong> When an event booking is confirmed or rescheduled in Entertainment Express, it appears on your Google/Outlook calendar instantly with venue address, client contact info, and digital run-sheet links.
+</div>
+
+<div class="steps-container">
+  <div class="step-card">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Navigate to Integrations → Calendars</h3>
+      <p>From the Owner Cockpit or Settings menu, open <strong>Integrations</strong> and select <strong>Calendar Feeds & Two-Way Sync</strong>.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Choose Your Calendar Provider</h3>
+      <p>Select either <strong>Sign in with Google</strong> (Google Calendar) or <strong>Sign in with Microsoft</strong> (Office 365 / Outlook). Authorize read/write calendar permissions.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Configure Sync Rules & Privacy</h3>
+      <p>Choose whether to sync all confirmed bookings, tentative leads, or only gigs assigned to specific crew members. Enable <strong>Busy Time Blocking</strong> so private appointments on your personal calendar automatically block availability on your booking calendar.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>Subscribe via iCal on Mobile Phones</h3>
+      <p>For field crew who prefer not to link full Google accounts, copy the secure, tokenized <strong>iCal Subscription URL</strong>. Crew can subscribe to their personal dispatch calendar directly in Apple Calendar or Android Calendar.</p>
+    </div>
+  </div>
+</div>
+
+<div class="tip-box">
+  <strong>Pro Tip:</strong> Event updates in Entertainment Express automatically update the calendar entry on your phone, including updated timeline cues and venue gate codes.
+</div>
+"""
+    },
+    {
+        "title": "AI Voice Receptionist & Twilio SMS Webhook Setup",
+        "category": "APIs, Hardware & Webhooks",
+        "route": "ai-voice-twilio-webhook-setup",
+        "role": "Developer",
+        "level": "Advanced",
+        "read_time": "7 min read",
+        "summary": "Configure Dial.ai conversational AI voice phone answering and Twilio SMS webhooks for 24/7 lead capture and client text notifications.",
+        "content": """
+<h2>AI Voice Phone Receptionist & SMS Webhooks</h2>
+<p>Never miss a high-ticket weekend event inquiry. Connect Dial.ai or Twilio to answer missed phone calls, quote instant ballpark pricing, and trigger automated booking text alerts.</p>
+
+<div class="callout-box">
+  <strong>24/7 Voice Answering:</strong> When you are on site at an event or asleep, your AI voice assistant answers inbound phone calls, checks real-time date availability, answers FAQs, and logs the customer into your leads pipeline.
+</div>
+
+<div class="steps-container">
+  <div class="step-card">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Obtain Your Webhook Secret & Credentials</h3>
+      <p>In the Owner Cockpit, go to <strong>Settings → Webhooks & Telephony</strong>. Copy your unique tenant <strong>Webhook Ingest URL</strong> and <strong>HMAC Signature Secret</strong>.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Configure Dial.ai or Twilio Phone Number</h3>
+      <p>Log into your Dial.ai or Twilio console. Set the voice webhook URL to your Entertainment Express endpoint (<code>https://&lt;your-subdomain&gt;.app.entx.app/api/method/entertainment_express.integrations.telephony.handle_call</code>).</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Set Up Inbound Lead Prompts</h3>
+      <p>Define your business knowledge base: event types served, minimum booking fees, service radius, and FAQs. The AI receptionist will ask callers for their event date, venue city, and guest count.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>Verify Instant Lead Creation & SMS Alerts</h3>
+      <p>Place a test call to your number. As soon as the caller hangs up, Entertainment Express creates a new Lead, sends an SMS confirmation to the caller with a proposal link, and notifies the business owner via mobile push notification.</p>
+    </div>
+  </div>
+</div>
+
+<div class="tip-box">
+  <strong>Pro Tip:</strong> All call transcripts and audio recordings are attached directly to the Lead record in the Owner Cockpit for instant review.
+</div>
+"""
     }
 ]
 

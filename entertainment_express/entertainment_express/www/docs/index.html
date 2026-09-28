@@ -206,6 +206,26 @@
     .section-count {
       color: var(--text-muted);
       font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+    }
+    .clear-cat-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.65rem;
+      padding: 0.2rem 0.65rem;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .clear-cat-badge:hover {
+      background: rgba(239, 68, 68, 0.28);
+      color: #ffffff;
+      border-color: rgba(239, 68, 68, 0.5);
     }
 
     .categories-grid {
@@ -411,14 +431,15 @@
 
     <div class="categories-grid">
       {% for cat in categories %}
-        <a href="/docs?category={{ cat.route | replace('docs/', '') }}{% if selected_role %}&role={{ selected_role }}{% endif %}" class="category-card {% if selected_category and selected_category in cat.route %}selected{% endif %}">
+        {% set is_selected = selected_category and (selected_category in cat.route or cat.route in selected_category or (selected_category_name and selected_category_name == cat.category_name)) %}
+        <a href="{% if is_selected %}/docs{% if selected_role %}?role={{ selected_role }}{% endif %}{% else %}/docs?category={{ cat.route | replace('docs/', '') }}{% if selected_role %}&role={{ selected_role }}{% endif %}{% endif %}" class="category-card {% if is_selected %}selected{% endif %}">
           <div>
             <div class="category-title">{{ cat.category_name }}</div>
             <div class="category-desc">{{ cat.description }}</div>
           </div>
           <div class="category-meta">
             <span>{{ cat.article_count }} Guides</span>
-            <span>View Guides →</span>
+            <span>{% if is_selected %}Active Filter (Click to Clear) ✕{% else %}View Guides →{% endif %}</span>
           </div>
         </a>
       {% endfor %}
@@ -429,6 +450,10 @@
       <div class="section-title">
         {% if search_query %}
           Search Results for "{{ search_query }}"
+        {% elif selected_category_name and selected_role %}
+          {{ selected_category_name }} ({{ selected_role }})
+        {% elif selected_category_name %}
+          {{ selected_category_name }} Playbooks
         {% elif selected_role == 'Owner' %}
           Owner & Admin Operations Playbooks
         {% elif selected_role == 'Crew' %}
@@ -441,7 +466,12 @@
           Featured Operations & User Guides
         {% endif %}
       </div>
-      <div class="section-count">{{ results_count }} Guides Available</div>
+      <div class="section-count">
+        {{ results_count }} Guides Available
+        {% if selected_category %}
+          <a href="/docs{% if selected_role %}?role={{ selected_role }}{% endif %}" class="clear-cat-badge">✕ Clear category</a>
+        {% endif %}
+      </div>
     </div>
 
     <div class="articles-grid">
@@ -472,8 +502,8 @@
       {% else %}
         <div class="empty-state">
           <h3>No guides found matching your filter</h3>
-          <p>Try clearing your search query or selecting "All User Guides".</p>
-          <a href="/docs" class="role-pill active">Reset Filters</a>
+          <p>{% if selected_category %}No guides found in "{{ selected_category_name or selected_category }}"{% if selected_role %} for {{ selected_role }}{% endif %}.{% else %}Try clearing your search query or selecting "All User Guides".{% endif %}</p>
+          <a href="/docs" class="role-pill active">Reset All Filters</a>
         </div>
       {% endfor %}
     </div>

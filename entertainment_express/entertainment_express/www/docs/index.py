@@ -1,5 +1,9 @@
 import frappe
-from entertainment_express.api.docs import get_documentation_categories, search_documentation
+from entertainment_express.api.docs import (
+    CATEGORY_SLUG_TO_NAME,
+    get_documentation_categories,
+    search_documentation,
+)
 
 def get_context(context):
     context.no_cache = 1
@@ -21,8 +25,18 @@ def get_context(context):
     else:
         role = ""
 
-    # Dynamic role headlines
-    if role == "Owner":
+    selected_category_name = CATEGORY_SLUG_TO_NAME.get(category.lower()) or category if category else ""
+
+    # Dynamic role / category headlines
+    if selected_category_name and role:
+        context.title = f"{selected_category_name} ({role}) — Entertainment Express Docs"
+        context.role_headline = f"{selected_category_name} ({role})"
+        context.role_description = f"Guides and playbooks for {selected_category_name} tailored for {role}."
+    elif selected_category_name:
+        context.title = f"{selected_category_name} Docs — Entertainment Express"
+        context.role_headline = f"{selected_category_name}"
+        context.role_description = f"Playbooks and step-by-step guides for {selected_category_name}."
+    elif role == "Owner":
         context.title = "Owner Operations & Business Cockpit Docs — Entertainment Express"
         context.role_headline = "🏢 Owner Operations & Business Cockpit"
         context.role_description = "Step-by-step guides for entertainment business owners to set up pricing, equipment inventory, dispatch, job costing, and payroll."
@@ -45,6 +59,7 @@ def get_context(context):
 
     context.selected_role = role
     context.selected_category = category
+    context.selected_category_name = selected_category_name
     context.search_query = query
     context.categories = get_documentation_categories(role=role)
 

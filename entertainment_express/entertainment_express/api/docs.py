@@ -6,6 +6,41 @@ SEED_CAT_MAP = {c["category_name"]: c for c in SEED_CATEGORIES}
 SEED_ARTICLES_BY_TITLE = {a["title"].strip().lower(): a for a in SEED_ARTICLES}
 SEED_ARTICLES_BY_ROUTE = {a["route"].strip().lower(): a for a in SEED_ARTICLES}
 
+# Build category slug & name resolver
+CATEGORY_SLUG_TO_NAME = {}
+for c in SEED_CATEGORIES:
+    name = c["category_name"]
+    slug_route = c["route"].replace("docs/", "").strip("/").lower()
+    CATEGORY_SLUG_TO_NAME[slug_route] = name
+    CATEGORY_SLUG_TO_NAME[name.lower()] = name
+    CATEGORY_SLUG_TO_NAME[frappe.utils.slug(name)] = name
+    # Also index without punctuation
+    CATEGORY_SLUG_TO_NAME[name.lower().replace("&", "and").replace(",", "")] = name
+
+def _matches_category(article_category, requested_category):
+    """Accurately matches category whether passed as slug, route, canonical name, or search query."""
+    if not requested_category:
+        return True
+    req = requested_category.strip().lower()
+    art = (article_category or "").strip().lower()
+    
+    # 1. Canonical lookup via dictionary
+    canonical = CATEGORY_SLUG_TO_NAME.get(req)
+    if canonical and canonical.lower() == art:
+        return True
+        
+    # 2. Direct string equality
+    if req == art:
+        return True
+        
+    # 3. Normalized slug / name comparison (handles & vs and, dashes vs spaces)
+    req_norm = req.replace("-", " ").replace("&", "and").replace(",", "").strip()
+    art_norm = art.replace("-", " ").replace("&", "and").replace(",", "").strip()
+    if req_norm == art_norm or req_norm in art_norm or art_norm in req_norm:
+        return True
+        
+    return False
+
 def _matches_role(article_role, requested_role):
     if not requested_role or requested_role.lower() in ("all", "all users", ""):
         return True
@@ -61,7 +96,7 @@ def search_documentation(query=None, role=None, category=None):
                     continue
 
                 # Filter by Category
-                if category and category not in cat.lower() and category not in (doc.get("route") or "").lower():
+                if category and not _matches_category(cat, category):
                     continue
 
                 # Filter by Keyword Query
@@ -94,7 +129,7 @@ def search_documentation(query=None, role=None, category=None):
             continue
 
         cat = sa.get("category", "")
-        if category and category not in cat.lower() and category not in sa.get("route", "").lower():
+        if category and not _matches_category(cat, category):
             continue
 
         content = sa.get("content", "")
