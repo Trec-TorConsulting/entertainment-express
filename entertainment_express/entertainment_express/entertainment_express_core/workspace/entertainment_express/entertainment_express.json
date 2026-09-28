@@ -623,7 +623,7 @@
    "format": "{} Queued",
    "label": "Provisioning Jobs",
    "link_to": "Provisioning Job",
-   "stats_filter": "{\"status\":[\"in\", [\"queued\", \"running\"]]}",
+   "stats_filter": "{\"state\":[\"in\", [\"queued\", \"running\"]]}",
    "type": "DocType"
   },
   {
@@ -631,15 +631,15 @@
    "format": "{} Confirmed",
    "label": "Event Bookings",
    "link_to": "Event Booking",
-   "stats_filter": "{\"status\":\"Confirmed\"}",
+   "stats_filter": "{\"status\":\"confirmed\"}",
    "type": "DocType"
   },
   {
    "color": "Blue",
-   "format": "{} Executed",
+   "format": "{} Signed",
    "label": "Contracts",
    "link_to": "EE Contract",
-   "stats_filter": "{\"status\":\"Executed\"}",
+   "stats_filter": "{\"status\":\"signed\"}",
    "type": "DocType"
   },
   {
