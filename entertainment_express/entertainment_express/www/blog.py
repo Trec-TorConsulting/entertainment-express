@@ -290,7 +290,7 @@ def _build_article_jsonld(post: dict, base_url: str) -> str:
             "@type": "Organization",
             "name": "Entertainment Express",
             "url": base_url.rstrip("/"),
-            "logo": f"{base_url.rstrip('/')}/assets/entertainment_express/marketing/img/og-default.svg",
+            "logo": f"{base_url.rstrip('/')}/assets/entertainment_express/marketing/img/og-default.png",
         },
         "mainEntityOfPage": {
             "@type": "WebPage",

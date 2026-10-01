@@ -244,6 +244,10 @@ def test_blog_playbooks_and_context():
     assert hasattr(context, "grid_posts")
     assert hasattr(context, "blog_json_ld")
     assert context.canonical == "https://www.entx.app/blog"
+    assert context.ee_canonical == "https://www.entx.app/blog"
+    assert context.og_image == "https://www.entx.app/assets/entertainment_express/marketing/img/og-default.png"
+    assert context.web_include_js == []
+    assert context.web_include_css == []
 
     blog_ld = json.loads(context.blog_json_ld)
     assert blog_ld["@type"] == "Blog"
@@ -255,4 +259,18 @@ def test_reverse_trial_downgrades_to_starter():
     src = _read(ROOT / "api" / "saas_billing.py")
     assert "trial_expired_downgrade_to_starter" in src
     assert 'sub_doc.status = "active"' in src
+
+
+def test_marketing_shell_skips_frappe_web_assets():
+    """Public marketing pages must not pull the Frappe website bundle."""
+    base = _read(ROOT / "templates" / "marketing" / "base.html")
+    seo = _read(ROOT / "templates" / "marketing" / "seo_head.html")
+    css = _read(MARKETING_DIR / "marketing.css")
+    js = _read(MARKETING_DIR / "marketing.js")
+    assert "frappe-web.bundle.js" not in base
+    assert "ee_canonical" in seo
+    assert "og-default.png" in seo
+    assert ".ee-footer-col .ee-footer-heading" in css
+    assert "frappe.call" not in js
+    assert "eeCall(" in js
 

@@ -166,15 +166,23 @@ def apply_common_page_context(context, settings, title, description, route, brea
     context.seo_title = title
     context.meta_description = description
     base_domain = settings.get("base_domain") or "entx.app"
-    context.canonical = f"https://www.{base_domain}{route}"
+    origin = f"https://www.{base_domain}"
+    # Frappe overwrites context.canonical with the site host (admin.entx.app)
+    # after this runs. ee_canonical is what the public head actually emits.
+    context.ee_marketing_page = 1
+    context.ee_canonical = f"{origin}{route}"
+    context.canonical = context.ee_canonical
     context.base_domain = base_domain
+    # Marketing pages do not need ERPNext/Frappe website bundles.
+    context.web_include_js = []
+    context.web_include_css = []
     context.analytics_provider = settings.get("analytics_provider", "none")
     context.analytics_site_id = settings.get("analytics_site_id", "")
     context.consent_banner_enabled = settings.get("consent_banner_enabled", 1)
     context.consent_banner_text = settings.get("consent_banner_text", "")
     context.og_title = title
     context.og_description = description
-    context.og_image = "/assets/entertainment_express/marketing/img/og-default.svg"
+    context.og_image = f"{origin}/assets/entertainment_express/marketing/img/og-default.png"
     context.primary_cta_label = settings.get("primary_cta_label", "Start free trial")
     context.primary_cta_target = settings.get("primary_cta_target", "/start-trial")
     context.secondary_cta_label = settings.get("secondary_cta_label", "Request a demo")

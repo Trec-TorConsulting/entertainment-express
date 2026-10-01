@@ -2763,13 +2763,14 @@ select:focus-visible {
   margin-bottom: var(--ee-space-10);
 }
 
-.ee-footer-col h4 {
+.ee-footer-col .ee-footer-heading {
+  font-family: var(--ee-font-display);
   font-size: var(--ee-font-size-label);
   font-weight: var(--ee-font-weight-title);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ee-rail-text);
-  margin-bottom: var(--ee-space-4);
+  margin: 0 0 var(--ee-space-4);
 }
 
 .ee-footer-links {

@@ -115,6 +115,30 @@ def _redirect(location: str) -> None:
     raise frappe.Redirect(302)
 
 
+def redirect_apex_host() -> None:
+    """301 https://entx.app/... to https://www.entx.app/... so one host is indexed."""
+    request = getattr(frappe.local, "request", None)
+    if request is None:
+        return
+    host = (getattr(request, "host", "") or "").split(":")[0].lower()
+    if host != "entx.app":
+        return
+    path = getattr(request, "path", "") or "/"
+    if not path.startswith("/"):
+        path = "/" + path
+    query = b""
+    raw_query = getattr(request, "query_string", b"") or b""
+    if isinstance(raw_query, bytes):
+        query = raw_query
+    else:
+        query = str(raw_query).encode()
+    location = "https://www.entx.app" + path
+    if query:
+        location += "?" + query.decode()
+    frappe.flags.redirect_location = location
+    raise frappe.Redirect(301)
+
+
 def _rewrite_path(location: str) -> None:
     """Rewrite the in-flight request path (before_request cannot safely raise Redirect).
 

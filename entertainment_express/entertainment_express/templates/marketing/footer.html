@@ -3,7 +3,7 @@
     <div class="ee-footer-columns">
       <!-- Column 1: Product -->
       <div class="ee-footer-col">
-        <h4>Product</h4>
+        <p class="ee-footer-heading">Product</p>
         <ul class="ee-footer-links">
           <li><a href="/features">Features</a></li>
           <li><a href="/pricing">Pricing</a></li>
@@ -14,7 +14,7 @@
 
       <!-- Column 2: Solutions -->
       <div class="ee-footer-col">
-        <h4>Solutions</h4>
+        <p class="ee-footer-heading">Solutions</p>
         <ul class="ee-footer-links">
           <li><a href="/solutions/djs">Mobile DJs & MCs</a></li>
           <li><a href="/solutions/rentals">Party & Inflatables</a></li>
@@ -27,7 +27,7 @@
 
       <!-- Column 3: Company -->
       <div class="ee-footer-col">
-        <h4>Company</h4>
+        <p class="ee-footer-heading">Company</p>
         <ul class="ee-footer-links">
           <li><a href="/about">About</a></li>
           <li><a href="/contact">Contact</a></li>
@@ -40,7 +40,7 @@
 
       <!-- Column 4: Connect & Newsletter -->
       <div class="ee-footer-col">
-        <h4>Connect</h4>
+        <p class="ee-footer-heading">Connect</p>
         <p style="font-size: var(--ee-font-size-label); color: var(--ee-rail-muted); margin-bottom: var(--ee-space-3);">
           Subscribe to event industry growth tips and software updates.
         </p>
@@ -49,7 +49,7 @@
             <input id="ee-newsletter-email" name="email" type="email" placeholder="you@company.com" required aria-label="Email address for newsletter">
             <button type="submit" class="ee-btn ee-btn-primary" style="min-height: auto; padding: 0.5rem 1rem;">Join</button>
           </div>
-          <input type="hidden" name="source_page" value="{{ canonical or request.path }}">
+          <input type="hidden" name="source_page" value="{{ ee_canonical or canonical or request.path }}">
           <input type="hidden" name="utm_source" value="">
           <input type="hidden" name="utm_medium" value="">
           <input type="hidden" name="utm_campaign" value="">

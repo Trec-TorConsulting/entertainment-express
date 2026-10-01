@@ -1,15 +1,15 @@
 <title>{{ seo_title or title or "Entertainment Express" }}</title>
 <meta name="description" content="{{ meta_description or 'Run your entertainment company on one platform.' }}">
-<link rel="canonical" href="{{ canonical or request.url }}">
+<link rel="canonical" href="{{ ee_canonical or canonical }}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ og_title or seo_title or title or 'Entertainment Express' }}">
 <meta property="og:description" content="{{ og_description or meta_description or 'Run your entertainment company on one platform.' }}">
-<meta property="og:url" content="{{ canonical or request.url }}">
-<meta property="og:image" content="{{ og_image or '/assets/entertainment_express/marketing/img/og-default.svg' }}">
+<meta property="og:url" content="{{ ee_canonical or canonical }}">
+<meta property="og:image" content="{{ og_image or ('https://www.' ~ (base_domain or 'entx.app') ~ '/assets/entertainment_express/marketing/img/og-default.png') }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ twitter_title or og_title or seo_title or title or 'Entertainment Express' }}">
 <meta name="twitter:description" content="{{ twitter_description or og_description or meta_description or 'Run your entertainment company on one platform.' }}">
-<meta name="twitter:image" content="{{ twitter_image or og_image or '/assets/entertainment_express/marketing/img/og-default.svg' }}">
+<meta name="twitter:image" content="{{ twitter_image or og_image or ('https://www.' ~ (base_domain or 'entx.app') ~ '/assets/entertainment_express/marketing/img/og-default.png') }}">
 
 <!-- Organization JSON-LD -->
 <script type="application/ld+json">

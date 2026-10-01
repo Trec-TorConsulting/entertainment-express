@@ -226,6 +226,27 @@
     }
   }
 
+  function eeCall(method, args) {
+    var token = (window.frappe && window.frappe.csrf_token) || "";
+    return fetch("/api/method/" + method, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-Frappe-CSRF-Token": token
+      },
+      body: JSON.stringify(args || {})
+    }).then(function (response) {
+      return response.json().then(function (payload) {
+        if (!response.ok || (payload && payload.exc)) {
+          throw new Error((payload && (payload.message || payload.exception)) || "Request failed");
+        }
+        return payload;
+      });
+    });
+  }
+
   function initLeadForms() {
     var forms = document.querySelectorAll(".ee-form[data-lead-type]");
     forms.forEach(function (form) {
@@ -239,10 +260,7 @@
         var data = Object.fromEntries(new FormData(form).entries());
 
         try {
-          await frappe.call({
-            method: "entertainment_express.api.marketing.submit_lead",
-            args: { payload: data }
-          });
+          await eeCall("entertainment_express.api.marketing.submit_lead", { payload: data });
 
           if (status) {
             status.textContent = "Thanks. We received your request.";
@@ -273,10 +291,7 @@
 
       var data = Object.fromEntries(new FormData(form).entries());
       try {
-        await frappe.call({
-          method: "entertainment_express.api.marketing.subscribe_newsletter",
-          args: { payload: data }
-        });
+        await eeCall("entertainment_express.api.marketing.subscribe_newsletter", { payload: data });
         if (status) {
           status.textContent = "Check your inbox to confirm your subscription.";
         }
