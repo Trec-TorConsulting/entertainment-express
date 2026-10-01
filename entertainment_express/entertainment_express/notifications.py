@@ -270,7 +270,6 @@ def _deliver_channel(channel, recipient, subject, body, text, from_name: str | N
             "subject": subject,
             "message": body,
             "now": True,
-            "add_footer": False,
             "with_container": False,
         }
         if from_name:
@@ -282,15 +281,13 @@ def _deliver_channel(channel, recipient, subject, body, text, from_name: str | N
             frappe.sendmail(**kwargs)
             return True, "", "", "frappe"
         except TypeError:
-            # Older frappe without sender_name or extra kwargs
+            # Fallback for minimal frappe.sendmail parameters
             try:
                 frappe.sendmail(
                     recipients=[recipient],
                     subject=subject,
                     message=body,
                     now=True,
-                    add_footer=False,
-                    with_container=False,
                 )
                 return True, "", "", "frappe"
             except Exception as exc:
