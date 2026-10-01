@@ -116,7 +116,15 @@ def _redirect(location: str) -> None:
 
 
 def redirect_apex_host() -> None:
-    """301 https://entx.app/... to https://www.entx.app/... so one host is indexed."""
+    """301 https://entx.app/... to https://www.entx.app/... so one host is indexed.
+
+    before_request cannot raise frappe.Redirect. Frappe renders that as a
+    Server Error page and never sends a Location header. Werkzeug's
+    HTTPException is returned by frappe.app.application as the response.
+    """
+    from werkzeug.exceptions import abort
+    from werkzeug.utils import redirect
+
     request = getattr(frappe.local, "request", None)
     if request is None:
         return
@@ -126,17 +134,12 @@ def redirect_apex_host() -> None:
     path = getattr(request, "path", "") or "/"
     if not path.startswith("/"):
         path = "/" + path
-    query = b""
     raw_query = getattr(request, "query_string", b"") or b""
-    if isinstance(raw_query, bytes):
-        query = raw_query
-    else:
-        query = str(raw_query).encode()
+    query = raw_query.decode() if isinstance(raw_query, bytes) else str(raw_query)
     location = "https://www.entx.app" + path
     if query:
-        location += "?" + query.decode()
-    frappe.flags.redirect_location = location
-    raise frappe.Redirect(301)
+        location += "?" + query
+    abort(redirect(location, code=301))
 
 
 def _rewrite_path(location: str) -> None:

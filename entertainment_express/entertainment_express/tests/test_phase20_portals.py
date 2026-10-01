@@ -256,6 +256,31 @@ def test_require_employee_login_allows_staff_even_if_system_manager(monkeypatch)
     assert getattr(fake.flags, "redirect_location", None) is None
 
 
+def test_apex_host_redirects_with_a_location_header(monkeypatch):
+    from werkzeug.exceptions import HTTPException
+
+    req = SimpleNamespace(host="entx.app:443", path="/pricing", query_string=b"plan=pro")
+    fake = _FakeFrappeRG()
+    fake.local.request = req
+    monkeypatch.setattr(request_guards, "frappe", fake)
+
+    with pytest.raises(HTTPException) as raised:
+        request_guards.redirect_apex_host()
+
+    response = raised.value.get_response()
+    assert response.status_code == 301
+    assert response.headers["Location"] == "https://www.entx.app/pricing?plan=pro"
+
+
+def test_www_host_is_not_redirected(monkeypatch):
+    req = SimpleNamespace(host="www.entx.app", path="/", query_string=b"")
+    fake = _FakeFrappeRG()
+    fake.local.request = req
+    monkeypatch.setattr(request_guards, "frappe", fake)
+
+    request_guards.redirect_apex_host()
+
+
 def test_owner_canonical_route_is_owner_not_admin():
     from entertainment_express import hooks
 
