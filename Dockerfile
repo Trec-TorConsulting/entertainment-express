@@ -16,13 +16,13 @@ FROM frappe/erpnext:v15.65.2
 
 # ── Install the entertainment_express app ───────────────────────────────────
 # COPY paths are relative to the build context (this repo's root).
-COPY entertainment_express/entertainment_express \
+COPY --chown=frappe:frappe entertainment_express/entertainment_express \
      /home/frappe/frappe-bench/apps/entertainment_express/entertainment_express
-COPY entertainment_express/pyproject.toml \
+COPY --chown=frappe:frappe entertainment_express/pyproject.toml \
      /home/frappe/frappe-bench/apps/entertainment_express/pyproject.toml
-COPY entertainment_express/license.txt \
+COPY --chown=frappe:frappe entertainment_express/license.txt \
      /home/frappe/frappe-bench/apps/entertainment_express/license.txt
-COPY entertainment_express/README.md \
+COPY --chown=frappe:frappe entertainment_express/README.md \
      /home/frappe/frappe-bench/apps/entertainment_express/README.md
 
 # Install the app into the bench virtualenv (editable so Frappe resolves it)
