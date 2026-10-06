@@ -23,8 +23,16 @@ logger = frappe.logger("entertainment_express.api.mobile_api_v2")
 def _extract_bearer(token: str | None = None) -> str:
     if token:
         return token.replace("Bearer ", "").strip()
-    header = frappe.request.headers.get("Authorization", "") if frappe.request else ""
-    return header.replace("Bearer ", "").strip()
+    req = getattr(frappe.local, "request", None) or getattr(frappe, "request", None)
+    if req:
+        header = req.headers.get("Authorization", "")
+        if header:
+            return header.replace("Bearer ", "").strip()
+        if hasattr(req, "cookies") and req.cookies:
+            cookie_val = req.cookies.get("ee_jwt_token")
+            if cookie_val:
+                return cookie_val.strip()
+    return ""
 
 
 def _get_jwt_user(token: str = None) -> str:

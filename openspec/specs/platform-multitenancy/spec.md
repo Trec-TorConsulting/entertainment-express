@@ -12,22 +12,21 @@ its own Frappe site + MariaDB database, addressed by a wildcard subdomain. This 
 - **Tenant Domain**: tenant (link), hostname, type (`default|custom`), tls_status, verified (bool).
 
 > Tenant business data (bookings, invoices, etc.) lives INSIDE each tenant site, never on the control plane.
-
 ## Requirements
-
 ### Requirement: Site-Per-Tenant Isolation
-The system SHALL run each tenant on a dedicated Frappe site with its own MariaDB database, such that no
-application code path can read or write another tenant's data.
+The system SHALL run each tenant on a dedicated Frappe site with its own MariaDB database, such that no application code path can read or write another tenant's data. Furthermore, within a tenant's database, all API queries processing user data MUST enforce `if_owner` constraints or similar explicit row-level permission logic to prevent Insecure Direct Object Reference (IDOR) attacks across users.
 
 #### Scenario: Data isolation enforced at database boundary
 - **WHEN** any tenant user or tenant-scoped job accesses data
-- **THEN** all queries resolve only against that tenant's own site database, and there is no code path that
-  connects a tenant request to another tenant's database
+- **THEN** all queries resolve only against that tenant's own site database, and there is no code path that connects a tenant request to another tenant's database
+
+#### Scenario: Data isolation enforced at row-level boundary (IDOR prevention)
+- **WHEN** an authenticated user attempts to read, update, or delete a record (e.g., booking, invoice) belonging to the tenant site
+- **THEN** the API layer MUST explicitly validate that the requesting user's identity is the designated owner or holds the required role permissions for that specific row, denying access (403) otherwise.
 
 #### Scenario: Isolation regression test
 - **WHEN** the multi-tenant isolation test suite runs
-- **THEN** it provisions two test tenants, writes distinct records to each, and asserts neither tenant's API
-  or portal can retrieve the other's records
+- **THEN** it provisions two test tenants, writes distinct records to each, and asserts neither tenant's API or portal can retrieve the other's records
 
 ### Requirement: Automated Tenant Provisioning
 The system SHALL provision a new tenant automatically and idempotently: create the site, install `erpnext`
@@ -107,3 +106,4 @@ The system SHALL show the owner the DNS target (CNAME to this site's default hos
 #### Scenario: Pending domain instructions
 - **WHEN** an owner requests `events.acme.com` before DNS is ready
 - **THEN** the hostname is stored unverified and the UI shows the CNAME target equal to this site's default host
+

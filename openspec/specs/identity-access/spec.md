@@ -15,9 +15,7 @@ entitlement checks tied to the tenant's plan.
 - **EE Customer** — customer portal only (end clients of the tenant).
 - **EE Event Guest** — invited to a single booking for planning/chat; never a payer.
 - **SaaS Operator** — control-plane only (not present on tenant sites).
-
 ## Requirements
-
 ### Requirement: User Authentication
 The system SHALL authenticate users with email/password sessions and support optional TOTP two-factor
 authentication, password reset, and account lockout on repeated failures.
@@ -47,15 +45,19 @@ portal page, and API endpoint.
 - **THEN** only records belonging to that customer are returned, enforced by permission query conditions
 
 ### Requirement: API Tokens & Mobile Auth
-The system SHALL issue API keys/tokens for the mobile app and integrations, revocable per user/device.
+The system SHALL issue HttpOnly, SameSite cookies for web portal sessions and JWT tokens for the mobile app, both revocable per user/device. The mobile app MUST securely store its token in a platform-backed Secure Store. Web portals MUST NOT store tokens in `localStorage` or `sessionStorage`.
+
+#### Scenario: Web portal token issuance
+- **WHEN** a user logs into the customer or dispatch portal
+- **THEN** the backend issues the session token as a secure, HttpOnly, SameSite=Strict cookie instead of a raw token string in the JSON payload
 
 #### Scenario: Mobile token issuance
 - **WHEN** a crew member logs into the mobile app
-- **THEN** a scoped, revocable token is issued and used for subsequent API calls
+- **THEN** a scoped, revocable token is issued and securely stored in `expo-secure-store` for subsequent API calls
 
 #### Scenario: Token revocation
-- **WHEN** an admin revokes a device token
-- **THEN** subsequent API calls with that token are rejected (401)
+- **WHEN** an admin revokes a device token or forces logout
+- **THEN** subsequent API calls with that token or cookie are rejected (401)
 
 ### Requirement: Plan-Based Entitlement Checks
 The system SHALL gate premium features behind the tenant's current plan entitlements, enforced server-side.

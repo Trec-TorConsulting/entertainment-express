@@ -64,4 +64,5 @@ export * from "./components/FieldBoard";
 export * from "./components/ErrorBoundary";
 export * from "./components/MarginHealthBadge";
 export * from "./components/AddressLookupInput";
+export * from "./components/SafeHtml";
 

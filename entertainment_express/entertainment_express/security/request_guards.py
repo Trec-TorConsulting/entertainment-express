@@ -441,3 +441,26 @@ def get_website_user_home_page(user: str | None) -> str | None:
     if is_coming_soon_enabled() and not has_beta_access():
         return "coming_soon"
     return EE_MARKETING_HOME if _is_control_plane() else TENANT_HOME
+
+
+def enforce_doc_ownership(doctype: str, docname: str, user: str | None = None) -> None:
+    """Enforce row-level ownership validation (IDOR defense).
+    Raises PermissionError if the given user is neither a System Manager / Tenant Admin
+    nor the owner / designated customer of the document.
+    """
+    user = user or frappe.session.user
+    if not user or user == "Guest":
+        raise PermissionError("Authentication required")
+    roles = _get_user_roles(user)
+    if _is_super_admin(roles) or _is_owner(roles):
+        return
+
+    owner = frappe.db.get_value(doctype, docname, "owner")
+    if owner and owner != user:
+        # Check if customer field matches
+        if frappe.db.has_column(doctype, "customer"):
+            cust = frappe.db.get_value(doctype, docname, "customer")
+            if cust and cust == user:
+                return
+        raise PermissionError(f"Access denied to {doctype} {docname}: user does not own this document")
+

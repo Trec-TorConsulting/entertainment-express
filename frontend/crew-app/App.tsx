@@ -215,7 +215,8 @@ export default function App() {
         await initializeNotifications();
 
         // Check if user is logged in
-        const storedToken = await AsyncStorage.getItem('jwt_token');
+        const { getSecureItem } = require('./src/utils/secureStore');
+        const storedToken = await getSecureItem('jwt_token');
         if (storedToken) {
           await initialize(storedToken);
           setInitialRoute('MainApp');

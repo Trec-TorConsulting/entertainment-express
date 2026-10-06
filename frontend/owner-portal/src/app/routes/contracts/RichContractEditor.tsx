@@ -3,7 +3,8 @@ import {
   Button,
   Input,
   useToast,
-  call
+  call,
+  SafeHtml
 } from "@portal-kit";
 import {
   Bold,
@@ -513,8 +514,8 @@ export const RichContractEditor: React.FC<RichContractEditorProps> = ({
               <span>📄 Live Contract Sample Render</span>
               <span className="text-[10px] opacity-70 font-normal">Interpolated with sample booking values</span>
             </div>
-            <div
-              dangerouslySetInnerHTML={{ __html: samplePreviewHtml || "<p class='italic opacity-50'>No content yet...</p>" }}
+            <SafeHtml
+              html={samplePreviewHtml || "<p class='italic opacity-50'>No content yet...</p>"}
               className="text-sm leading-relaxed"
             />
           </div>

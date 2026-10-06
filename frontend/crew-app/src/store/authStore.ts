@@ -4,8 +4,8 @@
  */
 
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { getSecureItem, setSecureItem, removeSecureItem } from '../utils/secureStore';
 
 interface AuthState {
   token: string | null;
@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async (token: string) => {
     set({ isLoading: true });
     try {
-      await AsyncStorage.setItem('jwt_token', token);
+      await setSecureItem('jwt_token', token);
       set({ token, isLoading: false });
     } catch (error) {
       set({ error: 'Failed to initialize auth', isLoading: false });
@@ -51,9 +51,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const { token, refresh_token, user } = response.data.data;
 
-      await AsyncStorage.setItem('jwt_token', token);
+      await setSecureItem('jwt_token', token);
       if (refresh_token) {
-        await AsyncStorage.setItem('refresh_token', refresh_token);
+        await setSecureItem('refresh_token', refresh_token);
       }
 
       set({
@@ -71,8 +71,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await AsyncStorage.removeItem('jwt_token');
-      await AsyncStorage.removeItem('refresh_token');
+      await removeSecureItem('jwt_token');
+      await removeSecureItem('refresh_token');
       set({
         token: null,
         refreshToken: null,
@@ -86,7 +86,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshAccessToken: async () => {
     try {
-      const refreshToken = get().refreshToken || (await AsyncStorage.getItem('refresh_token'));
+      const refreshToken = get().refreshToken || (await getSecureItem('refresh_token'));
       if (!refreshToken) {
         throw new Error('No refresh token available');
       }
@@ -98,9 +98,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const { token, refresh_token } = response.data.data;
 
-      await AsyncStorage.setItem('jwt_token', token);
+      await setSecureItem('jwt_token', token);
       if (refresh_token) {
-        await AsyncStorage.setItem('refresh_token', refresh_token);
+        await setSecureItem('refresh_token', refresh_token);
       }
 
       set({

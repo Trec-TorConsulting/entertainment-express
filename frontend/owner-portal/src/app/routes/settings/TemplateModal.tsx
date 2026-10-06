@@ -6,7 +6,8 @@ import {
   Button,
   Badge,
   useToast,
-  call
+  call,
+  SafeHtml
 } from "@portal-kit";
 import { Mail, Check, AlertCircle, Eye, Code, Trash2 } from "lucide-react";
 
@@ -256,7 +257,7 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
             </div>
 
             <div className="border border-[var(--ee-border)] rounded-xl overflow-hidden shadow-inner bg-white min-h-[300px] p-6 text-slate-800">
-              <div dangerouslySetInnerHTML={{ __html: samplePreviewHtml }} />
+              <SafeHtml html={samplePreviewHtml} />
             </div>
           </div>
         )}

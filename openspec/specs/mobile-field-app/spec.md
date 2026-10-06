@@ -5,9 +5,7 @@ A mobile-first **PWA** for field crew and talent to run events from their phone:
 access run sheets, check in/out, capture photos/signatures, upload deliverables, and report issues — with
 offline tolerance for poor-connectivity venues. Consumes the same REST APIs as the rest of the platform;
 scoped to the `EE Crew` role.
-
 ## Requirements
-
 ### Requirement: Crew Job List & Details
 The system SHALL show each crew member their assigned upcoming and current jobs with full run-sheet detail.
 
@@ -71,4 +69,11 @@ The system SHALL provide a frictionless damage reporting flow in the Mobile Fiel
 #### Scenario: Submitting teardown damage offline
 - **WHEN** crew flags a torn seam on a bounce house while offline at a rural venue
 - **THEN** the defect report and photo are saved to local IndexedDB and synced immediately upon network reconnection, triggering the quarantine workflow
+
+### Requirement: Secure Storage for Authentication Tokens
+The mobile app SHALL utilize platform-specific secure enclaves (e.g., iOS Keychain, Android Keystore) via `expo-secure-store` to store sensitive identity tokens (JWT). It MUST NOT store sensitive authentication tokens in plain text in `AsyncStorage`.
+
+#### Scenario: Storing JWT tokens
+- **WHEN** a crew member logs into the app and receives a JWT
+- **THEN** the application persists the token using `expo-secure-store` ensuring hardware-backed encryption where available
 

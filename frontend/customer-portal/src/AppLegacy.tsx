@@ -11,6 +11,7 @@ import {
   call,
   downloadBase64,
   getSessionBootstrap,
+  SafeHtml,
 } from "../../portal-kit/src";
 
 function isGuest(roles: string[]) {
@@ -569,7 +570,7 @@ function Documents() {
           ← Documents
         </button>
         <h1 style={{ margin: 0 }}>{open.kind === "waiver" ? "Waiver" : "Contract"}</h1>
-        <div dangerouslySetInnerHTML={{ __html: open.rendered_html || "" }} />
+        <SafeHtml html={open.rendered_html || ""} />
         {open.status === "signed" ? (
           <p style={{ color: "var(--ee-success)", margin: 0 }}>This is already signed.</p>
         ) : (

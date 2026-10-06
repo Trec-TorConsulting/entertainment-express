@@ -18,33 +18,34 @@ import '../../portal-kit/src/tokens.css';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v2',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
   },
 });
 
 // ── Store (Zustand) ───────────────────────────────────────────────────────
 
 interface AuthState {
-  token: string | null;
   customer: any | null;
-  setAuth: (token: string, customer: any) => void;
+  setAuth: (customer: any) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  token: localStorage.getItem('jwt_token'),
-  customer: localStorage.getItem('customer') ? JSON.parse(localStorage.getItem('customer')!) : null,
-  setAuth: (token, customer) => {
-    localStorage.setItem('jwt_token', token);
-    localStorage.setItem('customer', JSON.stringify(customer));
-    set({ token, customer });
+  customer: typeof localStorage !== 'undefined' && localStorage.getItem('customer') ? JSON.parse(localStorage.getItem('customer')!) : null,
+  setAuth: (customer) => {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('customer', JSON.stringify(customer));
+    }
+    set({ customer });
   },
   logout: () => {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('customer');
-    set({ token: null, customer: null });
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('customer');
+      localStorage.removeItem('jwt_token');
+    }
+    set({ customer: null });
   },
 }));
 

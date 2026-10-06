@@ -167,6 +167,14 @@ def auth_login(email: str = None, password: str = None) -> dict:
         raise PermissionError("Invalid email or password")
 
     tokens = issue_token_pair(user)
+    if hasattr(frappe.local, "cookie_manager") and frappe.local.cookie_manager:
+        frappe.local.cookie_manager.set_cookie(
+            "ee_jwt_token", tokens["access_token"], httponly=True, samesite="Strict", max_age=ACCESS_TTL_SECONDS
+        )
+        frappe.local.cookie_manager.set_cookie(
+            "ee_refresh_token", tokens["refresh_token"], httponly=True, samesite="Strict", max_age=REFRESH_TTL_SECONDS
+        )
+
     return {
         "status": "success",
         "data": {
@@ -181,11 +189,39 @@ def auth_login(email: str = None, password: str = None) -> dict:
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def auth_refresh(refresh_token: str = None) -> dict:
     """POST — exchange a refresh token for a new access/refresh pair."""
+    req = getattr(frappe.local, "request", None) or getattr(frappe, "request", None)
+    if not refresh_token and req and hasattr(req, "cookies"):
+        refresh_token = req.cookies.get("ee_refresh_token")
     if not refresh_token:
         raise ValidationError("refresh_token is required")
+
     tokens = refresh_access_token(refresh_token)
+    if hasattr(frappe.local, "cookie_manager") and frappe.local.cookie_manager:
+        frappe.local.cookie_manager.set_cookie(
+            "ee_jwt_token", tokens["access_token"], httponly=True, samesite="Strict", max_age=ACCESS_TTL_SECONDS
+        )
+        frappe.local.cookie_manager.set_cookie(
+            "ee_refresh_token", tokens["refresh_token"], httponly=True, samesite="Strict", max_age=REFRESH_TTL_SECONDS
+        )
+
     return {
         "status": "success",
         "data": tokens,
         "meta": {"timestamp": frappe.utils.now_datetime().isoformat(), "version": "2.0"},
     }
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def auth_logout() -> dict:
+    """POST — clear session and HttpOnly authentication cookies."""
+    if hasattr(frappe.local, "cookie_manager") and frappe.local.cookie_manager:
+        frappe.local.cookie_manager.delete_cookie("ee_jwt_token")
+        frappe.local.cookie_manager.delete_cookie("ee_refresh_token")
+    if hasattr(frappe.local, "login_manager") and frappe.local.login_manager:
+        frappe.local.login_manager.logout()
+    return {
+        "status": "success",
+        "message": "Logged out successfully",
+        "meta": {"timestamp": frappe.utils.now_datetime().isoformat(), "version": "2.0"},
+    }
+

@@ -5,6 +5,7 @@
 
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getSecureItem } from '../utils/secureStore';
 import { useAuthStore } from '../store/authStore';
 import { storePendingAction, syncOfflineActions as replayOfflineQueue } from './databaseService';
 
@@ -48,7 +49,7 @@ export const createApiClient = (): AxiosInstance => {
   client.interceptors.request.use(
     async (config) => {
       try {
-        const token = await AsyncStorage.getItem('jwt_token');
+        const token = await getSecureItem('jwt_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }

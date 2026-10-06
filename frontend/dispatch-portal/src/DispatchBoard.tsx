@@ -13,9 +13,7 @@ import '../../portal-kit/src/tokens.css';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  headers: {
-    Authorization: `Bearer ${typeof localStorage !== 'undefined' ? localStorage.getItem('jwt_token') : ''}`,
-  },
+  withCredentials: true,
 });
 
 async function callMethod(method: string, params: Record<string, any> = {}) {
@@ -56,7 +54,7 @@ export const DispatchBoard: React.FC = () => {
   useEffect(() => {
     socketRef.current = io('/', {
       path: '/socket.io',
-      auth: { token: localStorage.getItem('jwt_token') },
+      withCredentials: true,
     });
 
     socketRef.current.on('at_risk_alert', (booking: any) => {

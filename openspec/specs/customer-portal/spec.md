@@ -4,9 +4,7 @@
 The authenticated self-service portal where a tenant's end customers manage their relationship: view/track
 bookings, sign contracts, pay invoices, message the company, upload event details, and access deliverables
 (photos/media). Built on Frappe Portal + web pages, scoped to the `EE Customer` role.
-
 ## Requirements
-
 ### Requirement: Customer Account & Dashboard
 The system SHALL give each customer a secure account with a dashboard of their bookings, balances, and
 documents, scoped strictly to their own records.
@@ -265,4 +263,10 @@ The `/client/pay` route SHALL fetch open invoices from `portal_client.list_invoi
 - **WHEN** a customer selects an invoice, chooses a processor, adds a tip, and initiates checkout
 - **THEN** the system requests checkout URL from the backend and routes the user smoothly with return confirmation and celebration
 
+### Requirement: Strict Client UI Sanitization
+The system SHALL strictly sanitize all user-generated or tenant-provided HTML content before rendering it in the customer portal to prevent DOM-based Cross-Site Scripting (XSS).
+
+#### Scenario: Rendering unsanitized inputs
+- **WHEN** the portal retrieves and attempts to display rich text (such as contract terms or event notes)
+- **THEN** it MUST use a recognized sanitization library (e.g., DOMPurify) and MUST NOT directly execute `dangerouslySetInnerHTML` with raw, unverified data
 

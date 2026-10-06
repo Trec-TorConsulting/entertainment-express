@@ -205,12 +205,14 @@ export const notifyPaymentReceived = async (
   }
 };
 
+import { getSecureItem } from '../utils/secureStore';
+
 /**
  * Register device token with backend
  */
 const registerDeviceToken = async (token: string): Promise<void> => {
   try {
-    const authToken = await AsyncStorage.getItem('jwt_token');
+    const authToken = await getSecureItem('jwt_token');
     if (!authToken) {
       console.warn('[Notifications] No auth token for device registration');
       return;
@@ -241,7 +243,7 @@ const registerDeviceToken = async (token: string): Promise<void> => {
 export const unregisterDeviceToken = async (): Promise<void> => {
   try {
     const token = await AsyncStorage.getItem('expo_push_token');
-    const authToken = await AsyncStorage.getItem('jwt_token');
+    const authToken = await getSecureItem('jwt_token');
 
     if (!token || !authToken) return;
 
