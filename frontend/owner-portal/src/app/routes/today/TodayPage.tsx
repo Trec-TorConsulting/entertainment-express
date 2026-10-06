@@ -24,6 +24,7 @@ export const TodayPage: React.FC = () => {
   const person = getSessionBootstrap().person;
   const [stats, setStats] = useState<any>(null);
   const [approvals, setApprovals] = useState<any[]>([]);
+  const [smtpStatus, setSmtpStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const hour = new Date().getHours();
@@ -32,13 +33,15 @@ export const TodayPage: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const [statsRes, approvalsRes] = await Promise.allSettled([
+      const [statsRes, approvalsRes, smtpRes] = await Promise.allSettled([
         call("entertainment_express.api.portal_owner.get_owner_dashboard", {}),
-        call("entertainment_express.api.portal_owner.get_approvals", {})
+        call("entertainment_express.api.portal_owner.get_approvals", {}),
+        call("entertainment_express.api.portal_owner.get_smtp_status", {})
       ]);
 
       if (statsRes.status === "fulfilled") setStats(statsRes.value);
       if (approvalsRes.status === "fulfilled") setApprovals(approvalsRes.value || []);
+      if (smtpRes.status === "fulfilled") setSmtpStatus(smtpRes.value);
     } catch {
       // Fallback
     } finally {
@@ -124,6 +127,23 @@ export const TodayPage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {smtpStatus && !smtpStatus.configured && (
+        <Card elevated className="border-[var(--ee-warning)] bg-yellow-50 dark:bg-yellow-900/20">
+          <CardContent className="p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-[var(--ee-warning)] shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-1">
+              <h4 className="font-medium text-[var(--ee-warning)]">Email Configuration Required</h4>
+              <p className="text-sm text-[var(--ee-muted)]">
+                {smtpStatus.message} Setup an Outgoing Email Account in Frappe desk to enable client emails (Quotes, Contracts, Invoices).
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => window.open("/app/email-account/new-email-account-1", "_blank")}>
+              Configure SMTP
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Gamified Onboarding Launchpad */}
       <LaunchpadWidget />

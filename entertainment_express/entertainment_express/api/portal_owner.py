@@ -927,3 +927,25 @@ def get_onboarding_status() -> dict:
         "quests": quests,
     }
 
+
+@frappe.whitelist()
+def get_smtp_status() -> dict:
+    _require_owner()
+    from entertainment_express.notifications import _get_tenant_outgoing_email_account
+    
+    account_name = _get_tenant_outgoing_email_account()
+    if not account_name:
+        return {
+            "configured": False,
+            "status": "not_configured",
+            "message": "Custom tenant SMTP is not configured. Client operational emails will not be sent."
+        }
+    
+    return {
+        "configured": True,
+        "status": "active",
+        "account_name": account_name,
+        "message": "Custom tenant SMTP is configured and active."
+    }
+
+

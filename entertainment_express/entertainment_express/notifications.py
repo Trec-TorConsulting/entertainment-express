@@ -76,6 +76,7 @@ def _send_now(
     tmpl = frappe.get_doc("Notification Template", template_name)
     subject = frappe.render_template(tmpl.subject, context)
     body = frappe.render_template(tmpl.body_html, context)
+    category = (getattr(tmpl, "category", None) or "system").strip()
     try:
         from entertainment_express.white_label.kit import kit_dict, wrap_email_html
 
@@ -105,7 +106,7 @@ def _send_now(
                 scheduled_for=now_datetime(),
             )
             continue
-        ok, err, mid, provider = _deliver_channel(channel, recipient, subject, body, text, from_name=from_name)
+        ok, err, mid, provider = _deliver_channel(channel, recipient, subject, body, text, from_name=from_name, category=category)
         _log(
             recipient,
             channel,
@@ -120,7 +121,7 @@ def _send_now(
         delivered_any = delivered_any or ok
 
     if not delivered_any and fallback and fallback not in wanted:
-        ok, err, mid, provider = _deliver_channel(fallback, recipient, subject, body, text, from_name=from_name)
+        ok, err, mid, provider = _deliver_channel(fallback, recipient, subject, body, text, from_name=from_name, category=category)
         _log(
             recipient,
             fallback,
@@ -142,12 +143,13 @@ def retry_failed():
         limit_page_length=100,
     )
     for row in rows:
-        if row.error in ("opted_out", "not_configured"):
+        if row.error in ("opted_out", "not_configured", "tenant_smtp_not_configured"):
             continue
-        tmpl = frappe.db.get_value("Notification Template", {"template_key": row.template_key}, ["subject", "body_html"], as_dict=True)
+        tmpl = frappe.db.get_value("Notification Template", {"template_key": row.template_key}, ["subject", "body_html", "category"], as_dict=True)
         if not tmpl:
             continue
-        ok, err, mid, provider = _deliver_channel(row.channel, row.recipient, tmpl.subject, tmpl.body_html, frappe.utils.strip_html(tmpl.body_html))
+        category = (tmpl.get("category") or "system").strip()
+        ok, err, mid, provider = _deliver_channel(row.channel, row.recipient, tmpl.subject, tmpl.body_html, frappe.utils.strip_html(tmpl.body_html), category=category)
         frappe.db.set_value(
             "Notification Log",
             row.name,
@@ -171,7 +173,8 @@ def send_deferred():
         tmpl = frappe.get_doc("Notification Template", {"template_key": row.template_key})
         subject = tmpl.subject
         body = tmpl.body_html
-        ok, err, mid, provider = _deliver_channel(row.channel, row.recipient, subject, body, frappe.utils.strip_html(body))
+        category = (getattr(tmpl, "category", None) or "system").strip()
+        ok, err, mid, provider = _deliver_channel(row.channel, row.recipient, subject, body, frappe.utils.strip_html(body), category=category)
         frappe.db.set_value(
             "Notification Log",
             row.name,
@@ -183,6 +186,21 @@ def send_deferred():
 def _channels_of(tmpl) -> list[str]:
     raw = (getattr(tmpl, "channels", None) or "email").replace(" ", "")
     return [c for c in raw.split(",") if c]
+
+
+def _get_tenant_outgoing_email_account() -> str | None:
+    if not frappe.db.exists("DocType", "Email Account"):
+        return None
+    # We want an outgoing email account that is NOT the system 'Notifications' account
+    accounts = frappe.get_all(
+        "Email Account",
+        filters={"enable_outgoing": 1, "name": ("!=", "Notifications")},
+        fields=["name"],
+        limit_page_length=1
+    )
+    if accounts:
+        return accounts[0].name
+    return None
 
 
 def _prefs(party_type, party, recipient) -> dict:
@@ -263,14 +281,21 @@ def _in_quiet_hours(prefs: dict) -> bool:
     return now >= s or now <= e
 
 
-def _deliver_channel(channel, recipient, subject, body, text, from_name: str | None = None):
+def _deliver_channel(channel, recipient, subject, body, text, from_name: str | None = None, category: str = "system"):
     if channel == "email":
+        email_account = "Notifications"
+        if category == "client_operational":
+            email_account = _get_tenant_outgoing_email_account()
+            if not email_account:
+                return False, "tenant_smtp_not_configured", "", "frappe"
+
         kwargs = {
             "recipients": [recipient],
             "subject": subject,
             "message": body,
             "now": True,
             "with_container": False,
+            "email_account": email_account,
         }
         if from_name:
             try:
@@ -288,6 +313,7 @@ def _deliver_channel(channel, recipient, subject, body, text, from_name: str | N
                     subject=subject,
                     message=body,
                     now=True,
+                    email_account=email_account,
                 )
                 return True, "", "", "frappe"
             except Exception as exc:
